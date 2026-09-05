@@ -1,0 +1,640 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>전산회계 1급 오답 훈련센터</title>
+  <style>
+    :root{
+      --ink:#17324d;
+      --muted:#587087;
+      --line:#cfe1ef;
+      --blue:#1877d2;
+      --blue-dark:#0d5eaa;
+      --blue-soft:#e9f5ff;
+      --mint:#daf8e9;
+      --green:#137a4a;
+      --yellow:#fff2bd;
+      --orange:#a85b00;
+      --rose:#ffe5e8;
+      --red:#b42339;
+      --violet:#efe8ff;
+      --paper:#ffffff;
+      --shadow:0 12px 32px rgba(31,79,119,.10);
+    }
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{
+      margin:0;
+      color:var(--ink);
+      background:linear-gradient(180deg,#eaf7ff 0,#f8fbff 380px,#f6f8fb 100%);
+      font-family:"Malgun Gothic","맑은 고딕",system-ui,-apple-system,sans-serif;
+      font-size:17px;
+      line-height:1.65;
+    }
+    button,a{font:inherit}
+    button{cursor:pointer}
+    a{color:inherit}
+    .skip-link{position:absolute;left:-9999px;top:0;background:#fff;padding:10px;z-index:10}
+    .skip-link:focus{left:12px;top:12px}
+    .hero{
+      padding:34px 20px 30px;
+      background:
+        radial-gradient(circle at 88% 8%,rgba(255,237,153,.7),transparent 25%),
+        linear-gradient(135deg,#1172c9,#22a7a0);
+      color:#fff;
+    }
+    .hero-inner,.nav-inner,main{max-width:1180px;margin:0 auto}
+    .eyebrow{margin:0 0 3px;font-weight:800;letter-spacing:.06em;color:#d9fbff}
+    h1{margin:0;font-size:clamp(2rem,4.3vw,3.15rem);line-height:1.18;letter-spacing:-.045em}
+    .hero-copy{max-width:790px;margin:13px 0 0;font-size:1.05rem;color:#f1ffff}
+    .privacy{
+      display:inline-flex;align-items:center;gap:7px;margin-top:17px;padding:7px 13px;
+      border-radius:999px;background:rgba(255,255,255,.17);font-size:.9rem;font-weight:700
+    }
+    .top-nav{position:sticky;top:0;z-index:5;background:rgba(255,255,255,.96);border-bottom:1px solid var(--line);box-shadow:0 5px 20px rgba(31,79,119,.08);backdrop-filter:blur(12px)}
+    .nav-inner{display:flex;gap:9px;padding:11px 20px;overflow-x:auto}
+    .nav-link{
+      flex:0 0 auto;text-decoration:none;border:2px solid #d2e4f2;border-radius:13px;
+      padding:8px 16px;background:#fff;color:#34546d;font-weight:800
+    }
+    .nav-link:hover,.nav-link:focus-visible{border-color:#68a9df;background:#edf8ff;outline:none}
+    .nav-link.active{background:var(--blue);border-color:var(--blue);color:#fff}
+    main{padding:28px 20px 64px}
+    .notice{
+      display:flex;gap:12px;align-items:flex-start;margin-bottom:22px;padding:16px 18px;
+      background:#fff7cf;border:2px solid #f2d66d;border-radius:16px;color:#684a00;font-weight:700
+    }
+    .notice[hidden]{display:none}
+    .notice-icon{font-size:1.4rem;line-height:1.25}
+    .section{
+      margin:0 0 24px;padding:25px;background:var(--paper);border:1px solid var(--line);
+      border-radius:22px;box-shadow:var(--shadow);scroll-margin-top:90px
+    }
+    .section-heading{display:flex;gap:14px;align-items:flex-start;justify-content:space-between;margin-bottom:18px}
+    .section-heading h2{margin:0;font-size:clamp(1.45rem,3vw,2rem);line-height:1.25;letter-spacing:-.035em}
+    .section-heading p{margin:5px 0 0;color:var(--muted)}
+    .today-chip{white-space:nowrap;padding:7px 12px;border-radius:999px;background:var(--blue-soft);color:var(--blue-dark);font-weight:800}
+    .filter-bar{display:flex;flex-wrap:wrap;gap:9px;margin:0 0 18px}
+    .filter-button,.refresh-button,.sort-select{
+      border:2px solid #bcd8eb;border-radius:12px;padding:8px 14px;background:#fff;color:#30536d;font-weight:800
+    }
+    .filter-button:hover,.refresh-button:hover,.filter-button:focus-visible,.refresh-button:focus-visible,.sort-select:focus-visible{background:#edf8ff;border-color:#5d9ed2;outline:none}
+    .filter-button.active{color:#fff;background:var(--blue);border-color:var(--blue)}
+    .sort-label{display:flex;align-items:center;gap:7px;margin-left:auto;color:#30536d;font-weight:900}.sort-select{min-height:43px;padding-right:34px}
+    .refresh-button{margin-left:0}
+    .summary-strip{display:grid;grid-template-columns:repeat(6,minmax(120px,1fr));gap:12px;margin-bottom:24px}
+    .stat-card{padding:16px;border:1px solid #d8e6f0;border-radius:17px;background:#fff;box-shadow:0 7px 18px rgba(31,79,119,.06)}
+    .stat-card:nth-child(1){background:#ebf7ff}.stat-card:nth-child(2){background:#e9fbf2}.stat-card:nth-child(3){background:#fff7d6}.stat-card:nth-child(4){background:#fff0ee}.stat-card:nth-child(5){background:#f1ecff}.stat-card:nth-child(6){background:#e8fafa}
+    .stat-label{display:block;color:#526b7e;font-size:.88rem;font-weight:800}
+    .stat-value{display:block;margin-top:2px;font-size:1.65rem;font-weight:900;line-height:1.25;color:#173b58}
+    .problem-list{display:grid;gap:12px}
+    .problem-item{
+      display:grid;grid-template-columns:minmax(0,1fr) auto;gap:14px;align-items:center;
+      padding:17px 18px;border:1px solid #d8e6ef;border-left:6px solid #7db6de;border-radius:15px;background:#fcfeff
+    }
+    .problem-item[data-source="theory"]{border-left-color:#8b6edb}
+    .problem-item[data-source="closing"]{border-left-color:#16a477}
+    .problem-item[data-source="voucher"]{border-left-color:#e4892d}
+    .problem-main{min-width:0}
+    .problem-topline{display:flex;flex-wrap:wrap;gap:7px;align-items:center;margin-bottom:4px}
+    .category-badge,.type-badge,.state-badge{display:inline-flex;align-items:center;border-radius:999px;padding:3px 9px;font-size:.82rem;font-weight:800}
+    .category-badge{background:#e9f4fc;color:#225f8e}
+    [data-source="theory"] .category-badge{background:var(--violet);color:#5e3fa4}
+    [data-source="closing"] .category-badge{background:var(--mint);color:#116846}
+    [data-source="voucher"] .category-badge{background:#fff0d9;color:#8b4d08}
+    .type-badge{background:#f0f4f7;color:#506477}
+    .state-badge.pass{background:var(--mint);color:var(--green)}
+    .state-badge.hide{background:var(--rose);color:var(--red)}
+    .problem-title{margin:0;font-size:1.05rem;line-height:1.42;word-break:keep-all}
+    .problem-meta{margin:5px 0 0;color:#60778a;font-size:.88rem}
+    .problem-actions{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:8px}
+    .open-link,.restore-button{
+      display:inline-flex;align-items:center;justify-content:center;text-decoration:none;white-space:nowrap;
+      padding:9px 13px;border-radius:11px;font-weight:800
+    }
+    .open-link{color:#fff;background:var(--blue);border:2px solid var(--blue)}
+    .open-link:hover,.open-link:focus-visible{background:var(--blue-dark);border-color:var(--blue-dark);outline:none}
+    .restore-button{color:#176443;background:#e8f9f0;border:2px solid #82c8a5}
+    .restore-button:hover,.restore-button:focus-visible{background:#d2f3e1;border-color:#48a878;outline:none}
+    .empty-state{padding:25px;border:2px dashed #bed7e8;border-radius:16px;background:#f7fbfe;text-align:center;color:#526d82}
+    .empty-state strong{display:block;margin-bottom:3px;color:#274b66;font-size:1.1rem}
+    .training-note{margin-top:13px;color:#687d8e;font-size:.9rem}
+    .frequent-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px}
+    .frequent-card{padding:18px;border:1px solid #efd27b;border-radius:16px;background:linear-gradient(145deg,#fff9db,#fff)}
+    .frequent-count{font-size:1.42rem;font-weight:900;color:#a45200}
+    .frequent-type{display:block;margin:2px 0 4px;font-size:1.05rem;font-weight:900}
+    .frequent-source{color:#6d735f;font-size:.88rem}
+    .rule-box{margin-top:16px;padding:14px 16px;border-radius:14px;background:#f2f6f9;color:#536b7c}
+    .category-summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:13px}
+    .category-card{padding:18px;border:1px solid #d8e5ee;border-radius:16px;background:#fafcfe}
+    .category-card h3{margin:0 0 2px;font-size:1.08rem}
+    .category-number{font-size:1.55rem;font-weight:900;color:#176eae}
+    .category-card p{margin:4px 0 11px;color:#607687;font-size:.88rem}
+    .mini-link{font-weight:800;color:#0b69b5;text-underline-offset:3px}
+    .details-list{margin-top:15px;border-top:1px solid #e1ebf2;padding-top:15px}
+    details.unpassed-details{border:1px solid #d8e5ee;border-radius:13px;background:#fbfdff;margin-top:9px}
+    details.unpassed-details summary{padding:12px 15px;cursor:pointer;font-weight:800}
+    details.unpassed-details .problem-list{padding:0 12px 12px}
+    .table-wrap{overflow-x:auto;border:1px solid #d9e6ef;border-radius:14px}
+    table{width:100%;border-collapse:collapse;min-width:700px;background:#fff}
+    th,td{padding:12px 14px;border-bottom:1px solid #e2ebf2;text-align:left}
+    th{background:#ecf7ff;color:#274d68;font-size:.9rem}
+    tr:last-child td{border-bottom:0}
+    td.num{text-align:right;font-weight:800}
+    .footer{margin-top:25px;text-align:center;color:#657a8b;font-size:.9rem}
+    .live-status{min-height:1.6em;margin:12px 0 0;color:var(--green);font-weight:800}
+    .backup-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+    .backup-card{padding:19px;border:1px solid #cfe0ec;border-radius:16px;background:#f8fcff}
+    .backup-card h3{margin:0 0 6px;font-size:1.12rem}.backup-card p{margin:0 0 14px;color:var(--muted)}
+    .backup-button{
+      display:inline-flex;align-items:center;justify-content:center;min-height:46px;padding:10px 17px;
+      border:2px solid var(--blue);border-radius:12px;background:var(--blue);color:#fff;font-weight:900
+    }
+    .backup-button.secondary{background:#fff;color:var(--blue-dark);border-color:#7eb4dc}
+    .backup-button:hover,.backup-button:focus-visible{background:var(--blue-dark);border-color:var(--blue-dark);color:#fff;outline:none}
+    .backup-file{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+    .backup-status{min-height:1.7em;margin:14px 0 0;color:var(--green);font-weight:800}
+    .backup-warning{margin-top:13px;padding:12px 14px;border-radius:12px;background:#fff7d6;color:#765200;font-size:.92rem}
+    @media (max-width:960px){.summary-strip{grid-template-columns:repeat(3,1fr)}.category-summary{grid-template-columns:1fr}}
+    @media (max-width:680px){
+      body{font-size:16px}.hero{padding-top:27px}.section{padding:19px 16px;border-radius:18px}
+      .section-heading{display:block}.today-chip{display:inline-block;margin-top:10px}.summary-strip{grid-template-columns:repeat(2,1fr)}
+      .problem-item{grid-template-columns:1fr}.problem-actions{justify-content:flex-start}.open-link,.restore-button{flex:1 1 auto}
+      .sort-label{width:100%;margin-left:0;align-items:flex-start;flex-direction:column}.sort-select{width:100%}.refresh-button{margin-left:0}.nav-inner{padding-inline:12px}.nav-link{padding:7px 12px}.backup-grid{grid-template-columns:1fr}.backup-button{width:100%}
+    }
+    @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#main">본문으로 바로가기</a>
+  <header class="hero">
+    <div class="hero-inner">
+      <p class="eyebrow">오늘 틀린 문제에 집중하는 학습 공간</p>
+      <h1>전산회계 1급 오답 훈련센터</h1>
+      <p class="hero-copy">오늘 등록된 문제부터 가볍게 훈련하고, 누적 오답은 한눈에 확인하세요. 한 번 통과하거나 직접 숨긴 문제는 보관함에 남습니다.</p>
+      <span class="privacy">🔒 모든 학습기록은 이 브라우저 안에서만 처리됩니다.</span>
+    </div>
+  </header>
+
+  <nav class="top-nav" aria-label="유형별 메뉴">
+    <div class="nav-inner">
+      <a class="nav-link active" href="오답_훈련센터.html" aria-current="page">오늘의 오답훈련</a>
+      <a class="nav-link" href="일반전표_기본연습_24문제.html">일반전표 입력</a>
+      <a class="nav-link" href="이론_오답응용_5문제.html">이론 오답</a>
+      <a class="nav-link" href="결산정리사항_연습_7문제.html">결산 정리사항</a>
+      <a class="nav-link" href="매입매출전표_오답연습_3문제.html?view=all">매입매출전표 입력</a>
+    </div>
+  </nav>
+
+  <main id="main">
+    <div id="storageNotice" class="notice" hidden role="alert">
+      <span class="notice-icon">⚠️</span>
+      <span>브라우저 학습기록을 읽을 수 없습니다. 이 파일을 학습문제와 같은 브라우저에서 열어 주세요.</span>
+    </div>
+
+    <section class="section" id="todaySection">
+      <div class="section-heading">
+        <div>
+          <h2>오늘의 오답훈련</h2>
+          <p>이론·일반전표·결산·매입매출전표를 나누지 않고, 오늘 등록된 문제 중 아직 통과하거나 숨기지 않은 문제를 등록 순서대로 보여줍니다.</p>
+        </div>
+        <span class="today-chip" id="todayLabel"></span>
+      </div>
+      <div class="filter-bar" aria-label="오늘의 훈련 범위">
+        <button class="filter-button active" type="button" data-filter="today" aria-pressed="true">오늘 등록 문제</button>
+        <button class="filter-button" type="button" data-filter="all" aria-pressed="false">전체 미통과</button>
+        <label class="sort-label" for="sortOrder">정렬
+          <select class="sort-select" id="sortOrder">
+            <option value="registered">등록 순서</option>
+            <option value="wrong">오답 많은 순</option>
+            <option value="unattempted">아직 안 푼 문제 우선</option>
+            <option value="recentAttempt">최근에 푼 순</option>
+            <option value="recentRegistered">최근 등록 순</option>
+          </select>
+        </label>
+        <button class="refresh-button" id="refreshData" type="button">기록 새로고침</button>
+      </div>
+      <div id="trainingList" class="problem-list"></div>
+      <p class="training-note">문제는 이 화면에서 자동으로 새로 만들지 않습니다. 원본 연습문제를 열어 푼 뒤 다시 돌아오면 기록이 반영됩니다.</p>
+      <p id="liveStatus" class="live-status" role="status" aria-live="polite"></p>
+    </section>
+
+    <div class="summary-strip" aria-label="전체 학습 통계 요약">
+      <div class="stat-card"><span class="stat-label">등록 문제</span><strong class="stat-value" id="totalStat">0</strong></div>
+      <div class="stat-card"><span class="stat-label">통과</span><strong class="stat-value" id="passedStat">0</strong></div>
+      <div class="stat-card"><span class="stat-label">아직 훈련 중</span><strong class="stat-value" id="activeStat">0</strong></div>
+      <div class="stat-card"><span class="stat-label">누적 오답</span><strong class="stat-value" id="wrongStat">0회</strong></div>
+      <div class="stat-card"><span class="stat-label">직접 숨김</span><strong class="stat-value" id="hiddenStat">0</strong></div>
+      <div class="stat-card"><span class="stat-label">총 채점</span><strong class="stat-value" id="attemptStat">0회</strong></div>
+    </div>
+
+    <section class="section" id="frequentSection">
+      <div class="section-heading">
+        <div>
+          <h2>자주 틀린 유형</h2>
+          <p>같은 유형에서 누적 오답이 3회 이상인 것만 표시합니다.</p>
+        </div>
+      </div>
+      <div id="frequentList" class="frequent-list"></div>
+      <div class="rule-box">여기서는 표시와 기록만 합니다. 자동으로 변형문제 3개를 만들지 않으며, 필요할 때 원하는 유형을 골라 GPT AI에게 요청할 수 있습니다.</div>
+    </section>
+
+    <section class="section" id="unpassedSection">
+      <div class="section-heading">
+        <div>
+          <h2>아직 통과하지 않은 문제 요약</h2>
+          <p>오늘 문제가 아니어도 아직 남아 있는 문제 수를 유형별로 확인할 수 있습니다.</p>
+        </div>
+      </div>
+      <div id="categorySummary" class="category-summary"></div>
+      <div id="unpassedDetails" class="details-list"></div>
+    </section>
+
+    <section class="section" id="archiveSection">
+      <div class="section-heading">
+        <div>
+          <h2>통과 · 숨김 보관함</h2>
+          <p>문제와 학습 이력은 삭제하지 않습니다. 다시 풀고 싶다면 복원하세요.</p>
+        </div>
+      </div>
+      <div id="archiveList" class="problem-list"></div>
+    </section>
+
+    <section class="section" id="statsSection">
+      <div class="section-heading">
+        <div>
+          <h2>학습 통계</h2>
+          <p>일반전표·이론·결산·매입매출전표 기록을 한곳에서 합산한 현재 상태입니다.</p>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>유형</th><th>등록</th><th>통과</th><th>훈련 중</th><th>직접 숨김</th><th>채점</th><th>누적 오답</th></tr></thead>
+          <tbody id="statsBody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="section" id="backupSection">
+      <div class="section-heading">
+        <div>
+          <h2>모바일 · PC 학습상태 이동</h2>
+          <p>통과 여부, 오답 횟수, 답변 이력과 메모를 하나의 파일로 옮길 수 있습니다.</p>
+        </div>
+      </div>
+      <div class="backup-grid">
+        <article class="backup-card">
+          <h3>1. 학습상태 백업</h3>
+          <p>모바일 학습을 마친 뒤 파일을 저장하여 PC로 보내세요.</p>
+          <button class="backup-button" id="exportBackup" type="button">학습상태 백업 파일 저장</button>
+        </article>
+        <article class="backup-card">
+          <h3>2. 학습상태 불러오기</h3>
+          <p>PC의 기존 기록을 지우지 않고 전달받은 기록과 합칩니다.</p>
+          <label class="backup-button secondary" for="importBackup">학습상태 백업 파일 선택</label>
+          <input class="backup-file" id="importBackup" type="file" accept="application/json,.json">
+        </article>
+      </div>
+      <div class="backup-warning">Markdown 학습기록은 GPT 분석용이고, 진행 상태를 다른 기기에서 이어갈 때는 이곳의 JSON 백업 파일을 사용합니다.</div>
+      <p class="backup-status" id="backupStatus" role="status" aria-live="polite"></p>
+    </section>
+
+    <p class="footer">오답 훈련센터 · 기록은 외부로 자동 전송되지 않습니다. 사용자가 백업 버튼을 누른 경우에만 파일로 저장됩니다.</p>
+  </main>
+
+  <script>
+    const SOURCES={
+      practical:{label:'일반전표',file:'일반전표_기본연습_24문제.html',key:'tax-accounting-practical-journal-24-v2'},
+      theory:{label:'이론',file:'이론_오답응용_5문제.html',key:'tax-accounting-theory-wrong-2026-09-01-v1'},
+      closing:{label:'결산',file:'결산정리사항_연습_7문제.html',key:'closing-adjustment-practice-7-v1'},
+      voucher:{label:'매입매출전표',file:'매입매출전표_오답연습_3문제.html',key:'purchase-sales-voucher-wrong-2026-09-02-v1'}
+    };
+
+    const practicalMeta=[
+      ['유형자산 폐기','기계장치 폐기'],['유형자산 폐기','비품 폐기 및 철거비 지급'],
+      ['건설중인자산 완공','사옥 완공'],['건설중인자산 완공','생산설비 완공'],
+      ['무상 증여','대주주로부터 토지 증여'],['기부금','사회복지단체에 현금 기부'],
+      ['출장비','법인카드로 해외 항공권 결제'],['출장비','출장비 가지급'],['출장비','출장 후 정산'],
+      ['단기매매증권','주식 취득과 수수료'],['단기매매증권','단기매매증권 처분손실'],['단기매매증권','단기매매증권 처분이익'],
+      ['정기예금 가입','정기예금 가입과 송금수수료'],['재해','화재로 제품 소실'],
+      ['어음 발행','외상매입금 결제를 위한 약속어음 발행'],['어음 보관','외상매출금 회수 후 받을어음 보관'],
+      ['어음 배서양도','받을어음 배서양도로 채무 결제'],['어음 부도','받을어음 부도와 부도비용'],
+      ['어음 할인','받을어음 은행 할인'],['어음 만기','지급어음 만기 결제'],
+      ['매도가능증권 취득','매도가능증권 취득과 수수료'],['매도가능증권 평가','기말 공정가치 평가이익'],
+      ['매도가능증권 평가','기말 공정가치 평가손실'],['매도가능증권 처분','매도가능증권 처분이익'],
+      ['퇴직금 지급','영업부 사원 퇴직금 지급과 원천징수','2026-09-02',8],
+      ['외화평가','외화 외상매출금의 기말 환산이익','2026-09-03',1],
+      ['이자수익 원천징수 수정','이자수익의 원천징수 누락 수정','2026-09-03',4],
+      ['받을어음 대손처리','파산으로 회수할 수 없는 받을어음의 대손처리','2026-09-04',1],
+      ['확정급여형 퇴직연금 수정','DB형 퇴직연금 납입액의 계정과목 수정','2026-09-04',4],
+      ['지방자치단체 제품 기부','판매용 제품을 지방자치단체에 기부','2026-09-05',7],
+      ['국가 제품 무상 기부','판매용 제품을 국가기관에 무상 기부','2026-09-05',10],
+      ['지방자치단체 제품 기부','판매용 제품을 지방자치단체 복지시설에 기부','2026-09-05',11],
+      ['외부강사료 원천징수','생산부 직원 교육 강사료 지급과 원천징수','2026-09-05',12]
+    ];
+    const theoryMeta=[
+      ['operating-profit','영업이익 계산','영업이익 계산'],
+      ['service-dept','보조부문 원가배분','보조부문 원가배분'],
+      ['predetermined-overhead','제조간접원가 예정배부','제조간접원가 예정배부'],
+      ['vat-taxpayer','부가가치세 납세의무자','부가가치세 납세의무자'],
+      ['tax-invoice','세금계산서 발급의무 면제','세금계산서 발급의무 면제']
+    ];
+    const closingMeta=[
+      ['trading-security','단기매매증권 평가','회사별 단기매매증권 기말평가'],
+      ['fx','외화평가','외화 외상매출금 기말평가'],
+      ['current-loan','장기차입금 유동성 대체','1년 이내 만기 장기차입금의 유동성 대체'],
+      ['cash-shortage','현금과부족 결산','원인불명 현금 부족액의 결산 처리'],
+      ['vat-close','부가가치세 정리','부가세예수금과 부가세대급금 상계'],
+      ['tax','법인세비용','선납세금 조회 후 미지급세금 계산'],
+      ['retirement','퇴직급여충당부채','부서별 퇴직급여충당부채 추가 설정'],
+      ['prepaid-rent','선급비용 결산','기간 미경과 임차료의 선급비용 대체','2026-09-03',5],
+      ['vat-close-deduction','부가가치세 정리','공제세액이 있는 확정 부가가치세 결산','2026-09-04',5],
+      ['fx-payable-gain','외화평가','외화 외상매입금의 기말 환산이익','2026-09-05',4],
+      ['prepaid-insurance-expensed','보험료·선급비용 결산','전액 비용 처리한 공장 화재보험료 결산','2026-09-05',5]
+    ];
+    const voucherMeta=[
+      ['면세매입과 업무용 선물','면세 수산물 선물세트 구입','2026-09-02',9],
+      ['과세매입 수정과 선급금','외상매입금을 선급금으로 수정','2026-09-02',10],
+      ['현금영수증 과세매입 수정','업무용 승용차 유류대를 생산부 화물차분으로 수정','2026-09-02',11],
+      ['신용카드 과세매입과 수익적 지출','제조부문 기계장치 수선비 카드결제','2026-09-03',2],
+      ['구매확인서에 의한 영세율 매출','구매확인서 제품매출과 대금 분할회수','2026-09-03',3],
+      ['현금영수증 미발급 현금매출','지역행사장에서 제품을 현금으로 건별 판매','2026-09-04',2],
+      ['유형자산 과세매각과 약속어음 회수','기계장치 매각대금을 약속어음으로 회수','2026-09-04',3],
+      ['과세매입·자산취득 혼합결제','건물 부착용 간판을 자산으로 취득','2026-09-05',1],
+      ['현금영수증 과세매출','비사업자에게 제품을 판매하고 현금영수증 발행','2026-09-05',2],
+      ['사업상 증여·제품 타계정 대체','원재료 매입처에 제품을 무상 제공','2026-09-05',3],
+      ['면세 운용리스료·법인카드 결제','영업부 차량 운용리스료를 법인카드로 결제','2026-09-05',6],
+      ['사업상증여·거래처 무상제공','영업 거래처에 접대 목적으로 제품 무상제공','2026-09-05',8],
+      ['사업상증여·거래처 무상제공','원재료 공급업체에 접대 목적으로 제품 무상제공','2026-09-05',9]
+    ];
+
+    const META=[
+      ...practicalMeta.map((x,index)=>({source:'practical',id:index,type:x[0],title:x[1],registered:x[2]||'2026-09-01',registeredOrder:x[3]||index+1})),
+      ...theoryMeta.map(x=>({source:'theory',id:x[0],type:x[1],title:x[2],registered:'2026-09-01'})),
+      ...closingMeta.map((x,index)=>({source:'closing',id:x[0],index,type:x[1],title:x[2],registered:x[3]||'2026-09-02',registeredOrder:x[4]||index+1})),
+      ...voucherMeta.map((x,index)=>({source:'voucher',id:index,type:x[0],title:x[1],registered:x[2]||'2026-09-02',registeredOrder:x[3]||index+9}))
+    ];
+
+    const $=(selector,root=document)=>root.querySelector(selector);
+    const $$=(selector,root=document)=>[...root.querySelectorAll(selector)];
+    let storageAvailable=true;
+    let currentFilter='today';
+    let currentSort='registered';
+    let records=[];
+
+    function localDateKey(date=new Date()){
+      const y=date.getFullYear(),m=String(date.getMonth()+1).padStart(2,'0'),d=String(date.getDate()).padStart(2,'0');
+      return `${y}-${m}-${d}`;
+    }
+    function formatDate(key){
+      const [y,m,d]=key.split('-').map(Number);
+      return new Intl.DateTimeFormat('ko-KR',{year:'numeric',month:'long',day:'numeric',weekday:'short'}).format(new Date(y,m-1,d));
+    }
+    function readState(key){
+      try{return JSON.parse(localStorage.getItem(key)||'{}')||{}}
+      catch(error){storageAvailable=false;return{}}
+    }
+    function writeState(key,value){
+      try{localStorage.setItem(key,JSON.stringify(value));return true}
+      catch(error){storageAvailable=false;return false}
+    }
+    function correctInHistory(history){return Array.isArray(history)&&history.some(item=>item&&item.correct===true)}
+    function isPassed(explicit,currentCorrect,history,trainingCenterRestored){
+      if(trainingCenterRestored===true)return false;
+      return explicit===true||currentCorrect===true||correctInHistory(history);
+    }
+    function number(value){const n=Number(value);return Number.isFinite(n)?n:0}
+
+    function uniqueHistory(first,second){
+      const seen=new Set();
+      return [...(Array.isArray(first)?first:[]),...(Array.isArray(second)?second:[])].filter(item=>{
+        const key=JSON.stringify(item);if(seen.has(key))return false;seen.add(key);return true;
+      }).sort((a,b)=>Date.parse(a?.at||0)-Date.parse(b?.at||0));
+    }
+    function joinedNote(first,second){
+      const a=String(first||'').trim(),b=String(second||'').trim();
+      if(!a)return b;if(!b||a===b)return a;
+      return `${a}\n\n[다른 기기에서 작성]\n${b}`;
+    }
+    function mergeCard(current,incoming,incomingNewer){
+      const a=(current&&typeof current==='object')?current:{},b=(incoming&&typeof incoming==='object')?incoming:{};
+      const merged={...(incomingNewer?a:b),...(incomingNewer?b:a)};
+      merged.history=uniqueHistory(a.history,b.history);
+      merged.attempts=Math.max(number(a.attempts),number(b.attempts),merged.history.length);
+      merged.wrongCount=Math.max(number(a.wrongCount),number(b.wrongCount),merged.history.filter(item=>item?.correct===false).length);
+      merged.passed=Boolean(a.passed||b.passed||a.correct===true||b.correct===true||correctInHistory(merged.history));
+      merged.archived=Boolean(a.archived||b.archived);
+      merged.note=joinedNote(a.note,b.note);
+      if(merged.passed)delete merged.trainingCenterRestored;
+      return merged;
+    }
+    function mergeMap(current,incoming,incomingNewer){return {...(incomingNewer?current:incoming),...(incomingNewer?incoming:current)}}
+    function mergeTheory(current,incoming,incomingNewer){
+      const merged={...(incomingNewer?current:incoming),...(incomingNewer?incoming:current)};
+      const ids=new Set([...Object.keys(current.history||{}),...Object.keys(incoming.history||{}),...Object.keys(current.answers||{}),...Object.keys(incoming.answers||{})]);
+      merged.answers=mergeMap(current.answers||{},incoming.answers||{},incomingNewer);
+      merged.checked=mergeMap(current.checked||{},incoming.checked||{},incomingNewer);
+      merged.notes=mergeMap(current.notes||{},incoming.notes||{},incomingNewer);
+      merged.history={};merged.attempts={};merged.passed={};merged.archived={};
+      merged.passedAt=mergeMap(current.passedAt||{},incoming.passedAt||{},incomingNewer);
+      merged.archivedAt=mergeMap(current.archivedAt||{},incoming.archivedAt||{},incomingNewer);
+      merged.trainingCenterRestored=mergeMap(current.trainingCenterRestored||{},incoming.trainingCenterRestored||{},incomingNewer);
+      ids.forEach(id=>{
+        const history=uniqueHistory(current.history?.[id],incoming.history?.[id]);
+        merged.history[id]=history;
+        merged.attempts[id]=Math.max(number(current.attempts?.[id]),number(incoming.attempts?.[id]),history.length);
+        merged.passed[id]=Boolean(current.passed?.[id]||incoming.passed?.[id]||current.checked?.[id]===true||incoming.checked?.[id]===true||correctInHistory(history));
+        merged.archived[id]=Boolean(current.archived?.[id]||incoming.archived?.[id]);
+        merged.notes[id]=joinedNote(current.notes?.[id],incoming.notes?.[id]);
+        if(merged.passed[id])delete merged.trainingCenterRestored[id];
+      });
+      return merged;
+    }
+    function mergeState(sourceName,current,incoming){
+      const a=(current&&typeof current==='object')?current:{},b=(incoming&&typeof incoming==='object')?incoming:{};
+      const incomingNewer=Date.parse(b.updatedAt||0)>=Date.parse(a.updatedAt||0);
+      if(sourceName==='theory')return mergeTheory(a,b,incomingNewer);
+      const merged={...(incomingNewer?a:b),...(incomingNewer?b:a)},cards={};
+      const indexes=new Set([...Object.keys(a.cards||{}),...Object.keys(b.cards||{})]);
+      indexes.forEach(index=>{cards[index]=mergeCard(a.cards?.[index],b.cards?.[index],incomingNewer)});
+      merged.cards=cards;merged.startedAt=a.startedAt&&b.startedAt?(Date.parse(a.startedAt)<=Date.parse(b.startedAt)?a.startedAt:b.startedAt):(a.startedAt||b.startedAt);
+      merged.updatedAt=new Date().toISOString();return merged;
+    }
+    function backupPayload(){
+      const states={};Object.entries(SOURCES).forEach(([name,source])=>{states[name]=readState(source.key)});
+      return {format:'tax-accounting-training-center-backup',version:1,exportedAt:new Date().toISOString(),states};
+    }
+    function downloadBackup(){
+      const data=JSON.stringify(backupPayload(),null,2),blob=new Blob([data],{type:'application/json;charset=utf-8'}),link=document.createElement('a');
+      link.href=URL.createObjectURL(blob);link.download=`오답훈련센터_학습상태_${localDateKey()}.json`;document.body.appendChild(link);link.click();link.remove();
+      setTimeout(()=>URL.revokeObjectURL(link.href),1000);$('#backupStatus').textContent='학습상태 백업 파일을 저장했습니다. 모바일의 다운로드 또는 파일 앱에서 확인하세요.';
+    }
+    async function importBackupFile(file){
+      const status=$('#backupStatus');
+      try{
+        const payload=JSON.parse(await file.text());
+        if(payload?.format!=='tax-accounting-training-center-backup'||payload?.version!==1||!payload.states)throw new Error('지원하지 않는 파일입니다.');
+        Object.entries(SOURCES).forEach(([name,source])=>{
+          if(!payload.states[name])return;
+          if(!writeState(source.key,mergeState(name,readState(source.key),payload.states[name])))throw new Error('브라우저 저장공간에 기록하지 못했습니다.');
+        });
+        renderAll('다른 기기의 학습상태를 현재 기록과 합쳤습니다.');status.textContent='불러오기가 완료되었습니다. 기존 PC 기록과 전달받은 기록을 함께 보존했습니다.';
+      }catch(error){status.textContent=`불러오지 못했습니다. ${error.message}`}
+    }
+
+    function buildRecords(){
+      storageAvailable=true;
+      const roots={};
+      Object.entries(SOURCES).forEach(([name,source])=>{roots[name]=readState(source.key)});
+      records=META.map((meta,metaOrder)=>{
+        const source=SOURCES[meta.source],root=roots[meta.source];
+        let saved={},history=[],attempts=0,wrong=0,passed=false,archived=false;
+        if(meta.source==='theory'){
+          history=Array.isArray(root.history?.[meta.id])?root.history[meta.id]:[];
+          attempts=number(root.attempts?.[meta.id]);
+          wrong=history.filter(item=>item&&item.correct===false).length;
+          passed=isPassed(root.passed?.[meta.id],root.checked?.[meta.id],history,root.trainingCenterRestored?.[meta.id]);
+          archived=Boolean(root.archived?.[meta.id]);
+        }else{
+          const index=meta.source==='closing'?meta.index:meta.id;
+          saved=(root.cards&&root.cards[index])||{};
+          history=Array.isArray(saved.history)?saved.history:[];
+          attempts=number(saved.attempts);
+          wrong=number(saved.wrongCount);
+          if(!wrong&&history.length)wrong=history.filter(item=>item&&item.correct===false).length;
+          passed=isPassed(saved.passed,saved.correct,history,saved.trainingCenterRestored);
+          archived=Boolean(saved.archived);
+        }
+        const lastAttempt=history.reduce((latest,item)=>{const time=Date.parse(item?.at||'');return Number.isFinite(time)&&time>latest?time:latest},0);
+        return {...meta,metaOrder,category:source.label,file:source.file,key:source.key,history,attempts,wrong,passed,archived,lastAttempt};
+      });
+      $('#storageNotice').hidden=storageAvailable;
+    }
+
+    function emptyState(title,message){return `<div class="empty-state"><strong>${title}</strong>${message}</div>`}
+    function problemItem(record,{restore=false,view='',plain=false}={}){
+      const stateBadges=[];
+      if(record.archived)stateBadges.push('<span class="state-badge hide">숨김</span>');
+      else if(record.passed)stateBadges.push('<span class="state-badge pass">✓ 통과</span>');
+      return `<article class="problem-item" data-source="${record.source}">
+        <div class="problem-main">
+          ${plain?'':`<div class="problem-topline"><span class="category-badge">${record.category}</span><span class="type-badge">${record.type}</span>${stateBadges.join('')}</div>`}
+          <h3 class="problem-title">${record.title}</h3>
+          <p class="problem-meta">등록 ${record.registered} · 채점 ${record.attempts}회 · 틀림 ${record.wrong}회</p>
+        </div>
+        <div class="problem-actions">
+          <a class="open-link" href="${record.file}${view?`?view=${view}`:''}">원본에서 풀기</a>
+          ${restore?`<button class="restore-button" type="button" data-restore="${record.source}:${record.id}">훈련 목록으로 복원</button>`:''}
+        </div>
+      </article>`;
+    }
+
+    function visibleUnpassed(){return records.filter(record=>!record.passed&&!record.archived)}
+    function registrationCompare(a,b){return a.registered.localeCompare(b.registered)||number(a.registeredOrder)-number(b.registeredOrder)||a.metaOrder-b.metaOrder}
+    function sortTraining(list){return [...list].sort((a,b)=>{
+      if(currentSort==='wrong')return b.wrong-a.wrong||b.attempts-a.attempts||registrationCompare(a,b);
+      if(currentSort==='unattempted')return Number(a.attempts>0)-Number(b.attempts>0)||registrationCompare(a,b);
+      if(currentSort==='recentAttempt')return b.lastAttempt-a.lastAttempt||registrationCompare(a,b);
+      if(currentSort==='recentRegistered')return b.registered.localeCompare(a.registered)||number(b.registeredOrder)-number(a.registeredOrder)||b.metaOrder-a.metaOrder;
+      return registrationCompare(a,b)
+    })}
+    function renderSummary(){
+      const passed=records.filter(record=>record.passed&&!record.archived).length;
+      const hidden=records.filter(record=>record.archived).length;
+      const active=visibleUnpassed().length;
+      const wrong=records.reduce((sum,record)=>sum+record.wrong,0);
+      const attempts=records.reduce((sum,record)=>sum+record.attempts,0);
+      $('#totalStat').textContent=records.length;
+      $('#passedStat').textContent=passed;
+      $('#activeStat').textContent=active;
+      $('#wrongStat').textContent=`${wrong}회`;
+      $('#hiddenStat').textContent=hidden;
+      $('#attemptStat').textContent=`${attempts}회`;
+    }
+    function renderTraining(){
+      const today=localDateKey();
+      const list=sortTraining(visibleUnpassed().filter(record=>currentFilter==='all'||record.registered===today));
+      const target=$('#trainingList');
+      if(list.length)target.innerHTML=list.map(record=>problemItem(record,{view:currentFilter,plain:true})).join('');
+      else if(currentFilter==='today')target.innerHTML=emptyState('오늘 남아 있는 문제가 없습니다.',records.some(record=>record.registered===today)?'오늘 문제를 모두 통과했거나 보관함으로 숨겼습니다.':'오늘 날짜로 등록된 문제가 없습니다. ‘전체 미통과’를 누르면 이전 문제를 볼 수 있습니다.');
+      else target.innerHTML=emptyState('아직 통과하지 않은 문제가 없습니다.','현재 등록된 문제를 모두 통과했거나 보관함으로 숨겼습니다.');
+    }
+    function renderFrequent(){
+      const grouped=new Map();
+      records.forEach(record=>{
+        if(!grouped.has(record.type))grouped.set(record.type,{wrong:0,sources:new Set()});
+        const item=grouped.get(record.type);item.wrong+=record.wrong;if(record.wrong)item.sources.add(record.category);
+      });
+      const list=[...grouped.entries()].map(([type,value])=>({type,...value})).filter(item=>item.wrong>=3).sort((a,b)=>b.wrong-a.wrong||a.type.localeCompare(b.type,'ko'));
+      $('#frequentList').innerHTML=list.length?list.map(item=>`<article class="frequent-card"><span class="frequent-count">${item.wrong}회 틀림</span><strong class="frequent-type">${item.type}</strong><span class="frequent-source">${[...item.sources].join(' · ')||'누적 기록'}</span></article>`).join(''):emptyState('아직 3회 이상 틀린 유형이 없습니다.','채점 기록이 쌓이면 이곳에 자동으로 표시됩니다.');
+    }
+    function renderUnpassed(){
+      const list=visibleUnpassed();
+      $('#categorySummary').innerHTML=Object.entries(SOURCES).map(([source,info])=>{
+        const sourceList=list.filter(record=>record.source===source);
+        return `<article class="category-card"><h3>${info.label}</h3><strong class="category-number">${sourceList.length}문제</strong><p>전체 ${records.filter(record=>record.source===source).length}문제 중 아직 훈련 중</p><a class="mini-link" href="${info.file}">${info.label} 문제 열기</a></article>`;
+      }).join('');
+      const grouped=Object.entries(SOURCES).map(([source,info])=>({source,info,list:list.filter(record=>record.source===source)})).filter(group=>group.list.length);
+      $('#unpassedDetails').innerHTML=grouped.length?grouped.map(group=>`<details class="unpassed-details"><summary>${group.info.label} · ${group.list.length}문제 보기</summary><div class="problem-list">${group.list.map(record=>problemItem(record)).join('')}</div></details>`).join(''):emptyState('남은 문제가 없습니다.','보관함에서 문제를 복원하면 다시 훈련 목록에 나타납니다.');
+    }
+    function renderArchive(){
+      const list=records.filter(record=>record.passed||record.archived).sort((a,b)=>b.registered.localeCompare(a.registered)||a.category.localeCompare(b.category,'ko'));
+      $('#archiveList').innerHTML=list.length?list.map(record=>problemItem(record,{restore:true})).join(''):emptyState('보관된 문제가 없습니다.','한 번 정답을 맞히거나 원본 문제에서 ‘이 문제 지우기’를 누르면 이곳에 보관됩니다.');
+    }
+    function renderStats(){
+      $('#statsBody').innerHTML=Object.entries(SOURCES).map(([source,info])=>{
+        const list=records.filter(record=>record.source===source),passed=list.filter(record=>record.passed&&!record.archived).length,hidden=list.filter(record=>record.archived).length,active=list.filter(record=>!record.passed&&!record.archived).length,attempts=list.reduce((n,r)=>n+r.attempts,0),wrong=list.reduce((n,r)=>n+r.wrong,0);
+        return `<tr><td><strong>${info.label}</strong></td><td class="num">${list.length}</td><td class="num">${passed}</td><td class="num">${active}</td><td class="num">${hidden}</td><td class="num">${attempts}회</td><td class="num">${wrong}회</td></tr>`;
+      }).join('');
+    }
+    function renderAll(message=''){
+      buildRecords();renderSummary();renderTraining();renderFrequent();renderUnpassed();renderArchive();renderStats();
+      $('#liveStatus').textContent=message;
+    }
+
+    function restoreRecord(sourceName,id){
+      const source=SOURCES[sourceName];if(!source)return;
+      const root=readState(source.key);
+      if(sourceName==='theory'){
+        root.passed=(root.passed&&typeof root.passed==='object')?root.passed:{};
+        root.archived=(root.archived&&typeof root.archived==='object')?root.archived:{};
+        root.trainingCenterRestored=(root.trainingCenterRestored&&typeof root.trainingCenterRestored==='object')?root.trainingCenterRestored:{};
+        root.passed[id]=false;root.archived[id]=false;
+        root.trainingCenterRestored[id]=true;
+      }else{
+        root.cards=(root.cards&&typeof root.cards==='object')?root.cards:{};
+        const record=records.find(item=>item.source===sourceName&&String(item.id)===String(id));
+        const index=sourceName==='closing'?record?.index:Number(id);
+        if(!Number.isInteger(index))return;
+        root.cards[index]=(root.cards[index]&&typeof root.cards[index]==='object')?root.cards[index]:{};
+        root.cards[index].passed=false;root.cards[index].archived=false;
+        root.cards[index].trainingCenterRestored=true;
+      }
+      root.updatedAt=new Date().toISOString();
+      if(writeState(source.key,root))renderAll('문제를 훈련 목록으로 복원했습니다. 기존 채점 이력과 오답 횟수는 그대로 보존됩니다.');
+      else renderAll('복원하지 못했습니다. 브라우저 저장 허용 상태를 확인해 주세요.');
+    }
+
+    $('#todayLabel').textContent=formatDate(localDateKey());
+    $$('.filter-button').forEach(button=>button.addEventListener('click',()=>{
+      currentFilter=button.dataset.filter;
+      $$('.filter-button').forEach(item=>{const active=item===button;item.classList.toggle('active',active);item.setAttribute('aria-pressed',String(active))});
+      renderTraining();$('#liveStatus').textContent=currentFilter==='today'?'오늘 등록 문제만 표시합니다.':'등록일과 관계없이 전체 미통과 문제를 표시합니다.';
+    }));
+    $('#refreshData').addEventListener('click',()=>renderAll('최신 학습기록을 불러왔습니다.'));
+    $('#exportBackup').addEventListener('click',downloadBackup);
+    $('#importBackup').addEventListener('change',event=>{const file=event.target.files?.[0];if(file)importBackupFile(file);event.target.value=''});
+    $('#sortOrder').addEventListener('change',event=>{currentSort=event.target.value;renderTraining();$('#liveStatus').textContent=`${event.target.options[event.target.selectedIndex].text}으로 정렬했습니다.`});
+    $('#archiveList').addEventListener('click',event=>{
+      const button=event.target.closest('[data-restore]');if(!button)return;
+      const separator=button.dataset.restore.indexOf(':'),source=button.dataset.restore.slice(0,separator),id=button.dataset.restore.slice(separator+1);
+      restoreRecord(source,id);
+    });
+    window.addEventListener('storage',event=>{if(Object.values(SOURCES).some(source=>source.key===event.key))renderAll('다른 학습 화면에서 바뀐 기록을 반영했습니다.')});
+    window.addEventListener('focus',()=>renderAll());
+    document.addEventListener('visibilitychange',()=>{if(!document.hidden)renderAll()});
+    renderAll();
+  </script>
+</body>
+</html>

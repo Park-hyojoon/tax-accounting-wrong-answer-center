@@ -1,0 +1,371 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>전산회계 1급 이론 오답 응용연습 5문제</title>
+  <style>
+    :root{--navy:#15345e;--blue:#2d78c5;--sky:#e7f5ff;--mint:#e9fbf3;--yellow:#fff4b8;--red:#ce3f4b;--green:#137e57;--line:#cadceb;--ink:#172235;--muted:#65748a}
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{margin:0;background:linear-gradient(135deg,#f5fbff 0%,#fffdf3 100%);color:var(--ink);font-family:"Malgun Gothic","Apple SD Gothic Neo",sans-serif;font-size:18px;line-height:1.65}
+    button,input,textarea{font:inherit}
+    input[type="text"],textarea{ime-mode:active}
+    .wrap{width:min(1080px,94vw);margin:30px auto 80px}
+    .category-nav{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:0 0 16px;padding:12px;background:#fff;border:2px solid #d5e6f3;border-radius:17px;box-shadow:0 7px 22px rgba(44,91,128,.07)}
+    .category-nav strong{color:var(--navy);padding:0 7px}
+    .category-link{display:inline-flex;align-items:center;justify-content:center;min-height:46px;padding:8px 17px;border:2px solid var(--line);border-radius:12px;background:#fff;color:var(--navy);font-weight:900;text-decoration:none}
+    .category-link:hover{border-color:var(--blue);background:var(--sky)}
+    .category-link.active{border-color:var(--navy);background:var(--navy);color:#fff;box-shadow:0 4px 11px rgba(21,52,94,.2)}
+    .hero{background:#fff;border:2px solid #cde5f7;border-radius:24px;padding:28px 30px;box-shadow:0 12px 35px rgba(40,84,122,.1)}
+    h1{margin:0 0 8px;color:var(--navy);font-size:clamp(29px,4vw,42px);line-height:1.25}
+    h2{color:var(--navy)}
+    .hero p{margin:7px 0}
+    .notice{margin-top:16px;padding:14px 17px;border-radius:13px;background:var(--yellow);font-weight:800}
+    .dashboard{position:sticky;top:8px;z-index:10;margin:18px 0;background:rgba(247,252,255,.95);backdrop-filter:blur(8px);border:1px solid #d5e6f2;border-radius:17px;padding:13px;display:flex;flex-wrap:wrap;align-items:center;gap:12px}
+    .stat{background:#fff;border:1px solid var(--line);border-radius:12px;padding:8px 14px;font-weight:900;color:var(--navy)}
+    .btn{border:0;border-radius:12px;padding:10px 17px;cursor:pointer;font-weight:900;color:#fff;background:var(--blue);box-shadow:0 4px 12px rgba(45,120,197,.2)}
+    .btn:hover{filter:brightness(.96);transform:translateY(-1px)}
+    .btn.green{background:var(--green)}
+    .btn.secondary{background:#fff;color:var(--navy);border:2px solid var(--line);box-shadow:none}
+    .btn.danger{background:#fff;color:var(--red);border:2px solid #e8b3b8;box-shadow:none}
+    .question{background:#fff;border:2px solid #d9e7f2;border-radius:22px;padding:24px;margin:22px 0;box-shadow:0 8px 24px rgba(44,91,128,.07)}
+    .question.correct{border-color:#73c8a6;background:#fbfffd}
+    .question.wrong{border-color:#ee9fa7;background:#fffdfd}
+    .qhead{display:flex;gap:14px;align-items:flex-start}
+    .qnum{display:grid;place-items:center;min-width:49px;height:49px;border-radius:14px;background:var(--navy);color:#fff;font-size:22px;font-weight:900}
+    .qhead h3{margin:0;color:var(--navy);font-size:24px;line-height:1.4}
+    .tag{display:inline-block;margin-top:4px;padding:2px 10px;border-radius:99px;background:var(--sky);color:#246090;font-size:14px;font-weight:800}
+    .prompt{margin:16px 0;padding:18px;background:#f8fbfe;border-left:6px solid #71b8ea;border-radius:8px;font-size:20px}
+    .data-box{margin:12px 0 16px;padding:15px 18px;background:#fffbed;border:1px solid #eedf9a;border-radius:13px;white-space:pre-line}
+    .choices{display:grid;gap:11px;margin:16px 0}
+    .choice{display:flex;align-items:flex-start;gap:12px;padding:13px 15px;border:2px solid #d9e5ee;border-radius:13px;cursor:pointer;background:#fff;transition:.15s}
+    .choice:hover{border-color:#80b8e0;background:#f5fbff}
+    .choice:has(input:checked){border-color:var(--blue);background:#eaf6ff;box-shadow:0 0 0 2px #cbe7fb inset}
+    .choice input{width:23px;height:23px;margin-top:3px;accent-color:var(--blue);flex:none}
+    .choice-number{font-weight:900;color:var(--navy)}
+    .actions{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:15px 0}
+    .result{font-weight:900;min-height:30px}.result.ok{color:var(--green)}.result.no{color:var(--red)}
+    .attempt{margin-left:auto;color:var(--muted);font-size:15px;font-weight:800}
+    details{margin-top:11px;border:1px solid var(--line);border-radius:12px;background:#fffdf5;overflow:hidden}
+    details summary{cursor:pointer;padding:11px 15px;font-weight:900;color:#684d00;list-style:none}
+    details summary::-webkit-details-marker{display:none}
+    .detail-body{padding:9px 16px 16px;border-top:1px solid #eee3bd}
+    .note-label{display:block;margin-top:15px;color:var(--navy);font-weight:900}
+    textarea{display:block;width:100%;min-height:95px;margin-top:7px;padding:12px 14px;border:2px solid #cad9e4;border-radius:12px;resize:vertical;background:#fff}
+    textarea:focus,input[type="text"]:focus{outline:3px solid #bde1fb;border-color:#4b98d3}
+    .save-panel{margin:34px 0;background:#fff;border:2px solid #bcdcca;border-radius:22px;padding:25px;box-shadow:0 9px 28px rgba(32,114,81,.08)}
+    .save-panel h2{margin-top:0}
+    .path{display:flex;align-items:center;gap:9px;flex-wrap:wrap;padding:12px 14px;background:#eef9f4;border-radius:12px;color:#185f47;font-weight:800;word-break:break-all}
+    .filename-row{display:grid;grid-template-columns:minmax(240px,1fr) auto auto;gap:10px;margin-top:16px}
+    .filename-row input{width:100%;min-height:48px;padding:9px 12px;border:2px solid #cad9e4;border-radius:11px}
+    .checks{display:flex;flex-wrap:wrap;gap:18px;margin-top:15px}
+    .checks label{display:flex;align-items:center;gap:8px;font-weight:800}
+    .checks input{width:22px;height:22px;accent-color:var(--green)}
+    .save-status{min-height:29px;margin:12px 0 0;font-weight:900;color:var(--green)}
+    .help{font-size:15px;color:var(--muted)}
+    .footer{text-align:center;color:var(--muted);font-size:15px;margin-top:28px}
+    @media(max-width:760px){body{font-size:16px}.hero,.question,.save-panel{padding:18px}.prompt{font-size:18px}.dashboard{position:static}.filename-row{grid-template-columns:1fr}.attempt{width:100%;margin-left:0}}
+    @media print{.dashboard,.actions,.save-panel,.footer{display:none}.question{break-inside:avoid;box-shadow:none}details:not([open]){display:none}}
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <nav class="category-nav" aria-label="유형별 연습 메뉴">
+      <strong>오답 훈련센터</strong>
+      <a class="category-link" href="오답_훈련센터.html">오늘의 오답훈련</a>
+      <a class="category-link" href="일반전표_기본연습_24문제.html">일반전표 입력</a>
+      <a class="category-link active" href="이론_오답응용_5문제.html" aria-current="page">이론 오답</a>
+      <a class="category-link" href="결산정리사항_연습_7문제.html">결산 정리사항</a>
+      <a class="category-link" href="매입매출전표_오답연습_3문제.html?view=all">매입매출전표 입력</a>
+    </nav>
+    <section class="hero">
+      <h1>이론 오답 응용연습</h1>
+      <p><strong>전산회계 1급 이론 · 오답 유형별 1문제 · 총 5문제</strong></p>
+      <p>전달해 주신 문제의 핵심 개념을 유지하면서 숫자와 보기 구성을 바꾼 응용문제입니다.</p>
+      <div class="notice">선택 답과 오답 메모는 이 브라우저에 자동 저장됩니다. 풀이가 끝나면 학습기록을 Markdown 파일로 저장하여 나중에 AI에게 전달할 수 있습니다.</div>
+    </section>
+
+    <div class="dashboard">
+      <span class="stat" id="solvedStat">채점 0 / 5</span>
+      <span class="stat" id="correctStat">현재 정답 0</span>
+      <span class="stat" id="wrongStat">누적 오답 0</span>
+      <button class="btn green" id="checkAll" type="button">선택한 문제 전체 채점</button>
+      <button class="btn secondary" id="goSave" type="button">학습기록 저장으로 이동</button>
+    </div>
+
+    <section id="questions" aria-label="이론 문제"></section>
+
+    <section class="save-panel" id="savePanel">
+      <h2>학습기록 저장</h2>
+      <p>처음 저장할 때 아래 폴더를 선택하세요. 파일에는 풀이 이력과 오답 메모, 핵심 해설이 함께 들어갑니다.</p>
+      <div class="path"><span>D:\00. 학습센터\기출문제 연습코너\또 틀렸다!</span><button class="btn secondary" id="copyPath" type="button">폴더 경로 복사</button></div>
+      <div class="filename-row">
+        <input type="text" id="fileName" lang="ko" data-ko-auto aria-label="저장 파일 이름">
+        <button class="btn green" id="saveAll" type="button">전체 학습기록 저장</button>
+        <button class="btn" id="saveWrong" type="button">오답 기록만 저장</button>
+      </div>
+      <div class="checks">
+        <label><input type="checkbox" id="koAuto" checked> 영문 자판 입력을 두벌식 한글로 자동 변환</label>
+      </div>
+      <p class="help">파일 이름에 확장자를 쓰지 않아도 자동으로 <strong>.md</strong>가 붙습니다. 저장 창이 열리면 위의 ‘또 틀렸다!’ 폴더를 선택하세요.</p>
+      <p class="save-status" id="saveStatus" aria-live="polite"></p>
+      <button class="btn danger" id="resetProgress" type="button">이 문제의 저장된 풀이 기록 초기화</button>
+    </section>
+
+    <p class="footer">학습기록은 사용자 컴퓨터에만 저장되며 외부로 자동 전송되지 않습니다.</p>
+  </main>
+
+  <script>
+    const problems=[
+      {
+        id:'operating-profit',type:'영업이익 계산',
+        prompt:'다음 자료를 이용하여 영업이익을 계산한 금액으로 옳은 것은? (기말재고는 제시된 금액을 사용한다.)',
+        data:'총매출액 820,000원  ·  매출환입 20,000원\n기초상품재고액 60,000원  ·  당기총매입액 460,000원  ·  매입할인 10,000원  ·  기말상품재고액 90,000원\n급여 35,000원  ·  광고선전비 25,000원  ·  감가상각비 20,000원  ·  임차료 30,000원\n이자비용 40,000원  ·  유형자산처분이익 50,000원  ·  배당금수익 15,000원',
+        choices:['230,000원','255,000원','270,000원','295,000원'],answer:2,
+        hint:'영업이익 계산에는 이자비용, 유형자산처분이익, 배당금수익 같은 영업외손익을 포함하지 않습니다.',
+        explanation:'순매출액은 820,000-20,000=800,000원입니다. 매출원가는 60,000+(460,000-10,000)-90,000=420,000원, 매출총이익은 380,000원입니다. 판매비와관리비는 35,000+25,000+20,000+30,000=110,000원이므로 영업이익은 270,000원입니다.',
+        key:'영업이익 = 순매출액 - 매출원가 - 판매비와관리비. 영업외수익과 영업외비용은 제외한다.'
+      },
+      {
+        id:'service-dept',type:'보조부문 원가배분',
+        prompt:'다음 중 보조부문 원가의 배분방법에 관한 설명으로 옳지 않은 것은?',
+        choices:[
+          '직접배분법은 보조부문 상호 간의 용역수수를 무시하고 보조부문 원가를 제조부문에만 배분한다.',
+          '단계배분법은 정해진 배분순서에 따라 배분하며, 이미 원가를 배분한 보조부문에는 다시 배분하지 않는다.',
+          '상호배분법은 보조부문 상호 간의 용역수수를 완전히 인식하므로 이론적으로 가장 타당하지만 계산이 복잡하다.',
+          '직접배분법은 보조부문의 배분순서에 따라 각 제조부문에 배분되는 금액이 달라진다.'
+        ],answer:3,
+        hint:'직접배분법에는 보조부문 사이의 배분 단계나 배분순서가 존재하지 않습니다.',
+        explanation:'④가 옳지 않습니다. 직접배분법은 보조부문 상호 간의 용역수수를 무시하고 제조부문에 직접 배분하므로 보조부문 배분순서의 영향을 받지 않습니다. 배분순서에 따라 결과가 달라질 수 있는 방법은 단계배분법입니다.',
+        key:'직접배분법은 상호용역과 배분순서를 무시하고, 단계배분법은 일부 상호용역을 순서대로, 상호배분법은 상호용역을 완전히 반영한다.'
+      },
+      {
+        id:'predetermined-overhead',type:'제조간접원가 예정배부',
+        prompt:'다음 자료를 이용하여 2026년 제조작업지시서 #A10의 제조간접원가 예정배부율과 예정배부액을 계산한 것으로 옳은 것은?',
+        data:'2025년 실제 제조간접원가 4,200,000원, 실제 기계작업시간 100,000시간\n2026년 연간 예정 제조간접원가 4,500,000원, 총예정기계작업시간 90,000시간\n2026년 제조작업지시서 #A10의 실제 기계작업시간 12,400시간',
+        choices:[
+          '45원/기계작업시간, 558,000원',
+          '50원/기계작업시간, 620,000원',
+          '52원/기계작업시간, 644,800원',
+          '55원/기계작업시간, 682,000원'
+        ],answer:1,
+        hint:'예정배부율은 당기 예정 제조간접원가를 당기 예정 조업도로 나눕니다. 전년도 실제자료는 사용하지 않습니다.',
+        explanation:'예정배부율은 4,500,000원÷90,000시간=50원/기계작업시간입니다. #A10의 예정배부액은 50원×12,400시간=620,000원입니다.',
+        key:'예정배부율 = 예정 제조간접원가 ÷ 예정 조업도, 개별 작업 예정배부액 = 예정배부율 × 실제 조업도.'
+      },
+      {
+        id:'vat-taxpayer',type:'부가가치세 납세의무자',
+        prompt:'다음 중 부가가치세법상 납세의무자에 관한 설명으로 옳지 않은 것은?',
+        choices:[
+          '사업자는 과세유형에 따라 일반과세자와 간이과세자로 구분될 수 있다.',
+          '재화를 수입하는 자는 사업자인지 여부와 관계없이 수입 시 부가가치세 납세의무를 질 수 있다.',
+          '영세율을 적용받는 사업자는 매출세액이 0이므로 부가가치세법상 사업자등록의무가 없다.',
+          '국가와 지방자치단체도 과세대상 재화 또는 용역을 공급하는 경우 부가가치세 납세의무자가 될 수 있다.'
+        ],answer:2,
+        hint:'영세율은 면세가 아니라 0%의 세율을 적용하는 과세제도입니다.',
+        explanation:'③이 옳지 않습니다. 영세율 적용 사업도 부가가치세 과세사업이므로 사업자등록의무가 있습니다. 영세율은 매출세액이 0이면서 관련 매입세액 공제가 가능한 제도입니다.',
+        key:'영세율 사업자는 과세사업자이며 사업자등록의무가 있다. 재화의 수입자는 사업자 여부와 관계없이 납세의무자가 될 수 있다.'
+      },
+      {
+        id:'tax-invoice',type:'세금계산서 발급의무 면제',
+        prompt:'다음 중 부가가치세법상 세금계산서 발급의무가 면제되지 않는 경우는?',
+        choices:[
+          '일반 소비자를 대상으로 시내버스 운송용역을 제공하는 경우',
+          '목욕업자가 소비자에게 목욕용역을 제공하는 경우',
+          '제조업자가 구매확인서에 의하여 수출업자에게 재화를 공급하는 경우',
+          '부동산임대업자가 부동산임대용역의 간주임대료를 받는 경우'
+        ],answer:2,
+        hint:'영세율이 적용되는 거래라고 해서 세금계산서 발급의무까지 없어지는 것은 아닙니다.',
+        explanation:'③은 세금계산서 발급의무가 면제되지 않습니다. 구매확인서에 의한 수출용 재화의 공급은 영세율이 적용되지만 영세율 세금계산서를 발급해야 합니다. 나머지는 세금계산서 발급의무가 면제되는 대표적인 경우입니다.',
+        key:'구매확인서 또는 내국신용장에 의한 수출용 재화 공급은 영세율 거래이며 세금계산서를 발급한다.'
+      }
+    ];
+
+    const STORAGE_KEY='tax-accounting-theory-wrong-2026-09-01-v1';
+    const circled=['①','②','③','④','⑤'];
+    const $=(s,r=document)=>r.querySelector(s);
+    const $$=(s,r=document)=>[...r.querySelectorAll(s)];
+    const nowIso=()=>new Date().toISOString();
+    const localDate=()=>{const d=new Date(),o=d.getTimezoneOffset()*60000;return new Date(d-o).toISOString().slice(0,10)};
+    problems.forEach(p=>{if(!p.addedDate)p.addedDate='2026-09-01'});
+    const defaultState=()=>({startedAt:nowIso(),updatedAt:nowIso(),answers:{},checked:{},attempts:{},history:{},notes:{},passed:{},archived:{},passedAt:{},archivedAt:{},trainingCenterRestored:{},fileName:'이론_오답학습기록_2026-09-01',koAuto:true});
+    let state=loadState();
+
+    function loadState(){
+      try{const s=Object.assign(defaultState(),JSON.parse(localStorage.getItem(STORAGE_KEY)||'{}'));s.passed=s.passed||{};s.archived=s.archived||{};s.passedAt=s.passedAt||{};s.archivedAt=s.archivedAt||{};s.trainingCenterRestored=s.trainingCenterRestored||{};problems.forEach(p=>{const wasCorrect=s.checked[p.id]===true||(s.history[p.id]||[]).some(h=>h.correct);s.passed[p.id]=s.trainingCenterRestored[p.id]?false:Boolean(s.passed[p.id]||wasCorrect);s.archived[p.id]=Boolean(s.archived[p.id])});return s}catch(e){return defaultState()}
+    }
+    function persist(){state.updatedAt=nowIso();localStorage.setItem(STORAGE_KEY,JSON.stringify(state));updateDashboard()}
+    function choiceText(p,n){return Number.isInteger(n)?`${circled[n]} ${p.choices[n]}`:'미선택'}
+    function questionHtml(p,i){
+      const selected=state.answers[p.id];
+      return `<article class="question" data-id="${p.id}" data-added-date="${p.addedDate}">
+        <div class="qhead"><span class="qnum">${i+1}</span><div><h3>${p.prompt}</h3><span class="tag">${p.type}</span></div></div>
+        ${p.data?`<div class="data-box">${p.data}</div>`:''}
+        <div class="choices">${p.choices.map((c,n)=>`<label class="choice"><input type="radio" name="q-${p.id}" value="${n}" ${Number(selected)===n?'checked':''}><span class="choice-number">${circled[n]}</span><span>${c}</span></label>`).join('')}</div>
+        <div class="actions"><button class="btn check-one" type="button">채점하기</button><button class="btn secondary archive-one" type="button">이 문제 지우기</button><span class="result" aria-live="polite"></span><span class="attempt"></span></div>
+        <details><summary>힌트 보기</summary><div class="detail-body">${p.hint}</div></details>
+        <details><summary>정답 · 해설 보기</summary><div class="detail-body"><p><strong>정답: ${circled[p.answer]} ${p.choices[p.answer]}</strong></p><p>${p.explanation}</p><p><strong>핵심:</strong> ${p.key}</p></div></details>
+        <label class="note-label" for="note-${p.id}">나의 오답 메모</label>
+        <textarea id="note-${p.id}" lang="ko" data-ko-auto placeholder="헷갈린 이유, 외울 기준, 다시 볼 내용을 한글로 적어보세요.">${escapeHtml(state.notes[p.id]||'')}</textarea>
+      </article>`
+    }
+    function escapeHtml(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+    $('#questions').innerHTML=problems.map(questionHtml).join('');
+    $('#fileName').value=state.fileName||defaultState().fileName;
+    $('#koAuto').checked=state.koAuto!==false;
+
+    function getProblem(id){return problems.find(p=>p.id===id)}
+    function wrongCount(id){return (state.history[id]||[]).filter(h=>!h.correct).length}
+    const todayView=new URLSearchParams(location.search).get('view')==='today';
+    const sessionPassed=new Set();
+    function renderCard(card){
+      const id=card.dataset.id,p=getProblem(id),checked=state.checked[id],attempts=state.attempts[id]||0,result=$('.result',card);
+      card.hidden=Boolean((state.passed[id]&&!sessionPassed.has(id))||state.archived[id]||(todayView&&card.dataset.addedDate!==localDate()));
+      card.classList.toggle('correct',checked===true);card.classList.toggle('wrong',checked===false);
+      result.className='result'+(checked===true?' ok':checked===false?' no':'');
+      result.textContent=checked===true?'정답입니다! 통과 처리되어 다음 방문부터 숨겨집니다.':checked===false?`오답입니다. 힌트를 확인하고 다시 풀어보세요.`:state.answers[id]!==undefined?'선택 내용이 자동 저장되었습니다.':'';
+      $('.attempt',card).textContent=`채점 ${attempts}회 · 틀림 ${wrongCount(id)}회`;
+    }
+    $$('.question').forEach(card=>{
+      const id=card.dataset.id;
+      $$('input[type="radio"]',card).forEach(r=>r.addEventListener('change',()=>{state.answers[id]=Number(r.value);delete state.checked[id];persist();renderCard(card)}));
+      $('.check-one',card).addEventListener('click',()=>grade(card));
+      $('.archive-one',card).addEventListener('click',()=>{if(!confirm('이 문제를 훈련 목록에서 숨길까요? 학습 이력은 보관함에 남으며 센터 홈에서 복원할 수 있습니다.'))return;state.archived[id]=true;state.archivedAt[id]=nowIso();delete state.trainingCenterRestored[id];persist();card.hidden=true;updateDashboard()});
+      $('textarea',card).addEventListener('input',e=>{state.notes[id]=e.target.value;persist()});
+      renderCard(card);
+    });
+
+    function grade(card){
+      const id=card.dataset.id,p=getProblem(id),selected=state.answers[id];
+      if(selected===undefined){const r=$('.result',card);r.className='result no';r.textContent='먼저 답을 선택해 주세요.';return false}
+      const correct=Number(selected)===p.answer;
+      state.attempts[id]=(state.attempts[id]||0)+1;
+      state.history[id]=state.history[id]||[];
+      state.history[id].push({at:nowIso(),choice:Number(selected),correct});
+      if(correct){state.passed[id]=true;state.passedAt[id]=nowIso();delete state.trainingCenterRestored[id];sessionPassed.add(id)}
+      state.checked[id]=correct;persist();renderCard(card);return correct
+    }
+    function updateDashboard(){
+      const visible=problems.filter(p=>{const card=$(`.question[data-id="${p.id}"]`);return card&&!card.hidden});
+      const solved=visible.filter(p=>(state.attempts[p.id]||0)>0).length;
+      const correct=visible.filter(p=>state.checked[p.id]===true).length;
+      const wrong=problems.reduce((n,p)=>n+wrongCount(p.id),0);
+      $('#solvedStat').textContent=`채점 ${solved} / ${visible.length}`;
+      $('#correctStat').textContent=`현재 정답 ${correct}`;
+      $('#wrongStat').textContent=`누적 오답 ${wrong}`;
+      let empty=$('#emptyState');if(!empty){empty=document.createElement('p');empty.id='emptyState';empty.className='notice';$('#questions').before(empty)}empty.hidden=visible.length>0;empty.textContent='현재 노출할 문제가 없습니다. 통과·숨김 문제는 센터 홈의 보관함에서 확인할 수 있습니다.';
+    }
+    updateDashboard();
+    $('#checkAll').addEventListener('click',()=>{$$('.question').filter(c=>!c.hidden&&state.answers[c.dataset.id]!==undefined).forEach(grade)});
+    $('#goSave').addEventListener('click',()=>$('#savePanel').scrollIntoView({behavior:'smooth'}));
+    $('#fileName').addEventListener('input',e=>{state.fileName=e.target.value;persist()});
+    $('#koAuto').addEventListener('change',e=>{state.koAuto=e.target.checked;persist();resetKoreanBuffers()});
+    $('#copyPath').addEventListener('click',async()=>{
+      const path='D:\\00. 학습센터\\기출문제 연습코너\\또 틀렸다!';
+      try{await navigator.clipboard.writeText(path);$('#saveStatus').textContent='폴더 경로를 복사했습니다.'}catch(e){$('#saveStatus').textContent='폴더 경로를 복사하지 못했습니다. 화면의 경로를 직접 선택해 복사해 주세요.'}
+    });
+
+    function safeFileName(raw,suffix=''){
+      let name=(raw||'이론_오답학습기록').replace(/[<>:"/\\|?*\x00-\x1F]/g,'-').trim().replace(/\.+$/,'');
+      name=name.replace(/\.md$/i,'');return `${name}${suffix}.md`
+    }
+    function fmtDate(iso){try{return new Intl.DateTimeFormat('ko-KR',{dateStyle:'medium',timeStyle:'medium'}).format(new Date(iso))}catch(e){return iso}}
+    function buildMarkdown(onlyWrong=false){
+      const list=onlyWrong?problems.filter(p=>wrongCount(p.id)>0||state.checked[p.id]===false):problems;
+      const solved=problems.filter(p=>(state.attempts[p.id]||0)>0).length;
+      const correct=problems.filter(p=>state.checked[p.id]===true).length;
+      const totalWrong=problems.reduce((n,p)=>n+wrongCount(p.id),0);
+      const lines=[
+        '# 전산회계 1급 이론 학습기록','',
+        `- 학습 시작: ${fmtDate(state.startedAt)}`,
+        `- 마지막 저장: ${fmtDate(nowIso())}`,
+        `- 채점한 문제: ${solved}/${problems.length}`,
+        `- 현재 정답: ${correct}/${problems.length}`,
+        `- 누적 오답 횟수: ${totalWrong}`,
+        `- 기록 범위: ${onlyWrong?'한 번 이상 틀린 문제':'전체 문제'}`,'',
+        '## 자주 틀린 유형',''
+      ];
+      const ranked=problems.map(p=>({p,n:wrongCount(p.id)})).filter(x=>x.n>0).sort((a,b)=>b.n-a.n);
+      if(ranked.length)ranked.forEach(x=>lines.push(`- ${x.p.type}: ${x.n}회 틀림`));else lines.push('- 아직 기록된 오답이 없습니다.');
+      lines.push('');
+      if(!list.length)lines.push('## 오답 문제','', '- 아직 저장할 오답이 없습니다.','');
+      list.forEach((p,i)=>{
+        const selected=state.answers[p.id],history=state.history[p.id]||[],checked=state.checked[p.id];
+        lines.push(`## ${i+1}. ${p.type}`,'',`**문제:** ${p.prompt}`,'');
+        if(p.data)lines.push('**자료:**','',...p.data.split('\n').map(x=>`- ${x}`),'');
+        p.choices.forEach((c,n)=>lines.push(`- ${circled[n]} ${c}`));
+        lines.push('',`- 훈련 상태: ${state.archived[p.id]?'사용자가 숨긴 문제':state.passed[p.id]?'통과':'학습 중'}`,`- 현재 선택: ${choiceText(p,selected)}`,`- 정답: ${choiceText(p,p.answer)}`,`- 현재 결과: ${checked===true?'정답':checked===false?'오답':'미채점'}`,`- 총 채점 횟수: ${state.attempts[p.id]||0}회`,`- 틀린 횟수: ${wrongCount(p.id)}회`,'');
+        lines.push('**답변 이력:**');
+        if(history.length)history.forEach((h,n)=>lines.push(`- ${n+1}차 (${fmtDate(h.at)}): ${choiceText(p,h.choice)} → ${h.correct?'정답':'오답'}`));else lines.push('- 아직 채점 이력이 없습니다.');
+        lines.push('',`**나의 오답 메모:** ${state.notes[p.id]?.trim()||'작성하지 않음'}`,'',`**핵심 학습 내용:** ${p.key}`,'',`**해설:** ${p.explanation}`,'','---','');
+      });
+      lines.push('## AI에게 전달할 요청 예시','', '> 이 학습기록에서 틀린 횟수가 많은 유형을 우선 분석하고, 내가 적은 오답 메모를 반영하여 전산회계 1급 수준의 응용문제를 유형별로 만들어 주세요. 원본 문제의 핵심 구조는 유지하되 숫자와 보기를 바꾸고, 정답과 해설은 처음에는 숨겨 주세요.','');
+      return lines.join('\n')
+    }
+    async function saveRecord(onlyWrong){
+      const suffix=onlyWrong?'_오답만':'';
+      const name=safeFileName($('#fileName').value,suffix),content=buildMarkdown(onlyWrong),status=$('#saveStatus');
+      try{
+        if('showSaveFilePicker' in window){
+          const handle=await window.showSaveFilePicker({suggestedName:name,types:[{description:'Markdown 학습기록',accept:{'text/markdown':['.md']}}]});
+          const writable=await handle.createWritable();await writable.write(content);await writable.close();status.textContent=`${handle.name} 파일로 저장했습니다.`;return
+        }
+      }catch(e){if(e.name==='AbortError'){status.textContent='저장을 취소했습니다.';return}}
+      const blob=new Blob([content],{type:'text/markdown;charset=utf-8'}),a=document.createElement('a');
+      a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+      status.textContent=`${name} 다운로드를 시작했습니다. 다운로드된 파일을 ‘또 틀렸다!’ 폴더에 보관해 주세요.`
+    }
+    $('#saveAll').addEventListener('click',()=>saveRecord(false));
+    $('#saveWrong').addEventListener('click',()=>saveRecord(true));
+    $('#resetProgress').addEventListener('click',()=>{
+      if(!confirm('이 문제의 선택 답, 채점 이력, 오답 메모를 모두 지울까요?'))return;
+      const keepName=$('#fileName').value;state=defaultState();state.fileName=keepName;localStorage.setItem(STORAGE_KEY,JSON.stringify(state));location.reload()
+    });
+
+    // 영문 자판 상태에서도 일반적인 두벌식 한글 입력을 돕는 간단한 조합기
+    const C_MAP={r:'ㄱ',R:'ㄲ',s:'ㄴ',e:'ㄷ',E:'ㄸ',f:'ㄹ',a:'ㅁ',q:'ㅂ',Q:'ㅃ',t:'ㅅ',T:'ㅆ',d:'ㅇ',w:'ㅈ',W:'ㅉ',c:'ㅊ',z:'ㅋ',x:'ㅌ',v:'ㅍ',g:'ㅎ'};
+    const V_MAP={k:'ㅏ',o:'ㅐ',i:'ㅑ',O:'ㅒ',j:'ㅓ',p:'ㅔ',u:'ㅕ',P:'ㅖ',h:'ㅗ',y:'ㅛ',n:'ㅜ',b:'ㅠ',m:'ㅡ',l:'ㅣ'};
+    const CHO=['ㄱ','ㄲ','ㄴ','ㄷ','ㄸ','ㄹ','ㅁ','ㅂ','ㅃ','ㅅ','ㅆ','ㅇ','ㅈ','ㅉ','ㅊ','ㅋ','ㅌ','ㅍ','ㅎ'];
+    const JUNG=['ㅏ','ㅐ','ㅑ','ㅒ','ㅓ','ㅔ','ㅕ','ㅖ','ㅗ','ㅘ','ㅙ','ㅚ','ㅛ','ㅜ','ㅝ','ㅞ','ㅟ','ㅠ','ㅡ','ㅢ','ㅣ'];
+    const JONG=['','ㄱ','ㄲ','ㄳ','ㄴ','ㄵ','ㄶ','ㄷ','ㄹ','ㄺ','ㄻ','ㄼ','ㄽ','ㄾ','ㄿ','ㅀ','ㅁ','ㅂ','ㅄ','ㅅ','ㅆ','ㅇ','ㅈ','ㅊ','ㅋ','ㅌ','ㅍ','ㅎ'];
+    const V_COMB={'ㅗㅏ':'ㅘ','ㅗㅐ':'ㅙ','ㅗㅣ':'ㅚ','ㅜㅓ':'ㅝ','ㅜㅔ':'ㅞ','ㅜㅣ':'ㅟ','ㅡㅣ':'ㅢ'};
+    const F_COMB={'ㄱㅅ':'ㄳ','ㄴㅈ':'ㄵ','ㄴㅎ':'ㄶ','ㄹㄱ':'ㄺ','ㄹㅁ':'ㄻ','ㄹㅂ':'ㄼ','ㄹㅅ':'ㄽ','ㄹㅌ':'ㄾ','ㄹㅍ':'ㄿ','ㄹㅎ':'ㅀ','ㅂㅅ':'ㅄ'};
+    const isC=x=>CHO.includes(x),isV=x=>JUNG.includes(x);
+    function romanToHangul(raw){
+      const j=[...raw].map(x=>C_MAP[x]||V_MAP[x]||x);let out='',i=0;
+      while(i<j.length){
+        const x=j[i];
+        if(isC(x)&&isV(j[i+1])){
+          let cho=CHO.indexOf(x),v=j[i+1];i+=2;
+          if(isV(j[i])&&V_COMB[v+j[i]]){v=V_COMB[v+j[i]];i++}
+          let f='';
+          if(isC(j[i])&&JONG.includes(j[i])){
+            const c1=j[i],c2=j[i+1],after=j[i+2];
+            if(isV(c2)){}
+            else if(isC(c2)&&F_COMB[c1+c2]&&!isV(after)){f=F_COMB[c1+c2];i+=2}
+            else{f=c1;i++}
+          }
+          out+=String.fromCharCode(0xAC00+cho*588+JUNG.indexOf(v)*28+JONG.indexOf(f));
+        }else if(isV(x)&&isV(j[i+1])&&V_COMB[x+j[i+1]]){out+=V_COMB[x+j[i+1]];i+=2}
+        else{out+=x;i++}
+      }
+      return out
+    }
+    function resetKoreanBuffers(){$$('[data-ko-auto]').forEach(x=>{x.dataset.koRaw='';x.dataset.koBase=x.value})}
+    function setupKoreanInput(field){
+      field.dataset.koRaw='';field.dataset.koBase=field.value;
+      field.addEventListener('focus',()=>{field.dataset.koRaw='';field.dataset.koBase=field.value});
+      field.addEventListener('blur',()=>{field.dataset.koRaw='';field.dataset.koBase=field.value});
+      field.addEventListener('keydown',e=>{
+        if(!$('#koAuto').checked||e.ctrlKey||e.altKey||e.metaKey)return;
+        const raw=field.dataset.koRaw||'',atEnd=field.selectionStart===field.value.length&&field.selectionEnd===field.value.length;
+        if(e.key==='Backspace'&&raw&&atEnd){e.preventDefault();const next=raw.slice(0,-1);field.dataset.koRaw=next;field.value=(field.dataset.koBase||'')+romanToHangul(next);field.dispatchEvent(new Event('input',{bubbles:true}));return}
+        if(/^[A-Za-z]$/.test(e.key)&&atEnd){e.preventDefault();if(!raw)field.dataset.koBase=field.value;const next=raw+e.key;field.dataset.koRaw=next;field.value=(field.dataset.koBase||'')+romanToHangul(next);field.dispatchEvent(new Event('input',{bubbles:true}));return}
+        field.dataset.koRaw='';field.dataset.koBase=field.value
+      })
+    }
+    $$('[data-ko-auto]').forEach(setupKoreanInput);
+  </script>
+</body>
+</html>
