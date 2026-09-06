@@ -48,6 +48,17 @@
     .eyebrow{margin:0 0 3px;font-weight:800;letter-spacing:.06em;color:#d9fbff}
     h1{margin:0;font-size:clamp(2rem,4.3vw,3.15rem);line-height:1.18;letter-spacing:-.045em}
     .hero-copy{max-width:790px;margin:13px 0 0;font-size:1.05rem;color:#f1ffff}
+    .hero-top{display:flex;align-items:flex-start;justify-content:space-between;gap:22px;flex-wrap:wrap}
+    .hero-head{flex:1 1 460px;min-width:0}
+    .hero-sync{flex:0 0 auto;width:min(310px,100%);display:grid;gap:8px;padding:14px;border-radius:18px;background:rgba(255,255,255,.16);border:2px solid rgba(255,255,255,.42);backdrop-filter:blur(6px)}
+    .hero-sync-title{margin:0;font-size:1.15rem;letter-spacing:.02em;text-align:center}
+    .hero-sync-button{display:grid;gap:2px;width:100%;padding:10px 13px;border:2px solid rgba(255,255,255,.55);border-radius:13px;background:rgba(255,255,255,.95);color:#0f4f86;font:inherit;text-align:left;cursor:pointer}
+    .hero-sync-button:hover:not(:disabled){background:#fff;border-color:#fff;transform:translateY(-1px)}
+    .hero-sync-button:focus-visible{outline:3px solid #ffe680;outline-offset:2px}
+    .hero-sync-button:disabled{opacity:.62;cursor:progress}
+    .hero-sync-arrow{font-weight:900;font-size:1.02rem}
+    .hero-sync-note{font-size:.83rem;font-weight:700;color:#3a6f9c}
+    .hero-sync-status{margin:0;font-size:.85rem;font-weight:700;color:#f2ffff;word-break:keep-all}
     .privacy{
       display:inline-flex;align-items:center;gap:7px;margin-top:17px;padding:7px 13px;
       border-radius:999px;background:rgba(255,255,255,.17);font-size:.9rem;font-weight:700
@@ -175,8 +186,18 @@
   <a class="skip-link" href="#main">본문으로 바로가기</a>
   <header class="hero">
     <div class="hero-inner">
-      <p class="eyebrow">오늘 틀린 문제에 집중하는 학습 공간</p>
-      <h1>전산회계 1급 오답 훈련센터</h1>
+      <div class="hero-top">
+        <div class="hero-head">
+          <p class="eyebrow">오늘 틀린 문제에 집중하는 학습 공간</p>
+          <h1>전산회계 1급 오답 훈련센터</h1>
+        </div>
+        <section class="hero-sync" aria-label="문제·프로그램 동기화">
+          <h2 class="hero-sync-title">Sync</h2>
+          <button class="hero-sync-button" id="syncPcToGithub" type="button"><span class="hero-sync-arrow">PC → GitHub</span><span class="hero-sync-note">내 PC의 새 문제를 올리기</span></button>
+          <button class="hero-sync-button" id="syncGithubToPc" type="button"><span class="hero-sync-arrow">GitHub → PC</span><span class="hero-sync-note">GitHub의 최신 문제 내려받기</span></button>
+          <p class="hero-sync-status" id="heroSyncStatus" role="status" aria-live="polite">GitHub를 연결하면 사용할 수 있습니다.</p>
+        </section>
+      </div>
       <p class="hero-copy">오늘 등록된 문제부터 가볍게 훈련하고, 누적 오답은 한눈에 확인하세요. 한 번 통과하거나 직접 숨긴 문제는 보관함에 남습니다.</p>
       <span class="privacy">🔒 기본 저장은 이 브라우저이며, 사용자가 연결할 때만 GitHub와 동기화합니다.</span>
     </div>
@@ -325,7 +346,7 @@
     <p class="footer">오답 훈련센터 · 사용자가 저장 또는 동기화 버튼을 누른 경우에만 파일이나 GitHub로 기록을 보냅니다.</p>
   </main>
 
-  <script src="github-learning-sync.js"></script>
+  <script src="github-learning-sync.js?v=2"></script>
   <script>
     const SOURCES={
       practical:{label:'일반전표',file:'일반전표_기본연습_24문제.html',key:'tax-accounting-practical-journal-24-v2'},
@@ -572,6 +593,26 @@
       }catch(error){status.textContent=`연결하지 못했습니다. ${error.message}`}
       finally{button.disabled=false}
     }
+    function heroSyncButtons(){return [$('#syncPcToGithub'),$('#syncGithubToPc')]}
+    function refreshHeroSync(){
+      $('#heroSyncStatus').textContent=window.TrainingGitHub?.hasToken()?'GitHub에 연결되어 있습니다. 보낼 방향을 고르세요.':'GitHub를 연결하면 사용할 수 있습니다.';
+    }
+    function runHeroSync(intent){
+      if(typeof window.TrainingGitHub?.runDirectionalSync!=='function'){$('#heroSyncStatus').textContent='동기화 기능을 불러오지 못했습니다. Ctrl+F5로 새로고침한 뒤 다시 눌러주세요.';return}
+      return TrainingGitHub.runDirectionalSync(intent,{
+        setStatus:text=>{$('#heroSyncStatus').textContent=text},
+        setBusy:busy=>heroSyncButtons().forEach(button=>{button.disabled=busy}),
+        onNeedConnection:()=>{
+          $('#heroSyncStatus').textContent='먼저 아래 ‘GitHub 학습기록 연결 · 동기화’에서 토큰을 입력하고 연결해 주세요.';
+          $('#githubToken').scrollIntoView({behavior:'smooth',block:'center'});$('#githubToken').focus();
+        },
+        afterProgramSync:async()=>{
+          $('#heroSyncStatus').textContent='이제 PC·모바일 학습기록을 합치고 있습니다…';
+          const remote=await mergeLearningStateWithGitHub();
+          return remote?'학습기록도 양쪽 이력을 합쳐 보존했습니다.':'첫 학습상태를 GitHub에 저장했습니다.';
+        }
+      });
+    }
     async function mergeLearningStateWithGitHub(){
       const remote=await TrainingGitHub.getSyncState();
       if(remote?.json?.states){
@@ -767,10 +808,13 @@
     $('#importBackup').addEventListener('change',event=>{const file=event.target.files?.[0];if(file)importBackupFile(file);event.target.value=''});
     $('#githubDeviceName').value=TrainingGitHub.getDeviceName();
     $('#githubDeviceName').addEventListener('change',event=>TrainingGitHub.setDeviceName(event.target.value));
-    $('#githubConnect').addEventListener('click',connectGitHub);
+    $('#githubConnect').addEventListener('click',()=>connectGitHub().finally(refreshHeroSync));
     $('#githubSync').addEventListener('click',syncGitHub);
     $('#githubAllSync').addEventListener('click',syncAllGitHub);
-    $('#githubDisconnect').addEventListener('click',()=>{TrainingGitHub.clearToken();$('#githubToken').value='';$('#githubStatus').textContent='GitHub 연결 정보를 이 브라우저 세션에서 제거했습니다.'});
+    $('#githubDisconnect').addEventListener('click',()=>{TrainingGitHub.clearToken();$('#githubToken').value='';$('#githubStatus').textContent='GitHub 연결 정보를 이 브라우저 세션에서 제거했습니다.';refreshHeroSync()});
+    $('#syncPcToGithub').addEventListener('click',()=>runHeroSync('pc-to-github'));
+    $('#syncGithubToPc').addEventListener('click',()=>runHeroSync('github-to-pc'));
+    refreshHeroSync();
     $('#sortOrder').addEventListener('change',event=>{currentSort=event.target.value;renderTraining();$('#liveStatus').textContent=`${event.target.options[event.target.selectedIndex].text}으로 정렬했습니다.`});
     $('#archiveList').addEventListener('click',event=>{
       const button=event.target.closest('[data-restore]');if(!button)return;

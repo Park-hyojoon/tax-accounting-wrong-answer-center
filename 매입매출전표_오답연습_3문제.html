@@ -7,7 +7,17 @@
   <style>
     :root{--navy:#17345f;--blue:#3178c6;--sky:#eaf6ff;--mint:#e9fbf3;--yellow:#fff5bd;--red:#c93e48;--green:#16845b;--line:#cdddec;--ink:#172033;--muted:#607089}
     *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:linear-gradient(180deg,#eef8ff,#fff 25%,#f5fbf8);color:var(--ink);font-family:"Malgun Gothic","Apple SD Gothic Neo",sans-serif;font-size:18px;line-height:1.65}button,input,select{font:inherit}.wrap{width:min(1580px,98vw);margin:0 auto;padding:24px 0 60px}
-    .category-nav{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-bottom:16px;padding:12px;background:#fff;border:2px solid #d5e6f3;border-radius:17px;box-shadow:0 7px 22px rgba(44,91,128,.07)}.category-nav strong{color:var(--navy);padding:0 7px}.category-link{display:inline-flex;align-items:center;justify-content:center;min-height:45px;padding:7px 15px;border:2px solid var(--line);border-radius:12px;background:#fff;color:var(--navy);font-weight:900;text-decoration:none}.category-link:hover{border-color:var(--blue);background:var(--sky)}.category-link.active{border-color:var(--navy);background:var(--navy);color:#fff}
+    .category-nav{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-bottom:16px;padding:12px;background:#fff;border:2px solid #d5e6f3;border-radius:17px;box-shadow:0 7px 22px rgba(44,91,128,.07)}
+    .nav-sync{display:flex;align-items:center;gap:8px;margin-left:auto;padding:5px 9px;border:2px solid #d9e7f2;border-radius:14px;background:#f6fbff}
+    .nav-sync-title{font-weight:900;color:var(--navy);letter-spacing:.02em}
+    .nav-sync-button{min-height:40px;padding:6px 13px;border:2px solid var(--line);border-radius:11px;background:#fff;color:var(--navy);font:inherit;font-weight:900;font-size:.9em;cursor:pointer}
+    .nav-sync-button:hover:not(:disabled){border-color:var(--blue);background:var(--sky)}
+    .nav-sync-button:focus-visible{outline:3px solid #bde1fb;outline-offset:2px}
+    .nav-sync-button:disabled{opacity:.6;cursor:progress}
+    .nav-sync-status{flex:1 1 100%;margin:0;font-size:.85em;font-weight:800;color:var(--muted);word-break:keep-all}
+    .nav-sync-status:empty{display:none}
+    @media(max-width:680px){.nav-sync{width:100%;margin-left:0;flex-wrap:wrap}.nav-sync-button{flex:1 1 auto}}
+   .category-link{display:inline-flex;align-items:center;justify-content:center;min-height:45px;padding:7px 15px;border:2px solid var(--line);border-radius:12px;background:#fff;color:var(--navy);font-weight:900;text-decoration:none}.category-link:hover{border-color:var(--blue);background:var(--sky)}.category-link.active{border-color:var(--navy);background:var(--navy);color:#fff}
     .hero,.question,.save-panel{background:#fff;border:2px solid #d9e7f2;border-radius:22px;padding:24px;box-shadow:0 8px 24px rgba(44,91,128,.07)}.hero h1{margin:0 0 8px;color:var(--navy);font-size:clamp(29px,4vw,43px);line-height:1.25}.hero p{margin:7px 0}.notice{margin-top:15px;padding:14px 17px;border-radius:14px;background:var(--yellow);font-weight:800}
     .toolbar{position:sticky;top:0;z-index:5;display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:18px 0;padding:13px;background:rgba(255,255,255,.96);border:2px solid #d9e7f2;border-radius:16px;box-shadow:0 7px 20px rgba(44,91,128,.08)}.btn{border:0;border-radius:12px;padding:10px 17px;cursor:pointer;font-weight:900;background:var(--blue);color:#fff}.btn:hover{filter:brightness(.96);transform:translateY(-1px)}.btn.secondary{background:#fff;color:var(--navy);border:2px solid var(--line)}.btn.green{background:var(--green)}.btn.danger{background:#fff;color:var(--red);border:2px solid #e8b3b8}.progress{display:flex;align-items:center;gap:10px;margin-left:auto;font-weight:900;color:var(--navy)}.progress-bar{width:150px;height:14px;background:#dfeaf2;border-radius:99px;overflow:hidden}.progress-bar span{display:block;height:100%;width:0;background:linear-gradient(90deg,#39a7f0,#27b47e);transition:.2s}
     .question{margin:22px 0;padding:18px}.question.correct{border-color:#72c9a7;background:#fbfffd}.question.wrong{border-color:#f1a4a4}.question-layout{display:grid;grid-template-columns:clamp(310px,24vw,360px) minmax(0,1fr);gap:20px;align-items:start}.question-brief{position:sticky;top:92px;min-width:0;align-self:start}.answer-workspace{min-width:0}.answer-workspace>.kclep-shell{margin-top:0}.qhead{display:flex;gap:14px;align-items:flex-start;margin-bottom:13px}.qnum{display:grid;place-items:center;min-width:50px;height:50px;border-radius:14px;background:var(--navy);color:#fff;font-size:22px;font-weight:900}.qhead h2{margin:0;color:var(--navy);font-size:25px}.tag{display:inline-block;margin-top:4px;padding:2px 10px;border-radius:99px;background:var(--sky);color:#246093;font-size:14px;font-weight:900}.prompt{padding:17px;border-left:7px solid var(--blue);border-radius:10px;background:#f5fbff;font-size:20px;font-weight:750;white-space:pre-line}.before-box{margin-top:14px;padding:15px;border:2px dashed #e3aa53;border-radius:13px;background:#fff9e8}.before-box h3{margin:0 0 7px;color:#8b5612}.before-box p{margin:0;white-space:pre-line}
@@ -52,7 +62,7 @@
     @media(max-width:1100px){.voucher-grid{grid-template-columns:repeat(2,1fr)}.question{padding:18px}.kclep-shell{font-size:13px}}@media(max-width:680px){body{font-size:16px}.wrap{width:96vw}.hero,.question,.save-panel{padding:13px}.toolbar{position:static}.progress{width:100%;margin-left:0}.progress-bar{flex:1}.voucher-grid,.balance-panel,.save-row{grid-template-columns:1fr}.prompt{font-size:18px}.attempt{width:100%;margin-left:0}.answer-line{grid-template-columns:58px 1fr}.answer-line span:nth-child(n+3){grid-column:2}.kclep-titlebar{align-items:flex-end}.kclep-titlebar .cash-label,.kclep-titlebar .cash-balance{display:none}.kclep-caption{align-items:flex-start;flex-direction:column}.kclep-help{align-items:flex-start;flex-direction:column}}
     @media print{.category-nav,.toolbar,.qactions,.save-panel{display:none}.question{break-inside:avoid;box-shadow:none}.question-layout{display:block}.question-brief{position:static}details:not([open]){display:none}}
     @media(min-width:681px){.answer-line{grid-template-columns:70px 1fr 150px 110px 115px}}
-    .sort-label{display:flex;align-items:center;gap:8px;font-weight:900;color:var(--navy)}
+    .sort-label{display:flex;align-items:center;gap:8px;white-space:nowrap;font-weight:900;color:var(--navy)}
     .sort-select{border:2px solid var(--line);border-radius:12px;background:#fff;color:var(--navy);font-weight:800;font-size:inherit;padding:9px 12px;cursor:pointer}
     .sort-select:focus-visible{border-color:#5d9ed2;outline:none}
     @media(max-width:680px){.sort-label{width:100%;align-items:stretch;flex-direction:column;gap:5px}.sort-select{width:100%}}
@@ -61,12 +71,17 @@
 <body>
 <main class="wrap">
   <nav class="category-nav" aria-label="오답 훈련 메뉴">
-    <strong>오답 훈련센터</strong>
     <a class="category-link" href="오답_훈련센터.html">오늘의 오답훈련</a>
     <a class="category-link" href="일반전표_기본연습_24문제.html">일반전표 입력</a>
     <a class="category-link" href="이론_오답응용_5문제.html">이론 오답</a>
     <a class="category-link" href="결산정리사항_연습_7문제.html">결산 정리사항</a>
     <a class="category-link active" href="매입매출전표_오답연습_3문제.html?view=all" aria-current="page">매입매출전표 입력</a>
+  <div class="nav-sync">
+      <span class="nav-sync-title">Sync</span>
+      <button class="nav-sync-button" id="syncPcToGithub" type="button" title="내 PC의 새 문제와 프로그램을 GitHub에 올립니다">PC → GitHub</button>
+      <button class="nav-sync-button" id="syncGithubToPc" type="button" title="GitHub의 최신 문제와 프로그램을 이 PC 폴더에 내려받습니다">GitHub → PC</button>
+    </div>
+    <p class="nav-sync-status" id="navSyncStatus" role="status" aria-live="polite"></p>
   </nav>
   <section class="hero">
     <h1>매입매출전표 입력 오답연습</h1>
@@ -102,7 +117,7 @@
   </section>
   <p class="footer">유형·세액·분개 조건을 모두 충족해야 통과합니다. 입력 내용은 이 브라우저에 자동 저장됩니다.</p>
 </main>
-<script src="github-learning-sync.js"></script>
+<script src="github-learning-sync.js?v=2"></script>
 <script>
   const TYPES={
     sales:['11.과세','12.영세','13.면세','14.건별','15.간이','16.수출','17.카과','18.카면','19.카영','20.면건','21.전자','22.현과','23.현면','24.현영'],
@@ -280,6 +295,20 @@
   async function saveTodayRecord(){const status=$('#saveStatus'),payload=todayRecordPayload();if(!payload.list.length){status.textContent='오늘 채점한 학습기록이 없습니다. 문제를 채점한 뒤 다시 저장해 주세요.';return}const github=window.TrainingGitHub;if(github?.hasToken()){status.textContent='오늘 학습기록을 GitHub에 저장하고 있습니다…';try{await github.saveDailyRecord('voucher',payload.date,payload.content);status.textContent=`${payload.date} 매입매출전표 학습기록을 GitHub에 저장했습니다.`;return}catch(error){const message=String(error?.message||'알 수 없는 오류');downloadRecord(payload,status,`GitHub 저장에 실패했습니다(${message}). 기록은 손실되지 않도록 이 기기에 저장합니다. `);return}}await saveLocalRecord(payload,status)}
   const oldDefault=/^매입매출전표_(?:오답연습_13문제_)?학습기록_\d{4}-\d{2}-\d{2}$/;$('#recordFileName').value=!state.fileName||oldDefault.test(state.fileName)?`매입매출전표_오늘학습기록_${localDate()}`:state.fileName;$('#recordFileName').addEventListener('input',e=>{state.fileName=e.target.value;save()});$('#saveToday').addEventListener('click',saveTodayRecord);$('#copyPath').addEventListener('click',async()=>{try{await navigator.clipboard.writeText('D:\\00. 학습센터\\기출문제 연습코너\\또 틀렸다!');$('#saveStatus').textContent='폴더 경로를 복사했습니다.'}catch(e){$('#saveStatus').textContent='화면의 폴더 경로를 직접 복사해 주세요.'}});$('#resetLearning').addEventListener('click',()=>{if(confirm('17문제의 입력과 채점 이력을 모두 지울까요?')){localStorage.removeItem(KEY);location.reload()}});
   const CM={r:'ㄱ',R:'ㄲ',s:'ㄴ',e:'ㄷ',E:'ㄸ',f:'ㄹ',a:'ㅁ',q:'ㅂ',Q:'ㅃ',t:'ㅅ',T:'ㅆ',d:'ㅇ',w:'ㅈ',W:'ㅉ',c:'ㅊ',z:'ㅋ',x:'ㅌ',v:'ㅍ',g:'ㅎ'},VM={k:'ㅏ',o:'ㅐ',i:'ㅑ',O:'ㅒ',j:'ㅓ',p:'ㅔ',u:'ㅕ',P:'ㅖ',h:'ㅗ',y:'ㅛ',n:'ㅜ',b:'ㅠ',m:'ㅡ',l:'ㅣ'},CHO=['ㄱ','ㄲ','ㄴ','ㄷ','ㄸ','ㄹ','ㅁ','ㅂ','ㅃ','ㅅ','ㅆ','ㅇ','ㅈ','ㅉ','ㅊ','ㅋ','ㅌ','ㅍ','ㅎ'],JUNG=['ㅏ','ㅐ','ㅑ','ㅒ','ㅓ','ㅔ','ㅕ','ㅖ','ㅗ','ㅘ','ㅙ','ㅚ','ㅛ','ㅜ','ㅝ','ㅞ','ㅟ','ㅠ','ㅡ','ㅢ','ㅣ'],JONG=['','ㄱ','ㄲ','ㄳ','ㄴ','ㄵ','ㄶ','ㄷ','ㄹ','ㄺ','ㄻ','ㄼ','ㄽ','ㄾ','ㄿ','ㅀ','ㅁ','ㅂ','ㅄ','ㅅ','ㅆ','ㅇ','ㅈ','ㅊ','ㅋ','ㅌ','ㅍ','ㅎ'],VC={'ㅗㅏ':'ㅘ','ㅗㅐ':'ㅙ','ㅗㅣ':'ㅚ','ㅜㅓ':'ㅝ','ㅜㅔ':'ㅞ','ㅜㅣ':'ㅟ','ㅡㅣ':'ㅢ'},FC={'ㄱㅅ':'ㄳ','ㄴㅈ':'ㄵ','ㄴㅎ':'ㄶ','ㄹㄱ':'ㄺ','ㄹㅁ':'ㄻ','ㄹㅂ':'ㄼ','ㄹㅅ':'ㄽ','ㄹㅌ':'ㄾ','ㄹㅍ':'ㄿ','ㄹㅎ':'ㅀ','ㅂㅅ':'ㅄ'},isC=x=>CHO.includes(x),isV=x=>JUNG.includes(x);function toKo(raw){const j=[...raw].map(x=>CM[x]||VM[x]||x);let o='',i=0;while(i<j.length){const x=j[i];if(isC(x)&&isV(j[i+1])){let c=CHO.indexOf(x),v=j[i+1];i+=2;if(isV(j[i])&&VC[v+j[i]]){v=VC[v+j[i]];i++}let f='';if(isC(j[i])&&JONG.includes(j[i])){const a=j[i],b=j[i+1],z=j[i+2];if(isV(b)){}else if(isC(b)&&FC[a+b]&&!isV(z)){f=FC[a+b];i+=2}else{f=a;i++}}o+=String.fromCharCode(44032+c*588+JUNG.indexOf(v)*28+JONG.indexOf(f))}else if(isV(x)&&isV(j[i+1])&&VC[x+j[i+1]]){o+=VC[x+j[i+1]];i+=2}else{o+=x;i++}}return o}function setupKo(x){x.dataset.raw='';x.dataset.base=x.value;x.addEventListener('focus',()=>{x.dataset.raw='';x.dataset.base=x.value});x.addEventListener('keydown',e=>{if(e.ctrlKey||e.altKey||e.metaKey)return;const r=x.dataset.raw||'',end=x.selectionStart===x.value.length&&x.selectionEnd===x.value.length;if(e.key==='Backspace'&&r&&end){e.preventDefault();const n=r.slice(0,-1);x.dataset.raw=n;x.value=(x.dataset.base||'')+toKo(n);x.dispatchEvent(new Event('input',{bubbles:true}));return}if(/^[A-Za-z]$/.test(e.key)&&end){e.preventDefault();if(!r)x.dataset.base=x.value;const n=r+e.key;x.dataset.raw=n;x.value=(x.dataset.base||'')+toKo(n);x.dispatchEvent(new Event('input',{bubbles:true}));return}x.dataset.raw='';x.dataset.base=x.value})}$$('[data-ko-auto]').forEach(setupKo);
+  (function(){
+    const bar=document.querySelector('.nav-sync');if(!bar)return;
+    const status=document.querySelector('#navSyncStatus'),buttons=[...bar.querySelectorAll('.nav-sync-button')];
+    function run(intent){
+      if(typeof window.TrainingGitHub?.runDirectionalSync!=='function'){status.textContent='동기화 기능을 불러오지 못했습니다. Ctrl+F5로 새로고침한 뒤 다시 눌러주세요.';return}
+      TrainingGitHub.runDirectionalSync(intent,{
+        setStatus:text=>{status.textContent=text},
+        setBusy:busy=>buttons.forEach(button=>{button.disabled=busy}),
+        onNeedConnection:()=>{status.innerHTML='먼저 <a href="오답_훈련센터.html">오답 훈련센터 홈</a>에서 GitHub를 연결한 뒤 다시 눌러주세요. 학습기록 합치기도 홈에서 실행합니다.'}
+      });
+    }
+    document.querySelector('#syncPcToGithub').addEventListener('click',()=>run('pc-to-github'));
+    document.querySelector('#syncGithubToPc').addEventListener('click',()=>run('github-to-pc'));
+  })();
 </script>
 </body>
 </html>

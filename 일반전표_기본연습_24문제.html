@@ -12,7 +12,15 @@
     input[type="text"],textarea{ime-mode:active}
     .wrap{width:min(1180px,94vw);margin:32px auto 80px}
     .category-nav{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:0 0 16px;padding:12px;background:#fff;border:2px solid #d5e6f3;border-radius:17px;box-shadow:0 7px 22px rgba(44,91,128,.07)}
-    .category-nav strong{color:var(--navy);padding:0 7px}
+    .nav-sync{display:flex;align-items:center;gap:8px;margin-left:auto;padding:5px 9px;border:2px solid #d9e7f2;border-radius:14px;background:#f6fbff}
+    .nav-sync-title{font-weight:900;color:var(--navy);letter-spacing:.02em}
+    .nav-sync-button{min-height:40px;padding:6px 13px;border:2px solid var(--line);border-radius:11px;background:#fff;color:var(--navy);font:inherit;font-weight:900;font-size:.9em;cursor:pointer}
+    .nav-sync-button:hover:not(:disabled){border-color:var(--blue);background:var(--sky)}
+    .nav-sync-button:focus-visible{outline:3px solid #bde1fb;outline-offset:2px}
+    .nav-sync-button:disabled{opacity:.6;cursor:progress}
+    .nav-sync-status{flex:1 1 100%;margin:0;font-size:.85em;font-weight:800;color:var(--muted);word-break:keep-all}
+    .nav-sync-status:empty{display:none}
+    @media(max-width:760px){.nav-sync{width:100%;margin-left:0;flex-wrap:wrap}.nav-sync-button{flex:1 1 auto}}
     .category-link{display:inline-flex;align-items:center;justify-content:center;min-height:46px;padding:8px 17px;border:2px solid var(--line);border-radius:12px;background:#fff;color:var(--navy);font-weight:900;text-decoration:none}
     .category-link:hover{border-color:var(--blue);background:var(--sky)}
     .category-link.active{border-color:var(--navy);background:var(--navy);color:#fff;box-shadow:0 4px 11px rgba(23,52,95,.2)}
@@ -26,7 +34,7 @@
     .btn.secondary{background:#fff;color:var(--navy);border:2px solid var(--line);box-shadow:none}
     .btn.green{background:var(--green)}
     .progress{display:flex;align-items:center;gap:12px;margin-left:auto;font-weight:800;color:var(--navy)}
-    .sort-label{display:flex;align-items:center;gap:8px;font-weight:800;color:var(--navy)}
+    .sort-label{display:flex;align-items:center;gap:8px;white-space:nowrap;font-weight:800;color:var(--navy)}
     .sort-select{border:2px solid var(--line);border-radius:12px;background:#fff;color:var(--navy);font-weight:800;font-size:inherit;padding:9px 12px;cursor:pointer}
     .sort-select:focus-visible{border-color:#5d9ed2;outline:none}
     @media(max-width:720px){.sort-label{width:100%;align-items:stretch;flex-direction:column;gap:5px}.sort-select{width:100%}}
@@ -90,13 +98,18 @@
 <body>
   <main class="wrap">
     <nav class="category-nav" aria-label="유형별 연습 메뉴">
-      <strong>오답 훈련센터</strong>
       <a class="category-link" href="오답_훈련센터.html">오늘의 오답훈련</a>
       <a class="category-link active" href="일반전표_기본연습_24문제.html" aria-current="page">일반전표 입력</a>
       <a class="category-link" href="이론_오답응용_5문제.html">이론 오답</a>
       <a class="category-link" href="결산정리사항_연습_7문제.html">결산 정리사항</a>
       <a class="category-link" href="매입매출전표_오답연습_3문제.html?view=all">매입매출전표 입력</a>
-    </nav>
+    <div class="nav-sync">
+      <span class="nav-sync-title">Sync</span>
+      <button class="nav-sync-button" id="syncPcToGithub" type="button" title="내 PC의 새 문제와 프로그램을 GitHub에 올립니다">PC → GitHub</button>
+      <button class="nav-sync-button" id="syncGithubToPc" type="button" title="GitHub의 최신 문제와 프로그램을 이 PC 폴더에 내려받습니다">GitHub → PC</button>
+    </div>
+    <p class="nav-sync-status" id="navSyncStatus" role="status" aria-live="polite"></p>
+  </nav>
     <section class="hero">
       <h1>일반전표 입력 기본연습</h1>
       <p><strong>전산회계 1급 실무 기준 · 28문제</strong></p>
@@ -154,7 +167,7 @@
     <p class="footer">학습용 자료 · 전표 입력 순서는 달라도 계정과목, 금액, 차·대변이 맞으면 정답으로 처리됩니다.</p>
   </main>
 
-  <script src="github-learning-sync.js"></script>
+  <script src="github-learning-sync.js?v=2"></script>
   <script>
     const problems = [
       {
@@ -620,6 +633,20 @@
     function setupKoreanInput(field){field.dataset.koRaw='';field.dataset.koBase=field.value;field.addEventListener('focus',()=>{field.dataset.koRaw='';field.dataset.koBase=field.value});field.addEventListener('blur',()=>{field.dataset.koRaw='';field.dataset.koBase=field.value});field.addEventListener('keydown',e=>{if(!el('#koAuto').checked||e.ctrlKey||e.altKey||e.metaKey)return;const raw=field.dataset.koRaw||'',atEnd=field.selectionStart===field.value.length&&field.selectionEnd===field.value.length;if(e.key==='Backspace'&&raw&&atEnd){e.preventDefault();const next=raw.slice(0,-1);field.dataset.koRaw=next;field.value=(field.dataset.koBase||'')+romanToHangul(next);field.dispatchEvent(new Event('input',{bubbles:true}));return}if(/^[A-Za-z]$/.test(e.key)&&atEnd){e.preventDefault();if(!raw)field.dataset.koBase=field.value;const next=raw+e.key;field.dataset.koRaw=next;field.value=(field.dataset.koBase||'')+romanToHangul(next);field.dispatchEvent(new Event('input',{bubbles:true}));return}field.dataset.koRaw='';field.dataset.koBase=field.value})}
     els('[data-ko-auto]').forEach(setupKoreanInput);
     updateProgress();
-  </script>
+    (function(){
+    const bar=document.querySelector('.nav-sync');if(!bar)return;
+    const status=document.querySelector('#navSyncStatus'),buttons=[...bar.querySelectorAll('.nav-sync-button')];
+    function run(intent){
+      if(typeof window.TrainingGitHub?.runDirectionalSync!=='function'){status.textContent='동기화 기능을 불러오지 못했습니다. Ctrl+F5로 새로고침한 뒤 다시 눌러주세요.';return}
+      TrainingGitHub.runDirectionalSync(intent,{
+        setStatus:text=>{status.textContent=text},
+        setBusy:busy=>buttons.forEach(button=>{button.disabled=busy}),
+        onNeedConnection:()=>{status.innerHTML='먼저 <a href="오답_훈련센터.html">오답 훈련센터 홈</a>에서 GitHub를 연결한 뒤 다시 눌러주세요. 학습기록 합치기도 홈에서 실행합니다.'}
+      });
+    }
+    document.querySelector('#syncPcToGithub').addEventListener('click',()=>run('pc-to-github'));
+    document.querySelector('#syncGithubToPc').addEventListener('click',()=>run('github-to-pc'));
+  })();
+</script>
 </body>
 </html>

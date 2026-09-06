@@ -239,5 +239,45 @@
     throw new Error('알 수 없는 프로그램 동기화 방향입니다.');
   }
 
-  global.TrainingGitHub={OWNER,REPOSITORY,BRANCH,PROGRAM_OWNER,PROGRAM_REPOSITORY,PROGRAM_BRANCH,PROGRAM_FILES,getSessionToken,setSessionToken,clearToken,hasToken,connect,getFile,putFile,saveDailyRecord,getSyncState,putSyncState,getDeviceId,getDeviceName,setDeviceName,pickProgramDirectory,validateProgramDirectory,readLocalProgramSnapshot,readRemoteProgramSnapshot,planProgramSync,executeProgramSync};
+  const SYNC_LABELS={'pc-to-github':'PC → GitHub','github-to-pc':'GitHub → PC'};
+  const RESUME_LEARNING_SYNC_KEY='tax-accounting-resume-learning-sync';
+  async function runDirectionalSync(intent,{setStatus=()=>{},setBusy=()=>{},onNeedConnection=null,afterProgramSync=null}={}){
+    const label=SYNC_LABELS[intent];
+    if(!label)throw new Error('알 수 없는 동기화 방향입니다.');
+    if(!hasToken()){
+      setStatus('먼저 GitHub를 연결해야 동기화할 수 있습니다.');
+      if(onNeedConnection)onNeedConnection();
+      return{status:'no-token'};
+    }
+    setBusy(true);
+    let programDone='';
+    try{
+      setStatus('훈련센터 폴더를 선택하면 PC와 GitHub를 비교합니다…');
+      const plan=await planProgramSync(await pickProgramDirectory());
+      if(!plan.differences.length)setStatus('PC와 GitHub의 문제·프로그램이 이미 같습니다.');
+      else{
+        const question=plan.direction===intent?`${plan.reason}\n\n${plan.confirmationMessage}`
+          :plan.direction==='conflict'?`${plan.reason}\n\n그래도 ${label} 방향으로 덮어쓸까요? 반대쪽에만 있는 변경은 사라집니다.`
+          :`${plan.reason}\n\n요청하신 방향은 ${label}입니다. 이대로 진행하면 ${intent==='pc-to-github'?'GitHub의 더 최신 내용':'PC의 더 최신 내용'}이 사라집니다. 계속할까요?`;
+        if(!global.confirm(`${question}\n\n대상 파일: ${plan.differences.join(', ')}`)){setStatus('동기화를 취소했습니다. 양쪽 파일은 그대로입니다.');return{status:'cancelled'}}
+        setStatus(intent==='pc-to-github'?'PC의 문제와 프로그램을 GitHub에 올리고 있습니다…':'GitHub의 최신 문제와 프로그램을 PC 폴더에 적용하고 있습니다…');
+        const result=await executeProgramSync({...plan,direction:intent},{confirmed:true});
+        programDone=result.message;
+        if(intent==='github-to-pc'){
+          try{global.sessionStorage.setItem(RESUME_LEARNING_SYNC_KEY,'1')}catch(error){}
+          setStatus(`${result.message} 최신 화면으로 새로고침합니다…`);
+          global.setTimeout(()=>global.location.reload(),1500);
+          return{status:'reload',message:result.message};
+        }
+      }
+      const extra=afterProgramSync?await afterProgramSync(programDone):'';
+      setStatus(`${programDone?programDone+' ':''}${extra||''}${programDone&&intent==='pc-to-github'?' GitHub Pages 반영에는 잠시 걸릴 수 있습니다.':''}`.trim()||'동기화를 완료했습니다.');
+      return{status:'done',message:programDone};
+    }catch(error){
+      setStatus(`${label} 동기화를 마치지 못했습니다. 아직 반영되지 않은 파일과 학습기록은 그대로 보존됩니다. ${error.message}`);
+      return{status:'error',message:error.message};
+    }finally{setBusy(false)}
+  }
+
+  global.TrainingGitHub={OWNER,REPOSITORY,BRANCH,PROGRAM_OWNER,PROGRAM_REPOSITORY,PROGRAM_BRANCH,PROGRAM_FILES,SYNC_LABELS,RESUME_LEARNING_SYNC_KEY,getSessionToken,setSessionToken,clearToken,hasToken,connect,getFile,putFile,saveDailyRecord,getSyncState,putSyncState,getDeviceId,getDeviceName,setDeviceName,pickProgramDirectory,validateProgramDirectory,readLocalProgramSnapshot,readRemoteProgramSnapshot,planProgramSync,executeProgramSync,runDirectionalSync};
 })(window);
