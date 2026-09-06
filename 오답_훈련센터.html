@@ -61,6 +61,8 @@
     .nav-sync-button:hover:not(:disabled){border-color:var(--blue);background:#edf8ff}
     .nav-sync-button:focus-visible{outline:3px solid #bde1fb;outline-offset:2px}
     .nav-sync-button:disabled{opacity:.6;cursor:progress}
+    .nav-sync-button.primary{border-color:var(--blue);background:var(--blue);color:#fff}
+    .nav-sync-button.primary:hover:not(:disabled){background:var(--blue-dark);border-color:var(--blue-dark);color:#fff}
     .nav-sync-status{flex:1 1 100%;margin:0;font-size:.85em;font-weight:800;color:var(--muted);word-break:keep-all}
     .nav-sync-status:empty{display:none}
     @media(max-width:760px){.nav-sync{width:100%;margin-left:0;flex-wrap:wrap}.nav-sync-button{flex:1 1 auto}}
@@ -164,6 +166,7 @@
     .github-sync h3{margin:0 0 6px;font-size:1.2rem}.github-sync>p{margin:0 0 14px;color:var(--muted)}
     .github-fields{display:grid;grid-template-columns:minmax(150px,.55fr) minmax(260px,1.45fr);gap:11px;margin-bottom:12px}
     .github-field{display:grid;gap:5px;color:#31526b;font-weight:800}.github-field input{width:100%;min-height:45px;padding:9px 12px;border:2px solid #bdd5e6;border-radius:11px;background:#fff;color:var(--ink);font:inherit}
+    .github-remember{display:flex;gap:8px;align-items:flex-start;margin:0 0 12px;font-weight:800;color:#31526b}.github-remember input{width:20px;height:20px;margin-top:3px}.github-remember span{font-weight:600;color:var(--muted)}
     .github-actions{display:flex;flex-wrap:wrap;gap:9px}.github-help{margin-top:12px!important;font-size:.9rem}.github-help a{color:var(--blue-dark);font-weight:900}
     @media (max-width:960px){.summary-strip{grid-template-columns:repeat(3,1fr)}.category-summary{grid-template-columns:1fr}}
     @media (max-width:680px){
@@ -191,11 +194,9 @@
       <a class="nav-link" href="이론_오답응용_5문제.html">이론 오답</a>
       <a class="nav-link" href="결산정리사항_연습_7문제.html">결산 정리사항</a>
       <a class="nav-link" href="매입매출전표_오답연습_3문제.html?view=all">매입매출전표 입력</a>
-      <div class="nav-sync" aria-label="문제·프로그램 동기화">
-        <span class="nav-sync-title">Sync</span>
-        <button class="nav-sync-button" id="syncPcToGithub" type="button" title="내 PC의 새 문제와 프로그램을 GitHub에 올립니다">PC → GitHub</button>
-        <button class="nav-sync-button" id="syncGithubToPc" type="button" title="GitHub의 최신 문제와 프로그램을 이 PC 폴더에 내려받습니다">GitHub → PC</button>
-        <p class="nav-sync-status" id="heroSyncStatus" role="status" aria-live="polite"></p>
+      <div class="nav-sync" aria-label="동기화">
+        <button class="nav-sync-button primary" id="syncAll" type="button" title="PC·GitHub·모바일의 새 문제와 학습기록을 한 번에 최신으로 맞춥니다">🔄 동기화</button>
+        <p class="nav-sync-status" id="navSyncStatus" role="status" aria-live="polite"></p>
       </div>
     </div>
   </nav>
@@ -312,28 +313,26 @@
       <div class="backup-warning">Markdown 학습기록은 GPT 분석용이고, 진행 상태를 다른 기기에서 이어갈 때는 이곳의 JSON 백업 파일을 사용합니다.</div>
       <p class="backup-status" id="backupStatus" role="status" aria-live="polite"></p>
       <div class="github-sync">
-        <h3>GitHub 학습기록 연결 · 동기화</h3>
-        <p>학습기록 전용 저장소에만 접근하는 제한 토큰을 현재 브라우저 세션 동안 사용합니다. 토큰은 HTML·백업 파일·GitHub 저장소에 기록하지 않습니다.</p>
+        <h3>GitHub 연결 (모바일은 처음 한 번만)</h3>
+        <p><strong>PC</strong>는 바탕화면의 「오답훈련센터 시작」으로 열면 동기화 도우미가 함께 켜지므로 토큰이 필요 없습니다. <strong>모바일</strong>은 처음 한 번만 아래에 토큰을 넣고 「연결」을 누르면 이 기기에 기억되고, 그 뒤로는 위 메뉴의 「동기화」 한 번이면 됩니다.</p>
         <div class="github-fields">
           <label class="github-field">기기 이름<input id="githubDeviceName" type="text" lang="ko" maxlength="30" placeholder="예: 내 휴대전화 또는 집 PC"></label>
           <label class="github-field">Fine-grained GitHub 토큰<input id="githubToken" type="password" autocomplete="off" spellcheck="false" placeholder="학습기록 저장소 Contents 권한 전용"></label>
         </div>
+        <label class="github-remember"><input id="githubRemember" type="checkbox" checked> 이 기기에 토큰 기억하기 <span>(나만 쓰는 휴대전화·PC에서만 켜세요. 「연결 해제」를 누르면 지워집니다.)</span></label>
         <div class="github-actions">
-          <button class="backup-button secondary" id="githubConnect" type="button">GitHub 연결</button>
-          <button class="backup-button secondary" id="githubSync" type="button">학습기록만 동기화</button>
-          <button class="backup-button" id="githubAllSync" type="button">학습기록 + 새 문제 동기화</button>
-          <button class="backup-button secondary" id="githubDisconnect" type="button">연결 해제</button>
+          <button class="backup-button" id="githubConnect" type="button">연결</button>
+          <button class="backup-button secondary" id="githubDisconnect" type="button">연결 해제 (토큰 삭제)</button>
         </div>
-        <p class="github-help"><a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener noreferrer">Fine-grained 토큰 만들기</a> · Selected repositories에서 <strong>tax-accounting-learning-sync</strong>와 <strong>tax-accounting-wrong-answer-center</strong> 두 저장소만 선택하고 <strong>Contents: Read and write</strong>만 허용하세요.</p>
-        <p class="github-help">새 문제 동기화는 PC의 최신 Chrome/Edge에서 훈련센터 폴더를 선택한 뒤, 표시되는 이동 방향을 확인하고 승인할 때만 실행됩니다. 모바일에서는 `학습기록만 동기화`를 사용하세요.</p>
+        <p class="github-help"><a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener noreferrer">Fine-grained 토큰 만들기</a> · Selected repositories에서 <strong>tax-accounting-learning-sync</strong> 저장소를 선택하고 <strong>Contents: Read and write</strong>만 허용하세요. 토큰은 HTML·백업 파일·GitHub 저장소에 기록하지 않습니다.</p>
         <p class="backup-status" id="githubStatus" role="status" aria-live="polite"></p>
       </div>
     </section>
 
-    <p class="footer">오답 훈련센터 · 사용자가 저장 또는 동기화 버튼을 누른 경우에만 파일이나 GitHub로 기록을 보냅니다.</p>
+    <p class="footer">오답 훈련센터 · 「동기화」 또는 「오늘 학습기록 저장」을 누른 경우에만 GitHub로 기록을 보냅니다.</p>
   </main>
 
-  <script src="github-learning-sync.js?v=2"></script>
+  <script src="github-learning-sync.js?v=3"></script>
   <script>
     const SOURCES={
       practical:{label:'일반전표',file:'일반전표_기본연습_24문제.html',key:'tax-accounting-practical-journal-24-v2'},
@@ -417,10 +416,6 @@
     let currentFilter='today';
     let currentSort='registered';
     let records=[];
-    const RESUME_LEARNING_SYNC_KEY='tax-accounting-resume-learning-sync';
-    const PRACTICAL_STATE_VERSION='general-journal-27-v1';
-    const PRACTICAL_OLD_TO_NEW={4:0,6:1,8:2,9:3,10:4,11:5,12:6,13:7,14:8,15:9,16:10,17:11,18:12,19:13,20:14,21:15,22:16,23:17,24:18,25:19,26:20,27:21,28:22,29:23,30:24,31:25,32:26};
-
     function localDateKey(date=new Date()){
       const y=date.getFullYear(),m=String(date.getMonth()+1).padStart(2,'0'),d=String(date.getDate()).padStart(2,'0');
       return `${y}-${m}-${d}`;
@@ -429,38 +424,11 @@
       const [y,m,d]=key.split('-').map(Number);
       return new Intl.DateTimeFormat('ko-KR',{year:'numeric',month:'long',day:'numeric',weekday:'short'}).format(new Date(y,m-1,d));
     }
-    function normalizeState(sourceName,value){
-      const source=value&&typeof value==='object'?value:{};
-      let normalized={...source};
-      if(sourceName==='practical'){
-        const cards={};
-        if(source.schemaVersion===PRACTICAL_STATE_VERSION){
-          Object.entries(source.cards||{}).forEach(([index,card])=>{
-            const numberIndex=Number(index);
-            if(!Number.isInteger(numberIndex)||numberIndex<0)return;
-            cards[numberIndex]={...card};delete cards[numberIndex].note;
-          });
-        }else{
-          Object.entries(PRACTICAL_OLD_TO_NEW).forEach(([oldIndex,newIndex])=>{
-            const card=source.cards?.[oldIndex];if(!card)return;
-            cards[newIndex]={...card};delete cards[newIndex].note;
-          });
-        }
-        normalized={...source,schemaVersion:PRACTICAL_STATE_VERSION,cards};
-        if(typeof normalized.fileName==='string')normalized.fileName=normalized.fileName.replace('일반전표_33문제','일반전표_27문제');
-      }else if(sourceName==='theory'){
-        normalized={...source};delete normalized.notes;
-      }else{
-        const cards={};Object.entries(source.cards||{}).forEach(([index,card])=>{cards[index]={...card};delete cards[index].note});
-        normalized={...source,cards};
-      }
-      return normalized;
-    }
     function readState(key){
       try{
         const raw=JSON.parse(localStorage.getItem(key)||'{}')||{};
         const sourceName=Object.keys(SOURCES).find(name=>SOURCES[name].key===key);
-        const normalized=sourceName?normalizeState(sourceName,raw):raw;
+        const normalized=sourceName?TrainingGitHub.normalizeState(sourceName,raw):raw;
         if(sourceName&&JSON.stringify(normalized)!==JSON.stringify(raw))localStorage.setItem(key,JSON.stringify(normalized));
         return normalized;
       }
@@ -477,84 +445,8 @@
     }
     function number(value){const n=Number(value);return Number.isFinite(n)?n:0}
 
-    function uniqueHistory(first,second){
-      const seen=new Set();
-      return [...(Array.isArray(first)?first:[]),...(Array.isArray(second)?second:[])].filter(item=>{
-        const key=JSON.stringify(item);if(seen.has(key))return false;seen.add(key);return true;
-      }).sort((a,b)=>Date.parse(a?.at||0)-Date.parse(b?.at||0));
-    }
-    function eventTime(value){const time=Date.parse(value||'');return Number.isFinite(time)?time:0}
-    function latestEventIso(...values){
-      let best='',bestTime=0;values.flat().forEach(value=>{const time=eventTime(value);if(time>bestTime){best=value;bestTime=time}});return best;
-    }
-    function resolveTrainingFlags(a,b,history,aUpdated,bUpdated){
-      const correctTimes=history.filter(item=>item?.correct===true).map(item=>item.at);
-      const passedAt=latestEventIso(a.passedAt,b.passedAt,correctTimes);
-      const archivedAt=latestEventIso(a.archivedAt,b.archivedAt);
-      const restoredAt=latestEventIso(a.trainingCenterRestored?a.restoredAt:'',b.trainingCenterRestored?b.restoredAt:'');
-      let passedTime=eventTime(passedAt),archivedTime=eventTime(archivedAt),restoredTime=eventTime(restoredAt);
-      if(!passedTime){if(a.passed||a.correct===true)passedTime=eventTime(aUpdated)||1;if(b.passed||b.correct===true)passedTime=Math.max(passedTime,eventTime(bUpdated)||1)}
-      if(!archivedTime){if(a.archived)archivedTime=eventTime(aUpdated)||1;if(b.archived)archivedTime=Math.max(archivedTime,eventTime(bUpdated)||1)}
-      if(!restoredTime){if(a.trainingCenterRestored)restoredTime=eventTime(aUpdated)||1;if(b.trainingCenterRestored)restoredTime=Math.max(restoredTime,eventTime(bUpdated)||1)}
-      const restoreWins=restoredTime>0&&restoredTime>=passedTime&&restoredTime>=archivedTime;
-      return{passed:restoreWins?false:Boolean(passedTime||a.passed||b.passed||a.correct===true||b.correct===true||correctInHistory(history)),archived:restoreWins?false:Boolean(archivedTime||a.archived||b.archived),trainingCenterRestored:restoreWins,passedAt,archivedAt,restoredAt};
-    }
-    function mergeCard(current,incoming,incomingNewer,currentUpdated,incomingUpdated){
-      const a=(current&&typeof current==='object')?current:{},b=(incoming&&typeof incoming==='object')?incoming:{};
-      const merged={...(incomingNewer?a:b),...(incomingNewer?b:a)};
-      merged.history=uniqueHistory(a.history,b.history);
-      merged.attempts=Math.max(number(a.attempts),number(b.attempts),merged.history.length);
-      merged.wrongCount=Math.max(number(a.wrongCount),number(b.wrongCount),merged.history.filter(item=>item?.correct===false).length);
-      const flags=resolveTrainingFlags(a,b,merged.history,currentUpdated,incomingUpdated);
-      merged.passed=flags.passed;merged.archived=flags.archived;
-      if(flags.passedAt)merged.passedAt=flags.passedAt;if(flags.archivedAt)merged.archivedAt=flags.archivedAt;if(flags.restoredAt)merged.restoredAt=flags.restoredAt;
-      if(flags.trainingCenterRestored)merged.trainingCenterRestored=true;else delete merged.trainingCenterRestored;
-      delete merged.note;
-      return merged;
-    }
-    function mergeMap(current,incoming,incomingNewer){return {...(incomingNewer?current:incoming),...(incomingNewer?incoming:current)}}
-    function mergeTheory(current,incoming,incomingNewer){
-      const merged={...(incomingNewer?current:incoming),...(incomingNewer?incoming:current)};
-      const ids=new Set([...Object.keys(current.history||{}),...Object.keys(incoming.history||{}),...Object.keys(current.answers||{}),...Object.keys(incoming.answers||{})]);
-      merged.answers=mergeMap(current.answers||{},incoming.answers||{},incomingNewer);
-      merged.checked=mergeMap(current.checked||{},incoming.checked||{},incomingNewer);
-      delete merged.notes;
-      merged.history={};merged.attempts={};merged.passed={};merged.archived={};
-      merged.passedAt=mergeMap(current.passedAt||{},incoming.passedAt||{},incomingNewer);
-      merged.archivedAt=mergeMap(current.archivedAt||{},incoming.archivedAt||{},incomingNewer);
-      merged.restoredAt=mergeMap(current.restoredAt||{},incoming.restoredAt||{},incomingNewer);
-      merged.trainingCenterRestored=mergeMap(current.trainingCenterRestored||{},incoming.trainingCenterRestored||{},incomingNewer);
-      ids.forEach(id=>{
-        const history=uniqueHistory(current.history?.[id],incoming.history?.[id]);
-        merged.history[id]=history;
-        merged.attempts[id]=Math.max(number(current.attempts?.[id]),number(incoming.attempts?.[id]),history.length);
-        const flags=resolveTrainingFlags(
-          {passed:current.passed?.[id],correct:current.checked?.[id],archived:current.archived?.[id],trainingCenterRestored:current.trainingCenterRestored?.[id],passedAt:current.passedAt?.[id],archivedAt:current.archivedAt?.[id],restoredAt:current.restoredAt?.[id]},
-          {passed:incoming.passed?.[id],correct:incoming.checked?.[id],archived:incoming.archived?.[id],trainingCenterRestored:incoming.trainingCenterRestored?.[id],passedAt:incoming.passedAt?.[id],archivedAt:incoming.archivedAt?.[id],restoredAt:incoming.restoredAt?.[id]},
-          history,current.updatedAt,incoming.updatedAt
-        );
-        merged.passed[id]=flags.passed;merged.archived[id]=flags.archived;
-        if(flags.passedAt)merged.passedAt[id]=flags.passedAt;if(flags.archivedAt)merged.archivedAt[id]=flags.archivedAt;if(flags.restoredAt)merged.restoredAt[id]=flags.restoredAt;
-        if(flags.trainingCenterRestored)merged.trainingCenterRestored[id]=true;else delete merged.trainingCenterRestored[id];
-      });
-      return merged;
-    }
-    function mergeState(sourceName,current,incoming){
-      const a=normalizeState(sourceName,(current&&typeof current==='object')?current:{}),b=normalizeState(sourceName,(incoming&&typeof incoming==='object')?incoming:{});
-      const incomingNewer=Date.parse(b.updatedAt||0)>=Date.parse(a.updatedAt||0);
-      if(sourceName==='theory')return mergeTheory(a,b,incomingNewer);
-      const merged={...(incomingNewer?a:b),...(incomingNewer?b:a)},cards={};
-      const indexes=new Set([...Object.keys(a.cards||{}),...Object.keys(b.cards||{})]);
-      indexes.forEach(index=>{cards[index]=mergeCard(a.cards?.[index],b.cards?.[index],incomingNewer,a.updatedAt,b.updatedAt)});
-      merged.cards=cards;merged.startedAt=a.startedAt&&b.startedAt?(Date.parse(a.startedAt)<=Date.parse(b.startedAt)?a.startedAt:b.startedAt):(a.startedAt||b.startedAt);
-      merged.updatedAt=new Date().toISOString();return normalizeState(sourceName,merged);
-    }
-    function backupPayload(){
-      const states={};Object.entries(SOURCES).forEach(([name,source])=>{states[name]=readState(source.key)});
-      return {format:'tax-accounting-training-center-backup',version:1,exportedAt:new Date().toISOString(),states};
-    }
     function downloadBackup(){
-      const data=JSON.stringify(backupPayload(),null,2),blob=new Blob([data],{type:'application/json;charset=utf-8'}),link=document.createElement('a');
+      const data=JSON.stringify(TrainingGitHub.backupPayload(),null,2),blob=new Blob([data],{type:'application/json;charset=utf-8'}),link=document.createElement('a');
       link.href=URL.createObjectURL(blob);link.download=`오답훈련센터_학습상태_${localDateKey()}.json`;document.body.appendChild(link);link.click();link.remove();
       setTimeout(()=>URL.revokeObjectURL(link.href),1000);$('#backupStatus').textContent='학습상태 백업 파일을 저장했습니다. 모바일의 다운로드 또는 파일 앱에서 확인하세요.';
     }
@@ -563,91 +455,26 @@
       try{
         const payload=JSON.parse(await file.text());
         if(payload?.format!=='tax-accounting-training-center-backup'||payload?.version!==1||!payload.states)throw new Error('지원하지 않는 파일입니다.');
-        Object.entries(SOURCES).forEach(([name,source])=>{
-          if(!payload.states[name])return;
-          if(!writeState(source.key,mergeState(name,readState(source.key),payload.states[name])))throw new Error('브라우저 저장공간에 기록하지 못했습니다.');
-        });
+        TrainingGitHub.mergeStatesIntoLocal(payload.states);
         renderAll('다른 기기의 학습상태를 현재 기록과 합쳤습니다.');status.textContent='불러오기가 완료되었습니다. 기존 PC 기록과 전달받은 기록을 함께 보존했습니다.';
       }catch(error){status.textContent=`불러오지 못했습니다. ${error.message}`}
     }
     async function connectGitHub(){
-      const status=$('#githubStatus'),token=$('#githubToken').value,button=$('#githubConnect');
+      const status=$('#githubStatus'),token=$('#githubToken').value,button=$('#githubConnect'),remember=$('#githubRemember').checked;
       button.disabled=true;status.textContent='GitHub 학습기록 저장소를 확인하고 있습니다…';
       try{
         TrainingGitHub.setDeviceName($('#githubDeviceName').value);
-        await TrainingGitHub.connect(token);$('#githubToken').value='';
-        status.textContent='GitHub에 연결되었습니다. 토큰은 이 브라우저 세션이 끝나면 제거됩니다.';
+        await TrainingGitHub.connect(token,{remember});$('#githubToken').value='';
+        status.textContent=remember?'GitHub에 연결되었습니다. 토큰을 이 기기에 기억했으므로 앞으로는 위 메뉴의 「동기화」만 누르면 됩니다.':'GitHub에 연결되었습니다. 토큰은 이 브라우저를 닫으면 지워집니다.';
       }catch(error){status.textContent=`연결하지 못했습니다. ${error.message}`}
-      finally{button.disabled=false}
+      finally{button.disabled=false;refreshGitHubStatus()}
     }
-    function heroSyncButtons(){return [$('#syncPcToGithub'),$('#syncGithubToPc')]}
-    function refreshHeroSync(){
-      $('#heroSyncStatus').textContent=window.TrainingGitHub?.hasToken()?'GitHub에 연결되어 있습니다. 보낼 방향을 고르세요.':'';
-    }
-    function runHeroSync(intent){
-      if(typeof window.TrainingGitHub?.runDirectionalSync!=='function'){$('#heroSyncStatus').textContent='동기화 기능을 불러오지 못했습니다. Ctrl+F5로 새로고침한 뒤 다시 눌러주세요.';return}
-      return TrainingGitHub.runDirectionalSync(intent,{
-        setStatus:text=>{$('#heroSyncStatus').textContent=text},
-        setBusy:busy=>heroSyncButtons().forEach(button=>{button.disabled=busy}),
-        onNeedConnection:()=>{
-          $('#heroSyncStatus').textContent='먼저 아래 ‘GitHub 학습기록 연결 · 동기화’에서 토큰을 입력하고 연결해 주세요.';
-          $('#githubToken').scrollIntoView({behavior:'smooth',block:'center'});$('#githubToken').focus();
-        },
-        afterProgramSync:async()=>{
-          $('#heroSyncStatus').textContent='이제 PC·모바일 학습기록을 합치고 있습니다…';
-          const remote=await mergeLearningStateWithGitHub();
-          return remote?'학습기록도 양쪽 이력을 합쳐 보존했습니다.':'첫 학습상태를 GitHub에 저장했습니다.';
-        }
-      });
-    }
-    async function mergeLearningStateWithGitHub(){
-      const remote=await TrainingGitHub.getSyncState();
-      if(remote?.json?.states){
-        Object.entries(SOURCES).forEach(([name,source])=>{
-          if(remote.json.states[name]&&!writeState(source.key,mergeState(name,readState(source.key),remote.json.states[name])))throw new Error(`${source.label} 기록을 현재 브라우저에 저장하지 못해 안전하게 중단했습니다.`);
-        });
-      }
-      const merged=backupPayload();merged.syncedAt=new Date().toISOString();merged.device={id:TrainingGitHub.getDeviceId(),name:TrainingGitHub.getDeviceName()};
-      await TrainingGitHub.putSyncState(merged,remote?.sha||null);renderAll('GitHub와 현재 기기의 학습상태를 반영했습니다.');
-      return remote;
-    }
-    async function syncGitHub(){
-      const status=$('#githubStatus'),button=$('#githubSync');
-      if(!TrainingGitHub.hasToken()){status.textContent='먼저 제한 토큰을 입력하고 GitHub 연결을 눌러주세요.';return false}
-      button.disabled=true;status.textContent='PC·모바일 학습 이력을 안전하게 합치고 있습니다…';
-      try{
-        const remote=await mergeLearningStateWithGitHub();
-        status.textContent=remote?'학습기록 동기화를 완료했습니다. 양쪽의 고유 채점 이력을 합쳐 보존했습니다.':'첫 학습상태를 GitHub에 안전하게 저장했습니다.';
-        return true;
-      }catch(error){status.textContent=`학습기록을 동기화하지 못했습니다. 현재 기기의 기록은 그대로 보존됩니다. ${error.message}`;return false}
-      finally{button.disabled=false}
-    }
-    async function syncAllGitHub(){
-      const status=$('#githubStatus'),button=$('#githubAllSync');
-      if(!TrainingGitHub.hasToken()){status.textContent='먼저 제한 토큰을 입력하고 GitHub 연결을 눌러주세요.';return}
-      button.disabled=true;
-      let programCompleted='';
-      try{
-        status.textContent='PC와 GitHub의 새 문제·프로그램 버전을 먼저 안전하게 비교합니다. 오답 훈련센터 폴더를 선택해 주세요.';
-        const directory=await TrainingGitHub.pickProgramDirectory(),plan=await TrainingGitHub.planProgramSync(directory);
-        if(plan.direction==='conflict'){status.textContent=`새 문제·프로그램의 자동 덮어쓰기를 중단했습니다. 학습기록도 안전을 위해 아직 전송하지 않았습니다. ${plan.reason}`;return}
-        if(plan.direction!=='none'){
-          const detail=plan.differences.length?`\n\n대상 파일: ${plan.differences.join(', ')}`:'';
-          if(!confirm(`${plan.reason}\n\n${plan.confirmationMessage}${detail}`)){status.textContent='새 문제·프로그램과 학습기록 동기화를 모두 취소했습니다.';return}
-          status.textContent=plan.direction==='pc-to-github'?'PC에 새로 추가된 문제와 프로그램을 GitHub에 올리고 있습니다…':'GitHub의 최신 문제와 프로그램을 선택한 PC 폴더에 적용하고 있습니다…';
-          const result=await TrainingGitHub.executeProgramSync(plan,{confirmed:true});programCompleted=result.message;
-          if(result.direction==='github-to-pc'){
-            try{sessionStorage.setItem(RESUME_LEARNING_SYNC_KEY,'1')}catch(error){}
-            status.textContent=`${result.message} 최신 화면으로 새로고침한 뒤 학습기록 동기화를 자동으로 이어갑니다.`;
-            setTimeout(()=>location.reload(),1500);return;
-          }
-        }
-        status.textContent=`${programCompleted?programCompleted+' ':''}이제 PC·모바일 학습기록을 합치고 있습니다…`;
-        const remote=await mergeLearningStateWithGitHub();
-        const learningMessage=remote?'양쪽의 고유 채점 이력을 합쳐 보존했습니다.':'첫 학습상태를 GitHub에 저장했습니다.';
-        status.textContent=`${programCompleted?programCompleted+' ':''}${learningMessage}${programCompleted?' GitHub Pages 반영에는 잠시 시간이 걸릴 수 있습니다.':''}`;
-      }catch(error){status.textContent=`${programCompleted?programCompleted+' ':''}동기화를 마치지 못했습니다. 아직 반영되지 않은 PC 파일과 학습기록은 안전하게 보존됩니다. ${error.message}`}
-      finally{button.disabled=false}
+    async function refreshGitHubStatus(){
+      const status=$('#githubStatus');
+      if(status.textContent)return;
+      const helper=await TrainingGitHub.detectHelper();
+      if(helper)status.textContent='PC 동기화 도우미가 켜져 있습니다. 이 PC에서는 토큰 없이 동기화됩니다.';
+      else if(TrainingGitHub.hasToken())status.textContent=TrainingGitHub.isTokenRemembered()?'GitHub 토큰이 이 기기에 저장되어 있습니다. 위 메뉴의 「동기화」만 누르면 됩니다.':'GitHub 토큰이 이 브라우저 세션에 연결되어 있습니다.';
     }
 
     function buildRecords(){
@@ -795,13 +622,13 @@
     $('#importBackup').addEventListener('change',event=>{const file=event.target.files?.[0];if(file)importBackupFile(file);event.target.value=''});
     $('#githubDeviceName').value=TrainingGitHub.getDeviceName();
     $('#githubDeviceName').addEventListener('change',event=>TrainingGitHub.setDeviceName(event.target.value));
-    $('#githubConnect').addEventListener('click',()=>connectGitHub().finally(refreshHeroSync));
-    $('#githubSync').addEventListener('click',syncGitHub);
-    $('#githubAllSync').addEventListener('click',syncAllGitHub);
-    $('#githubDisconnect').addEventListener('click',()=>{TrainingGitHub.clearToken();$('#githubToken').value='';$('#githubStatus').textContent='GitHub 연결 정보를 이 브라우저 세션에서 제거했습니다.';refreshHeroSync()});
-    $('#syncPcToGithub').addEventListener('click',()=>runHeroSync('pc-to-github'));
-    $('#syncGithubToPc').addEventListener('click',()=>runHeroSync('github-to-pc'));
-    refreshHeroSync();
+    $('#githubConnect').addEventListener('click',connectGitHub);
+    $('#githubToken').addEventListener('keydown',event=>{if(event.key==='Enter'){event.preventDefault();connectGitHub()}});
+    $('#githubDisconnect').addEventListener('click',()=>{TrainingGitHub.clearToken();$('#githubToken').value='';$('#githubStatus').textContent='이 기기에서 GitHub 토큰을 지웠습니다.'});
+    TrainingGitHub.installSyncBar({
+      onNeedToken:({mobile})=>{if(mobile){$('#githubToken').scrollIntoView({behavior:'smooth',block:'center'});$('#githubToken').focus()}}
+    });
+    refreshGitHubStatus();
     $('#sortOrder').addEventListener('change',event=>{currentSort=event.target.value;renderTraining();$('#liveStatus').textContent=`${event.target.options[event.target.selectedIndex].text}으로 정렬했습니다.`});
     $('#archiveList').addEventListener('click',event=>{
       const button=event.target.closest('[data-restore]');if(!button)return;
@@ -812,11 +639,6 @@
     window.addEventListener('focus',()=>renderAll());
     document.addEventListener('visibilitychange',()=>{if(!document.hidden)renderAll()});
     renderAll();
-    try{
-      if(sessionStorage.getItem(RESUME_LEARNING_SYNC_KEY)==='1'&&TrainingGitHub.hasToken()){
-        sessionStorage.removeItem(RESUME_LEARNING_SYNC_KEY);setTimeout(syncGitHub,200);
-      }
-    }catch(error){}
   </script>
 </body>
 </html>

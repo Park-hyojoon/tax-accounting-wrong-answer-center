@@ -22,6 +22,8 @@
     .nav-sync-button:hover:not(:disabled){border-color:var(--blue);background:var(--sky)}
     .nav-sync-button:focus-visible{outline:3px solid #bde1fb;outline-offset:2px}
     .nav-sync-button:disabled{opacity:.6;cursor:progress}
+    .nav-sync-button.primary{border-color:var(--blue);background:var(--blue);color:#fff}
+    .nav-sync-button.primary:hover:not(:disabled){background:#0d5eaa;border-color:#0d5eaa;color:#fff}
     .nav-sync-status{flex:1 1 100%;margin:0;font-size:.85em;font-weight:800;color:var(--muted);word-break:keep-all}
     .nav-sync-status:empty{display:none}
     @media(max-width:760px){.nav-sync{width:100%;margin-left:0;flex-wrap:wrap}.nav-sync-button{flex:1 1 auto}}
@@ -104,10 +106,8 @@
       <a class="nav-link" href="이론_오답응용_5문제.html">이론 오답</a>
       <a class="nav-link" href="결산정리사항_연습_7문제.html">결산 정리사항</a>
       <a class="nav-link" href="매입매출전표_오답연습_3문제.html?view=all">매입매출전표 입력</a>
-      <div class="nav-sync" aria-label="문제·프로그램 동기화">
-        <span class="nav-sync-title">Sync</span>
-        <button class="nav-sync-button" id="syncPcToGithub" type="button" title="내 PC의 새 문제와 프로그램을 GitHub에 올립니다">PC → GitHub</button>
-        <button class="nav-sync-button" id="syncGithubToPc" type="button" title="GitHub의 최신 문제와 프로그램을 이 PC 폴더에 내려받습니다">GitHub → PC</button>
+      <div class="nav-sync" aria-label="동기화">
+        <button class="nav-sync-button primary" id="syncAll" type="button" title="PC·GitHub·모바일의 새 문제와 학습기록을 한 번에 최신으로 맞춥니다">🔄 동기화</button>
         <p class="nav-sync-status" id="navSyncStatus" role="status" aria-live="polite"></p>
       </div>
     </div>
@@ -164,7 +164,7 @@
     <p class="footer">학습용 자료 · 전표 입력 순서는 달라도 계정과목, 금액, 차·대변이 맞으면 정답으로 처리됩니다.</p>
   </main>
 
-  <script src="github-learning-sync.js?v=2"></script>
+  <script src="github-learning-sync.js?v=3"></script>
   <script>
     const problems = [
       {
@@ -606,7 +606,7 @@
     }
     async function saveTodayRecord(){
       const payload=createTodayRecord(),status=el('#saveStatus'),github=window.TrainingGitHub;
-      if(github?.hasToken?.()){
+      if(await github?.canSaveRemote?.()){
         status.textContent='GitHub에 오늘 학습기록을 저장하고 있습니다.';
         try{await github.saveDailyRecord('practical',payload.date,payload.content);status.textContent=`${payload.date} 일반전표 오늘 학습기록을 GitHub에 저장했습니다.`;return}
         catch(error){await saveLocalRecord(payload,error?.message||'알 수 없는 오류');return}
@@ -631,18 +631,9 @@
     els('[data-ko-auto]').forEach(setupKoreanInput);
     updateProgress();
     (function(){
-    const bar=document.querySelector('.nav-sync');if(!bar)return;
-    const status=document.querySelector('#navSyncStatus'),buttons=[...bar.querySelectorAll('.nav-sync-button')];
-    function run(intent){
-      if(typeof window.TrainingGitHub?.runDirectionalSync!=='function'){status.textContent='동기화 기능을 불러오지 못했습니다. Ctrl+F5로 새로고침한 뒤 다시 눌러주세요.';return}
-      TrainingGitHub.runDirectionalSync(intent,{
-        setStatus:text=>{status.textContent=text},
-        setBusy:busy=>buttons.forEach(button=>{button.disabled=busy}),
-        onNeedConnection:()=>{status.innerHTML='먼저 <a href="오답_훈련센터.html">오답 훈련센터 홈</a>에서 GitHub를 연결한 뒤 다시 눌러주세요. 학습기록 합치기도 홈에서 실행합니다.'}
-      });
-    }
-    document.querySelector('#syncPcToGithub').addEventListener('click',()=>run('pc-to-github'));
-    document.querySelector('#syncGithubToPc').addEventListener('click',()=>run('github-to-pc'));
+    const status=document.querySelector('#navSyncStatus');
+    if(typeof window.TrainingGitHub?.installSyncBar!=='function'){if(status)status.textContent='동기화 기능을 불러오지 못했습니다. Ctrl+F5로 새로고침한 뒤 다시 눌러주세요.';return}
+    TrainingGitHub.installSyncBar({onNeedToken:({mobile})=>{if(mobile)status.innerHTML='처음 한 번만 <a href="오답_훈련센터.html">오답 훈련센터 홈</a>에서 GitHub 토큰을 연결한 뒤 다시 눌러주세요. 그 뒤로는 「동기화」 한 번이면 됩니다.'}});
   })();
 </script>
 </body>

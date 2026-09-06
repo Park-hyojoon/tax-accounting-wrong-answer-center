@@ -1,36 +1,48 @@
 (function(global){
   'use strict';
 
+  // ── 저장소 설정 ──────────────────────────────────────────────────────────────
   const OWNER='Park-hyojoon';
   const REPOSITORY='tax-accounting-learning-sync';
   const BRANCH='main';
-  const TOKEN_KEY='tax-accounting-github-token-session';
-  const DEVICE_ID_KEY='tax-accounting-sync-device-id';
-  const DEVICE_NAME_KEY='tax-accounting-sync-device-name';
-  const API_ROOT=`https://api.github.com/repos/${OWNER}/${REPOSITORY}`;
   const PROGRAM_OWNER='Park-hyojoon';
   const PROGRAM_REPOSITORY='tax-accounting-wrong-answer-center';
   const PROGRAM_BRANCH='main';
-  const PROGRAM_API_ROOT=`https://api.github.com/repos/${PROGRAM_OWNER}/${PROGRAM_REPOSITORY}`;
-  const PROGRAM_VERSION_FILE='program-version.json';
-  const PROGRAM_FILES=Object.freeze([
-    '오답_훈련센터.html',
-    '일반전표_기본연습_24문제.html',
-    '이론_오답응용_5문제.html',
-    '결산정리사항_연습_7문제.html',
-    '매입매출전표_오답연습_3문제.html',
-    'github-learning-sync.js',
-    PROGRAM_VERSION_FILE
-  ]);
+  const API_ROOT=`https://api.github.com/repos/${OWNER}/${REPOSITORY}`;
+  const STATE_FILE='sync/learning-state.json';
+  const HELPER_URL=(()=>{try{return localStorage.getItem('tax-accounting-helper-url')||'http://127.0.0.1:8790'}catch(error){return 'http://127.0.0.1:8790'}})();
 
-  function getSessionToken(){try{return sessionStorage.getItem(TOKEN_KEY)||''}catch(error){return''}}
-  function setSessionToken(token){
+  const SESSION_TOKEN_KEY='tax-accounting-github-token-session';
+  const LOCAL_TOKEN_KEY='tax-accounting-github-token';
+  const DEVICE_ID_KEY='tax-accounting-sync-device-id';
+  const DEVICE_NAME_KEY='tax-accounting-sync-device-name';
+  const SYNC_MESSAGE_KEY='tax-accounting-sync-message';
+  const CACHE_BUST_KEY='tax-accounting-cache-bust';
+  const LAST_SYNC_KEY='tax-accounting-last-sync';
+
+  // 학습 화면별 localStorage 키. 훈련센터 홈과 학습상태 동기화가 함께 사용한다.
+  const SOURCES=Object.freeze({
+    practical:{label:'일반전표',file:'일반전표_기본연습_24문제.html',key:'tax-accounting-practical-journal-24-v2'},
+    theory:{label:'이론',file:'이론_오답응용_5문제.html',key:'tax-accounting-theory-wrong-2026-09-01-v1'},
+    closing:{label:'결산',file:'결산정리사항_연습_7문제.html',key:'closing-adjustment-practice-7-v1'},
+    voucher:{label:'매입매출전표',file:'매입매출전표_오답연습_3문제.html',key:'purchase-sales-voucher-wrong-2026-09-02-v1'}
+  });
+
+  // ── 토큰 (모바일용) ──────────────────────────────────────────────────────────
+  function readStorage(storage,key){try{return storage.getItem(key)||''}catch(error){return ''}}
+  function writeStorage(storage,key,value){try{if(value)storage.setItem(key,value);else storage.removeItem(key)}catch(error){}}
+  function getSessionToken(){return readStorage(global.sessionStorage,SESSION_TOKEN_KEY)||readStorage(global.localStorage,LOCAL_TOKEN_KEY)}
+  function setSessionToken(token,{remember=true}={}){
     const clean=String(token||'').trim();
-    try{if(clean)sessionStorage.setItem(TOKEN_KEY,clean);else sessionStorage.removeItem(TOKEN_KEY)}catch(error){}
+    writeStorage(global.sessionStorage,SESSION_TOKEN_KEY,remember?'':clean);
+    writeStorage(global.localStorage,LOCAL_TOKEN_KEY,remember?clean:'');
     return clean;
   }
-  function clearToken(){setSessionToken('')}
+  function clearToken(){writeStorage(global.sessionStorage,SESSION_TOKEN_KEY,'');writeStorage(global.localStorage,LOCAL_TOKEN_KEY,'')}
   function hasToken(){return Boolean(getSessionToken())}
+  function isTokenRemembered(){return Boolean(readStorage(global.localStorage,LOCAL_TOKEN_KEY))}
+
+  // ── 기기 정보 ────────────────────────────────────────────────────────────────
   function getDeviceId(){
     try{
       let id=localStorage.getItem(DEVICE_ID_KEY);
@@ -38,9 +50,12 @@
       return id;
     }catch(error){return `device-${Date.now()}`}
   }
-  function defaultDeviceName(){return /Android|iPhone|iPad|Mobile/i.test(navigator.userAgent)?'모바일':'PC'}
-  function getDeviceName(){try{return localStorage.getItem(DEVICE_NAME_KEY)||defaultDeviceName()}catch(error){return defaultDeviceName()}}
-  function setDeviceName(name){const clean=String(name||'').trim()||defaultDeviceName();try{localStorage.setItem(DEVICE_NAME_KEY,clean)}catch(error){}return clean}
+  function isMobileDevice(){return /Android|iPhone|iPad|Mobile/i.test(navigator.userAgent)}
+  function defaultDeviceName(){return isMobileDevice()?'모바일':'PC'}
+  function getDeviceName(){return readStorage(global.localStorage,DEVICE_NAME_KEY)||defaultDeviceName()}
+  function setDeviceName(name){const clean=String(name||'').trim()||defaultDeviceName();writeStorage(global.localStorage,DEVICE_NAME_KEY,clean);return clean}
+
+  // ── 공통 유틸 ────────────────────────────────────────────────────────────────
   function encodePath(path){return String(path).split('/').map(encodeURIComponent).join('/')}
   function utf8ToBase64(text){
     const bytes=new TextEncoder().encode(String(text)),parts=[];
@@ -52,18 +67,35 @@
     for(let i=0;i<binary.length;i++)bytes[i]=binary.charCodeAt(i);
     return new TextDecoder().decode(bytes);
   }
+  function fetchWithTimeout(url,options={},ms=8000){
+    const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),ms);
+    return fetch(url,{...options,signal:controller.signal}).finally(()=>clearTimeout(timer));
+  }
+  function localDateKey(date=new Date()){
+    const y=date.getFullYear(),m=String(date.getMonth()+1).padStart(2,'0'),d=String(date.getDate()).padStart(2,'0');
+    return `${y}-${m}-${d}`;
+  }
+
+  // ── GitHub API (모바일 또는 도우미가 꺼진 PC) ────────────────────────────────
   async function api(path,{method='GET',body,token=getSessionToken()}={}){
     const headers={Accept:'application/vnd.github+json','X-GitHub-Api-Version':'2022-11-28'};
     if(token)headers.Authorization=`Bearer ${token}`;
     if(body!==undefined)headers['Content-Type']='application/json';
-    const response=await fetch(`${API_ROOT}${path}`,{method,headers,body:body===undefined?undefined:JSON.stringify(body)});
+    let response;
+    try{response=await fetchWithTimeout(`${API_ROOT}${path}`,{method,headers,body:body===undefined?undefined:JSON.stringify(body)},20000)}
+    catch(error){throw new Error('GitHub에 연결할 수 없습니다. 인터넷 연결을 확인해 주세요.')}
     if(response.status===404)return null;
     let data=null;try{data=await response.json()}catch(error){}
-    if(!response.ok){const message=data?.message||`GitHub 요청 실패 (${response.status})`;throw new Error(message)}
+    if(!response.ok){
+      const detail=data?.message||`GitHub 요청 실패 (${response.status})`;
+      if(response.status===401)throw new Error(`${detail}. 토큰이 만료되었거나 잘못되었습니다. 홈에서 토큰을 다시 연결해 주세요.`);
+      if(response.status===409){const error=new Error('다른 기기가 먼저 저장했습니다. 다시 합칩니다.');error.conflict=true;throw error}
+      throw new Error(detail);
+    }
     return data;
   }
-  async function connect(token){
-    const clean=setSessionToken(token);
+  async function connect(token,{remember=true}={}){
+    const clean=setSessionToken(token,{remember});
     if(!clean)throw new Error('GitHub 연결용 토큰을 입력하세요.');
     try{const repository=await api('');if(!repository)throw new Error('학습기록 저장소를 찾지 못했습니다.');return repository}
     catch(error){clearToken();throw error}
@@ -75,209 +107,299 @@
     return {text:base64ToUtf8(data.content),sha:data.sha,path:data.path,updatedUrl:data.html_url};
   }
   async function putFile(path,text,message,options={}){
-    if(!hasToken())throw new Error('먼저 오답 훈련센터 홈에서 GitHub를 연결하세요.');
+    if(!hasToken())throw new Error('먼저 오답 훈련센터 홈에서 GitHub 토큰을 연결하세요.');
     const hasExpectedSha=Object.prototype.hasOwnProperty.call(options,'expectedSha');
     const existing=hasExpectedSha?null:await getFile(path),body={message,content:utf8ToBase64(text),branch:BRANCH};
     const sha=hasExpectedSha?options.expectedSha:existing?.sha;if(sha)body.sha=sha;
-    const saved=await api(`/contents/${encodePath(path)}`,{method:'PUT',body});
-    return saved;
+    return api(`/contents/${encodePath(path)}`,{method:'PUT',body});
   }
-  async function saveDailyRecord(source,date,markdown){
-    const deviceId=getDeviceId().replace(/[^a-zA-Z0-9-]/g,'').slice(0,12),path=`records/${date}/${source}-${deviceId}.md`;
-    return putFile(path,markdown,`학습기록 저장: ${date} ${getDeviceName()} ${source}`);
+  async function getSyncState(){
+    const file=await getFile(STATE_FILE);if(!file)return null;
+    let json=null;try{json=JSON.parse(file.text)}catch(error){json=null}
+    return {...file,json};
   }
-  async function getSyncState(){const file=await getFile('sync/learning-state.json');if(!file)return null;return {...file,json:JSON.parse(file.text)}}
-  async function putSyncState(payload,expectedSha){return putFile('sync/learning-state.json',JSON.stringify(payload,null,2),`학습상태 동기화: ${new Date().toISOString()}`,{expectedSha:expectedSha||null})}
+  async function putSyncState(payload,expectedSha){return putFile(STATE_FILE,JSON.stringify(payload,null,2)+'\n',`학습상태 동기화: ${new Date().toISOString()} ${getDeviceName()}`,{expectedSha:expectedSha||null})}
 
-  function programFileName(name){
-    const clean=String(name||'');
-    if(!PROGRAM_FILES.includes(clean))throw new Error('허용되지 않은 프로그램 파일입니다.');
-    return clean;
+  // ── PC 동기화 도우미 ─────────────────────────────────────────────────────────
+  function helperPossible(){return location.protocol!=='https:'}
+  async function detectHelper(){
+    if(!helperPossible())return null;
+    try{
+      const response=await fetchWithTimeout(`${HELPER_URL}/api/status`,{cache:'no-store'},2500);
+      const data=await response.json();
+      return data?.helper==='tax-accounting-sync-helper'?data:null;
+    }catch(error){return null}
   }
-  async function programApi(path,{method='GET',body,token=getSessionToken()}={}){
-    const headers={Accept:'application/vnd.github+json','X-GitHub-Api-Version':'2022-11-28'};
-    if(token)headers.Authorization=`Bearer ${token}`;
-    if(body!==undefined)headers['Content-Type']='application/json';
+  async function helperPost(path,body={}){
     let response;
-    try{response=await fetch(`${PROGRAM_API_ROOT}${path}`,{method,headers,body:body===undefined?undefined:JSON.stringify(body)})}
-    catch(error){throw new Error('GitHub 프로그램 저장소에 연결할 수 없습니다. 인터넷 연결을 확인해 주세요.')}
-    if(response.status===404&&method==='GET')return null;
+    try{response=await fetchWithTimeout(`${HELPER_URL}${path}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)},180000)}
+    catch(error){throw new Error('PC 동기화 도우미와 연결이 끊어졌습니다. 바탕화면의 「오답훈련센터 시작」을 다시 실행해 주세요.')}
     let data=null;try{data=await response.json()}catch(error){}
-    if(!response.ok){
-      const detail=data?.message||`GitHub 요청 실패 (${response.status})`;
-      if(response.status===401||response.status===403||response.status===404)throw new Error(`${detail}. 연결 토큰이 프로그램 저장소의 Contents 읽기·쓰기 권한을 갖는지 확인해 주세요.`);
-      throw new Error(detail);
+    if(!response.ok||!data?.ok){
+      const error=new Error(data?.message||`도우미 요청 실패 (${response.status})`);
+      if(response.status===409||data?.conflict)error.conflict=true;
+      throw error;
     }
     return data;
   }
-  function parseProgramVersion(text,side){
-    if(!text)return null;
-    let value;try{value=JSON.parse(text)}catch(error){throw new Error(`${side}의 ${PROGRAM_VERSION_FILE} 형식이 올바르지 않습니다.`)}
-    if(!Number.isInteger(value.revision)||value.revision<1)throw new Error(`${side} 프로그램 버전의 revision이 올바르지 않습니다.`);
-    if(typeof value.updatedAt!=='string'||Number.isNaN(Date.parse(value.updatedAt)))throw new Error(`${side} 프로그램 버전의 updatedAt이 올바르지 않습니다.`);
-    if(value.files!==undefined){
-      if(!Array.isArray(value.files)||value.files.length!==PROGRAM_FILES.length||value.files.some(name=>!PROGRAM_FILES.includes(name))||PROGRAM_FILES.some(name=>!value.files.includes(name)))throw new Error(`${side} 프로그램 버전의 파일 목록이 현재 오답 훈련센터와 맞지 않습니다.`);
+
+  // ── 학습상태 합치기 (기기별 고유 이력을 모두 보존) ───────────────────────────
+  const PRACTICAL_STATE_VERSION='general-journal-27-v1';
+  const PRACTICAL_OLD_TO_NEW={4:0,6:1,8:2,9:3,10:4,11:5,12:6,13:7,14:8,15:9,16:10,17:11,18:12,19:13,20:14,21:15,22:16,23:17,24:18,25:19,26:20,27:21,28:22,29:23,30:24,31:25,32:26};
+
+  function normalizeState(sourceName,value){
+    const source=value&&typeof value==='object'?value:{};
+    let normalized={...source};
+    if(sourceName==='practical'){
+      const cards={};
+      if(source.schemaVersion===PRACTICAL_STATE_VERSION){
+        Object.entries(source.cards||{}).forEach(([index,card])=>{
+          const numberIndex=Number(index);
+          if(!Number.isInteger(numberIndex)||numberIndex<0)return;
+          cards[numberIndex]={...card};delete cards[numberIndex].note;
+        });
+      }else{
+        Object.entries(PRACTICAL_OLD_TO_NEW).forEach(([oldIndex,newIndex])=>{
+          const card=source.cards?.[oldIndex];if(!card)return;
+          cards[newIndex]={...card};delete cards[newIndex].note;
+        });
+      }
+      normalized={...source,schemaVersion:PRACTICAL_STATE_VERSION,cards};
+      if(typeof normalized.fileName==='string')normalized.fileName=normalized.fileName.replace('일반전표_33문제','일반전표_27문제');
+    }else if(sourceName==='theory'){
+      normalized={...source};delete normalized.notes;
+    }else{
+      const cards={};Object.entries(source.cards||{}).forEach(([index,card])=>{cards[index]={...card};delete cards[index].note});
+      normalized={...source,cards};
     }
-    return{revision:value.revision,updatedAt:value.updatedAt,schemaVersion:value.schemaVersion||1};
+    return normalized;
   }
-  async function requestDirectoryPermission(directoryHandle,mode='read'){
-    if(!directoryHandle||directoryHandle.kind!=='directory')throw new Error('오답 훈련센터 폴더를 다시 선택해 주세요.');
-    const options={mode};
-    if(typeof directoryHandle.queryPermission==='function'){
-      let permission=await directoryHandle.queryPermission(options);
-      if(permission==='granted')return;
-      if(typeof directoryHandle.requestPermission==='function')permission=await directoryHandle.requestPermission(options);
-      if(permission!=='granted')throw new Error(mode==='readwrite'?'선택한 폴더를 업데이트할 권한이 필요합니다.':'선택한 폴더를 읽을 권한이 필요합니다.');
-    }
+  function readState(key){
+    try{
+      const raw=JSON.parse(localStorage.getItem(key)||'{}')||{};
+      const sourceName=Object.keys(SOURCES).find(name=>SOURCES[name].key===key);
+      const normalized=sourceName?normalizeState(sourceName,raw):raw;
+      if(sourceName&&JSON.stringify(normalized)!==JSON.stringify(raw))localStorage.setItem(key,JSON.stringify(normalized));
+      return normalized;
+    }catch(error){return {}}
   }
-  async function readDirectoryText(directoryHandle,name,required=true){
-    programFileName(name);
-    try{const handle=await directoryHandle.getFileHandle(name);return await(await handle.getFile()).text()}
-    catch(error){if(!required&&error?.name==='NotFoundError')return null;throw new Error(`선택한 폴더에서 ${name} 파일을 읽을 수 없습니다.`)}
+  function writeState(key,value){try{localStorage.setItem(key,JSON.stringify(value));return true}catch(error){return false}}
+  function correctInHistory(history){return Array.isArray(history)&&history.some(item=>item&&item.correct===true)}
+  function number(value){const n=Number(value);return Number.isFinite(n)?n:0}
+  function uniqueHistory(first,second){
+    const seen=new Set();
+    return [...(Array.isArray(first)?first:[]),...(Array.isArray(second)?second:[])].filter(item=>{
+      const key=JSON.stringify(item);if(seen.has(key))return false;seen.add(key);return true;
+    }).sort((a,b)=>Date.parse(a?.at||0)-Date.parse(b?.at||0));
   }
-  async function validateProgramDirectory(directoryHandle){
-    await requestDirectoryPermission(directoryHandle,'read');
-    const hub=await readDirectoryText(directoryHandle,'오답_훈련센터.html');
-    if(!hub.includes('전산회계 1급 오답 훈련센터'))throw new Error('선택한 폴더가 전산회계 1급 오답 훈련센터 폴더가 아닙니다.');
-    for(const name of PROGRAM_FILES){if(name!==PROGRAM_VERSION_FILE&&name!=='오답_훈련센터.html')await readDirectoryText(directoryHandle,name)}
-    return true;
+  function eventTime(value){const time=Date.parse(value||'');return Number.isFinite(time)?time:0}
+  function latestEventIso(...values){
+    let best='',bestTime=0;values.flat().forEach(value=>{const time=eventTime(value);if(time>bestTime){best=value;bestTime=time}});return best;
   }
-  async function pickProgramDirectory(){
-    if(typeof global.showDirectoryPicker!=='function')throw new Error('이 기기에서는 프로그램 폴더 동기화를 지원하지 않습니다. PC의 최신 Chrome 또는 Edge에서 이용해 주세요. 모바일에서는 학습기록 동기화만 사용할 수 있습니다.');
-    let handle;try{handle=await global.showDirectoryPicker({id:'tax-accounting-training-center',mode:'readwrite'})}
-    catch(error){if(error?.name==='AbortError')throw new Error('폴더 선택을 취소했습니다.');throw error}
-    await validateProgramDirectory(handle);
-    return handle;
+  function resolveTrainingFlags(a,b,history,aUpdated,bUpdated){
+    const correctTimes=history.filter(item=>item?.correct===true).map(item=>item.at);
+    const passedAt=latestEventIso(a.passedAt,b.passedAt,correctTimes);
+    const archivedAt=latestEventIso(a.archivedAt,b.archivedAt);
+    const restoredAt=latestEventIso(a.trainingCenterRestored?a.restoredAt:'',b.trainingCenterRestored?b.restoredAt:'');
+    let passedTime=eventTime(passedAt),archivedTime=eventTime(archivedAt),restoredTime=eventTime(restoredAt);
+    if(!passedTime){if(a.passed||a.correct===true)passedTime=eventTime(aUpdated)||1;if(b.passed||b.correct===true)passedTime=Math.max(passedTime,eventTime(bUpdated)||1)}
+    if(!archivedTime){if(a.archived)archivedTime=eventTime(aUpdated)||1;if(b.archived)archivedTime=Math.max(archivedTime,eventTime(bUpdated)||1)}
+    if(!restoredTime){if(a.trainingCenterRestored)restoredTime=eventTime(aUpdated)||1;if(b.trainingCenterRestored)restoredTime=Math.max(restoredTime,eventTime(bUpdated)||1)}
+    const restoreWins=restoredTime>0&&restoredTime>=passedTime&&restoredTime>=archivedTime;
+    return{passed:restoreWins?false:Boolean(passedTime||a.passed||b.passed||a.correct===true||b.correct===true||correctInHistory(history)),archived:restoreWins?false:Boolean(archivedTime||a.archived||b.archived),trainingCenterRestored:restoreWins,passedAt,archivedAt,restoredAt};
   }
-  async function readLocalProgramSnapshot(directoryHandle){
-    await validateProgramDirectory(directoryHandle);
-    const files={};
-    for(const name of PROGRAM_FILES){const text=await readDirectoryText(directoryHandle,name,name!==PROGRAM_VERSION_FILE);if(text!==null)files[name]=text}
-    return{side:'local',directoryHandle,files,version:parseProgramVersion(files[PROGRAM_VERSION_FILE]||'', 'PC'),missing:PROGRAM_FILES.filter(name=>files[name]===undefined)};
+  function mergeCard(current,incoming,incomingNewer,currentUpdated,incomingUpdated){
+    const a=(current&&typeof current==='object')?current:{},b=(incoming&&typeof incoming==='object')?incoming:{};
+    const merged={...(incomingNewer?a:b),...(incomingNewer?b:a)};
+    merged.history=uniqueHistory(a.history,b.history);
+    merged.attempts=Math.max(number(a.attempts),number(b.attempts),merged.history.length);
+    merged.wrongCount=Math.max(number(a.wrongCount),number(b.wrongCount),merged.history.filter(item=>item?.correct===false).length);
+    const flags=resolveTrainingFlags(a,b,merged.history,currentUpdated,incomingUpdated);
+    merged.passed=flags.passed;merged.archived=flags.archived;
+    if(flags.passedAt)merged.passedAt=flags.passedAt;if(flags.archivedAt)merged.archivedAt=flags.archivedAt;if(flags.restoredAt)merged.restoredAt=flags.restoredAt;
+    if(flags.trainingCenterRestored)merged.trainingCenterRestored=true;else delete merged.trainingCenterRestored;
+    delete merged.note;
+    return merged;
   }
-  async function getRemoteProgramHead(){
-    const ref=await programApi(`/git/ref/heads/${encodeURIComponent(PROGRAM_BRANCH)}`);
-    if(!ref?.object?.sha)throw new Error('GitHub 프로그램 저장소의 main 브랜치를 찾지 못했습니다.');
-    return ref.object.sha;
+  function mergeMap(current,incoming,incomingNewer){return {...(incomingNewer?current:incoming),...(incomingNewer?incoming:current)}}
+  function mergeTheory(current,incoming,incomingNewer){
+    const merged={...(incomingNewer?current:incoming),...(incomingNewer?incoming:current)};
+    const ids=new Set([...Object.keys(current.history||{}),...Object.keys(incoming.history||{}),...Object.keys(current.answers||{}),...Object.keys(incoming.answers||{})]);
+    merged.answers=mergeMap(current.answers||{},incoming.answers||{},incomingNewer);
+    merged.checked=mergeMap(current.checked||{},incoming.checked||{},incomingNewer);
+    delete merged.notes;
+    merged.history={};merged.attempts={};merged.passed={};merged.archived={};
+    merged.passedAt=mergeMap(current.passedAt||{},incoming.passedAt||{},incomingNewer);
+    merged.archivedAt=mergeMap(current.archivedAt||{},incoming.archivedAt||{},incomingNewer);
+    merged.restoredAt=mergeMap(current.restoredAt||{},incoming.restoredAt||{},incomingNewer);
+    merged.trainingCenterRestored=mergeMap(current.trainingCenterRestored||{},incoming.trainingCenterRestored||{},incomingNewer);
+    ids.forEach(id=>{
+      const history=uniqueHistory(current.history?.[id],incoming.history?.[id]);
+      merged.history[id]=history;
+      merged.attempts[id]=Math.max(number(current.attempts?.[id]),number(incoming.attempts?.[id]),history.length);
+      const flags=resolveTrainingFlags(
+        {passed:current.passed?.[id],correct:current.checked?.[id],archived:current.archived?.[id],trainingCenterRestored:current.trainingCenterRestored?.[id],passedAt:current.passedAt?.[id],archivedAt:current.archivedAt?.[id],restoredAt:current.restoredAt?.[id]},
+        {passed:incoming.passed?.[id],correct:incoming.checked?.[id],archived:incoming.archived?.[id],trainingCenterRestored:incoming.trainingCenterRestored?.[id],passedAt:incoming.passedAt?.[id],archivedAt:incoming.archivedAt?.[id],restoredAt:incoming.restoredAt?.[id]},
+        history,current.updatedAt,incoming.updatedAt
+      );
+      merged.passed[id]=flags.passed;merged.archived[id]=flags.archived;
+      if(flags.passedAt)merged.passedAt[id]=flags.passedAt;if(flags.archivedAt)merged.archivedAt[id]=flags.archivedAt;if(flags.restoredAt)merged.restoredAt[id]=flags.restoredAt;
+      if(flags.trainingCenterRestored)merged.trainingCenterRestored[id]=true;else delete merged.trainingCenterRestored[id];
+    });
+    return merged;
   }
-  async function readRemoteProgramSnapshot(){
-    const headSha=await getRemoteProgramHead(),files={};
-    for(const name of PROGRAM_FILES){
-      const data=await programApi(`/contents/${encodePath(programFileName(name))}?ref=${encodeURIComponent(headSha)}`);
-      if(data){if(Array.isArray(data)||data.type!=='file')throw new Error(`GitHub의 ${name} 경로가 파일이 아닙니다.`);files[name]=base64ToUtf8(data.content)}
-    }
-    const version=parseProgramVersion(files[PROGRAM_VERSION_FILE]||'', 'GitHub');
-    if(version){const missing=PROGRAM_FILES.filter(name=>files[name]===undefined);if(missing.length)throw new Error(`GitHub 프로그램에 필요한 파일이 없습니다: ${missing.join(', ')}`)}
-    return{side:'remote',headSha,files,version,missing:PROGRAM_FILES.filter(name=>files[name]===undefined)};
+  function mergeState(sourceName,current,incoming){
+    const a=normalizeState(sourceName,(current&&typeof current==='object')?current:{}),b=normalizeState(sourceName,(incoming&&typeof incoming==='object')?incoming:{});
+    const incomingNewer=Date.parse(b.updatedAt||0)>=Date.parse(a.updatedAt||0);
+    if(sourceName==='theory')return mergeTheory(a,b,incomingNewer);
+    const merged={...(incomingNewer?a:b),...(incomingNewer?b:a)},cards={};
+    const indexes=new Set([...Object.keys(a.cards||{}),...Object.keys(b.cards||{})]);
+    indexes.forEach(index=>{cards[index]=mergeCard(a.cards?.[index],b.cards?.[index],incomingNewer,a.updatedAt,b.updatedAt)});
+    merged.cards=cards;merged.startedAt=a.startedAt&&b.startedAt?(Date.parse(a.startedAt)<=Date.parse(b.startedAt)?a.startedAt:b.startedAt):(a.startedAt||b.startedAt);
+    merged.updatedAt=new Date().toISOString();return normalizeState(sourceName,merged);
   }
-  function comparableProgramText(value){return value===undefined||value===null?null:String(value).replace(/\r\n?/g,'\n')}
-  function differingProgramFiles(left,right){return PROGRAM_FILES.filter(name=>comparableProgramText(left[name])!==comparableProgramText(right[name]))}
-  function compareProgramVersions(local,remote){
-    if(!local&&!remote)throw new Error(`PC와 GitHub 모두 ${PROGRAM_VERSION_FILE}이 없어 동기화 방향을 안전하게 결정할 수 없습니다.`);
-    if(local&&!remote)return 1;
-    if(!local&&remote)return -1;
-    if(local.revision!==remote.revision)return local.revision>remote.revision?1:-1;
-    return 0;
+  function backupPayload(){
+    const states={};Object.entries(SOURCES).forEach(([name,source])=>{states[name]=readState(source.key)});
+    return {format:'tax-accounting-training-center-backup',version:1,exportedAt:new Date().toISOString(),states};
   }
-  async function planProgramSync(directoryHandle){
-    const [local,remote]=await Promise.all([readLocalProgramSnapshot(directoryHandle),readRemoteProgramSnapshot()]),differences=differingProgramFiles(local.files,remote.files),order=compareProgramVersions(local.version,remote.version);
-    let direction='none',reason='PC와 GitHub의 프로그램이 같습니다.';
-    if(order===0&&differences.length){direction='conflict';reason='PC와 GitHub의 프로그램 버전은 같지만 파일 내용이 다릅니다. 자동으로 덮어쓰지 않습니다.'}
-    else if(order>0){direction='pc-to-github';reason='PC 프로그램 버전이 GitHub보다 최신입니다.'}
-    else if(order<0){direction='github-to-pc';reason='GitHub 프로그램 버전이 PC보다 최신입니다.'}
-    const confirmationMessage=direction==='pc-to-github'?`PC의 프로그램 ${differences.length}개 파일을 GitHub 최신본으로 올릴까요? 한 번의 커밋으로 저장합니다.`:direction==='github-to-pc'?`GitHub의 최신 프로그램 ${differences.length}개 파일을 선택한 PC 폴더에 적용할까요?`:'실행할 동기화가 없습니다.';
-    return{kind:'tax-accounting-program-sync-plan-v1',direction,reason,confirmationMessage,differences,local,remote,createdAt:new Date().toISOString()};
+  // 전달받은 states를 현재 브라우저 기록과 합쳐 저장한다. 실제로 바뀐 분야 수를 돌려준다.
+  function mergeStatesIntoLocal(states){
+    if(!states||typeof states!=='object')return 0;
+    let changed=0;
+    Object.entries(SOURCES).forEach(([name,source])=>{
+      if(!states[name])return;
+      const local=readState(source.key),merged=mergeState(name,local,states[name]);
+      const baseline=stripUpdatedAt(JSON.stringify(mergeState(name,local,{}))),after=stripUpdatedAt(JSON.stringify(merged));
+      if(!writeState(source.key,merged))throw new Error(`${source.label} 기록을 이 브라우저에 저장하지 못해 안전하게 중단했습니다.`);
+      if(baseline!==after)changed++;
+    });
+    return changed;
   }
-  function assertExecutablePlan(plan,confirmed){
-    if(!plan||plan.kind!=='tax-accounting-program-sync-plan-v1')throw new Error('프로그램 동기화 비교를 다시 실행해 주세요.');
-    if(plan.direction==='conflict')throw new Error(plan.reason);
-    if(plan.direction==='none')return false;
-    if(confirmed!==true)throw new Error('프로그램 파일을 변경하기 전에 화면의 확인 절차를 완료해 주세요.');
-    return true;
-  }
-  async function writeDirectoryText(directoryHandle,name,text){
-    programFileName(name);
-    const fileHandle=await directoryHandle.getFileHandle(name,{create:true}),writable=await fileHandle.createWritable();
-    await writable.write(text);await writable.close();
-  }
-  async function applyRemoteProgramToPc(plan){
-    const directoryHandle=plan.local.directoryHandle;
-    await requestDirectoryPermission(directoryHandle,'readwrite');
-    const [currentLocal,currentRemote]=await Promise.all([readLocalProgramSnapshot(directoryHandle),readRemoteProgramSnapshot()]);
-    if(differingProgramFiles(currentLocal.files,plan.local.files).length)throw new Error('비교 후 PC 프로그램 파일이 변경되었습니다. 다시 동기화해 주세요.');
-    if(currentRemote.headSha!==plan.remote.headSha||differingProgramFiles(currentRemote.files,plan.remote.files).length)throw new Error('비교 후 GitHub 프로그램이 변경되었습니다. 다시 동기화해 주세요.');
-    const written=[];
-    try{for(const name of PROGRAM_FILES){await writeDirectoryText(directoryHandle,name,currentRemote.files[name]);written.push(name)}}
-    catch(error){
-      let restored=true;
-      for(const name of written.reverse()){try{if(plan.local.files[name]!==undefined)await writeDirectoryText(directoryHandle,name,plan.local.files[name]);else if(typeof directoryHandle.removeEntry==='function')await directoryHandle.removeEntry(name)}catch(rollbackError){restored=false}}
-      throw new Error(`PC 프로그램 적용 중 오류가 발생했습니다.${restored?' 기존 파일로 복원했습니다.':' 일부 파일을 복원하지 못했으므로 폴더를 확인해 주세요.'} ${error.message||''}`.trim());
-    }
-    return{direction:'github-to-pc',version:currentRemote.version,writtenFiles:[...PROGRAM_FILES],message:'GitHub의 최신 프로그램을 PC 폴더에 적용했습니다.'};
-  }
-  async function applyLocalProgramToGitHub(plan){
-    if(!hasToken())throw new Error('먼저 오답 훈련센터 홈에서 GitHub를 연결하세요.');
-    const [currentLocal,currentRemote]=await Promise.all([readLocalProgramSnapshot(plan.local.directoryHandle),readRemoteProgramSnapshot()]);
-    if(differingProgramFiles(currentLocal.files,plan.local.files).length)throw new Error('비교 후 PC 프로그램 파일이 변경되었습니다. 다시 동기화해 주세요.');
-    if(currentRemote.headSha!==plan.remote.headSha)throw new Error('비교 후 GitHub 프로그램이 변경되었습니다. 다시 동기화해 주세요.');
-    const changes=differingProgramFiles(currentLocal.files,currentRemote.files);
-    if(!changes.length)return{direction:'none',version:currentLocal.version,writtenFiles:[],message:'이미 같은 프로그램입니다.'};
-    const parent=await programApi(`/git/commits/${encodeURIComponent(currentRemote.headSha)}`);
-    if(!parent?.tree?.sha)throw new Error('GitHub 프로그램의 기준 커밋을 읽지 못했습니다.');
-    const tree=[];
-    for(const name of changes){const blob=await programApi('/git/blobs',{method:'POST',body:{content:comparableProgramText(currentLocal.files[name]),encoding:'utf-8'}});tree.push({path:programFileName(name),mode:'100644',type:'blob',sha:blob.sha})}
-    const nextTree=await programApi('/git/trees',{method:'POST',body:{base_tree:parent.tree.sha,tree}}),message=`오답 훈련센터 프로그램 동기화: r${currentLocal.version.revision}`;
-    const commit=await programApi('/git/commits',{method:'POST',body:{message,tree:nextTree.sha,parents:[currentRemote.headSha]}});
-    try{await programApi(`/git/refs/heads/${encodeURIComponent(PROGRAM_BRANCH)}`,{method:'PATCH',body:{sha:commit.sha,force:false}})}
-    catch(error){throw new Error(`GitHub가 비교 후 변경되어 안전하게 업로드하지 않았습니다. 다시 동기화해 주세요. ${error.message||''}`.trim())}
-    return{direction:'pc-to-github',version:currentLocal.version,writtenFiles:changes,commitSha:commit.sha,commitUrl:commit.html_url||'',message:'PC의 최신 프로그램을 GitHub에 한 번의 커밋으로 저장했습니다.'};
-  }
-  async function executeProgramSync(plan,{confirmed=false}={}){
-    if(!assertExecutablePlan(plan,confirmed))return{direction:'none',writtenFiles:[],message:plan.reason};
-    if(plan.direction==='github-to-pc')return applyRemoteProgramToPc(plan);
-    if(plan.direction==='pc-to-github')return applyLocalProgramToGitHub(plan);
-    throw new Error('알 수 없는 프로그램 동기화 방향입니다.');
+  function stripUpdatedAt(text){return String(text).replace(/"updatedAt":"[^"]*"/g,'')}
+  function buildSyncPayload(){
+    const payload=backupPayload();payload.syncedAt=new Date().toISOString();payload.device={id:getDeviceId(),name:getDeviceName()};
+    return payload;
   }
 
-  const SYNC_LABELS={'pc-to-github':'PC → GitHub','github-to-pc':'GitHub → PC'};
-  const RESUME_LEARNING_SYNC_KEY='tax-accounting-resume-learning-sync';
-  async function runDirectionalSync(intent,{setStatus=()=>{},setBusy=()=>{},onNeedConnection=null,afterProgramSync=null}={}){
-    const label=SYNC_LABELS[intent];
-    if(!label)throw new Error('알 수 없는 동기화 방향입니다.');
-    if(!hasToken()){
-      setStatus('먼저 GitHub를 연결해야 동기화할 수 있습니다.');
-      if(onNeedConnection)onNeedConnection();
-      return{status:'no-token'};
-    }
+  // ── 오늘 학습기록 Markdown 저장 ──────────────────────────────────────────────
+  async function canSaveRemote(){return Boolean(await detectHelper())||hasToken()}
+  async function saveDailyRecord(source,date,markdown){
+    const deviceId=getDeviceId().replace(/[^a-zA-Z0-9-]/g,'').slice(0,12),path=`records/${date}/${source}-${deviceId}.md`;
+    if(await detectHelper())return helperPost('/api/record',{path,content:String(markdown)});
+    return putFile(path,markdown,`학습기록 저장: ${date} ${getDeviceName()} ${source}`);
+  }
+
+  // ── 한 번 누르면 끝나는 동기화 ──────────────────────────────────────────────
+  function setSyncMessage(text){writeStorage(global.sessionStorage,SYNC_MESSAGE_KEY,text)}
+  function consumeSyncMessage(){const text=readStorage(global.sessionStorage,SYNC_MESSAGE_KEY);writeStorage(global.sessionStorage,SYNC_MESSAGE_KEY,'');return text}
+  function lastSyncLabel(){
+    const at=readStorage(global.localStorage,LAST_SYNC_KEY);if(!at)return '';
+    const date=new Date(at);if(Number.isNaN(date.getTime()))return '';
+    return `${localDateKey(date)} ${String(date.getHours()).padStart(2,'0')}:${String(date.getMinutes()).padStart(2,'0')}`;
+  }
+  async function syncEverything({setStatus=()=>{},setBusy=()=>{},onNeedToken=null}={}){
     setBusy(true);
-    let programDone='';
+    const summary=[];
     try{
-      setStatus('훈련센터 폴더를 선택하면 PC와 GitHub를 비교합니다…');
-      const plan=await planProgramSync(await pickProgramDirectory());
-      if(!plan.differences.length)setStatus('PC와 GitHub의 문제·프로그램이 이미 같습니다.');
-      else{
-        const question=plan.direction===intent?`${plan.reason}\n\n${plan.confirmationMessage}`
-          :plan.direction==='conflict'?`${plan.reason}\n\n그래도 ${label} 방향으로 덮어쓸까요? 반대쪽에만 있는 변경은 사라집니다.`
-          :`${plan.reason}\n\n요청하신 방향은 ${label}입니다. 이대로 진행하면 ${intent==='pc-to-github'?'GitHub의 더 최신 내용':'PC의 더 최신 내용'}이 사라집니다. 계속할까요?`;
-        if(!global.confirm(`${question}\n\n대상 파일: ${plan.differences.join(', ')}`)){setStatus('동기화를 취소했습니다. 양쪽 파일은 그대로입니다.');return{status:'cancelled'}}
-        setStatus(intent==='pc-to-github'?'PC의 문제와 프로그램을 GitHub에 올리고 있습니다…':'GitHub의 최신 문제와 프로그램을 PC 폴더에 적용하고 있습니다…');
-        const result=await executeProgramSync({...plan,direction:intent},{confirmed:true});
-        programDone=result.message;
-        if(intent==='github-to-pc'){
-          try{global.sessionStorage.setItem(RESUME_LEARNING_SYNC_KEY,'1')}catch(error){}
-          setStatus(`${result.message} 최신 화면으로 새로고침합니다…`);
-          global.setTimeout(()=>global.location.reload(),1500);
-          return{status:'reload',message:result.message};
+      setStatus('동기화를 시작합니다…');
+      const helper=await detectHelper();
+      let program=null;
+      if(helper){
+        setStatus('PC의 새 문제·프로그램과 GitHub를 맞추는 중…');
+        program=await helperPost('/api/sync/program');
+        summary.push(program.message);
+        if(program.conflict)summary.push('학습기록은 계속 동기화합니다.');
+      }else if(!hasToken()){
+        const hint=isMobileDevice()
+          ?'처음 한 번만 오답 훈련센터 홈에서 GitHub 토큰을 연결해 주세요. 그 뒤로는 「동기화」 한 번이면 됩니다.'
+          :'PC 동기화 도우미가 꺼져 있습니다. 바탕화면의 「오답훈련센터 시작」을 실행하면 도우미가 켜지고, 이 화면에서 「동기화」만 누르면 됩니다.';
+        setStatus(hint);
+        if(onNeedToken)onNeedToken({mobile:isMobileDevice(),hint});
+        return {status:'no-transport'};
+      }else if(!isMobileDevice()){
+        summary.push('PC 동기화 도우미가 꺼져 있어 새 문제·프로그램 파일은 건너뛰고 학습기록만 합쳤습니다. 바탕화면의 「오답훈련센터 시작」을 실행하면 다음부터 함께 동기화됩니다.');
+      }
+
+      setStatus('PC·모바일 학습기록을 합치는 중…');
+      let changedLocal=0,attempt=0;
+      while(true){
+        attempt++;
+        let remoteStates=null,base=null;
+        if(helper){const read=await helperPost('/api/learning/read');remoteStates=read.state?.states||null;base=read.base||''}
+        else{const remote=await getSyncState();remoteStates=remote?.json?.states||null;base=remote?.sha||null}
+        changedLocal=mergeStatesIntoLocal(remoteStates);
+        const payload=buildSyncPayload();
+        try{
+          if(helper)await helperPost('/api/learning/write',{state:payload,base});
+          else await putSyncState(payload,base);
+          break;
+        }catch(error){
+          if(error.conflict&&attempt<3){setStatus('다른 기기가 방금 저장했습니다. 다시 합치는 중…');continue}
+          throw error;
         }
       }
-      const extra=afterProgramSync?await afterProgramSync(programDone):'';
-      setStatus(`${programDone?programDone+' ':''}${extra||''}${programDone&&intent==='pc-to-github'?' GitHub Pages 반영에는 잠시 걸릴 수 있습니다.':''}`.trim()||'동기화를 완료했습니다.');
-      return{status:'done',message:programDone};
+      summary.push(changedLocal?`다른 기기의 학습기록을 이 기기에 합쳤습니다(${changedLocal}개 분야).`:'학습기록을 GitHub에 최신으로 저장했습니다.');
+      writeStorage(global.localStorage,LAST_SYNC_KEY,new Date().toISOString());
+      writeStorage(global.localStorage,CACHE_BUST_KEY,String(Date.now()));
+      const message=`✅ 동기화 완료 (${lastSyncLabel()}) · ${summary.join(' ')}`;
+      setStatus(message);
+      return {status:'done',message,program,changedLocal,reload:true};
     }catch(error){
-      setStatus(`${label} 동기화를 마치지 못했습니다. 아직 반영되지 않은 파일과 학습기록은 그대로 보존됩니다. ${error.message}`);
-      return{status:'error',message:error.message};
+      const message=`동기화를 마치지 못했습니다. 이 기기의 기록은 그대로 보존됩니다. ${error?.message||error}`;
+      setStatus(`${summary.length?summary.join(' ')+' ':''}${message}`);
+      return {status:'error',message};
     }finally{setBusy(false)}
   }
 
-  global.TrainingGitHub={OWNER,REPOSITORY,BRANCH,PROGRAM_OWNER,PROGRAM_REPOSITORY,PROGRAM_BRANCH,PROGRAM_FILES,SYNC_LABELS,RESUME_LEARNING_SYNC_KEY,getSessionToken,setSessionToken,clearToken,hasToken,connect,getFile,putFile,saveDailyRecord,getSyncState,putSyncState,getDeviceId,getDeviceName,setDeviceName,pickProgramDirectory,validateProgramDirectory,readLocalProgramSnapshot,readRemoteProgramSnapshot,planProgramSync,executeProgramSync,runDirectionalSync};
+  // ── 화면 공통: 메뉴 줄의 「동기화」 버튼 연결 ───────────────────────────────
+  function applyCacheBust(){
+    if(location.protocol!=='https:')return;
+    const stamp=readStorage(global.localStorage,CACHE_BUST_KEY);if(!stamp)return;
+    document.querySelectorAll('a.nav-link[href],a.open-link[href],a.mini-link[href]').forEach(link=>{
+      const href=link.getAttribute('href')||'';
+      if(!/\.html(\?|$)/.test(href)||/^https?:/.test(href))return;
+      const url=new URL(href,location.href);url.searchParams.set('r',stamp);link.setAttribute('href',url.pathname.split('/').pop()+url.search);
+    });
+  }
+  function installSyncBar({onNeedToken=null,onDone=null}={}){
+    const button=document.querySelector('#syncAll'),status=document.querySelector('#navSyncStatus');
+    if(!button||!status)return;
+    applyCacheBust();
+    const setStatus=text=>{status.textContent=text};
+    const previous=consumeSyncMessage();
+    if(previous)setStatus(previous);
+    else{
+      const last=lastSyncLabel();
+      detectHelper().then(helper=>{
+        if(helper)setStatus(`PC 동기화 도우미 켜짐${last?` · 마지막 동기화 ${last}`:''}`);
+        else if(!helperPossible()&&hasToken())setStatus(`GitHub 연결됨${last?` · 마지막 동기화 ${last}`:''}`);
+        else if(!helperPossible())setStatus('처음 한 번만 홈에서 GitHub 토큰을 연결하면 「동기화」 한 번으로 끝납니다.');
+        else if(hasToken())setStatus(`도우미 꺼짐 · 학습기록만 동기화 가능${last?` · 마지막 동기화 ${last}`:''}`);
+        else setStatus('PC 동기화 도우미가 꺼져 있습니다. 바탕화면의 「오답훈련센터 시작」으로 열어주세요.');
+      });
+    }
+    button.addEventListener('click',async()=>{
+      const result=await syncEverything({
+        setStatus,
+        setBusy:busy=>{button.disabled=busy;button.textContent=busy?'동기화 중…':'🔄 동기화'},
+        onNeedToken
+      });
+      if(result.status==='done'){
+        if(onDone){onDone(result);return}
+        setSyncMessage(result.message);
+        setStatus(`${result.message} 최신 화면으로 새로고침합니다…`);
+        setTimeout(()=>location.reload(),900);
+      }
+    });
+  }
+
+  global.TrainingGitHub={
+    OWNER,REPOSITORY,BRANCH,PROGRAM_OWNER,PROGRAM_REPOSITORY,PROGRAM_BRANCH,SOURCES,HELPER_URL,
+    getSessionToken,setSessionToken,clearToken,hasToken,isTokenRemembered,connect,
+    getFile,putFile,saveDailyRecord,canSaveRemote,getSyncState,putSyncState,
+    getDeviceId,getDeviceName,setDeviceName,isMobileDevice,
+    detectHelper,helperPost,
+    normalizeState,readState,writeState,mergeState,backupPayload,mergeStatesIntoLocal,buildSyncPayload,
+    syncEverything,installSyncBar,consumeSyncMessage,lastSyncLabel
+  };
 })(window);

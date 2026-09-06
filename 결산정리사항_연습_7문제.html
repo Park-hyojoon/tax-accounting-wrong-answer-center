@@ -21,6 +21,8 @@
     .nav-sync-button:hover:not(:disabled){border-color:var(--blue);background:var(--sky)}
     .nav-sync-button:focus-visible{outline:3px solid #bde1fb;outline-offset:2px}
     .nav-sync-button:disabled{opacity:.6;cursor:progress}
+    .nav-sync-button.primary{border-color:var(--blue);background:var(--blue);color:#fff}
+    .nav-sync-button.primary:hover:not(:disabled){background:#0d5eaa;border-color:#0d5eaa;color:#fff}
     .nav-sync-status{flex:1 1 100%;margin:0;font-size:.85em;font-weight:800;color:var(--muted);word-break:keep-all}
     .nav-sync-status:empty{display:none}
     @media(max-width:760px){.nav-sync{width:100%;margin-left:0;flex-wrap:wrap}.nav-sync-button{flex:1 1 auto}}
@@ -54,10 +56,8 @@
       <a class="nav-link" href="이론_오답응용_5문제.html">이론 오답</a>
       <a class="nav-link active" href="결산정리사항_연습_7문제.html" aria-current="page">결산 정리사항</a>
       <a class="nav-link" href="매입매출전표_오답연습_3문제.html?view=all">매입매출전표 입력</a>
-      <div class="nav-sync" aria-label="문제·프로그램 동기화">
-        <span class="nav-sync-title">Sync</span>
-        <button class="nav-sync-button" id="syncPcToGithub" type="button" title="내 PC의 새 문제와 프로그램을 GitHub에 올립니다">PC → GitHub</button>
-        <button class="nav-sync-button" id="syncGithubToPc" type="button" title="GitHub의 최신 문제와 프로그램을 이 PC 폴더에 내려받습니다">GitHub → PC</button>
+      <div class="nav-sync" aria-label="동기화">
+        <button class="nav-sync-button primary" id="syncAll" type="button" title="PC·GitHub·모바일의 새 문제와 학습기록을 한 번에 최신으로 맞춥니다">🔄 동기화</button>
         <p class="nav-sync-status" id="navSyncStatus" role="status" aria-live="polite"></p>
       </div>
     </div>
@@ -91,7 +91,7 @@
     </section>
     <p class="footer">학습용 자료 · 계정과목은 선택하고 금액만 입력합니다. 입력 순서는 달라도 정답으로 처리됩니다.</p>
   </main>
-  <script src="github-learning-sync.js?v=2"></script>
+  <script src="github-learning-sync.js?v=3"></script>
   <script>
     const accounts=['계정과목 선택','단기매매증권','단기매매증권평가이익','단기매매증권평가손실','외상매출금','외상매입금','외화환산이익','외화환산손실','외환차익','외환차손','장기차입금','유동성장기부채','현금과부족','잡손실','잡이익','부가세예수금','부가세대급금','법인세등','법인세비용','선납세금','미지급세금','미수금','미지급금','퇴직급여','퇴직급여충당부채','퇴직연금운용자산','보통예금','선급비용','임차료','보험료'];
     const problems=[
@@ -155,7 +155,7 @@
       const payload=todayRecordPayload(),status=$('#saveStatus');
       if(!payload){status.textContent='오늘 채점한 학습 기록이 없습니다. 문제를 채점한 뒤 저장해 주세요.';return}
       const name=payload.fileName,content=payload.content;let fallbackMessage='';
-      if(window.TrainingGitHub?.hasToken?.()){
+      if(await window.TrainingGitHub?.canSaveRemote?.()){
         status.textContent='오늘 학습기록을 GitHub에 저장하고 있습니다.';
         try{await window.TrainingGitHub.saveDailyRecord('closing',payload.date,content);status.textContent='오늘 결산 학습기록을 GitHub에 저장했습니다.';return}
         catch(error){fallbackMessage=`GitHub 저장에 실패하여 이 기기에 저장합니다. (${error?.message||'연결 오류'}) `}
@@ -167,18 +167,9 @@
     $('#saveToday').addEventListener('click',saveTodayRecord);$('#resetLearning').addEventListener('click',()=>{if(confirm('12문제의 모든 입력과 채점 이력을 지울까요?')){localStorage.removeItem(KEY);location.reload()}});
     const CM={r:'ㄱ',R:'ㄲ',s:'ㄴ',e:'ㄷ',E:'ㄸ',f:'ㄹ',a:'ㅁ',q:'ㅂ',Q:'ㅃ',t:'ㅅ',T:'ㅆ',d:'ㅇ',w:'ㅈ',W:'ㅉ',c:'ㅊ',z:'ㅋ',x:'ㅌ',v:'ㅍ',g:'ㅎ'},VM={k:'ㅏ',o:'ㅐ',i:'ㅑ',O:'ㅒ',j:'ㅓ',p:'ㅔ',u:'ㅕ',P:'ㅖ',h:'ㅗ',y:'ㅛ',n:'ㅜ',b:'ㅠ',m:'ㅡ',l:'ㅣ'},CHO=['ㄱ','ㄲ','ㄴ','ㄷ','ㄸ','ㄹ','ㅁ','ㅂ','ㅃ','ㅅ','ㅆ','ㅇ','ㅈ','ㅉ','ㅊ','ㅋ','ㅌ','ㅍ','ㅎ'],JUNG=['ㅏ','ㅐ','ㅑ','ㅒ','ㅓ','ㅔ','ㅕ','ㅖ','ㅗ','ㅘ','ㅙ','ㅚ','ㅛ','ㅜ','ㅝ','ㅞ','ㅟ','ㅠ','ㅡ','ㅢ','ㅣ'],JONG=['','ㄱ','ㄲ','ㄳ','ㄴ','ㄵ','ㄶ','ㄷ','ㄹ','ㄺ','ㄻ','ㄼ','ㄽ','ㄾ','ㄿ','ㅀ','ㅁ','ㅂ','ㅄ','ㅅ','ㅆ','ㅇ','ㅈ','ㅊ','ㅋ','ㅌ','ㅍ','ㅎ'],VC={'ㅗㅏ':'ㅘ','ㅗㅐ':'ㅙ','ㅗㅣ':'ㅚ','ㅜㅓ':'ㅝ','ㅜㅔ':'ㅞ','ㅜㅣ':'ㅟ','ㅡㅣ':'ㅢ'},FC={'ㄱㅅ':'ㄳ','ㄴㅈ':'ㄵ','ㄴㅎ':'ㄶ','ㄹㄱ':'ㄺ','ㄹㅁ':'ㄻ','ㄹㅂ':'ㄼ','ㄹㅅ':'ㄽ','ㄹㅌ':'ㄾ','ㄹㅍ':'ㄿ','ㄹㅎ':'ㅀ','ㅂㅅ':'ㅄ'},isC=x=>CHO.includes(x),isV=x=>JUNG.includes(x);function toKo(raw){const j=[...raw].map(x=>CM[x]||VM[x]||x);let o='',i=0;while(i<j.length){const x=j[i];if(isC(x)&&isV(j[i+1])){let c=CHO.indexOf(x),v=j[i+1];i+=2;if(isV(j[i])&&VC[v+j[i]]){v=VC[v+j[i]];i++}let f='';if(isC(j[i])&&JONG.includes(j[i])){const a=j[i],b=j[i+1],z=j[i+2];if(isV(b)){}else if(isC(b)&&FC[a+b]&&!isV(z)){f=FC[a+b];i+=2}else{f=a;i++}}o+=String.fromCharCode(44032+c*588+JUNG.indexOf(v)*28+JONG.indexOf(f))}else if(isV(x)&&isV(j[i+1])&&VC[x+j[i+1]]){o+=VC[x+j[i+1]];i+=2}else{o+=x;i++}}return o}function resetKo(){$$('[data-ko-auto]').forEach(x=>{x.dataset.raw='';x.dataset.base=x.value})}function setupKo(x){x.dataset.raw='';x.dataset.base=x.value;x.addEventListener('focus',()=>{x.dataset.raw='';x.dataset.base=x.value});x.addEventListener('keydown',e=>{if(!$('#koAuto').checked||e.ctrlKey||e.altKey||e.metaKey)return;const r=x.dataset.raw||'',end=x.selectionStart===x.value.length&&x.selectionEnd===x.value.length;if(e.key==='Backspace'&&r&&end){e.preventDefault();const n=r.slice(0,-1);x.dataset.raw=n;x.value=(x.dataset.base||'')+toKo(n);x.dispatchEvent(new Event('input',{bubbles:true}));return}if(/^[A-Za-z]$/.test(e.key)&&end){e.preventDefault();if(!r)x.dataset.base=x.value;const n=r+e.key;x.dataset.raw=n;x.value=(x.dataset.base||'')+toKo(n);x.dispatchEvent(new Event('input',{bubbles:true}));return}x.dataset.raw='';x.dataset.base=x.value})}$$('[data-ko-auto]').forEach(setupKo);
     (function(){
-    const bar=document.querySelector('.nav-sync');if(!bar)return;
-    const status=document.querySelector('#navSyncStatus'),buttons=[...bar.querySelectorAll('.nav-sync-button')];
-    function run(intent){
-      if(typeof window.TrainingGitHub?.runDirectionalSync!=='function'){status.textContent='동기화 기능을 불러오지 못했습니다. Ctrl+F5로 새로고침한 뒤 다시 눌러주세요.';return}
-      TrainingGitHub.runDirectionalSync(intent,{
-        setStatus:text=>{status.textContent=text},
-        setBusy:busy=>buttons.forEach(button=>{button.disabled=busy}),
-        onNeedConnection:()=>{status.innerHTML='먼저 <a href="오답_훈련센터.html">오답 훈련센터 홈</a>에서 GitHub를 연결한 뒤 다시 눌러주세요. 학습기록 합치기도 홈에서 실행합니다.'}
-      });
-    }
-    document.querySelector('#syncPcToGithub').addEventListener('click',()=>run('pc-to-github'));
-    document.querySelector('#syncGithubToPc').addEventListener('click',()=>run('github-to-pc'));
+    const status=document.querySelector('#navSyncStatus');
+    if(typeof window.TrainingGitHub?.installSyncBar!=='function'){if(status)status.textContent='동기화 기능을 불러오지 못했습니다. Ctrl+F5로 새로고침한 뒤 다시 눌러주세요.';return}
+    TrainingGitHub.installSyncBar({onNeedToken:({mobile})=>{if(mobile)status.innerHTML='처음 한 번만 <a href="오답_훈련센터.html">오답 훈련센터 홈</a>에서 GitHub 토큰을 연결한 뒤 다시 눌러주세요. 그 뒤로는 「동기화」 한 번이면 됩니다.'}});
   })();
 </script>
 </body>
