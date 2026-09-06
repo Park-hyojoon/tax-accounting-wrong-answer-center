@@ -12,25 +12,26 @@
     button,input{font:inherit}
     input[type="text"]{ime-mode:active}
     .wrap{width:min(1080px,94vw);margin:30px auto 80px}
-    .category-nav{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:0 0 16px;padding:12px;background:#fff;border:2px solid #d5e6f3;border-radius:17px;box-shadow:0 7px 22px rgba(44,91,128,.07)}
-    .nav-sync{display:flex;align-items:center;gap:8px;margin-left:auto;padding:5px 9px;border:2px solid #d9e7f2;border-radius:14px;background:#f6fbff}
+    .top-nav{position:sticky;top:0;z-index:20;background:rgba(255,255,255,.96);border-bottom:1px solid var(--line);box-shadow:0 5px 20px rgba(44,91,128,.08);backdrop-filter:blur(12px)}
+    .nav-inner{max-width:1180px;margin:0 auto;display:flex;flex-wrap:wrap;align-items:center;gap:7px;padding:10px 20px}
+    .nav-link{flex:0 0 auto;text-decoration:none;border:2px solid #d2e4f2;border-radius:13px;padding:7px 14px;background:#fff;color:#34546d;font-weight:800}
+    .nav-link:hover,.nav-link:focus-visible{border-color:#68a9df;background:#edf8ff;outline:none}
+    .nav-link.active{background:var(--blue);border-color:var(--blue);color:#fff}
+    .nav-sync{display:flex;align-items:center;gap:6px;margin-left:auto;padding:4px 8px;border:2px solid var(--line);border-radius:14px;background:var(--sky)}
     .nav-sync-title{font-weight:900;color:var(--navy);letter-spacing:.02em}
-    .nav-sync-button{min-height:40px;padding:6px 13px;border:2px solid var(--line);border-radius:11px;background:#fff;color:var(--navy);font:inherit;font-weight:900;font-size:.9em;cursor:pointer}
+    .nav-sync-button{min-height:38px;padding:6px 11px;border:2px solid var(--line);border-radius:11px;background:#fff;color:var(--navy);font:inherit;font-weight:900;font-size:.87em;cursor:pointer}
     .nav-sync-button:hover:not(:disabled){border-color:var(--blue);background:var(--sky)}
     .nav-sync-button:focus-visible{outline:3px solid #bde1fb;outline-offset:2px}
     .nav-sync-button:disabled{opacity:.6;cursor:progress}
     .nav-sync-status{flex:1 1 100%;margin:0;font-size:.85em;font-weight:800;color:var(--muted);word-break:keep-all}
     .nav-sync-status:empty{display:none}
     @media(max-width:760px){.nav-sync{width:100%;margin-left:0;flex-wrap:wrap}.nav-sync-button{flex:1 1 auto}}
-    .category-link{display:inline-flex;align-items:center;justify-content:center;min-height:46px;padding:8px 17px;border:2px solid var(--line);border-radius:12px;background:#fff;color:var(--navy);font-weight:900;text-decoration:none}
-    .category-link:hover{border-color:var(--blue);background:var(--sky)}
-    .category-link.active{border-color:var(--navy);background:var(--navy);color:#fff;box-shadow:0 4px 11px rgba(21,52,94,.2)}
     .hero{background:#fff;border:2px solid #cde5f7;border-radius:24px;padding:28px 30px;box-shadow:0 12px 35px rgba(40,84,122,.1)}
     h1{margin:0 0 8px;color:var(--navy);font-size:clamp(29px,4vw,42px);line-height:1.25}
     h2{color:var(--navy)}
     .hero p{margin:7px 0}
     .notice{margin-top:16px;padding:14px 17px;border-radius:13px;background:var(--yellow);font-weight:800}
-    .dashboard{position:sticky;top:8px;z-index:10;margin:18px 0;background:rgba(247,252,255,.95);backdrop-filter:blur(8px);border:1px solid #d5e6f2;border-radius:17px;padding:13px;display:flex;flex-wrap:wrap;align-items:center;gap:12px}
+    .dashboard{position:sticky;top:calc(var(--nav-h,62px) + 8px);z-index:10;margin:18px 0;background:rgba(247,252,255,.95);backdrop-filter:blur(8px);border:1px solid #d5e6f2;border-radius:17px;padding:13px;display:flex;flex-wrap:wrap;align-items:center;gap:12px}
     .stat{background:#fff;border:1px solid var(--line);border-radius:12px;padding:8px 14px;font-weight:900;color:var(--navy)}
     .sort-label{display:flex;align-items:center;gap:8px;white-space:nowrap;margin-left:auto;font-weight:900;color:var(--navy)}
     .sort-select{border:2px solid var(--line);border-radius:12px;background:#fff;color:var(--navy);font-weight:800;font-size:inherit;padding:9px 12px;cursor:pointer}
@@ -80,20 +81,23 @@
   </style>
 </head>
 <body>
-  <main class="wrap">
-    <nav class="category-nav" aria-label="유형별 연습 메뉴">
-      <a class="category-link" href="오답_훈련센터.html">오늘의 오답훈련</a>
-      <a class="category-link" href="일반전표_기본연습_24문제.html">일반전표 입력</a>
-      <a class="category-link active" href="이론_오답응용_5문제.html" aria-current="page">이론 오답</a>
-      <a class="category-link" href="결산정리사항_연습_7문제.html">결산 정리사항</a>
-      <a class="category-link" href="매입매출전표_오답연습_3문제.html?view=all">매입매출전표 입력</a>
-    <div class="nav-sync">
-      <span class="nav-sync-title">Sync</span>
-      <button class="nav-sync-button" id="syncPcToGithub" type="button" title="내 PC의 새 문제와 프로그램을 GitHub에 올립니다">PC → GitHub</button>
-      <button class="nav-sync-button" id="syncGithubToPc" type="button" title="GitHub의 최신 문제와 프로그램을 이 PC 폴더에 내려받습니다">GitHub → PC</button>
+  <nav class="top-nav" aria-label="유형별 연습 메뉴">
+    <div class="nav-inner">
+      <a class="nav-link" href="오답_훈련센터.html">오늘의 오답훈련</a>
+      <a class="nav-link" href="일반전표_기본연습_24문제.html">일반전표 입력</a>
+      <a class="nav-link active" href="이론_오답응용_5문제.html" aria-current="page">이론 오답</a>
+      <a class="nav-link" href="결산정리사항_연습_7문제.html">결산 정리사항</a>
+      <a class="nav-link" href="매입매출전표_오답연습_3문제.html?view=all">매입매출전표 입력</a>
+      <div class="nav-sync" aria-label="문제·프로그램 동기화">
+        <span class="nav-sync-title">Sync</span>
+        <button class="nav-sync-button" id="syncPcToGithub" type="button" title="내 PC의 새 문제와 프로그램을 GitHub에 올립니다">PC → GitHub</button>
+        <button class="nav-sync-button" id="syncGithubToPc" type="button" title="GitHub의 최신 문제와 프로그램을 이 PC 폴더에 내려받습니다">GitHub → PC</button>
+        <p class="nav-sync-status" id="navSyncStatus" role="status" aria-live="polite"></p>
+      </div>
     </div>
-    <p class="nav-sync-status" id="navSyncStatus" role="status" aria-live="polite"></p>
   </nav>
+  <script>(function(){var nav=document.querySelector('.top-nav');function sync(){document.documentElement.style.setProperty('--nav-h',(nav?nav.offsetHeight:60)+'px')}sync();window.addEventListener('resize',sync)})()</script>
+  <main class="wrap">
     <div class="dashboard">
       <span class="stat" id="solvedStat">채점 0 / 5</span>
       <span class="stat" id="correctStat">현재 정답 0</span>
