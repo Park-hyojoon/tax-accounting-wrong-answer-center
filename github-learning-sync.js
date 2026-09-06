@@ -373,7 +373,7 @@
       detectHelper().then(helper=>{
         if(helper)setStatus(`PC 동기화 도우미 켜짐${last?` · 마지막 동기화 ${last}`:''}`);
         else if(!helperPossible()&&hasToken())setStatus(`GitHub 연결됨${last?` · 마지막 동기화 ${last}`:''}`);
-        else if(!helperPossible())setStatus('처음 한 번만 홈에서 GitHub 토큰을 연결하면 「동기화」 한 번으로 끝납니다.');
+        else if(!helperPossible())setStatus('');
         else if(hasToken())setStatus(`도우미 꺼짐 · 학습기록만 동기화 가능${last?` · 마지막 동기화 ${last}`:''}`);
         else setStatus('PC 동기화 도우미가 꺼져 있습니다. 바탕화면의 「오답훈련센터 시작」으로 열어주세요.');
       });
