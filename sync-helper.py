@@ -204,6 +204,8 @@ def sync_program():
     parts = []
     if result['committed']:
         parts.append(f"PC의 변경 {len(result['committed'])}개 파일을 GitHub에 올렸습니다.")
+    elif result['pushed']:
+        parts.append('PC에 미리 커밋된 변경을 GitHub에 올렸습니다.')
     if result['pulled']:
         parts.append(f"GitHub의 최신 {len(result['pulled'])}개 파일을 PC에 받았습니다.")
     result['message'] = ' '.join(parts) or 'PC와 GitHub의 문제·프로그램이 이미 같습니다.'
