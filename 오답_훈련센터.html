@@ -156,12 +156,17 @@
     .backup-file{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
     .backup-status{min-height:1.7em;margin:14px 0 0;color:var(--green);font-weight:800}
     .backup-warning{margin-top:13px;padding:12px 14px;border-radius:12px;background:#fff7d6;color:#765200;font-size:.92rem}
+    .github-sync{margin-top:16px;padding:20px;border:2px solid #b9d6ea;border-radius:17px;background:linear-gradient(135deg,#f1f9ff,#fff)}
+    .github-sync h3{margin:0 0 6px;font-size:1.2rem}.github-sync>p{margin:0 0 14px;color:var(--muted)}
+    .github-fields{display:grid;grid-template-columns:minmax(150px,.55fr) minmax(260px,1.45fr);gap:11px;margin-bottom:12px}
+    .github-field{display:grid;gap:5px;color:#31526b;font-weight:800}.github-field input{width:100%;min-height:45px;padding:9px 12px;border:2px solid #bdd5e6;border-radius:11px;background:#fff;color:var(--ink);font:inherit}
+    .github-actions{display:flex;flex-wrap:wrap;gap:9px}.github-help{margin-top:12px!important;font-size:.9rem}.github-help a{color:var(--blue-dark);font-weight:900}
     @media (max-width:960px){.summary-strip{grid-template-columns:repeat(3,1fr)}.category-summary{grid-template-columns:1fr}}
     @media (max-width:680px){
       body{font-size:16px}.hero{padding-top:27px}.section{padding:19px 16px;border-radius:18px}
       .section-heading{display:block}.today-chip{display:inline-block;margin-top:10px}.summary-strip{grid-template-columns:repeat(2,1fr)}
       .problem-item{grid-template-columns:1fr}.problem-actions{justify-content:flex-start}.open-link,.restore-button{flex:1 1 auto}
-      .sort-label{width:100%;margin-left:0;align-items:flex-start;flex-direction:column}.sort-select{width:100%}.refresh-button{margin-left:0}.nav-inner{padding-inline:12px}.nav-link{padding:7px 12px}.backup-grid{grid-template-columns:1fr}.backup-button{width:100%}
+      .sort-label{width:100%;margin-left:0;align-items:flex-start;flex-direction:column}.sort-select{width:100%}.refresh-button{margin-left:0}.nav-inner{padding-inline:12px}.nav-link{padding:7px 12px}.backup-grid,.github-fields{grid-template-columns:1fr}.backup-button{width:100%}.github-actions .backup-button{flex:1 1 100%}
     }
     @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
   </style>
@@ -173,7 +178,7 @@
       <p class="eyebrow">오늘 틀린 문제에 집중하는 학습 공간</p>
       <h1>전산회계 1급 오답 훈련센터</h1>
       <p class="hero-copy">오늘 등록된 문제부터 가볍게 훈련하고, 누적 오답은 한눈에 확인하세요. 한 번 통과하거나 직접 숨긴 문제는 보관함에 남습니다.</p>
-      <span class="privacy">🔒 모든 학습기록은 이 브라우저 안에서만 처리됩니다.</span>
+      <span class="privacy">🔒 기본 저장은 이 브라우저이며, 사용자가 연결할 때만 GitHub와 동기화합니다.</span>
     </div>
   </header>
 
@@ -280,7 +285,7 @@
       <div class="section-heading">
         <div>
           <h2>모바일 · PC 학습상태 이동</h2>
-          <p>통과 여부, 오답 횟수, 답변 이력과 메모를 하나의 파일로 옮길 수 있습니다.</p>
+          <p>통과 여부, 오답 횟수와 답변 이력을 하나의 파일로 옮길 수 있습니다.</p>
         </div>
       </div>
       <div class="backup-grid">
@@ -298,11 +303,29 @@
       </div>
       <div class="backup-warning">Markdown 학습기록은 GPT 분석용이고, 진행 상태를 다른 기기에서 이어갈 때는 이곳의 JSON 백업 파일을 사용합니다.</div>
       <p class="backup-status" id="backupStatus" role="status" aria-live="polite"></p>
+      <div class="github-sync">
+        <h3>GitHub 학습기록 연결 · 동기화</h3>
+        <p>학습기록 전용 저장소에만 접근하는 제한 토큰을 현재 브라우저 세션 동안 사용합니다. 토큰은 HTML·백업 파일·GitHub 저장소에 기록하지 않습니다.</p>
+        <div class="github-fields">
+          <label class="github-field">기기 이름<input id="githubDeviceName" type="text" lang="ko" maxlength="30" placeholder="예: 내 휴대전화 또는 집 PC"></label>
+          <label class="github-field">Fine-grained GitHub 토큰<input id="githubToken" type="password" autocomplete="off" spellcheck="false" placeholder="학습기록 저장소 Contents 권한 전용"></label>
+        </div>
+        <div class="github-actions">
+          <button class="backup-button secondary" id="githubConnect" type="button">GitHub 연결</button>
+          <button class="backup-button secondary" id="githubSync" type="button">학습기록만 동기화</button>
+          <button class="backup-button" id="githubAllSync" type="button">학습기록 + 새 문제 동기화</button>
+          <button class="backup-button secondary" id="githubDisconnect" type="button">연결 해제</button>
+        </div>
+        <p class="github-help"><a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener noreferrer">Fine-grained 토큰 만들기</a> · Selected repositories에서 <strong>tax-accounting-learning-sync</strong>와 <strong>tax-accounting-wrong-answer-center</strong> 두 저장소만 선택하고 <strong>Contents: Read and write</strong>만 허용하세요.</p>
+        <p class="github-help">새 문제 동기화는 PC의 최신 Chrome/Edge에서 훈련센터 폴더를 선택한 뒤, 표시되는 이동 방향을 확인하고 승인할 때만 실행됩니다. 모바일에서는 `학습기록만 동기화`를 사용하세요.</p>
+        <p class="backup-status" id="githubStatus" role="status" aria-live="polite"></p>
+      </div>
     </section>
 
-    <p class="footer">오답 훈련센터 · 기록은 외부로 자동 전송되지 않습니다. 사용자가 백업 버튼을 누른 경우에만 파일로 저장됩니다.</p>
+    <p class="footer">오답 훈련센터 · 사용자가 저장 또는 동기화 버튼을 누른 경우에만 파일이나 GitHub로 기록을 보냅니다.</p>
   </main>
 
+  <script src="github-learning-sync.js"></script>
   <script>
     const SOURCES={
       practical:{label:'일반전표',file:'일반전표_기본연습_24문제.html',key:'tax-accounting-practical-journal-24-v2'},
@@ -312,10 +335,8 @@
     };
 
     const practicalMeta=[
-      ['유형자산 폐기','기계장치 폐기'],['유형자산 폐기','비품 폐기 및 철거비 지급'],
-      ['건설중인자산 완공','사옥 완공'],['건설중인자산 완공','생산설비 완공'],
-      ['무상 증여','대주주로부터 토지 증여'],['기부금','사회복지단체에 현금 기부'],
-      ['출장비','법인카드로 해외 항공권 결제'],['출장비','출장비 가지급'],['출장비','출장 후 정산'],
+      ['무상 증여','대주주로부터 토지 증여'],
+      ['출장비','법인카드로 해외 항공권 결제'],['출장비','출장 후 정산'],
       ['단기매매증권','주식 취득과 수수료'],['단기매매증권','단기매매증권 처분손실'],['단기매매증권','단기매매증권 처분이익'],
       ['정기예금 가입','정기예금 가입과 송금수수료'],['재해','화재로 제품 소실'],
       ['어음 발행','외상매입금 결제를 위한 약속어음 발행'],['어음 보관','외상매출금 회수 후 받을어음 보관'],
@@ -382,6 +403,9 @@
     let currentFilter='today';
     let currentSort='registered';
     let records=[];
+    const RESUME_LEARNING_SYNC_KEY='tax-accounting-resume-learning-sync';
+    const PRACTICAL_STATE_VERSION='general-journal-27-v1';
+    const PRACTICAL_OLD_TO_NEW={4:0,6:1,8:2,9:3,10:4,11:5,12:6,13:7,14:8,15:9,16:10,17:11,18:12,19:13,20:14,21:15,22:16,23:17,24:18,25:19,26:20,27:21,28:22,29:23,30:24,31:25,32:26};
 
     function localDateKey(date=new Date()){
       const y=date.getFullYear(),m=String(date.getMonth()+1).padStart(2,'0'),d=String(date.getDate()).padStart(2,'0');
@@ -391,8 +415,41 @@
       const [y,m,d]=key.split('-').map(Number);
       return new Intl.DateTimeFormat('ko-KR',{year:'numeric',month:'long',day:'numeric',weekday:'short'}).format(new Date(y,m-1,d));
     }
+    function normalizeState(sourceName,value){
+      const source=value&&typeof value==='object'?value:{};
+      let normalized={...source};
+      if(sourceName==='practical'){
+        const cards={};
+        if(source.schemaVersion===PRACTICAL_STATE_VERSION){
+          Object.entries(source.cards||{}).forEach(([index,card])=>{
+            const numberIndex=Number(index);
+            if(!Number.isInteger(numberIndex)||numberIndex<0)return;
+            cards[numberIndex]={...card};delete cards[numberIndex].note;
+          });
+        }else{
+          Object.entries(PRACTICAL_OLD_TO_NEW).forEach(([oldIndex,newIndex])=>{
+            const card=source.cards?.[oldIndex];if(!card)return;
+            cards[newIndex]={...card};delete cards[newIndex].note;
+          });
+        }
+        normalized={...source,schemaVersion:PRACTICAL_STATE_VERSION,cards};
+        if(typeof normalized.fileName==='string')normalized.fileName=normalized.fileName.replace('일반전표_33문제','일반전표_27문제');
+      }else if(sourceName==='theory'){
+        normalized={...source};delete normalized.notes;
+      }else{
+        const cards={};Object.entries(source.cards||{}).forEach(([index,card])=>{cards[index]={...card};delete cards[index].note});
+        normalized={...source,cards};
+      }
+      return normalized;
+    }
     function readState(key){
-      try{return JSON.parse(localStorage.getItem(key)||'{}')||{}}
+      try{
+        const raw=JSON.parse(localStorage.getItem(key)||'{}')||{};
+        const sourceName=Object.keys(SOURCES).find(name=>SOURCES[name].key===key);
+        const normalized=sourceName?normalizeState(sourceName,raw):raw;
+        if(sourceName&&JSON.stringify(normalized)!==JSON.stringify(raw))localStorage.setItem(key,JSON.stringify(normalized));
+        return normalized;
+      }
       catch(error){storageAvailable=false;return{}}
     }
     function writeState(key,value){
@@ -412,21 +469,33 @@
         const key=JSON.stringify(item);if(seen.has(key))return false;seen.add(key);return true;
       }).sort((a,b)=>Date.parse(a?.at||0)-Date.parse(b?.at||0));
     }
-    function joinedNote(first,second){
-      const a=String(first||'').trim(),b=String(second||'').trim();
-      if(!a)return b;if(!b||a===b)return a;
-      return `${a}\n\n[다른 기기에서 작성]\n${b}`;
+    function eventTime(value){const time=Date.parse(value||'');return Number.isFinite(time)?time:0}
+    function latestEventIso(...values){
+      let best='',bestTime=0;values.flat().forEach(value=>{const time=eventTime(value);if(time>bestTime){best=value;bestTime=time}});return best;
     }
-    function mergeCard(current,incoming,incomingNewer){
+    function resolveTrainingFlags(a,b,history,aUpdated,bUpdated){
+      const correctTimes=history.filter(item=>item?.correct===true).map(item=>item.at);
+      const passedAt=latestEventIso(a.passedAt,b.passedAt,correctTimes);
+      const archivedAt=latestEventIso(a.archivedAt,b.archivedAt);
+      const restoredAt=latestEventIso(a.trainingCenterRestored?a.restoredAt:'',b.trainingCenterRestored?b.restoredAt:'');
+      let passedTime=eventTime(passedAt),archivedTime=eventTime(archivedAt),restoredTime=eventTime(restoredAt);
+      if(!passedTime){if(a.passed||a.correct===true)passedTime=eventTime(aUpdated)||1;if(b.passed||b.correct===true)passedTime=Math.max(passedTime,eventTime(bUpdated)||1)}
+      if(!archivedTime){if(a.archived)archivedTime=eventTime(aUpdated)||1;if(b.archived)archivedTime=Math.max(archivedTime,eventTime(bUpdated)||1)}
+      if(!restoredTime){if(a.trainingCenterRestored)restoredTime=eventTime(aUpdated)||1;if(b.trainingCenterRestored)restoredTime=Math.max(restoredTime,eventTime(bUpdated)||1)}
+      const restoreWins=restoredTime>0&&restoredTime>=passedTime&&restoredTime>=archivedTime;
+      return{passed:restoreWins?false:Boolean(passedTime||a.passed||b.passed||a.correct===true||b.correct===true||correctInHistory(history)),archived:restoreWins?false:Boolean(archivedTime||a.archived||b.archived),trainingCenterRestored:restoreWins,passedAt,archivedAt,restoredAt};
+    }
+    function mergeCard(current,incoming,incomingNewer,currentUpdated,incomingUpdated){
       const a=(current&&typeof current==='object')?current:{},b=(incoming&&typeof incoming==='object')?incoming:{};
       const merged={...(incomingNewer?a:b),...(incomingNewer?b:a)};
       merged.history=uniqueHistory(a.history,b.history);
       merged.attempts=Math.max(number(a.attempts),number(b.attempts),merged.history.length);
       merged.wrongCount=Math.max(number(a.wrongCount),number(b.wrongCount),merged.history.filter(item=>item?.correct===false).length);
-      merged.passed=Boolean(a.passed||b.passed||a.correct===true||b.correct===true||correctInHistory(merged.history));
-      merged.archived=Boolean(a.archived||b.archived);
-      merged.note=joinedNote(a.note,b.note);
-      if(merged.passed)delete merged.trainingCenterRestored;
+      const flags=resolveTrainingFlags(a,b,merged.history,currentUpdated,incomingUpdated);
+      merged.passed=flags.passed;merged.archived=flags.archived;
+      if(flags.passedAt)merged.passedAt=flags.passedAt;if(flags.archivedAt)merged.archivedAt=flags.archivedAt;if(flags.restoredAt)merged.restoredAt=flags.restoredAt;
+      if(flags.trainingCenterRestored)merged.trainingCenterRestored=true;else delete merged.trainingCenterRestored;
+      delete merged.note;
       return merged;
     }
     function mergeMap(current,incoming,incomingNewer){return {...(incomingNewer?current:incoming),...(incomingNewer?incoming:current)}}
@@ -435,31 +504,36 @@
       const ids=new Set([...Object.keys(current.history||{}),...Object.keys(incoming.history||{}),...Object.keys(current.answers||{}),...Object.keys(incoming.answers||{})]);
       merged.answers=mergeMap(current.answers||{},incoming.answers||{},incomingNewer);
       merged.checked=mergeMap(current.checked||{},incoming.checked||{},incomingNewer);
-      merged.notes=mergeMap(current.notes||{},incoming.notes||{},incomingNewer);
+      delete merged.notes;
       merged.history={};merged.attempts={};merged.passed={};merged.archived={};
       merged.passedAt=mergeMap(current.passedAt||{},incoming.passedAt||{},incomingNewer);
       merged.archivedAt=mergeMap(current.archivedAt||{},incoming.archivedAt||{},incomingNewer);
+      merged.restoredAt=mergeMap(current.restoredAt||{},incoming.restoredAt||{},incomingNewer);
       merged.trainingCenterRestored=mergeMap(current.trainingCenterRestored||{},incoming.trainingCenterRestored||{},incomingNewer);
       ids.forEach(id=>{
         const history=uniqueHistory(current.history?.[id],incoming.history?.[id]);
         merged.history[id]=history;
         merged.attempts[id]=Math.max(number(current.attempts?.[id]),number(incoming.attempts?.[id]),history.length);
-        merged.passed[id]=Boolean(current.passed?.[id]||incoming.passed?.[id]||current.checked?.[id]===true||incoming.checked?.[id]===true||correctInHistory(history));
-        merged.archived[id]=Boolean(current.archived?.[id]||incoming.archived?.[id]);
-        merged.notes[id]=joinedNote(current.notes?.[id],incoming.notes?.[id]);
-        if(merged.passed[id])delete merged.trainingCenterRestored[id];
+        const flags=resolveTrainingFlags(
+          {passed:current.passed?.[id],correct:current.checked?.[id],archived:current.archived?.[id],trainingCenterRestored:current.trainingCenterRestored?.[id],passedAt:current.passedAt?.[id],archivedAt:current.archivedAt?.[id],restoredAt:current.restoredAt?.[id]},
+          {passed:incoming.passed?.[id],correct:incoming.checked?.[id],archived:incoming.archived?.[id],trainingCenterRestored:incoming.trainingCenterRestored?.[id],passedAt:incoming.passedAt?.[id],archivedAt:incoming.archivedAt?.[id],restoredAt:incoming.restoredAt?.[id]},
+          history,current.updatedAt,incoming.updatedAt
+        );
+        merged.passed[id]=flags.passed;merged.archived[id]=flags.archived;
+        if(flags.passedAt)merged.passedAt[id]=flags.passedAt;if(flags.archivedAt)merged.archivedAt[id]=flags.archivedAt;if(flags.restoredAt)merged.restoredAt[id]=flags.restoredAt;
+        if(flags.trainingCenterRestored)merged.trainingCenterRestored[id]=true;else delete merged.trainingCenterRestored[id];
       });
       return merged;
     }
     function mergeState(sourceName,current,incoming){
-      const a=(current&&typeof current==='object')?current:{},b=(incoming&&typeof incoming==='object')?incoming:{};
+      const a=normalizeState(sourceName,(current&&typeof current==='object')?current:{}),b=normalizeState(sourceName,(incoming&&typeof incoming==='object')?incoming:{});
       const incomingNewer=Date.parse(b.updatedAt||0)>=Date.parse(a.updatedAt||0);
       if(sourceName==='theory')return mergeTheory(a,b,incomingNewer);
       const merged={...(incomingNewer?a:b),...(incomingNewer?b:a)},cards={};
       const indexes=new Set([...Object.keys(a.cards||{}),...Object.keys(b.cards||{})]);
-      indexes.forEach(index=>{cards[index]=mergeCard(a.cards?.[index],b.cards?.[index],incomingNewer)});
+      indexes.forEach(index=>{cards[index]=mergeCard(a.cards?.[index],b.cards?.[index],incomingNewer,a.updatedAt,b.updatedAt)});
       merged.cards=cards;merged.startedAt=a.startedAt&&b.startedAt?(Date.parse(a.startedAt)<=Date.parse(b.startedAt)?a.startedAt:b.startedAt):(a.startedAt||b.startedAt);
-      merged.updatedAt=new Date().toISOString();return merged;
+      merged.updatedAt=new Date().toISOString();return normalizeState(sourceName,merged);
     }
     function backupPayload(){
       const states={};Object.entries(SOURCES).forEach(([name,source])=>{states[name]=readState(source.key)});
@@ -481,6 +555,65 @@
         });
         renderAll('다른 기기의 학습상태를 현재 기록과 합쳤습니다.');status.textContent='불러오기가 완료되었습니다. 기존 PC 기록과 전달받은 기록을 함께 보존했습니다.';
       }catch(error){status.textContent=`불러오지 못했습니다. ${error.message}`}
+    }
+    async function connectGitHub(){
+      const status=$('#githubStatus'),token=$('#githubToken').value,button=$('#githubConnect');
+      button.disabled=true;status.textContent='GitHub 학습기록 저장소를 확인하고 있습니다…';
+      try{
+        TrainingGitHub.setDeviceName($('#githubDeviceName').value);
+        await TrainingGitHub.connect(token);$('#githubToken').value='';
+        status.textContent='GitHub에 연결되었습니다. 토큰은 이 브라우저 세션이 끝나면 제거됩니다.';
+      }catch(error){status.textContent=`연결하지 못했습니다. ${error.message}`}
+      finally{button.disabled=false}
+    }
+    async function mergeLearningStateWithGitHub(){
+      const remote=await TrainingGitHub.getSyncState();
+      if(remote?.json?.states){
+        Object.entries(SOURCES).forEach(([name,source])=>{
+          if(remote.json.states[name]&&!writeState(source.key,mergeState(name,readState(source.key),remote.json.states[name])))throw new Error(`${source.label} 기록을 현재 브라우저에 저장하지 못해 안전하게 중단했습니다.`);
+        });
+      }
+      const merged=backupPayload();merged.syncedAt=new Date().toISOString();merged.device={id:TrainingGitHub.getDeviceId(),name:TrainingGitHub.getDeviceName()};
+      await TrainingGitHub.putSyncState(merged,remote?.sha||null);renderAll('GitHub와 현재 기기의 학습상태를 반영했습니다.');
+      return remote;
+    }
+    async function syncGitHub(){
+      const status=$('#githubStatus'),button=$('#githubSync');
+      if(!TrainingGitHub.hasToken()){status.textContent='먼저 제한 토큰을 입력하고 GitHub 연결을 눌러주세요.';return false}
+      button.disabled=true;status.textContent='PC·모바일 학습 이력을 안전하게 합치고 있습니다…';
+      try{
+        const remote=await mergeLearningStateWithGitHub();
+        status.textContent=remote?'학습기록 동기화를 완료했습니다. 양쪽의 고유 채점 이력을 합쳐 보존했습니다.':'첫 학습상태를 GitHub에 안전하게 저장했습니다.';
+        return true;
+      }catch(error){status.textContent=`학습기록을 동기화하지 못했습니다. 현재 기기의 기록은 그대로 보존됩니다. ${error.message}`;return false}
+      finally{button.disabled=false}
+    }
+    async function syncAllGitHub(){
+      const status=$('#githubStatus'),button=$('#githubAllSync');
+      if(!TrainingGitHub.hasToken()){status.textContent='먼저 제한 토큰을 입력하고 GitHub 연결을 눌러주세요.';return}
+      button.disabled=true;
+      let programCompleted='';
+      try{
+        status.textContent='PC와 GitHub의 새 문제·프로그램 버전을 먼저 안전하게 비교합니다. 오답 훈련센터 폴더를 선택해 주세요.';
+        const directory=await TrainingGitHub.pickProgramDirectory(),plan=await TrainingGitHub.planProgramSync(directory);
+        if(plan.direction==='conflict'){status.textContent=`새 문제·프로그램의 자동 덮어쓰기를 중단했습니다. 학습기록도 안전을 위해 아직 전송하지 않았습니다. ${plan.reason}`;return}
+        if(plan.direction!=='none'){
+          const detail=plan.differences.length?`\n\n대상 파일: ${plan.differences.join(', ')}`:'';
+          if(!confirm(`${plan.reason}\n\n${plan.confirmationMessage}${detail}`)){status.textContent='새 문제·프로그램과 학습기록 동기화를 모두 취소했습니다.';return}
+          status.textContent=plan.direction==='pc-to-github'?'PC에 새로 추가된 문제와 프로그램을 GitHub에 올리고 있습니다…':'GitHub의 최신 문제와 프로그램을 선택한 PC 폴더에 적용하고 있습니다…';
+          const result=await TrainingGitHub.executeProgramSync(plan,{confirmed:true});programCompleted=result.message;
+          if(result.direction==='github-to-pc'){
+            try{sessionStorage.setItem(RESUME_LEARNING_SYNC_KEY,'1')}catch(error){}
+            status.textContent=`${result.message} 최신 화면으로 새로고침한 뒤 학습기록 동기화를 자동으로 이어갑니다.`;
+            setTimeout(()=>location.reload(),1500);return;
+          }
+        }
+        status.textContent=`${programCompleted?programCompleted+' ':''}이제 PC·모바일 학습기록을 합치고 있습니다…`;
+        const remote=await mergeLearningStateWithGitHub();
+        const learningMessage=remote?'양쪽의 고유 채점 이력을 합쳐 보존했습니다.':'첫 학습상태를 GitHub에 저장했습니다.';
+        status.textContent=`${programCompleted?programCompleted+' ':''}${learningMessage}${programCompleted?' GitHub Pages 반영에는 잠시 시간이 걸릴 수 있습니다.':''}`;
+      }catch(error){status.textContent=`${programCompleted?programCompleted+' ':''}동기화를 마치지 못했습니다. 아직 반영되지 않은 PC 파일과 학습기록은 안전하게 보존됩니다. ${error.message}`}
+      finally{button.disabled=false}
     }
 
     function buildRecords(){
@@ -600,8 +733,9 @@
         root.passed=(root.passed&&typeof root.passed==='object')?root.passed:{};
         root.archived=(root.archived&&typeof root.archived==='object')?root.archived:{};
         root.trainingCenterRestored=(root.trainingCenterRestored&&typeof root.trainingCenterRestored==='object')?root.trainingCenterRestored:{};
+        root.restoredAt=(root.restoredAt&&typeof root.restoredAt==='object')?root.restoredAt:{};
         root.passed[id]=false;root.archived[id]=false;
-        root.trainingCenterRestored[id]=true;
+        root.trainingCenterRestored[id]=true;root.restoredAt[id]=new Date().toISOString();
       }else{
         root.cards=(root.cards&&typeof root.cards==='object')?root.cards:{};
         const record=records.find(item=>item.source===sourceName&&String(item.id)===String(id));
@@ -609,7 +743,7 @@
         if(!Number.isInteger(index))return;
         root.cards[index]=(root.cards[index]&&typeof root.cards[index]==='object')?root.cards[index]:{};
         root.cards[index].passed=false;root.cards[index].archived=false;
-        root.cards[index].trainingCenterRestored=true;
+        root.cards[index].trainingCenterRestored=true;root.cards[index].restoredAt=new Date().toISOString();
       }
       root.updatedAt=new Date().toISOString();
       if(writeState(source.key,root))renderAll('문제를 훈련 목록으로 복원했습니다. 기존 채점 이력과 오답 횟수는 그대로 보존됩니다.');
@@ -625,6 +759,12 @@
     $('#refreshData').addEventListener('click',()=>renderAll('최신 학습기록을 불러왔습니다.'));
     $('#exportBackup').addEventListener('click',downloadBackup);
     $('#importBackup').addEventListener('change',event=>{const file=event.target.files?.[0];if(file)importBackupFile(file);event.target.value=''});
+    $('#githubDeviceName').value=TrainingGitHub.getDeviceName();
+    $('#githubDeviceName').addEventListener('change',event=>TrainingGitHub.setDeviceName(event.target.value));
+    $('#githubConnect').addEventListener('click',connectGitHub);
+    $('#githubSync').addEventListener('click',syncGitHub);
+    $('#githubAllSync').addEventListener('click',syncAllGitHub);
+    $('#githubDisconnect').addEventListener('click',()=>{TrainingGitHub.clearToken();$('#githubToken').value='';$('#githubStatus').textContent='GitHub 연결 정보를 이 브라우저 세션에서 제거했습니다.'});
     $('#sortOrder').addEventListener('change',event=>{currentSort=event.target.value;renderTraining();$('#liveStatus').textContent=`${event.target.options[event.target.selectedIndex].text}으로 정렬했습니다.`});
     $('#archiveList').addEventListener('click',event=>{
       const button=event.target.closest('[data-restore]');if(!button)return;
@@ -635,6 +775,11 @@
     window.addEventListener('focus',()=>renderAll());
     document.addEventListener('visibilitychange',()=>{if(!document.hidden)renderAll()});
     renderAll();
+    try{
+      if(sessionStorage.getItem(RESUME_LEARNING_SYNC_KEY)==='1'&&TrainingGitHub.hasToken()){
+        sessionStorage.removeItem(RESUME_LEARNING_SYNC_KEY);setTimeout(syncGitHub,200);
+      }
+    }catch(error){}
   </script>
 </body>
 </html>

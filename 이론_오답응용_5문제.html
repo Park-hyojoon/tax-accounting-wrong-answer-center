@@ -9,8 +9,8 @@
     *{box-sizing:border-box}
     html{scroll-behavior:smooth}
     body{margin:0;background:linear-gradient(135deg,#f5fbff 0%,#fffdf3 100%);color:var(--ink);font-family:"Malgun Gothic","Apple SD Gothic Neo",sans-serif;font-size:18px;line-height:1.65}
-    button,input,textarea{font:inherit}
-    input[type="text"],textarea{ime-mode:active}
+    button,input{font:inherit}
+    input[type="text"]{ime-mode:active}
     .wrap{width:min(1080px,94vw);margin:30px auto 80px}
     .category-nav{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:0 0 16px;padding:12px;background:#fff;border:2px solid #d5e6f3;border-radius:17px;box-shadow:0 7px 22px rgba(44,91,128,.07)}
     .category-nav strong{color:var(--navy);padding:0 7px}
@@ -51,9 +51,7 @@
     details summary{cursor:pointer;padding:11px 15px;font-weight:900;color:#684d00;list-style:none}
     details summary::-webkit-details-marker{display:none}
     .detail-body{padding:9px 16px 16px;border-top:1px solid #eee3bd}
-    .note-label{display:block;margin-top:15px;color:var(--navy);font-weight:900}
-    textarea{display:block;width:100%;min-height:95px;margin-top:7px;padding:12px 14px;border:2px solid #cad9e4;border-radius:12px;resize:vertical;background:#fff}
-    textarea:focus,input[type="text"]:focus{outline:3px solid #bde1fb;border-color:#4b98d3}
+    input[type="text"]:focus{outline:3px solid #bde1fb;border-color:#4b98d3}
     .save-panel{margin:34px 0;background:#fff;border:2px solid #bcdcca;border-radius:22px;padding:25px;box-shadow:0 9px 28px rgba(32,114,81,.08)}
     .save-panel h2{margin-top:0}
     .path{display:flex;align-items:center;gap:9px;flex-wrap:wrap;padding:12px 14px;background:#eef9f4;border-radius:12px;color:#185f47;font-weight:800;word-break:break-all}
@@ -83,7 +81,7 @@
       <h1>이론 오답 응용연습</h1>
       <p><strong>전산회계 1급 이론 · 오답 유형별 1문제 · 총 5문제</strong></p>
       <p>전달해 주신 문제의 핵심 개념을 유지하면서 숫자와 보기 구성을 바꾼 응용문제입니다.</p>
-      <div class="notice">선택 답과 오답 메모는 이 브라우저에 자동 저장됩니다. 풀이가 끝나면 학습기록을 Markdown 파일로 저장하여 나중에 AI에게 전달할 수 있습니다.</div>
+      <div class="notice">선택 답과 채점 이력은 이 브라우저에 자동 저장됩니다. 오늘 채점한 내용만 Markdown 파일로 저장하여 나중에 AI에게 전달할 수 있습니다.</div>
     </section>
 
     <div class="dashboard">
@@ -98,17 +96,16 @@
 
     <section class="save-panel" id="savePanel">
       <h2>학습기록 저장</h2>
-      <p>처음 저장할 때 아래 폴더를 선택하세요. 파일에는 풀이 이력과 오답 메모, 핵심 해설이 함께 들어갑니다.</p>
+      <p>오늘 채점한 문제와 오늘의 답변 이력, 정답 및 핵심 해설만 Markdown 파일로 저장합니다.</p>
       <div class="path"><span>D:\00. 학습센터\기출문제 연습코너\또 틀렸다!</span><button class="btn secondary" id="copyPath" type="button">폴더 경로 복사</button></div>
       <div class="filename-row">
         <input type="text" id="fileName" lang="ko" data-ko-auto aria-label="저장 파일 이름">
-        <button class="btn green" id="saveAll" type="button">전체 학습기록 저장</button>
-        <button class="btn" id="saveWrong" type="button">오답 기록만 저장</button>
+        <button class="btn green" id="saveToday" type="button">오늘 학습기록 저장</button>
       </div>
       <div class="checks">
         <label><input type="checkbox" id="koAuto" checked> 영문 자판 입력을 두벌식 한글로 자동 변환</label>
       </div>
-      <p class="help">파일 이름에 확장자를 쓰지 않아도 자동으로 <strong>.md</strong>가 붙습니다. 저장 창이 열리면 위의 ‘또 틀렸다!’ 폴더를 선택하세요.</p>
+      <p class="help">GitHub가 연결되어 있으면 오늘 기록을 GitHub에 저장합니다. 연결되지 않았거나 저장에 실패하면 이 기기에 Markdown 파일로 저장합니다.</p>
       <p class="save-status" id="saveStatus" aria-live="polite"></p>
       <button class="btn danger" id="resetProgress" type="button">이 문제의 저장된 풀이 기록 초기화</button>
     </section>
@@ -116,6 +113,7 @@
     <p class="footer">학습기록은 사용자 컴퓨터에만 저장되며 외부로 자동 전송되지 않습니다.</p>
   </main>
 
+  <script src="github-learning-sync.js"></script>
   <script>
     const problems=[
       {
@@ -204,10 +202,7 @@
         ${p.data?`<div class="data-box">${p.data}</div>`:''}
         <div class="choices">${p.choices.map((c,n)=>`<label class="choice"><input type="radio" name="q-${p.id}" value="${n}" ${Number(selected)===n?'checked':''}><span class="choice-number">${circled[n]}</span><span>${c}</span></label>`).join('')}</div>
         <div class="actions"><button class="btn check-one" type="button">채점하기</button><button class="btn secondary archive-one" type="button">이 문제 지우기</button><span class="result" aria-live="polite"></span><span class="attempt"></span></div>
-        <details><summary>힌트 보기</summary><div class="detail-body">${p.hint}</div></details>
         <details><summary>정답 · 해설 보기</summary><div class="detail-body"><p><strong>정답: ${circled[p.answer]} ${p.choices[p.answer]}</strong></p><p>${p.explanation}</p><p><strong>핵심:</strong> ${p.key}</p></div></details>
-        <label class="note-label" for="note-${p.id}">나의 오답 메모</label>
-        <textarea id="note-${p.id}" lang="ko" data-ko-auto placeholder="헷갈린 이유, 외울 기준, 다시 볼 내용을 한글로 적어보세요.">${escapeHtml(state.notes[p.id]||'')}</textarea>
       </article>`
     }
     function escapeHtml(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
@@ -224,7 +219,7 @@
       card.hidden=Boolean((state.passed[id]&&!sessionPassed.has(id))||state.archived[id]||(todayView&&card.dataset.addedDate!==localDate()));
       card.classList.toggle('correct',checked===true);card.classList.toggle('wrong',checked===false);
       result.className='result'+(checked===true?' ok':checked===false?' no':'');
-      result.textContent=checked===true?'정답입니다! 통과 처리되어 다음 방문부터 숨겨집니다.':checked===false?`오답입니다. 힌트를 확인하고 다시 풀어보세요.`:state.answers[id]!==undefined?'선택 내용이 자동 저장되었습니다.':'';
+      result.textContent=checked===true?'정답입니다! 통과 처리되어 다음 방문부터 숨겨집니다.':checked===false?`오답입니다. 다시 풀거나 정답·해설을 확인해보세요.`:state.answers[id]!==undefined?'선택 내용이 자동 저장되었습니다.':'';
       $('.attempt',card).textContent=`채점 ${attempts}회 · 틀림 ${wrongCount(id)}회`;
     }
     $$('.question').forEach(card=>{
@@ -232,7 +227,6 @@
       $$('input[type="radio"]',card).forEach(r=>r.addEventListener('change',()=>{state.answers[id]=Number(r.value);delete state.checked[id];persist();renderCard(card)}));
       $('.check-one',card).addEventListener('click',()=>grade(card));
       $('.archive-one',card).addEventListener('click',()=>{if(!confirm('이 문제를 훈련 목록에서 숨길까요? 학습 이력은 보관함에 남으며 센터 홈에서 복원할 수 있습니다.'))return;state.archived[id]=true;state.archivedAt[id]=nowIso();delete state.trainingCenterRestored[id];persist();card.hidden=true;updateDashboard()});
-      $('textarea',card).addEventListener('input',e=>{state.notes[id]=e.target.value;persist()});
       renderCard(card);
     });
 
@@ -271,55 +265,61 @@
       name=name.replace(/\.md$/i,'');return `${name}${suffix}.md`
     }
     function fmtDate(iso){try{return new Intl.DateTimeFormat('ko-KR',{dateStyle:'medium',timeStyle:'medium'}).format(new Date(iso))}catch(e){return iso}}
-    function buildMarkdown(onlyWrong=false){
-      const list=onlyWrong?problems.filter(p=>wrongCount(p.id)>0||state.checked[p.id]===false):problems;
-      const solved=problems.filter(p=>(state.attempts[p.id]||0)>0).length;
-      const correct=problems.filter(p=>state.checked[p.id]===true).length;
-      const totalWrong=problems.reduce((n,p)=>n+wrongCount(p.id),0);
+    function isToday(iso){
+      const d=new Date(iso);if(Number.isNaN(d.getTime()))return false;
+      return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`===localDate()
+    }
+    function todayRecords(){return problems.map(p=>({p,history:(state.history[p.id]||[]).filter(h=>isToday(h.at))})).filter(x=>x.history.length)}
+    function buildMarkdown(list=todayRecords()){
+      const attempts=list.reduce((n,x)=>n+x.history.length,0);
+      const correct=list.reduce((n,x)=>n+x.history.filter(h=>h.correct).length,0);
+      const totalWrong=attempts-correct;
       const lines=[
-        '# 전산회계 1급 이론 학습기록','',
-        `- 학습 시작: ${fmtDate(state.startedAt)}`,
-        `- 마지막 저장: ${fmtDate(nowIso())}`,
-        `- 채점한 문제: ${solved}/${problems.length}`,
-        `- 현재 정답: ${correct}/${problems.length}`,
-        `- 누적 오답 횟수: ${totalWrong}`,
-        `- 기록 범위: ${onlyWrong?'한 번 이상 틀린 문제':'전체 문제'}`,'',
-        '## 자주 틀린 유형',''
+        '# 전산회계 1급 이론 오늘 학습기록','',
+        `- 학습일: ${localDate()}`,
+        `- 저장 시각: ${fmtDate(nowIso())}`,
+        `- 오늘 채점한 문제: ${list.length}문제`,
+        `- 오늘 채점 시도: ${attempts}회`,
+        `- 오늘 정답 시도: ${correct}회`,
+        `- 오늘 오답 시도: ${totalWrong}회`,
+        '- 기록 범위: 오늘 채점한 문제와 오늘의 답변 이력',''
       ];
-      const ranked=problems.map(p=>({p,n:wrongCount(p.id)})).filter(x=>x.n>0).sort((a,b)=>b.n-a.n);
-      if(ranked.length)ranked.forEach(x=>lines.push(`- ${x.p.type}: ${x.n}회 틀림`));else lines.push('- 아직 기록된 오답이 없습니다.');
-      lines.push('');
-      if(!list.length)lines.push('## 오답 문제','', '- 아직 저장할 오답이 없습니다.','');
-      list.forEach((p,i)=>{
-        const selected=state.answers[p.id],history=state.history[p.id]||[],checked=state.checked[p.id];
+      list.forEach(({p,history},i)=>{
+        const last=history[history.length-1];
         lines.push(`## ${i+1}. ${p.type}`,'',`**문제:** ${p.prompt}`,'');
         if(p.data)lines.push('**자료:**','',...p.data.split('\n').map(x=>`- ${x}`),'');
         p.choices.forEach((c,n)=>lines.push(`- ${circled[n]} ${c}`));
-        lines.push('',`- 훈련 상태: ${state.archived[p.id]?'사용자가 숨긴 문제':state.passed[p.id]?'통과':'학습 중'}`,`- 현재 선택: ${choiceText(p,selected)}`,`- 정답: ${choiceText(p,p.answer)}`,`- 현재 결과: ${checked===true?'정답':checked===false?'오답':'미채점'}`,`- 총 채점 횟수: ${state.attempts[p.id]||0}회`,`- 틀린 횟수: ${wrongCount(p.id)}회`,'');
-        lines.push('**답변 이력:**');
-        if(history.length)history.forEach((h,n)=>lines.push(`- ${n+1}차 (${fmtDate(h.at)}): ${choiceText(p,h.choice)} → ${h.correct?'정답':'오답'}`));else lines.push('- 아직 채점 이력이 없습니다.');
-        lines.push('',`**나의 오답 메모:** ${state.notes[p.id]?.trim()||'작성하지 않음'}`,'',`**핵심 학습 내용:** ${p.key}`,'',`**해설:** ${p.explanation}`,'','---','');
+        lines.push('',`- 오늘 마지막 선택: ${choiceText(p,last.choice)}`,`- 정답: ${choiceText(p,p.answer)}`,`- 오늘 마지막 결과: ${last.correct?'정답':'오답'}`,`- 오늘 채점 횟수: ${history.length}회`,`- 오늘 틀린 횟수: ${history.filter(h=>!h.correct).length}회`,'','**오늘 답변 이력:**');
+        history.forEach((h,n)=>lines.push(`- ${n+1}차 (${fmtDate(h.at)}): ${choiceText(p,h.choice)} → ${h.correct?'정답':'오답'}`));
+        lines.push('',`**핵심 학습 내용:** ${p.key}`,'',`**해설:** ${p.explanation}`,'','---','');
       });
-      lines.push('## AI에게 전달할 요청 예시','', '> 이 학습기록에서 틀린 횟수가 많은 유형을 우선 분석하고, 내가 적은 오답 메모를 반영하여 전산회계 1급 수준의 응용문제를 유형별로 만들어 주세요. 원본 문제의 핵심 구조는 유지하되 숫자와 보기를 바꾸고, 정답과 해설은 처음에는 숨겨 주세요.','');
+      lines.push('## AI에게 전달할 요청 예시','', '> 오늘 학습기록에서 틀린 문제와 헷갈린 개념을 분석하고, 전산회계 1급 수준의 응용문제를 만들어 주세요. 원본 문제의 핵심 구조는 유지하되 숫자와 보기를 바꾸고, 정답과 해설은 처음에는 숨겨 주세요.','');
       return lines.join('\n')
     }
-    async function saveRecord(onlyWrong){
-      const suffix=onlyWrong?'_오답만':'';
-      const name=safeFileName($('#fileName').value,suffix),content=buildMarkdown(onlyWrong),status=$('#saveStatus');
+    function todayRecordPayload(){const list=todayRecords();return list.length?{date:localDate(),fileName:safeFileName($('#fileName').value,'_오늘'),content:buildMarkdown(list),problemCount:list.length}:null}
+    async function saveTodayRecord(){
+      const payload=todayRecordPayload(),status=$('#saveStatus');
+      if(!payload){status.textContent='오늘 채점한 학습 기록이 없습니다. 문제를 채점한 뒤 저장해 주세요.';return}
+      const name=payload.fileName,content=payload.content;
+      let fallbackMessage='';
+      if(window.TrainingGitHub?.hasToken?.()){
+        status.textContent='오늘 학습기록을 GitHub에 저장하고 있습니다.';
+        try{await window.TrainingGitHub.saveDailyRecord('theory',payload.date,content);status.textContent='오늘 이론 학습기록을 GitHub에 저장했습니다.';return}
+        catch(error){fallbackMessage=`GitHub 저장에 실패하여 이 기기에 저장합니다. (${error?.message||'연결 오류'}) `}
+      }
       try{
         if('showSaveFilePicker' in window){
           const handle=await window.showSaveFilePicker({suggestedName:name,types:[{description:'Markdown 학습기록',accept:{'text/markdown':['.md']}}]});
-          const writable=await handle.createWritable();await writable.write(content);await writable.close();status.textContent=`${handle.name} 파일로 저장했습니다.`;return
+          const writable=await handle.createWritable();await writable.write(content);await writable.close();status.textContent=`${fallbackMessage}${handle.name} 파일로 저장했습니다.`;return
         }
       }catch(e){if(e.name==='AbortError'){status.textContent='저장을 취소했습니다.';return}}
       const blob=new Blob([content],{type:'text/markdown;charset=utf-8'}),a=document.createElement('a');
       a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),1000);
-      status.textContent=`${name} 다운로드를 시작했습니다. 다운로드된 파일을 ‘또 틀렸다!’ 폴더에 보관해 주세요.`
+      status.textContent=`${fallbackMessage}${name} 다운로드를 시작했습니다. 다운로드된 파일을 ‘또 틀렸다!’ 폴더에 보관해 주세요.`
     }
-    $('#saveAll').addEventListener('click',()=>saveRecord(false));
-    $('#saveWrong').addEventListener('click',()=>saveRecord(true));
+    $('#saveToday').addEventListener('click',saveTodayRecord);
     $('#resetProgress').addEventListener('click',()=>{
-      if(!confirm('이 문제의 선택 답, 채점 이력, 오답 메모를 모두 지울까요?'))return;
+      if(!confirm('이 문제의 선택 답과 채점 이력을 모두 지울까요?'))return;
       const keepName=$('#fileName').value;state=defaultState();state.fileName=keepName;localStorage.setItem(STORAGE_KEY,JSON.stringify(state));location.reload()
     });
 
