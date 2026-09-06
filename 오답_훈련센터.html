@@ -38,39 +38,32 @@
     .skip-link{position:absolute;left:-9999px;top:0;background:#fff;padding:10px;z-index:10}
     .skip-link:focus{left:12px;top:12px}
     .hero{
-      padding:34px 20px 30px;
+      padding:16px 20px;
       background:
         radial-gradient(circle at 88% 8%,rgba(255,237,153,.7),transparent 25%),
         linear-gradient(135deg,#1172c9,#22a7a0);
       color:#fff;
     }
     .hero-inner,.nav-inner,main{max-width:1180px;margin:0 auto}
-    .eyebrow{margin:0 0 3px;font-weight:800;letter-spacing:.06em;color:#d9fbff}
-    h1{margin:0;font-size:clamp(2rem,4.3vw,3.15rem);line-height:1.18;letter-spacing:-.045em}
-    .hero-copy{max-width:790px;margin:13px 0 0;font-size:1.05rem;color:#f1ffff}
-    .hero-top{display:flex;align-items:flex-start;justify-content:space-between;gap:22px;flex-wrap:wrap}
-    .hero-head{flex:1 1 460px;min-width:0}
-    .hero-sync{flex:0 0 auto;width:min(310px,100%);display:grid;gap:8px;padding:14px;border-radius:18px;background:rgba(255,255,255,.16);border:2px solid rgba(255,255,255,.42);backdrop-filter:blur(6px)}
-    .hero-sync-title{margin:0;font-size:1.15rem;letter-spacing:.02em;text-align:center}
-    .hero-sync-button{display:grid;gap:2px;width:100%;padding:10px 13px;border:2px solid rgba(255,255,255,.55);border-radius:13px;background:rgba(255,255,255,.95);color:#0f4f86;font:inherit;text-align:left;cursor:pointer}
-    .hero-sync-button:hover:not(:disabled){background:#fff;border-color:#fff;transform:translateY(-1px)}
-    .hero-sync-button:focus-visible{outline:3px solid #ffe680;outline-offset:2px}
-    .hero-sync-button:disabled{opacity:.62;cursor:progress}
-    .hero-sync-arrow{font-weight:900;font-size:1.02rem}
-    .hero-sync-note{font-size:.83rem;font-weight:700;color:#3a6f9c}
-    .hero-sync-status{margin:0;font-size:.85rem;font-weight:700;color:#f2ffff;word-break:keep-all}
-    .privacy{
-      display:inline-flex;align-items:center;gap:7px;margin-top:17px;padding:7px 13px;
-      border-radius:999px;background:rgba(255,255,255,.17);font-size:.9rem;font-weight:700
-    }
+    .eyebrow{margin:0 0 2px;font-weight:800;letter-spacing:.06em;color:#d9fbff;font-size:.85rem}
+    h1{margin:0;font-size:clamp(1.5rem,3vw,2.15rem);line-height:1.2;letter-spacing:-.03em}
     .top-nav{position:sticky;top:0;z-index:5;background:rgba(255,255,255,.96);border-bottom:1px solid var(--line);box-shadow:0 5px 20px rgba(31,79,119,.08);backdrop-filter:blur(12px)}
-    .nav-inner{display:flex;gap:9px;padding:11px 20px;overflow-x:auto}
+    .nav-inner{display:flex;flex-wrap:wrap;align-items:center;gap:9px;padding:11px 20px}
     .nav-link{
       flex:0 0 auto;text-decoration:none;border:2px solid #d2e4f2;border-radius:13px;
       padding:8px 16px;background:#fff;color:#34546d;font-weight:800
     }
     .nav-link:hover,.nav-link:focus-visible{border-color:#68a9df;background:#edf8ff;outline:none}
     .nav-link.active{background:var(--blue);border-color:var(--blue);color:#fff}
+    .nav-sync{display:flex;align-items:center;gap:8px;margin-left:auto;padding:5px 9px;border:2px solid var(--line);border-radius:14px;background:var(--blue-soft)}
+    .nav-sync-title{font-weight:900;color:var(--ink);letter-spacing:.02em}
+    .nav-sync-button{min-height:40px;padding:6px 13px;border:2px solid var(--line);border-radius:11px;background:#fff;color:var(--ink);font:inherit;font-weight:900;font-size:.9em;cursor:pointer}
+    .nav-sync-button:hover:not(:disabled){border-color:var(--blue);background:#edf8ff}
+    .nav-sync-button:focus-visible{outline:3px solid #bde1fb;outline-offset:2px}
+    .nav-sync-button:disabled{opacity:.6;cursor:progress}
+    .nav-sync-status{flex:1 1 100%;margin:0;font-size:.85em;font-weight:800;color:var(--muted);word-break:keep-all}
+    .nav-sync-status:empty{display:none}
+    @media(max-width:760px){.nav-sync{width:100%;margin-left:0;flex-wrap:wrap}.nav-sync-button{flex:1 1 auto}}
     main{padding:28px 20px 64px}
     .notice{
       display:flex;gap:12px;align-items:flex-start;margin-bottom:22px;padding:16px 18px;
@@ -186,18 +179,8 @@
   <a class="skip-link" href="#main">본문으로 바로가기</a>
   <header class="hero">
     <div class="hero-inner">
-      <div class="hero-top">
-        <div class="hero-head">
-          <p class="eyebrow">오늘 틀린 문제에 집중하는 학습 공간</p>
-          <h1>전산회계 1급 오답 훈련센터</h1>
-        </div>
-        <section class="hero-sync" aria-label="문제·프로그램 동기화">
-          <h2 class="hero-sync-title">Sync</h2>
-          <button class="hero-sync-button" id="syncPcToGithub" type="button"><span class="hero-sync-arrow">PC → GitHub</span><span class="hero-sync-note">내 PC의 새 문제를 올리기</span></button>
-          <button class="hero-sync-button" id="syncGithubToPc" type="button"><span class="hero-sync-arrow">GitHub → PC</span><span class="hero-sync-note">GitHub의 최신 문제 내려받기</span></button>
-          <p class="hero-sync-status" id="heroSyncStatus" role="status" aria-live="polite">GitHub를 연결하면 사용할 수 있습니다.</p>
-        </section>
-      </div>
+      <p class="eyebrow">오늘 틀린 문제에 집중하는 학습 공간</p>
+      <h1>전산회계 1급 오답 훈련센터</h1>
     </div>
   </header>
 
@@ -208,6 +191,12 @@
       <a class="nav-link" href="이론_오답응용_5문제.html">이론 오답</a>
       <a class="nav-link" href="결산정리사항_연습_7문제.html">결산 정리사항</a>
       <a class="nav-link" href="매입매출전표_오답연습_3문제.html?view=all">매입매출전표 입력</a>
+      <div class="nav-sync" aria-label="문제·프로그램 동기화">
+        <span class="nav-sync-title">Sync</span>
+        <button class="nav-sync-button" id="syncPcToGithub" type="button" title="내 PC의 새 문제와 프로그램을 GitHub에 올립니다">PC → GitHub</button>
+        <button class="nav-sync-button" id="syncGithubToPc" type="button" title="GitHub의 최신 문제와 프로그램을 이 PC 폴더에 내려받습니다">GitHub → PC</button>
+        <p class="nav-sync-status" id="heroSyncStatus" role="status" aria-live="polite"></p>
+      </div>
     </div>
   </nav>
 
@@ -593,7 +582,7 @@
     }
     function heroSyncButtons(){return [$('#syncPcToGithub'),$('#syncGithubToPc')]}
     function refreshHeroSync(){
-      $('#heroSyncStatus').textContent=window.TrainingGitHub?.hasToken()?'GitHub에 연결되어 있습니다. 보낼 방향을 고르세요.':'GitHub를 연결하면 사용할 수 있습니다.';
+      $('#heroSyncStatus').textContent=window.TrainingGitHub?.hasToken()?'GitHub에 연결되어 있습니다. 보낼 방향을 고르세요.':'';
     }
     function runHeroSync(intent){
       if(typeof window.TrainingGitHub?.runDirectionalSync!=='function'){$('#heroSyncStatus').textContent='동기화 기능을 불러오지 못했습니다. Ctrl+F5로 새로고침한 뒤 다시 눌러주세요.';return}
