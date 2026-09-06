@@ -24,6 +24,10 @@
     .notice{margin-top:16px;padding:14px 17px;border-radius:13px;background:var(--yellow);font-weight:800}
     .dashboard{position:sticky;top:8px;z-index:10;margin:18px 0;background:rgba(247,252,255,.95);backdrop-filter:blur(8px);border:1px solid #d5e6f2;border-radius:17px;padding:13px;display:flex;flex-wrap:wrap;align-items:center;gap:12px}
     .stat{background:#fff;border:1px solid var(--line);border-radius:12px;padding:8px 14px;font-weight:900;color:var(--navy)}
+    .sort-label{display:flex;align-items:center;gap:8px;margin-left:auto;font-weight:900;color:var(--navy)}
+    .sort-select{border:2px solid var(--line);border-radius:12px;background:#fff;color:var(--navy);font-weight:800;font-size:inherit;padding:9px 12px;cursor:pointer}
+    .sort-select:focus-visible{border-color:#5d9ed2;outline:none}
+    @media(max-width:760px){.sort-label{width:100%;margin-left:0;align-items:stretch;flex-direction:column;gap:5px}.sort-select{width:100%}}
     .btn{border:0;border-radius:12px;padding:10px 17px;cursor:pointer;font-weight:900;color:#fff;background:var(--blue);box-shadow:0 4px 12px rgba(45,120,197,.2)}
     .btn:hover{filter:brightness(.96);transform:translateY(-1px)}
     .btn.green{background:var(--green)}
@@ -90,6 +94,15 @@
       <span class="stat" id="wrongStat">누적 오답 0</span>
       <button class="btn green" id="checkAll" type="button">선택한 문제 전체 채점</button>
       <button class="btn secondary" id="goSave" type="button">학습기록 저장으로 이동</button>
+      <label class="sort-label" for="sortOrder">정렬
+        <select class="sort-select" id="sortOrder">
+          <option value="registered">등록 순서</option>
+          <option value="wrong">오답 많은 순</option>
+          <option value="unattempted">아직 안 푼 문제 우선</option>
+          <option value="recentAttempt">최근에 푼 순</option>
+          <option value="recentRegistered">최근 등록 순</option>
+        </select>
+      </label>
     </div>
 
     <section id="questions" aria-label="이론 문제"></section>
@@ -251,6 +264,16 @@
       let empty=$('#emptyState');if(!empty){empty=document.createElement('p');empty.id='emptyState';empty.className='notice';$('#questions').before(empty)}empty.hidden=visible.length>0;empty.textContent='현재 노출할 문제가 없습니다. 통과·숨김 문제는 센터 홈의 보관함에서 확인할 수 있습니다.';
     }
     updateDashboard();
+    const questionOrder=$$('.question').map((card,index)=>({card,index}));
+    function sortKeys(entry){const id=entry.card.dataset.id,history=state.history[id]||[],last=history.length?Date.parse(history[history.length-1].at)||0:0;return{...entry,wrong:wrongCount(id),attempts:state.attempts[id]||0,last,added:entry.card.dataset.addedDate||''}}
+    function applySort(){const mode=$('#sortOrder').value,list=questionOrder.map(sortKeys);list.sort((a,b)=>{
+      if(mode==='wrong')return b.wrong-a.wrong||b.attempts-a.attempts||a.index-b.index;
+      if(mode==='unattempted')return Number(a.attempts>0)-Number(b.attempts>0)||a.index-b.index;
+      if(mode==='recentAttempt')return b.last-a.last||a.index-b.index;
+      if(mode==='recentRegistered')return b.added.localeCompare(a.added)||b.index-a.index;
+      return a.index-b.index});
+      const box=$('#questions');list.forEach(x=>box.appendChild(x.card))}
+    $('#sortOrder').addEventListener('change',applySort);
     $('#checkAll').addEventListener('click',()=>{$$('.question').filter(c=>!c.hidden&&state.answers[c.dataset.id]!==undefined).forEach(grade)});
     $('#goSave').addEventListener('click',()=>$('#savePanel').scrollIntoView({behavior:'smooth'}));
     $('#fileName').addEventListener('input',e=>{state.fileName=e.target.value;persist()});

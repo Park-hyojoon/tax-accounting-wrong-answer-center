@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>전산회계 1급 일반전표 오답연습 27문제</title>
+  <title>전산회계 1급 일반전표 오답연습 28문제</title>
   <style>
     :root{--navy:#17345f;--blue:#3178c6;--sky:#eaf6ff;--mint:#e9fbf3;--yellow:#fff5bd;--red:#d84343;--green:#16845b;--line:#cdddec;--ink:#172033;--muted:#607089}
     *{box-sizing:border-box}
@@ -26,6 +26,10 @@
     .btn.secondary{background:#fff;color:var(--navy);border:2px solid var(--line);box-shadow:none}
     .btn.green{background:var(--green)}
     .progress{display:flex;align-items:center;gap:12px;margin-left:auto;font-weight:800;color:var(--navy)}
+    .sort-label{display:flex;align-items:center;gap:8px;font-weight:800;color:var(--navy)}
+    .sort-select{border:2px solid var(--line);border-radius:12px;background:#fff;color:var(--navy);font-weight:800;font-size:inherit;padding:9px 12px;cursor:pointer}
+    .sort-select:focus-visible{border-color:#5d9ed2;outline:none}
+    @media(max-width:720px){.sort-label{width:100%;align-items:stretch;flex-direction:column;gap:5px}.sort-select{width:100%}}
     .progress-bar{width:180px;height:14px;background:#dfeaf2;border-radius:99px;overflow:hidden}
     .progress-bar span{display:block;height:100%;width:0;background:linear-gradient(90deg,#39a7f0,#27b47e);transition:.25s}
     .source{margin:22px 0;background:#fff;border:1px solid var(--line);border-radius:18px;overflow:hidden}
@@ -95,7 +99,7 @@
     </nav>
     <section class="hero">
       <h1>일반전표 입력 기본연습</h1>
-      <p><strong>전산회계 1급 실무 기준 · 27문제</strong></p>
+      <p><strong>전산회계 1급 실무 기준 · 28문제</strong></p>
       <p>기출형 구조는 유지하고 숫자만 바꿨습니다. 매입매출전표 문제는 포함하지 않았습니다.</p>
       <div class="notice">금액 입력 후 <kbd>+</kbd> 키를 누르면 000이 붙습니다. 차변·대변 합계와 차액은 입력 즉시 계산되며, 풀이 내용은 이 브라우저에 자동 저장됩니다.</div>
     </section>
@@ -105,6 +109,15 @@
       <button class="btn secondary" type="button" id="resetAll">입력 초기화</button>
       <button class="btn secondary" type="button" id="goSave">학습기록 저장</button>
       <button class="btn secondary" type="button" onclick="window.print()">인쇄 / PDF 저장</button>
+      <label class="sort-label" for="sortOrder">정렬
+        <select class="sort-select" id="sortOrder">
+          <option value="registered">등록 순서</option>
+          <option value="wrong">오답 많은 순</option>
+          <option value="unattempted">아직 안 푼 문제 우선</option>
+          <option value="recentAttempt">최근에 푼 순</option>
+          <option value="recentRegistered">최근 등록 순</option>
+        </select>
+      </label>
       <div class="progress"><span id="progressText">채점 0 / 26</span><div class="progress-bar"><span id="progressFill"></span></div></div>
     </div>
 
@@ -351,6 +364,16 @@
         accountSelect:true,
         accountOptions:['교육훈련비','지급수수료','급여','예수금','선납세금','보통예금','현금'],
         answers:[A('D','교육훈련비',3000000,'제'),A('C','예수금',264000),A('C','보통예금',2736000)]
+      },
+      {
+        type:'대손처리 채권의 회수', title:'전기에 대손처리한 외상매출금이 포함된 회수', addedDate:'2026-09-06',
+        prompt:'[11월 7일] (주)한별전자의 외상매출금 3,600,000원이 회수되어 보통예금 계좌에 입금되었다. 이 중에는 전기에 회수불능으로 판단하여 대손처리한 외상매출금 1,400,000원이 포함되어 있다. 단, 하나의 전표로 회계처리할 것.',
+        hint:'전기에 이미 제거한 채권을 다시 살리지 않습니다. 이미 대손처리한 금액을 회수하면 대손충당금을 그만큼 회복시키고, 나머지만 현재 남아 있는 외상매출금의 회수로 처리합니다. 외상매출금 행에는 거래처를 연결합니다.',
+        explanation:'입금액 3,600,000원 전액을 보통예금 증가로 기록합니다. 이 중 전기 대손처리분 1,400,000원은 이미 장부에서 제거된 채권이므로 외상매출금이 아니라 대손충당금을 대변에서 회복시킵니다. 나머지 2,200,000원만 현재 남아 있는 (주)한별전자에 대한 외상매출금의 회수로 대변에 기록합니다.',
+        accountSelect:true,
+        accountOptions:['보통예금','현금','외상매출금','받을어음','대손충당금','대손상각비','대손충당금환입','잡이익'],
+        partnerOptions:['(주)한별전자','(주)은성전자','(주)새봄'],
+        answers:[A('D','보통예금',3600000),A('C','외상매출금',2200000,'','','(주)한별전자'),A('C','대손충당금',1400000)]
       }
     ];
 
@@ -367,7 +390,7 @@
     problems.forEach(p=>{if(!p.addedDate)p.addedDate='2026-09-01'});
     const STATE_VERSION='general-journal-27-v1';
     const OLD_TO_NEW_INDEX={4:0,6:1,8:2,9:3,10:4,11:5,12:6,13:7,14:8,15:9,16:10,17:11,18:12,19:13,20:14,21:15,22:16,23:17,24:18,25:19,26:20,27:21,28:22,29:23,30:24,31:25,32:26};
-    const defaultState=()=>({schemaVersion:STATE_VERSION,startedAt:nowIso(),updatedAt:nowIso(),cards:{},fileName:`일반전표_27문제_학습기록_${localDate()}`,koAuto:true});
+    const defaultState=()=>({schemaVersion:STATE_VERSION,startedAt:nowIso(),updatedAt:nowIso(),cards:{},fileName:`일반전표_28문제_학습기록_${localDate()}`,koAuto:true});
     let studyState=loadState();
     function migrateStateTo27(rawState={}){
       const source=rawState&&typeof rawState==='object'?rawState:{};
@@ -380,7 +403,7 @@
       const fileName=String(source.fileName||'').replace('일반전표_33문제','일반전표_27문제');
       return {...source,schemaVersion:STATE_VERSION,migratedAt:nowIso(),cards,...(fileName?{fileName}:{})};
     }
-    function loadState(){try{const raw=JSON.parse(localStorage.getItem(STORAGE_KEY)||'{}'),migrated=migrateStateTo27(raw),s=Object.assign(defaultState(),migrated);if(/^일반전표_(?:24|27|33)문제_학습기록_\d{4}-\d{2}-\d{2}$/.test(s.fileName||''))s.fileName=`일반전표_27문제_학습기록_${localDate()}`;Object.values(s.cards||{}).forEach(c=>{const wasCorrect=c.correct===true||(c.history||[]).some(h=>h.correct);c.passed=c.trainingCenterRestored?false:Boolean(c.passed||wasCorrect);c.archived=Boolean(c.archived);c.history=c.history||[];delete c.note});if(raw.schemaVersion!==STATE_VERSION)localStorage.setItem(STORAGE_KEY,JSON.stringify(s));return s}catch(e){return defaultState()}}
+    function loadState(){try{const raw=JSON.parse(localStorage.getItem(STORAGE_KEY)||'{}'),migrated=migrateStateTo27(raw),s=Object.assign(defaultState(),migrated);if(/^일반전표_(?:24|27|28|33)문제_학습기록_\d{4}-\d{2}-\d{2}$/.test(s.fileName||''))s.fileName=`일반전표_28문제_학습기록_${localDate()}`;Object.values(s.cards||{}).forEach(c=>{const wasCorrect=c.correct===true||(c.history||[]).some(h=>h.correct);c.passed=c.trainingCenterRestored?false:Boolean(c.passed||wasCorrect);c.archived=Boolean(c.archived);c.history=c.history||[];delete c.note});if(raw.schemaVersion!==STATE_VERSION)localStorage.setItem(STORAGE_KEY,JSON.stringify(s));return s}catch(e){return defaultState()}}
     function saveState(){studyState.updatedAt=nowIso();localStorage.setItem(STORAGE_KEY,JSON.stringify(studyState))}
     function cardState(index){const s=studyState.cards[index]||(studyState.cards[index]={rows:[],graded:false,correct:false,attempts:0,wrongCount:0,history:[],passed:false,archived:false});if(s.passed===undefined)s.passed=false;if(s.archived===undefined)s.archived=false;return s}
 
@@ -500,6 +523,17 @@
       els('.entry-row input,.entry-row select',card).forEach(x=>{x.addEventListener('input',()=>markChanged(card));x.addEventListener('change',()=>markChanged(card))});
     });
 
+    const questionOrder=els('.question');
+    function sortKeys(card){const s=cardState(card.dataset.index),history=s.history||[],last=history.length?Date.parse(history[history.length-1].at)||0:0;return{card,index:Number(card.dataset.index),wrong:s.wrongCount||0,attempts:s.attempts||0,last,added:card.dataset.addedDate||''}}
+    function applySort(){const mode=el('#sortOrder').value,list=questionOrder.map(sortKeys);list.sort((a,b)=>{
+      if(mode==='wrong')return b.wrong-a.wrong||b.attempts-a.attempts||a.index-b.index;
+      if(mode==='unattempted')return Number(a.attempts>0)-Number(b.attempts>0)||a.index-b.index;
+      if(mode==='recentAttempt')return b.last-a.last||a.index-b.index;
+      if(mode==='recentRegistered')return b.added.localeCompare(a.added)||b.index-a.index;
+      return a.index-b.index});
+      const box=el('#questions');list.forEach(x=>box.appendChild(x.card))}
+    el('#sortOrder').addEventListener('change',applySort);
+
     function updateProgress(){
       const cards=els('.question').filter(c=>!c.hidden),graded=cards.filter(c=>c.dataset.graded==='true').length,correct=cards.filter(c=>c.dataset.correct==='true').length;
       const wrong=Object.values(studyState.cards).reduce((n,s)=>n+(s.wrongCount||0),0);
@@ -570,7 +604,7 @@
       await saveLocalRecord(payload)
     }
     el('#saveTodayRecord').addEventListener('click',saveTodayRecord);
-    el('#resetLearning').addEventListener('click',()=>{if(confirm('27문제의 전표 입력, 채점 이력과 틀린 횟수를 모두 지울까요?')){localStorage.removeItem(STORAGE_KEY);location.reload()}});
+    el('#resetLearning').addEventListener('click',()=>{if(confirm('28문제의 전표 입력, 채점 이력과 틀린 횟수를 모두 지울까요?')){localStorage.removeItem(STORAGE_KEY);location.reload()}});
 
     // 영문 자판 상태의 일반적인 두벌식 입력을 한글로 조합한다.
     const C_MAP={r:'ㄱ',R:'ㄲ',s:'ㄴ',e:'ㄷ',E:'ㄸ',f:'ㄹ',a:'ㅁ',q:'ㅂ',Q:'ㅃ',t:'ㅅ',T:'ㅆ',d:'ㅇ',w:'ㅈ',W:'ㅉ',c:'ㅊ',z:'ㅋ',x:'ㅌ',v:'ㅍ',g:'ㅎ'};
