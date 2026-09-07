@@ -316,6 +316,8 @@
         setStatus(hint);
         if(onNeedToken)onNeedToken({mobile:isMobileDevice(),hint});
         return {status:'no-transport'};
+      }else if(!helperPossible()){
+        summary.push('문제·프로그램은 GitHub 최신본입니다.');
       }else if(!isMobileDevice()){
         summary.push('PC 동기화 도우미가 꺼져 있어 새 문제·프로그램 파일은 건너뛰고 학습기록만 합쳤습니다. 바탕화면의 「오답훈련센터 시작」을 실행하면 다음부터 함께 동기화됩니다.');
       }
