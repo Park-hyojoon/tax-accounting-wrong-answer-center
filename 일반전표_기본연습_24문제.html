@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>전산회계 1급 일반전표 오답연습 28문제</title>
+  <title>전산회계 1급 일반전표 오답연습 31문제</title>
   <style>
     :root{--navy:#17345f;--blue:#3178c6;--sky:#eaf6ff;--mint:#e9fbf3;--yellow:#fff5bd;--red:#d84343;--green:#16845b;--line:#cdddec;--ink:#172033;--muted:#607089}
     *{box-sizing:border-box}
@@ -385,6 +385,33 @@
         accountOptions:['보통예금','현금','외상매출금','받을어음','대손충당금','대손상각비','대손충당금환입','잡이익'],
         partnerOptions:['(주)한별전자','(주)은성전자','(주)새봄'],
         answers:[A('D','보통예금',3600000),A('C','외상매출금',2200000,'','','(주)한별전자'),A('C','대손충당금',1400000)]
+      },
+      {
+        type:'임차보증금 잔금 지급', title:'계약금을 제외한 임차보증금 잔금 지급', addedDate:'2026-09-07',
+        prompt:'[9월 2일] 사무실 이전을 위하여 한결부동산과 체결한 건물 임대차계약의 잔금 지급일이 도래하였다. 임차보증금 7,200,000원 중 계약 시 지급하여 선급금으로 처리한 2,000,000원을 제외한 잔액을 보통예금 계좌에서 지급하였다. 적절한 일반전표를 입력하시오.',
+        explanation:'임차보증금 전체 7,200,000원을 차변에 인식합니다. 계약 시 선급금으로 처리한 2,000,000원을 대변에서 제거하고, 실제 잔금 5,200,000원은 보통예금 감소로 처리합니다. 임차보증금과 선급금에는 거래처 한결부동산을 연결합니다.',
+        accountSelect:true,
+        accountOptions:['임차보증금','선급금','선급비용','보통예금','현금','미지급금'],
+        partnerOptions:['한결부동산','형제상사','새봄빌딩'],
+        answers:[A('D','임차보증금',7200000,'','','한결부동산'),A('C','선급금',2000000,'','','한결부동산'),A('C','보통예금',5200000)]
+      },
+      {
+        type:'채무면제이익', title:'대표이사 단기차입금의 채무면제', addedDate:'2026-09-07',
+        prompt:'[10월 22일] 대표이사로부터 차입하여 단기차입금으로 계상한 잔액 24,000,000원에 대하여 채무를 면제받았다. 적절한 일반전표를 입력하시오.',
+        explanation:'채무가 면제되면 단기차입금 24,000,000원을 차변에서 제거하고 같은 금액을 채무면제이익으로 인식합니다. 단기차입금 행에는 거래처 대표이사를 연결합니다.',
+        accountSelect:true,
+        accountOptions:['단기차입금','장기차입금','가수금','채무면제이익','자산수증이익','잡이익'],
+        partnerOptions:['대표이사','한결은행','새봄상사'],
+        answers:[A('D','단기차입금',24000000,'','','대표이사'),A('C','채무면제이익',24000000)]
+      },
+      {
+        type:'매출채권의 대여금 전환', title:'외상매출금을 받을어음과 단기대여금으로 전환', addedDate:'2026-09-07',
+        prompt:'[11월 12일] ㈜새롬에 대한 제품매출 외상대금 6,500,000원 중 4,500,000원은 동사가 발행한 약속어음으로 받고, 나머지 2,000,000원은 금전소비대차계약에 따라 1년간 대여하는 것으로 전환하였다. 적절한 일반전표를 입력하시오.',
+        explanation:'약속어음으로 받은 4,500,000원은 받을어음, 1년간 금전소비대차로 전환한 2,000,000원은 단기대여금입니다. 기존 외상매출금 6,500,000원은 전액 제거하며 세 계정 모두 거래처 ㈜새롬을 연결합니다.',
+        accountSelect:true,
+        accountOptions:['받을어음','단기대여금','장기대여금','외상매출금','미수금','보통예금'],
+        partnerOptions:['㈜새롬','㈜다원','㈜한빛'],
+        answers:[A('D','받을어음',4500000,'','','㈜새롬'),A('D','단기대여금',2000000,'','','㈜새롬'),A('C','외상매출금',6500000,'','','㈜새롬')]
       }
     ];
 
@@ -401,7 +428,7 @@
     problems.forEach(p=>{if(!p.addedDate)p.addedDate='2026-09-01'});
     const STATE_VERSION='general-journal-27-v1';
     const OLD_TO_NEW_INDEX={4:0,6:1,8:2,9:3,10:4,11:5,12:6,13:7,14:8,15:9,16:10,17:11,18:12,19:13,20:14,21:15,22:16,23:17,24:18,25:19,26:20,27:21,28:22,29:23,30:24,31:25,32:26};
-    const defaultState=()=>({schemaVersion:STATE_VERSION,startedAt:nowIso(),updatedAt:nowIso(),cards:{},fileName:`일반전표_28문제_학습기록_${localDate()}`,koAuto:true});
+    const defaultState=()=>({schemaVersion:STATE_VERSION,startedAt:nowIso(),updatedAt:nowIso(),cards:{},fileName:`일반전표_31문제_학습기록_${localDate()}`,koAuto:true});
     let studyState=loadState();
     function migrateStateTo27(rawState={}){
       const source=rawState&&typeof rawState==='object'?rawState:{};
@@ -414,7 +441,7 @@
       const fileName=String(source.fileName||'').replace('일반전표_33문제','일반전표_27문제');
       return {...source,schemaVersion:STATE_VERSION,migratedAt:nowIso(),cards,...(fileName?{fileName}:{})};
     }
-    function loadState(){try{const raw=JSON.parse(localStorage.getItem(STORAGE_KEY)||'{}'),migrated=migrateStateTo27(raw),s=Object.assign(defaultState(),migrated);if(/^일반전표_(?:24|27|28|33)문제_학습기록_\d{4}-\d{2}-\d{2}$/.test(s.fileName||''))s.fileName=`일반전표_28문제_학습기록_${localDate()}`;Object.values(s.cards||{}).forEach(c=>{const wasCorrect=c.correct===true||(c.history||[]).some(h=>h.correct);c.passed=c.trainingCenterRestored?false:Boolean(c.passed||wasCorrect);c.archived=Boolean(c.archived);c.history=c.history||[];delete c.note});if(raw.schemaVersion!==STATE_VERSION)localStorage.setItem(STORAGE_KEY,JSON.stringify(s));return s}catch(e){return defaultState()}}
+    function loadState(){try{const raw=JSON.parse(localStorage.getItem(STORAGE_KEY)||'{}'),migrated=migrateStateTo27(raw),s=Object.assign(defaultState(),migrated);if(/^일반전표_(?:24|27|28|31|33)문제_학습기록_\d{4}-\d{2}-\d{2}$/.test(s.fileName||''))s.fileName=`일반전표_31문제_학습기록_${localDate()}`;Object.values(s.cards||{}).forEach(c=>{const wasCorrect=c.correct===true||(c.history||[]).some(h=>h.correct);c.passed=c.trainingCenterRestored?false:Boolean(c.passed||wasCorrect);c.archived=Boolean(c.archived);c.history=c.history||[];delete c.note});if(raw.schemaVersion!==STATE_VERSION)localStorage.setItem(STORAGE_KEY,JSON.stringify(s));return s}catch(e){return defaultState()}}
     function saveState(){studyState.updatedAt=nowIso();localStorage.setItem(STORAGE_KEY,JSON.stringify(studyState))}
     function cardState(index){const s=studyState.cards[index]||(studyState.cards[index]={rows:[],graded:false,correct:false,attempts:0,wrongCount:0,history:[],passed:false,archived:false});if(s.passed===undefined)s.passed=false;if(s.archived===undefined)s.archived=false;return s}
 
@@ -615,7 +642,7 @@
       await saveLocalRecord(payload)
     }
     el('#saveTodayRecord').addEventListener('click',saveTodayRecord);
-    el('#resetLearning').addEventListener('click',()=>{if(confirm('28문제의 전표 입력, 채점 이력과 틀린 횟수를 모두 지울까요?')){localStorage.removeItem(STORAGE_KEY);location.reload()}});
+    el('#resetLearning').addEventListener('click',()=>{if(confirm('31문제의 전표 입력, 채점 이력과 틀린 횟수를 모두 지울까요?')){localStorage.removeItem(STORAGE_KEY);location.reload()}});
 
     // 영문 자판 상태의 일반적인 두벌식 입력을 한글로 조합한다.
     const C_MAP={r:'ㄱ',R:'ㄲ',s:'ㄴ',e:'ㄷ',E:'ㄸ',f:'ㄹ',a:'ㅁ',q:'ㅂ',Q:'ㅃ',t:'ㅅ',T:'ㅆ',d:'ㅇ',w:'ㅈ',W:'ㅉ',c:'ㅊ',z:'ㅋ',x:'ㅌ',v:'ㅍ',g:'ㅎ'};
