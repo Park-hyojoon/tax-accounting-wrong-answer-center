@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>전산회계 1급 일반전표 오답연습 32문제</title>
+  <title>전산회계 1급 일반전표 오답연습 34문제</title>
   <style>
     :root{--navy:#17345f;--blue:#3178c6;--sky:#eaf6ff;--mint:#e9fbf3;--yellow:#fff5bd;--red:#d84343;--green:#16845b;--line:#cdddec;--ink:#172033;--muted:#607089}
     *{box-sizing:border-box}
@@ -408,6 +408,23 @@
         accountOptions:['외상매입금','미지급금','받을어음','지급어음','보통예금','현금'],
         partnerOptions:['㈜한빛','새롬상사','㈜상문','상명상사'],
         answers:[A('D','외상매입금',4500000,'','','㈜한빛'),A('C','받을어음',4500000,'','','새롬상사')]
+      },
+      {
+        type:'외화장기차입금 상환', title:'전기말 환율로 평가된 외화장기차입금 상환', addedDate:'2026-09-07',
+        prompt:'[8월 4일] 미주은행으로부터 2025년 10월 30일에 차입한 외화장기차입금 중 $40,000를 상환하기 위하여 보통예금 계좌에서 54,000,000원을 이체하여 지급하였다. 적용환율은 차입일 1,280원/$, 직전연도 종료일 1,320원/$, 상환일 1,350원/$이다. 적절한 일반전표를 입력하시오.',
+        explanation:'전기에 결산평가가 끝난 외화채무이므로 장부금액은 직전연도 종료일 환율을 사용한 $40,000×1,320원=52,800,000원입니다. 실제 지급액 54,000,000원과의 차이 1,200,000원은 결제 시점의 외환차손입니다. 결산일의 외화환산손실과 구분합니다.',
+        accountSelect:true,
+        accountOptions:['외화장기차입금','장기차입금','외상매입금','외환차손','외화환산손실','외환차익','보통예금'],
+        partnerOptions:['미주은행','미국은행','한빛은행'],
+        answers:[A('D','외화장기차입금',52800000,'','','미주은행'),A('D','외환차손',1200000),A('C','보통예금',54000000)]
+      },
+      {
+        type:'중간배당금 지급과 원천징수', title:'미지급 중간배당금 지급과 원천징수', addedDate:'2026-09-07',
+        prompt:'[8월 26일] 임시주주총회에서 6월 28일 결의하고 미지급한 중간배당금 12,000,000원에 대하여 원천징수세액 1,848,000원을 제외한 금액을 보통예금 계좌에서 지급하였다. 적절한 일반전표를 입력하시오.',
+        explanation:'배당 결의 때 계상한 미지급배당금 12,000,000원을 차변에서 제거합니다. 원천징수세액 1,848,000원은 예수금으로 계상하고, 실제 지급액 10,152,000원은 보통예금 감소로 처리합니다.',
+        accountSelect:true,
+        accountOptions:['미지급배당금','이익준비금','미처분이익잉여금','예수금','선납세금','보통예금','현금'],
+        answers:[A('D','미지급배당금',12000000),A('C','보통예금',10152000),A('C','예수금',1848000)]
       }
     ];
 
@@ -424,7 +441,7 @@
     problems.forEach(p=>{if(!p.addedDate)p.addedDate='2026-09-01'});
     const STATE_VERSION='general-journal-27-v1';
     const OLD_TO_NEW_INDEX={4:0,6:1,8:2,9:3,10:4,11:5,12:6,13:7,14:8,15:9,16:10,17:11,18:12,19:13,20:14,21:15,22:16,23:17,24:18,25:19,26:20,27:21,28:22,29:23,30:24,31:25,32:26};
-    const defaultState=()=>({schemaVersion:STATE_VERSION,startedAt:nowIso(),updatedAt:nowIso(),cards:{},fileName:`일반전표_32문제_학습기록_${localDate()}`,koAuto:true});
+    const defaultState=()=>({schemaVersion:STATE_VERSION,startedAt:nowIso(),updatedAt:nowIso(),cards:{},fileName:`일반전표_34문제_학습기록_${localDate()}`,koAuto:true});
     let studyState=loadState();
     function migrateStateTo27(rawState={}){
       const source=rawState&&typeof rawState==='object'?rawState:{};
@@ -437,7 +454,7 @@
       const fileName=String(source.fileName||'').replace('일반전표_33문제','일반전표_27문제');
       return {...source,schemaVersion:STATE_VERSION,migratedAt:nowIso(),cards,...(fileName?{fileName}:{})};
     }
-    function loadState(){try{const raw=JSON.parse(localStorage.getItem(STORAGE_KEY)||'{}'),migrated=migrateStateTo27(raw),s=Object.assign(defaultState(),migrated);if(/^일반전표_(?:24|27|28|31|32|33)문제_학습기록_\d{4}-\d{2}-\d{2}$/.test(s.fileName||''))s.fileName=`일반전표_32문제_학습기록_${localDate()}`;Object.values(s.cards||{}).forEach(c=>{const wasCorrect=c.correct===true||(c.history||[]).some(h=>h.correct);c.passed=c.trainingCenterRestored?false:Boolean(c.passed||wasCorrect);c.archived=Boolean(c.archived);c.history=c.history||[];delete c.note});if(raw.schemaVersion!==STATE_VERSION)localStorage.setItem(STORAGE_KEY,JSON.stringify(s));return s}catch(e){return defaultState()}}
+    function loadState(){try{const raw=JSON.parse(localStorage.getItem(STORAGE_KEY)||'{}'),migrated=migrateStateTo27(raw),s=Object.assign(defaultState(),migrated);if(/^일반전표_(?:24|27|28|31|32|33|34)문제_학습기록_\d{4}-\d{2}-\d{2}$/.test(s.fileName||''))s.fileName=`일반전표_34문제_학습기록_${localDate()}`;Object.values(s.cards||{}).forEach(c=>{const wasCorrect=c.correct===true||(c.history||[]).some(h=>h.correct);c.passed=c.trainingCenterRestored?false:Boolean(c.passed||wasCorrect);c.archived=Boolean(c.archived);c.history=c.history||[];delete c.note});if(raw.schemaVersion!==STATE_VERSION)localStorage.setItem(STORAGE_KEY,JSON.stringify(s));return s}catch(e){return defaultState()}}
     function saveState(){studyState.updatedAt=nowIso();localStorage.setItem(STORAGE_KEY,JSON.stringify(studyState))}
     function cardState(index){const s=studyState.cards[index]||(studyState.cards[index]={rows:[],graded:false,correct:false,attempts:0,wrongCount:0,history:[],passed:false,archived:false});if(s.passed===undefined)s.passed=false;if(s.archived===undefined)s.archived=false;return s}
 
@@ -636,7 +653,7 @@
       await saveLocalRecord(payload)
     }
     el('#saveTodayRecord').addEventListener('click',saveTodayRecord);
-    el('#resetLearning').addEventListener('click',()=>{if(confirm('32문제의 전표 입력, 채점 이력과 틀린 횟수를 모두 지울까요?')){localStorage.removeItem(STORAGE_KEY);location.reload()}});
+    el('#resetLearning').addEventListener('click',()=>{if(confirm('34문제의 전표 입력, 채점 이력과 틀린 횟수를 모두 지울까요?')){localStorage.removeItem(STORAGE_KEY);location.reload()}});
 
     // 영문 자판 상태의 일반적인 두벌식 입력을 한글로 조합한다.
     const C_MAP={r:'ㄱ',R:'ㄲ',s:'ㄴ',e:'ㄷ',E:'ㄸ',f:'ㄹ',a:'ㅁ',q:'ㅂ',Q:'ㅃ',t:'ㅅ',T:'ㅆ',d:'ㅇ',w:'ㅈ',W:'ㅉ',c:'ㅊ',z:'ㅋ',x:'ㅌ',v:'ㅍ',g:'ㅎ'};
