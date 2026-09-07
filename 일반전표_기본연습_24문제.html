@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>전산회계 1급 일반전표 오답연습 31문제</title>
+  <title>전산회계 1급 일반전표 오답연습 32문제</title>
   <style>
     :root{--navy:#17345f;--blue:#3178c6;--sky:#eaf6ff;--mint:#e9fbf3;--yellow:#fff5bd;--red:#d84343;--green:#16845b;--line:#cdddec;--ink:#172033;--muted:#607089}
     *{box-sizing:border-box}
@@ -409,6 +409,15 @@
         accountOptions:['받을어음','단기대여금','장기대여금','외상매출금','미수금','보통예금'],
         partnerOptions:['㈜새롬','㈜다원','㈜한빛'],
         answers:[A('D','받을어음',4500000,'','','㈜새롬'),A('D','단기대여금',2000000,'','','㈜새롬'),A('C','외상매출금',6500000,'','','㈜새롬')]
+      },
+      {
+        type:'받을어음 배서양도 수정', title:'외상매입금 결제수단을 받을어음 배서로 수정', addedDate:'2026-09-07',
+        prompt:'[7월 9일] ㈜한빛의 외상매입금 4,500,000원을 보통예금 계좌에서 이체한 것으로 회계처리하였다. 확인 결과 제품을 판매하고 받은 새롬상사 발행 약속어음 4,500,000원을 배서하여 지급한 거래였다. 수정 후의 올바른 일반전표를 입력하시오.',
+        explanation:'외상매입금 4,500,000원은 차변에서 제거하고, 결제에 사용한 새롬상사 발행 받을어음을 대변에서 감소시킵니다. 외상매입금 행에는 ㈜한빛, 받을어음 행에는 어음 발행인인 새롬상사를 각각 연결합니다.',
+        accountSelect:true,
+        accountOptions:['외상매입금','미지급금','받을어음','지급어음','보통예금','현금'],
+        partnerOptions:['㈜한빛','새롬상사','㈜상문','상명상사'],
+        answers:[A('D','외상매입금',4500000,'','','㈜한빛'),A('C','받을어음',4500000,'','','새롬상사')]
       }
     ];
 
@@ -425,7 +434,7 @@
     problems.forEach(p=>{if(!p.addedDate)p.addedDate='2026-09-01'});
     const STATE_VERSION='general-journal-27-v1';
     const OLD_TO_NEW_INDEX={4:0,6:1,8:2,9:3,10:4,11:5,12:6,13:7,14:8,15:9,16:10,17:11,18:12,19:13,20:14,21:15,22:16,23:17,24:18,25:19,26:20,27:21,28:22,29:23,30:24,31:25,32:26};
-    const defaultState=()=>({schemaVersion:STATE_VERSION,startedAt:nowIso(),updatedAt:nowIso(),cards:{},fileName:`일반전표_31문제_학습기록_${localDate()}`,koAuto:true});
+    const defaultState=()=>({schemaVersion:STATE_VERSION,startedAt:nowIso(),updatedAt:nowIso(),cards:{},fileName:`일반전표_32문제_학습기록_${localDate()}`,koAuto:true});
     let studyState=loadState();
     function migrateStateTo27(rawState={}){
       const source=rawState&&typeof rawState==='object'?rawState:{};
@@ -438,7 +447,7 @@
       const fileName=String(source.fileName||'').replace('일반전표_33문제','일반전표_27문제');
       return {...source,schemaVersion:STATE_VERSION,migratedAt:nowIso(),cards,...(fileName?{fileName}:{})};
     }
-    function loadState(){try{const raw=JSON.parse(localStorage.getItem(STORAGE_KEY)||'{}'),migrated=migrateStateTo27(raw),s=Object.assign(defaultState(),migrated);if(/^일반전표_(?:24|27|28|31|33)문제_학습기록_\d{4}-\d{2}-\d{2}$/.test(s.fileName||''))s.fileName=`일반전표_31문제_학습기록_${localDate()}`;Object.values(s.cards||{}).forEach(c=>{const wasCorrect=c.correct===true||(c.history||[]).some(h=>h.correct);c.passed=c.trainingCenterRestored?false:Boolean(c.passed||wasCorrect);c.archived=Boolean(c.archived);c.history=c.history||[];delete c.note});if(raw.schemaVersion!==STATE_VERSION)localStorage.setItem(STORAGE_KEY,JSON.stringify(s));return s}catch(e){return defaultState()}}
+    function loadState(){try{const raw=JSON.parse(localStorage.getItem(STORAGE_KEY)||'{}'),migrated=migrateStateTo27(raw),s=Object.assign(defaultState(),migrated);if(/^일반전표_(?:24|27|28|31|32|33)문제_학습기록_\d{4}-\d{2}-\d{2}$/.test(s.fileName||''))s.fileName=`일반전표_32문제_학습기록_${localDate()}`;Object.values(s.cards||{}).forEach(c=>{const wasCorrect=c.correct===true||(c.history||[]).some(h=>h.correct);c.passed=c.trainingCenterRestored?false:Boolean(c.passed||wasCorrect);c.archived=Boolean(c.archived);c.history=c.history||[];delete c.note});if(raw.schemaVersion!==STATE_VERSION)localStorage.setItem(STORAGE_KEY,JSON.stringify(s));return s}catch(e){return defaultState()}}
     function saveState(){studyState.updatedAt=nowIso();localStorage.setItem(STORAGE_KEY,JSON.stringify(studyState))}
     function cardState(index){const s=studyState.cards[index]||(studyState.cards[index]={rows:[],graded:false,correct:false,attempts:0,wrongCount:0,history:[],passed:false,archived:false});if(s.passed===undefined)s.passed=false;if(s.archived===undefined)s.archived=false;return s}
 
@@ -639,7 +648,7 @@
       await saveLocalRecord(payload)
     }
     el('#saveTodayRecord').addEventListener('click',saveTodayRecord);
-    el('#resetLearning').addEventListener('click',()=>{if(confirm('31문제의 전표 입력, 채점 이력과 틀린 횟수를 모두 지울까요?')){localStorage.removeItem(STORAGE_KEY);location.reload()}});
+    el('#resetLearning').addEventListener('click',()=>{if(confirm('32문제의 전표 입력, 채점 이력과 틀린 횟수를 모두 지울까요?')){localStorage.removeItem(STORAGE_KEY);location.reload()}});
 
     // 영문 자판 상태의 일반적인 두벌식 입력을 한글로 조합한다.
     const C_MAP={r:'ㄱ',R:'ㄲ',s:'ㄴ',e:'ㄷ',E:'ㄸ',f:'ㄹ',a:'ㅁ',q:'ㅂ',Q:'ㅃ',t:'ㅅ',T:'ㅆ',d:'ㅇ',w:'ㅈ',W:'ㅉ',c:'ㅊ',z:'ㅋ',x:'ㅌ',v:'ㅍ',g:'ㅎ'};
