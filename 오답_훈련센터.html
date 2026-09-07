@@ -55,7 +55,7 @@
     }
     .nav-link:hover,.nav-link:focus-visible{border-color:#68a9df;background:#edf8ff;outline:none}
     .nav-link.active{background:var(--blue);border-color:var(--blue);color:#fff}
-    .nav-sync{display:flex;align-items:center;gap:6px;margin-left:auto;padding:4px 8px;border:2px solid var(--line);border-radius:14px;background:var(--blue-soft)}
+    .nav-sync{display:flex;align-items:center;margin-left:auto}
     .nav-sync-title{font-weight:900;color:var(--ink);letter-spacing:.02em}
     .nav-sync-button{min-height:38px;padding:6px 11px;border:2px solid var(--line);border-radius:11px;background:#fff;color:var(--ink);font:inherit;font-weight:900;font-size:.87em;cursor:pointer}
     .nav-sync-button:hover:not(:disabled){border-color:var(--blue);background:#edf8ff}
@@ -64,9 +64,7 @@
     .nav-sync-button{white-space:nowrap}
     .nav-sync-button.primary{border-color:var(--blue);background:var(--blue);color:#fff}
     .nav-sync-button.primary:hover:not(:disabled){background:var(--blue-dark);border-color:var(--blue-dark);color:#fff}
-    .nav-sync-status{flex:1 1 100%;margin:0;font-size:.85em;font-weight:800;color:var(--muted);word-break:keep-all}
-    .nav-sync-status:empty{display:none}
-    @media(max-width:760px){.nav-sync{width:100%;margin-left:0;flex-wrap:wrap}.nav-sync-button{flex:1 1 auto}}
+        @media(max-width:760px){.nav-sync{width:100%;margin-left:0}.nav-sync-button{flex:1 1 auto}}
     main{padding:28px 20px 64px}
     .notice{
       display:flex;gap:12px;align-items:flex-start;margin-bottom:22px;padding:16px 18px;
@@ -197,7 +195,6 @@
       <a class="nav-link" href="매입매출전표_오답연습_3문제.html?view=all">매입매출전표 입력</a>
       <div class="nav-sync" aria-label="동기화">
         <button class="nav-sync-button primary" id="syncAll" type="button" title="PC·GitHub·모바일의 새 문제와 학습기록을 한 번에 최신으로 맞춥니다">🔄 동기화</button>
-        <p class="nav-sync-status" id="navSyncStatus" role="status" aria-live="polite"></p>
       </div>
     </div>
   </nav>
@@ -333,7 +330,7 @@
     <p class="footer">오답 훈련센터 · 「동기화」 또는 「오늘 학습기록 저장」을 누른 경우에만 GitHub로 기록을 보냅니다.</p>
   </main>
 
-  <script src="github-learning-sync.js?v=5"></script>
+  <script src="github-learning-sync.js?v=6"></script>
   <script>
     const SOURCES={
       practical:{label:'일반전표',file:'일반전표_기본연습_24문제.html',key:'tax-accounting-practical-journal-24-v2'},

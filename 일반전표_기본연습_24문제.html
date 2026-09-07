@@ -16,7 +16,7 @@
     .nav-link{flex:0 0 auto;text-decoration:none;border:2px solid #d2e4f2;border-radius:13px;padding:7px 14px;background:#fff;color:#34546d;font-weight:800}
     .nav-link:hover,.nav-link:focus-visible{border-color:#68a9df;background:#edf8ff;outline:none}
     .nav-link.active{background:var(--blue);border-color:var(--blue);color:#fff}
-    .nav-sync{display:flex;align-items:center;gap:6px;margin-left:auto;padding:4px 8px;border:2px solid var(--line);border-radius:14px;background:var(--sky)}
+    .nav-sync{display:flex;align-items:center;margin-left:auto}
     .nav-sync-title{font-weight:900;color:var(--navy);letter-spacing:.02em}
     .nav-sync-button{min-height:38px;padding:6px 11px;border:2px solid var(--line);border-radius:11px;background:#fff;color:var(--navy);font:inherit;font-weight:900;font-size:.87em;cursor:pointer}
     .nav-sync-button:hover:not(:disabled){border-color:var(--blue);background:var(--sky)}
@@ -25,9 +25,7 @@
     .nav-sync-button{white-space:nowrap}
     .nav-sync-button.primary{border-color:var(--blue);background:var(--blue);color:#fff}
     .nav-sync-button.primary:hover:not(:disabled){background:#0d5eaa;border-color:#0d5eaa;color:#fff}
-    .nav-sync-status{flex:1 1 100%;margin:0;font-size:.85em;font-weight:800;color:var(--muted);word-break:keep-all}
-    .nav-sync-status:empty{display:none}
-    @media(max-width:760px){.nav-sync{width:100%;margin-left:0;flex-wrap:wrap}.nav-sync-button{flex:1 1 auto}}
+        @media(max-width:760px){.nav-sync{width:100%;margin-left:0}.nav-sync-button{flex:1 1 auto}}
     .hero{background:#fff;border:2px solid #cfe6f7;border-radius:24px;padding:28px 30px;box-shadow:0 12px 35px rgba(44,91,128,.1)}
     h1{margin:0 0 10px;color:var(--navy);font-size:clamp(28px,4vw,43px);line-height:1.25}
     .hero p{margin:8px 0}
@@ -109,7 +107,6 @@
       <a class="nav-link" href="매입매출전표_오답연습_3문제.html?view=all">매입매출전표 입력</a>
       <div class="nav-sync" aria-label="동기화">
         <button class="nav-sync-button primary" id="syncAll" type="button" title="PC·GitHub·모바일의 새 문제와 학습기록을 한 번에 최신으로 맞춥니다">🔄 동기화</button>
-        <p class="nav-sync-status" id="navSyncStatus" role="status" aria-live="polite"></p>
       </div>
     </div>
   </nav>
@@ -165,7 +162,7 @@
     <p class="footer">학습용 자료 · 전표 입력 순서는 달라도 계정과목, 금액, 차·대변이 맞으면 정답으로 처리됩니다.</p>
   </main>
 
-  <script src="github-learning-sync.js?v=5"></script>
+  <script src="github-learning-sync.js?v=6"></script>
   <script>
     const problems = [
       {
@@ -659,9 +656,8 @@
     els('[data-ko-auto]').forEach(setupKoreanInput);
     updateProgress();
     (function(){
-    const status=document.querySelector('#navSyncStatus');
-    if(typeof window.TrainingGitHub?.installSyncBar!=='function'){if(status)status.textContent='동기화 기능을 불러오지 못했습니다. Ctrl+F5로 새로고침한 뒤 다시 눌러주세요.';return}
-    TrainingGitHub.installSyncBar({onNeedToken:({mobile})=>{if(mobile)status.innerHTML='처음 한 번만 <a href="오답_훈련센터.html">오답 훈련센터 홈</a>에서 GitHub 토큰을 연결한 뒤 다시 눌러주세요. 그 뒤로는 「동기화」 한 번이면 됩니다.'}});
+    if(typeof window.TrainingGitHub?.installSyncBar!=='function'){const button=document.querySelector('#syncAll');if(button)button.addEventListener('click',()=>alert('동기화 기능을 불러오지 못했습니다. Ctrl+F5로 새로고침한 뒤 다시 눌러주세요.'));return}
+    TrainingGitHub.installSyncBar({onNeedToken:({mobile})=>{if(mobile)TrainingGitHub.showToast('처음 한 번만 오답 훈련센터 홈 아래쪽에서 GitHub 토큰을 연결한 뒤 다시 눌러주세요.',8000)}});
   })();
 </script>
 </body>

@@ -363,35 +363,48 @@
       const url=new URL(href,location.href);url.searchParams.set('r',stamp);link.setAttribute('href',url.pathname.split('/').pop()+url.search);
     });
   }
+  // ── 결과 알림: 화면 아래에 잠깐 떠 있다가 사라진다 ─────────────────────────
+  let toastElement=null,toastTimer=null;
+  function ensureToast(){
+    if(toastElement)return toastElement;
+    const style=document.createElement('style');
+    style.textContent='.sync-toast{position:fixed;left:50%;bottom:26px;z-index:9999;max-width:min(92vw,720px);padding:12px 18px;border-radius:14px;background:#17324d;color:#fff;font:inherit;font-weight:800;font-size:.95rem;line-height:1.5;box-shadow:0 12px 32px rgba(0,0,0,.28);opacity:0;pointer-events:none;transform:translate(-50%,16px);transition:opacity .25s,transform .25s;word-break:keep-all;cursor:pointer}.sync-toast.show{opacity:1;pointer-events:auto;transform:translate(-50%,0)}.sync-toast.error{background:#8f1d2d}';
+    document.head.appendChild(style);
+    toastElement=document.createElement('div');toastElement.className='sync-toast';toastElement.setAttribute('role','status');toastElement.setAttribute('aria-live','polite');
+    toastElement.addEventListener('click',hideToast);document.body.appendChild(toastElement);
+    return toastElement;
+  }
+  function showToast(text,duration=5000,{error=false}={}){
+    const element=ensureToast();clearTimeout(toastTimer);
+    element.textContent=text;element.classList.toggle('error',error);element.classList.add('show');
+    if(duration>0)toastTimer=setTimeout(hideToast,duration);
+  }
+  function hideToast(){clearTimeout(toastTimer);if(toastElement)toastElement.classList.remove('show')}
+
   function installSyncBar({onNeedToken=null,onDone=null}={}){
-    const button=document.querySelector('#syncAll'),status=document.querySelector('#navSyncStatus');
-    if(!button||!status)return;
+    const button=document.querySelector('#syncAll');
+    if(!button)return;
     applyCacheBust();
-    const setStatus=text=>{status.textContent=text};
     const previous=consumeSyncMessage();
-    if(previous)setStatus(previous);
-    else{
+    if(previous)showToast(previous,5000);
+    detectHelper().then(helper=>{
       const last=lastSyncLabel();
-      detectHelper().then(helper=>{
-        if(helper)setStatus(`PC 동기화 도우미 켜짐${last?` · 마지막 동기화 ${last}`:''}`);
-        else if(!helperPossible()&&hasToken())setStatus(`GitHub 연결됨${last?` · 마지막 동기화 ${last}`:''}`);
-        else if(!helperPossible())setStatus('');
-        else if(hasToken())setStatus(`도우미 꺼짐 · 학습기록만 동기화 가능${last?` · 마지막 동기화 ${last}`:''}`);
-        else setStatus('PC 동기화 도우미가 꺼져 있습니다. 바탕화면의 「오답훈련센터 시작」으로 열어주세요.');
-      });
-    }
+      button.title=(helper?'PC 동기화 도우미 켜짐':!helperPossible()?(hasToken()?'GitHub 연결됨':'홈에서 GitHub 토큰을 한 번 연결하면 됩니다'):'PC 동기화 도우미 꺼짐')+(last?` · 마지막 동기화 ${last}`:'');
+    });
+    let lastText='';
     button.addEventListener('click',async()=>{
       const result=await syncEverything({
-        setStatus,
+        setStatus:text=>{lastText=text;showToast(text,0)},
         setBusy:busy=>{button.disabled=busy;button.textContent=busy?'동기화 중…':'🔄 동기화'},
         onNeedToken
       });
       if(result.status==='done'){
         if(onDone){onDone(result);return}
         setSyncMessage(result.message);
-        setStatus(`${result.message} 최신 화면으로 새로고침합니다…`);
-        setTimeout(()=>location.reload(),900);
-      }
+        showToast('동기화 완료. 최신 화면으로 새로고침합니다…',0);
+        setTimeout(()=>location.reload(),700);
+      }else if(result.status==='error')showToast(result.message,10000,{error:true});
+      else showToast(lastText,8000);
     });
   }
 
@@ -402,6 +415,6 @@
     getDeviceId,getDeviceName,setDeviceName,isMobileDevice,
     detectHelper,helperPost,
     normalizeState,readState,writeState,mergeState,backupPayload,mergeStatesIntoLocal,buildSyncPayload,
-    syncEverything,installSyncBar,consumeSyncMessage,lastSyncLabel
+    syncEverything,installSyncBar,showToast,hideToast,consumeSyncMessage,lastSyncLabel
   };
 })(window);
