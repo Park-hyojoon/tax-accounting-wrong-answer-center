@@ -33,7 +33,10 @@
     .hero p{margin:7px 0}
     .notice{margin-top:16px;padding:14px 17px;border-radius:13px;background:var(--yellow);font-weight:800}
     .dashboard{position:sticky;top:calc(var(--nav-h,62px) + 8px);z-index:10;margin:18px 0;background:rgba(247,252,255,.95);backdrop-filter:blur(8px);border:1px solid #d5e6f2;border-radius:17px;padding:13px;display:flex;flex-wrap:wrap;align-items:center;gap:12px}
-    .stat{background:#fff;border:1px solid var(--line);border-radius:12px;padding:8px 14px;font-weight:900;color:var(--navy)}
+    .progress{display:flex;align-items:center;gap:12px;margin-left:auto;font-weight:800;color:var(--navy)}
+    .progress-bar{width:180px;height:14px;background:#dfeaf2;border-radius:99px;overflow:hidden}
+    .progress-bar span{display:block;height:100%;width:0;background:linear-gradient(90deg,#39a7f0,#27b47e);transition:.25s}
+    @media(max-width:760px){.progress{width:100%;margin-left:0}.progress-bar{flex:1 1 auto}}
     .sort-label{display:flex;align-items:center;gap:8px;white-space:nowrap;margin-left:auto;font-weight:900;color:var(--navy)}
     .sort-select{border:2px solid var(--line);border-radius:12px;background:#fff;color:var(--navy);font-weight:800;font-size:inherit;padding:9px 12px;cursor:pointer}
     .sort-select:focus-visible{border-color:#5d9ed2;outline:none}
@@ -97,11 +100,7 @@
   <script>(function(){var nav=document.querySelector('.top-nav');function sync(){document.documentElement.style.setProperty('--nav-h',(nav?nav.offsetHeight:60)+'px')}sync();window.addEventListener('resize',sync)})()</script>
   <main class="wrap">
     <div class="dashboard">
-      <span class="stat" id="solvedStat">채점 0 / 5</span>
-      <span class="stat" id="correctStat">현재 정답 0</span>
-      <span class="stat" id="wrongStat">누적 오답 0</span>
-      <button class="btn green" id="checkAll" type="button">선택한 문제 전체 채점</button>
-      <button class="btn secondary" id="goSave" type="button">학습기록 저장으로 이동</button>
+      <button class="btn secondary" id="goSave" type="button">학습기록 저장</button>
       <label class="sort-label" for="sortOrder">정렬
         <select class="sort-select" id="sortOrder">
           <option value="registered">등록 순서</option>
@@ -111,6 +110,7 @@
           <option value="recentRegistered">최근 등록 순</option>
         </select>
       </label>
+      <div class="progress"><span id="progressText">채점 0 / 5</span><div class="progress-bar"><span id="progressFill"></span></div></div>
     </div>
 
     <section id="questions" aria-label="이론 문제"></section>
@@ -134,7 +134,7 @@
     <p class="footer">학습기록은 사용자 컴퓨터에만 저장되며 외부로 자동 전송되지 않습니다.</p>
   </main>
 
-  <script src="github-learning-sync.js?v=6"></script>
+  <script src="github-learning-sync.js?v=7"></script>
   <script src="training-ui.js?v=1"></script>
   <script>
     const problems=[
@@ -223,7 +223,7 @@
         <div class="qhead"><span class="qnum">${i+1}</span><div><h3>${p.prompt}</h3><span class="tag">${p.type}</span></div></div>
         ${p.data?`<div class="data-box">${p.data}</div>`:''}
         <div class="choices">${p.choices.map((c,n)=>`<label class="choice"><input type="radio" name="q-${p.id}" value="${n}" ${Number(selected)===n?'checked':''}><span class="choice-number">${circled[n]}</span><span>${c}</span></label>`).join('')}</div>
-        <div class="actions"><button class="btn check-one" type="button">채점하기</button><button class="btn secondary archive-one" type="button">이 문제 지우기</button><span class="result" aria-live="polite"></span><span class="attempt"></span></div>
+        <div class="actions"><button class="btn check-one" type="button">채점하기</button><button class="btn secondary archive-one" type="button">정답으로 인정하고 통과</button><span class="result" aria-live="polite"></span><span class="attempt"></span></div>
         <details><summary>정답 · 해설 보기</summary><div class="detail-body"><p><strong>정답: ${circled[p.answer]} ${p.choices[p.answer]}</strong></p><p>${p.explanation}</p><p><strong>핵심:</strong> ${p.key}</p></div></details>
       </article>`
     }
@@ -248,7 +248,7 @@
       const id=card.dataset.id;
       $$('input[type="radio"]',card).forEach(r=>r.addEventListener('change',()=>{state.answers[id]=Number(r.value);delete state.checked[id];persist();renderCard(card)}));
       $('.check-one',card).addEventListener('click',()=>grade(card));
-      $('.archive-one',card).addEventListener('click',()=>{if(!confirm('이 문제를 훈련 목록에서 숨길까요? 학습 이력은 보관함에 남으며 센터 홈에서 복원할 수 있습니다.'))return;state.archived[id]=true;state.archivedAt[id]=nowIso();delete state.trainingCenterRestored[id];persist();card.hidden=true;updateDashboard()});
+      $('.archive-one',card).addEventListener('click',()=>{if(!confirm('이 문제를 정답으로 인정하고 통과 처리할까요?\n채점 이력과 오답 횟수는 그대로 남고, 학습기록에는 “스스로 인정”으로 표시됩니다. 센터 홈 보관함에서 복원할 수 있습니다.'))return;state.selfPassed=state.selfPassed||{};state.selfPassedAt=state.selfPassedAt||{};state.passed[id]=true;state.passedAt[id]=nowIso();state.selfPassed[id]=true;state.selfPassedAt[id]=nowIso();delete state.trainingCenterRestored[id];persist();card.hidden=true;updateDashboard()});
       renderCard(card);
     });
 
@@ -259,7 +259,7 @@
       state.attempts[id]=(state.attempts[id]||0)+1;
       state.history[id]=state.history[id]||[];
       state.history[id].push({at:nowIso(),choice:Number(selected),correct});
-      if(correct){state.passed[id]=true;state.passedAt[id]=nowIso();delete state.trainingCenterRestored[id];sessionPassed.add(id)}
+      if(correct){state.passed[id]=true;state.passedAt[id]=nowIso();delete state.trainingCenterRestored[id];if(state.selfPassed)delete state.selfPassed[id];if(state.selfPassedAt)delete state.selfPassedAt[id];sessionPassed.add(id)}
       state.checked[id]=correct;persist();renderCard(card);return correct
     }
     function updateDashboard(){
@@ -267,9 +267,8 @@
       const solved=visible.filter(p=>(state.attempts[p.id]||0)>0).length;
       const correct=visible.filter(p=>state.checked[p.id]===true).length;
       const wrong=problems.reduce((n,p)=>n+wrongCount(p.id),0);
-      $('#solvedStat').textContent=`채점 ${solved} / ${visible.length}`;
-      $('#correctStat').textContent=`현재 정답 ${correct}`;
-      $('#wrongStat').textContent=`누적 오답 ${wrong}`;
+      $('#progressText').textContent=`채점 ${solved} / ${visible.length} · 정답 ${correct} · 누적 오답 ${wrong}`;
+      $('#progressFill').style.width=(visible.length?solved/visible.length*100:100)+'%';
       let empty=$('#emptyState');if(!empty){empty=document.createElement('p');empty.id='emptyState';empty.className='notice';$('#questions').before(empty)}empty.hidden=visible.length>0;empty.textContent='현재 노출할 문제가 없습니다. 통과·숨김 문제는 센터 홈의 보관함에서 확인할 수 있습니다.';
     }
     updateDashboard();
@@ -283,7 +282,6 @@
       return a.index-b.index});
       const box=$('#questions');list.forEach(x=>box.appendChild(x.card))}
     $('#sortOrder').addEventListener('change',applySort);
-    $('#checkAll').addEventListener('click',()=>{$$('.question').filter(c=>!c.hidden&&state.answers[c.dataset.id]!==undefined).forEach(grade)});
     $('#goSave').addEventListener('click',()=>$('#savePanel').scrollIntoView({behavior:'smooth'}));
     $('#fileName').addEventListener('input',e=>{state.fileName=e.target.value;persist()});
     $('#koAuto').addEventListener('change',e=>{state.koAuto=e.target.checked;persist();resetKoreanBuffers()});
@@ -321,7 +319,7 @@
         lines.push(`## ${i+1}. ${p.type}`,'',`**문제:** ${p.prompt}`,'');
         if(p.data)lines.push('**자료:**','',...p.data.split('\n').map(x=>`- ${x}`),'');
         p.choices.forEach((c,n)=>lines.push(`- ${circled[n]} ${c}`));
-        lines.push('',`- 오늘 마지막 선택: ${choiceText(p,last.choice)}`,`- 정답: ${choiceText(p,p.answer)}`,`- 오늘 마지막 결과: ${last.correct?'정답':'오답'}`,`- 오늘 채점 횟수: ${history.length}회`,`- 오늘 틀린 횟수: ${history.filter(h=>!h.correct).length}회`,'','**오늘 답변 이력:**');
+        lines.push('',`- 오늘 마지막 선택: ${choiceText(p,last.choice)}`,`- 정답: ${choiceText(p,p.answer)}`,`- 오늘 마지막 결과: ${last.correct?'정답':'오답'}`,...(state.selfPassed?.[p.id]?[`- 스스로 정답 인정(통과): ${new Date(state.selfPassedAt?.[p.id]||0).toLocaleString('ko-KR')}`]:[]),`- 오늘 채점 횟수: ${history.length}회`,`- 오늘 틀린 횟수: ${history.filter(h=>!h.correct).length}회`,'','**오늘 답변 이력:**');
         history.forEach((h,n)=>lines.push(`- ${n+1}차 (${fmtDate(h.at)}): ${choiceText(p,h.choice)} → ${h.correct?'정답':'오답'}`));
         lines.push('',`**핵심 학습 내용:** ${p.key}`,'',`**해설:** ${p.explanation}`,'','---','');
       });

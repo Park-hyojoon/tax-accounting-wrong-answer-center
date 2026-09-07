@@ -218,6 +218,7 @@
     merged.passed=flags.passed;merged.archived=flags.archived;
     if(flags.passedAt)merged.passedAt=flags.passedAt;if(flags.archivedAt)merged.archivedAt=flags.archivedAt;if(flags.restoredAt)merged.restoredAt=flags.restoredAt;
     if(flags.trainingCenterRestored)merged.trainingCenterRestored=true;else delete merged.trainingCenterRestored;
+    if(merged.selfPassed){const selfAt=eventTime(merged.selfPassedAt||0);if(flags.trainingCenterRestored||merged.history.some(item=>item?.correct===true&&eventTime(item.at)>=selfAt)){delete merged.selfPassed;delete merged.selfPassedAt}}
     delete merged.note;
     return merged;
   }
@@ -233,6 +234,8 @@
     merged.archivedAt=mergeMap(current.archivedAt||{},incoming.archivedAt||{},incomingNewer);
     merged.restoredAt=mergeMap(current.restoredAt||{},incoming.restoredAt||{},incomingNewer);
     merged.trainingCenterRestored=mergeMap(current.trainingCenterRestored||{},incoming.trainingCenterRestored||{},incomingNewer);
+    merged.selfPassed=mergeMap(current.selfPassed||{},incoming.selfPassed||{},incomingNewer);
+    merged.selfPassedAt=mergeMap(current.selfPassedAt||{},incoming.selfPassedAt||{},incomingNewer);
     ids.forEach(id=>{
       const history=uniqueHistory(current.history?.[id],incoming.history?.[id]);
       merged.history[id]=history;
@@ -245,6 +248,7 @@
       merged.passed[id]=flags.passed;merged.archived[id]=flags.archived;
       if(flags.passedAt)merged.passedAt[id]=flags.passedAt;if(flags.archivedAt)merged.archivedAt[id]=flags.archivedAt;if(flags.restoredAt)merged.restoredAt[id]=flags.restoredAt;
       if(flags.trainingCenterRestored)merged.trainingCenterRestored[id]=true;else delete merged.trainingCenterRestored[id];
+      if(merged.selfPassed[id]){const selfAt=eventTime(merged.selfPassedAt[id]||0);if(flags.trainingCenterRestored||history.some(item=>item?.correct===true&&eventTime(item.at)>=selfAt)){delete merged.selfPassed[id];delete merged.selfPassedAt[id]}}
     });
     return merged;
   }

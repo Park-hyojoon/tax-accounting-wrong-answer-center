@@ -111,6 +111,7 @@
     .type-badge{background:#f0f4f7;color:#506477}
     .state-badge.pass{background:var(--mint);color:var(--green)}
     .state-badge.hide{background:var(--rose);color:var(--red)}
+    .state-badge.self{background:var(--yellow);color:var(--orange)}
     .problem-title{margin:0;font-size:1.05rem;line-height:1.42;word-break:keep-all}
     .problem-meta{margin:5px 0 0;color:#60778a;font-size:.88rem}
     .problem-actions{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:8px}
@@ -330,7 +331,7 @@
     <p class="footer">오답 훈련센터 · 「동기화」 또는 「오늘 학습기록 저장」을 누른 경우에만 GitHub로 기록을 보냅니다.</p>
   </main>
 
-  <script src="github-learning-sync.js?v=6"></script>
+  <script src="github-learning-sync.js?v=7"></script>
   <script src="training-ui.js?v=1"></script>
   <script>
     const SOURCES={
@@ -495,13 +496,14 @@
       Object.entries(SOURCES).forEach(([name,source])=>{roots[name]=readState(source.key)});
       records=META.map((meta,metaOrder)=>{
         const source=SOURCES[meta.source],root=roots[meta.source];
-        let saved={},history=[],attempts=0,wrong=0,passed=false,archived=false;
+        let saved={},history=[],attempts=0,wrong=0,passed=false,archived=false,selfPassed=false;
         if(meta.source==='theory'){
           history=Array.isArray(root.history?.[meta.id])?root.history[meta.id]:[];
           attempts=number(root.attempts?.[meta.id]);
           wrong=history.filter(item=>item&&item.correct===false).length;
           passed=isPassed(root.passed?.[meta.id],root.checked?.[meta.id],history,root.trainingCenterRestored?.[meta.id]);
           archived=Boolean(root.archived?.[meta.id]);
+          selfPassed=Boolean(root.selfPassed?.[meta.id]);
         }else{
           const index=meta.source==='closing'?meta.index:meta.id;
           saved=(root.cards&&root.cards[index])||{};
@@ -511,9 +513,10 @@
           if(!wrong&&history.length)wrong=history.filter(item=>item&&item.correct===false).length;
           passed=isPassed(saved.passed,saved.correct,history,saved.trainingCenterRestored);
           archived=Boolean(saved.archived);
+          selfPassed=Boolean(saved.selfPassed);
         }
         const lastAttempt=history.reduce((latest,item)=>{const time=Date.parse(item?.at||'');return Number.isFinite(time)&&time>latest?time:latest},0);
-        return {...meta,metaOrder,category:source.label,file:source.file,key:source.key,history,attempts,wrong,passed,archived,lastAttempt};
+        return {...meta,metaOrder,category:source.label,file:source.file,key:source.key,history,attempts,wrong,passed,archived,selfPassed,lastAttempt};
       });
       $('#storageNotice').hidden=storageAvailable;
     }
@@ -522,7 +525,7 @@
     function problemItem(record,{restore=false,view='',plain=false}={}){
       const stateBadges=[];
       if(record.archived)stateBadges.push('<span class="state-badge hide">숨김</span>');
-      else if(record.passed)stateBadges.push('<span class="state-badge pass">✓ 통과</span>');
+      else if(record.passed)stateBadges.push(record.selfPassed?'<span class="state-badge self">스스로 인정</span>':'<span class="state-badge pass">✓ 통과</span>');
       return `<article class="problem-item" data-source="${record.source}">
         <div class="problem-main">
           ${plain?'':`<div class="problem-topline"><span class="category-badge">${record.category}</span><span class="type-badge">${record.type}</span>${stateBadges.join('')}</div>`}
@@ -586,7 +589,7 @@
     }
     function renderArchive(){
       const list=records.filter(record=>record.passed||record.archived).sort((a,b)=>b.registered.localeCompare(a.registered)||a.category.localeCompare(b.category,'ko'));
-      $('#archiveList').innerHTML=list.length?list.map(record=>problemItem(record,{restore:true})).join(''):emptyState('보관된 문제가 없습니다.','한 번 정답을 맞히거나 원본 문제에서 ‘이 문제 지우기’를 누르면 이곳에 보관됩니다.');
+      $('#archiveList').innerHTML=list.length?list.map(record=>problemItem(record,{restore:true})).join(''):emptyState('보관된 문제가 없습니다.','한 번 정답을 맞히거나 원본 문제에서 ‘정답으로 인정하고 통과’를 누르면 이곳에 보관됩니다.');
     }
     function renderStats(){
       $('#statsBody').innerHTML=Object.entries(SOURCES).map(([source,info])=>{
@@ -607,7 +610,7 @@
         root.archived=(root.archived&&typeof root.archived==='object')?root.archived:{};
         root.trainingCenterRestored=(root.trainingCenterRestored&&typeof root.trainingCenterRestored==='object')?root.trainingCenterRestored:{};
         root.restoredAt=(root.restoredAt&&typeof root.restoredAt==='object')?root.restoredAt:{};
-        root.passed[id]=false;root.archived[id]=false;
+        root.passed[id]=false;root.archived[id]=false;if(root.selfPassed)delete root.selfPassed[id];if(root.selfPassedAt)delete root.selfPassedAt[id];
         root.trainingCenterRestored[id]=true;root.restoredAt[id]=new Date().toISOString();
       }else{
         root.cards=(root.cards&&typeof root.cards==='object')?root.cards:{};
@@ -615,7 +618,7 @@
         const index=sourceName==='closing'?record?.index:Number(id);
         if(!Number.isInteger(index))return;
         root.cards[index]=(root.cards[index]&&typeof root.cards[index]==='object')?root.cards[index]:{};
-        root.cards[index].passed=false;root.cards[index].archived=false;
+        root.cards[index].passed=false;root.cards[index].archived=false;delete root.cards[index].selfPassed;delete root.cards[index].selfPassedAt;
         root.cards[index].trainingCenterRestored=true;root.cards[index].restoredAt=new Date().toISOString();
       }
       root.updatedAt=new Date().toISOString();
