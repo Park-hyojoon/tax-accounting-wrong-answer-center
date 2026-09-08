@@ -174,11 +174,12 @@
     }
     if(sourceName==='theory'){
       const deleted={...(normalized.deleted||{})},deletedAt={...(normalized.deletedAt||{})};
-      Object.keys(normalized.selfPassed||{}).forEach(id=>{if(normalized.selfPassed[id]){deleted[id]=true;deletedAt[id]=deletedAt[id]||normalized.selfPassedAt?.[id]||new Date().toISOString()}});
+      const gone=new Set([...Object.keys(normalized.selfPassed||{}).filter(id=>normalized.selfPassed[id]),...Object.keys(normalized.passed||{}).filter(id=>normalized.passed[id]===true),...Object.keys(normalized.archived||{}).filter(id=>normalized.archived[id])]);
+      gone.forEach(id=>{deleted[id]=true;deletedAt[id]=deletedAt[id]||normalized.selfPassedAt?.[id]||normalized.passedAt?.[id]||normalized.archivedAt?.[id]||new Date().toISOString()});
       Object.keys(deleted).forEach(id=>{['answers','checked','attempts','history','passed','archived','passedAt','archivedAt','restoredAt','trainingCenterRestored','selfPassed','selfPassedAt'].forEach(k=>{if(normalized[k]&&typeof normalized[k]==='object')delete normalized[k][id]})});
       normalized.deleted=deleted;normalized.deletedAt=deletedAt;
     }else{
-      Object.keys(normalized.cards||{}).forEach(index=>{const card=normalized.cards[index];if(card&&(card.deleted||card.selfPassed))normalized.cards[index]={deleted:true,deletedAt:card.deletedAt||card.selfPassedAt||new Date().toISOString()}});
+      Object.keys(normalized.cards||{}).forEach(index=>{const card=normalized.cards[index];if(card&&(card.deleted||card.selfPassed||((card.passed||card.archived)&&!card.starred)))normalized.cards[index]={deleted:true,deletedAt:card.deletedAt||card.selfPassedAt||card.passedAt||card.archivedAt||new Date().toISOString()}});
     }
     return normalized;
   }

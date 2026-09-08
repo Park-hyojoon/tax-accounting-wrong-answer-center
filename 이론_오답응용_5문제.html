@@ -134,7 +134,7 @@
     <p class="footer">학습기록은 사용자 컴퓨터에만 저장되며 외부로 자동 전송되지 않습니다.</p>
   </main>
 
-  <script src="github-learning-sync.js?v=9"></script>
+  <script src="github-learning-sync.js?v=10"></script>
   <script src="training-ui.js?v=2"></script>
   <script>
     const problems=[
@@ -240,7 +240,7 @@
     const sessionPassed=new Set();
     function renderCard(card){
       const id=card.dataset.id,p=getProblem(id),checked=state.checked[id],attempts=state.attempts[id]||0,result=$('.result',card);
-      if(state.selfPassed?.[id]&&!state.deleted?.[id])deleteTheory(id);
+      if((state.selfPassed?.[id]||((state.passed?.[id]===true||state.archived?.[id])&&!sessionPassed.has(id)))&&!state.deleted?.[id])deleteTheory(id);
       card.hidden=state.deleted?.[id]?true:typeView?((p.type||'').trim()!==typeView):Boolean((state.passed[id]&&!sessionPassed.has(id))||state.archived[id]||(todayView&&card.dataset.addedDate!==localDate()));
       card.classList.toggle('correct',checked===true);card.classList.toggle('wrong',checked===false);
       result.className='result'+(checked===true?' ok':checked===false?' no':'');
@@ -251,7 +251,7 @@
       const id=card.dataset.id;
       $$('input[type="radio"]',card).forEach(r=>r.addEventListener('change',()=>{state.answers[id]=Number(r.value);delete state.checked[id];persist();renderCard(card)}));
       $('.check-one',card).addEventListener('click',()=>grade(card));
-      $('.archive-one',card).addEventListener('click',()=>{if(!confirm('이 문제를 영구 삭제할까요?\n목록·보관함·통계에서 완전히 사라지고 복구할 수 없습니다.'))return;deleteTheory(id);card.hidden=true;updateDashboard()});
+      $('.archive-one',card).addEventListener('click',()=>{if(!confirm('이 문제를 영구 삭제할까요?\n목록·통계에서 완전히 사라지고 복구할 수 없습니다.'))return;deleteTheory(id);card.hidden=true;updateDashboard()});
       renderCard(card);
     });
 
@@ -272,7 +272,7 @@
       const wrong=problems.reduce((n,p)=>n+wrongCount(p.id),0);
       $('#progressText').textContent=`채점 ${solved} / ${visible.length} · 정답 ${correct} · 누적 오답 ${wrong}`;
       $('#progressFill').style.width=(visible.length?solved/visible.length*100:100)+'%';
-      let empty=$('#emptyState');if(!empty){empty=document.createElement('p');empty.id='emptyState';empty.className='notice';$('#questions').before(empty)}empty.hidden=visible.length>0;empty.textContent='현재 노출할 문제가 없습니다. 통과·숨김 문제는 센터 홈의 보관함에서 확인할 수 있습니다.';
+      let empty=$('#emptyState');if(!empty){empty=document.createElement('p');empty.id='emptyState';empty.className='notice';$('#questions').before(empty)}empty.hidden=visible.length>0;empty.textContent='현재 노출할 문제가 없습니다. 맞힌 문제는 다음 방문 때 자동으로 삭제됩니다.';
     }
     updateDashboard();
     const questionOrder=$$('.question').map((card,index)=>({card,index}));
