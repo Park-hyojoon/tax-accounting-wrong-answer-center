@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>전산회계 1급 일반전표 오답연습 34문제</title>
+  <title>전산회계 1급 일반전표 오답연습 36문제</title>
   <style>
     :root{--navy:#17345f;--blue:#3178c6;--sky:#eaf6ff;--mint:#e9fbf3;--yellow:#fff5bd;--red:#d84343;--green:#16845b;--line:#cdddec;--ink:#172033;--muted:#607089}
     *{box-sizing:border-box}
@@ -37,6 +37,7 @@
     .btn.green{background:var(--green)}
     .progress{display:flex;align-items:center;gap:12px;margin-left:auto;font-weight:800;color:var(--navy)}
     .sort-label{display:flex;align-items:center;gap:8px;white-space:nowrap;font-weight:800;color:var(--navy)}
+    .sort-label[hidden]{display:none}
     .sort-select{border:2px solid var(--line);border-radius:12px;background:#fff;color:var(--navy);font-weight:800;font-size:inherit;padding:9px 12px;cursor:pointer}
     .sort-select:focus-visible{border-color:#5d9ed2;outline:none}
     @media(max-width:720px){.sort-label{width:100%;align-items:stretch;flex-direction:column;gap:5px}.sort-select{width:100%}}
@@ -201,6 +202,8 @@
         prompt:'[8월 20일] 장부금액 7,500,000원의 단기매매증권을 7,100,000원에 처분하였다. 처분수수료 50,000원을 차감한 금액이 보통예금에 입금되었다.',
         hint:'실제 입금액은 처분가액에서 수수료를 뺀 금액이며, 장부금액과의 차이는 처분손익입니다.',
         explanation:'보통예금 입금액은 7,050,000원이고 장부금액과의 차이 450,000원은 단기매매증권처분손실입니다.',
+        accountSelect:true,
+        accountOptions:['보통예금','단기매매증권','단기매매증권처분손실','단기매매증권처분이익','수수료비용','단기매매증권평가손실','현금'],
         answers:[A('D','보통예금',7050000),A('D','단기매매증권처분손실',450000),A('C','단기매매증권',7500000)]
       },
       {
@@ -438,6 +441,22 @@
         accountSelect:true,
         accountOptions:['미지급배당금','이익준비금','미처분이익잉여금','예수금','선납세금','보통예금','현금'],
         answers:[A('D','미지급배당금',12000000),A('C','보통예금',10152000),A('C','예수금',1848000)]
+      },
+      {
+        type:'단기매매증권', title:'단기매매증권 처분손실 (응용)', addedDate:'2026-09-08', variantOf:4,
+        prompt:'[9월 14일] 장부금액 9,200,000원의 단기매매증권을 8,700,000원에 처분하였다. 처분수수료 70,000원을 차감한 금액이 보통예금에 입금되었다. 적절한 일반전표를 입력하시오.',
+        explanation:'실제 입금액은 처분가액 8,700,000원에서 처분수수료 70,000원을 차감한 8,630,000원입니다. 장부금액 9,200,000원과 순수령액의 차이 570,000원을 단기매매증권처분손실로 기록합니다. 차변 보통예금 8,630,000원과 처분손실 570,000원의 합계가 대변 단기매매증권 9,200,000원과 일치합니다. 이 처분 거래에서 수수료는 순수령액에 반영했으므로 별도로 중복 비용 처리하지 않습니다. 취득 시 수수료 처리와 구분하세요.',
+        accountSelect:true,
+        accountOptions:['보통예금','단기매매증권','단기매매증권처분손실','단기매매증권처분이익','수수료비용','단기매매증권평가손실','현금'],
+        answers:[A('D','보통예금',8630000),A('D','단기매매증권처분손실',570000),A('C','단기매매증권',9200000)]
+      },
+      {
+        type:'이자수익 원천징수 수정', title:'이자수익의 원천징수 누락 수정 (응용)', addedDate:'2026-09-08', variantOf:20,
+        prompt:'[11월 30일] 보통예금 이자 2,250,000원을 은행에서 수령하여 법인 통장에 입금하였다. 담당자는 전액을 이자수익으로 회계처리했으나, 실제 수령액 2,250,000원은 이자소득세 450,000원을 공제한 후의 금액임을 뒤늦게 확인하였다. 수정 후 올바른 일반전표 전체를 입력하시오.',
+        explanation:'세전 이자수익은 실제 입금액 2,250,000원에 원천징수세액 450,000원을 더한 2,700,000원입니다. 차변 보통예금 2,250,000원과 선납세금 450,000원, 대변 이자수익 2,700,000원으로 수정합니다. 회사가 받을 이자에서 미리 납부된 세금이므로 선납세금이며, 다른 사람에게 지급하면서 떼어 보관한 세금인 예수금과 구분합니다. 추가 차액 분개만 입력하는 문제가 아니라 수정 후 전표 전체를 완성하는 문제입니다. 세액은 문제에 주어진 금액을 사용합니다.',
+        accountSelect:true,
+        accountOptions:['보통예금','선납세금','이자수익','예수금','미지급세금','이자비용','법인세비용'],
+        answers:[A('D','보통예금',2250000),A('D','선납세금',450000),A('C','이자수익',2700000)]
       }
     ];
 
@@ -454,7 +473,7 @@
     problems.forEach(p=>{if(!p.addedDate)p.addedDate='2026-09-01'});
     const STATE_VERSION='general-journal-27-v1';
     const OLD_TO_NEW_INDEX={4:0,6:1,8:2,9:3,10:4,11:5,12:6,13:7,14:8,15:9,16:10,17:11,18:12,19:13,20:14,21:15,22:16,23:17,24:18,25:19,26:20,27:21,28:22,29:23,30:24,31:25,32:26};
-    const defaultState=()=>({schemaVersion:STATE_VERSION,startedAt:nowIso(),updatedAt:nowIso(),cards:{},fileName:`일반전표_34문제_학습기록_${localDate()}`,koAuto:true});
+    const defaultState=()=>({schemaVersion:STATE_VERSION,startedAt:nowIso(),updatedAt:nowIso(),cards:{},fileName:`일반전표_36문제_학습기록_${localDate()}`,koAuto:true});
     let studyState=loadState();
     function migrateStateTo27(rawState={}){
       const source=rawState&&typeof rawState==='object'?rawState:{};
@@ -467,7 +486,7 @@
       const fileName=String(source.fileName||'').replace('일반전표_33문제','일반전표_27문제');
       return {...source,schemaVersion:STATE_VERSION,migratedAt:nowIso(),cards,...(fileName?{fileName}:{})};
     }
-    function loadState(){try{const raw=JSON.parse(localStorage.getItem(STORAGE_KEY)||'{}'),migrated=migrateStateTo27(raw),s=Object.assign(defaultState(),migrated);if(/^일반전표_(?:24|27|28|31|32|33|34)문제_학습기록_\d{4}-\d{2}-\d{2}$/.test(s.fileName||''))s.fileName=`일반전표_34문제_학습기록_${localDate()}`;Object.values(s.cards||{}).forEach(c=>{const wasCorrect=c.correct===true||(c.history||[]).some(h=>h.correct);c.passed=c.trainingCenterRestored?false:Boolean(c.passed||wasCorrect);c.archived=Boolean(c.archived);c.history=c.history||[];delete c.note});if(raw.schemaVersion!==STATE_VERSION)localStorage.setItem(STORAGE_KEY,JSON.stringify(s));return s}catch(e){return defaultState()}}
+    function loadState(){try{const raw=JSON.parse(localStorage.getItem(STORAGE_KEY)||'{}'),migrated=migrateStateTo27(raw),s=Object.assign(defaultState(),migrated);if(/^일반전표_(?:24|27|28|31|32|33|34|36)문제_학습기록_\d{4}-\d{2}-\d{2}$/.test(s.fileName||''))s.fileName=`일반전표_36문제_학습기록_${localDate()}`;Object.values(s.cards||{}).forEach(c=>{const wasCorrect=c.correct===true||(c.history||[]).some(h=>h.correct);c.passed=c.trainingCenterRestored?false:Boolean(c.passed||wasCorrect);c.archived=Boolean(c.archived);c.history=c.history||[];delete c.note});if(raw.schemaVersion!==STATE_VERSION)localStorage.setItem(STORAGE_KEY,JSON.stringify(s));return s}catch(e){return defaultState()}}
     function saveState(){studyState.updatedAt=nowIso();localStorage.setItem(STORAGE_KEY,JSON.stringify(studyState))}
     function cardState(index){const s=studyState.cards[index]||(studyState.cards[index]={rows:[],graded:false,correct:false,attempts:0,wrongCount:0,history:[],passed:false,archived:false});if(s.passed===undefined)s.passed=false;if(s.archived===undefined)s.archived=false;return s}
 
@@ -538,10 +557,12 @@
     const todayView=new URLSearchParams(location.search).get('view')==='today';
     const typeView=(new URLSearchParams(location.search).get('type')||'').trim();
     const starView=new URLSearchParams(location.search).get('view')==='star';
+    // 응용문제의 원문제도 기기의 ★ 상태와 관계없이 같은 묶음에 표시한다.
+    const variantSourceIndices=new Set(problems.filter(p=>p.variantOf!=null).map(p=>p.variantOf));
     function restoreCard(card){
       const s=cardState(card.dataset.index),rows=els('.entry-row',card);
       const problemOf=problems[Number(card.dataset.index)]||{};
-      card.hidden=starView?!(s.starred||problemOf.variantOf!=null):typeView?((problemOf.type||'').trim()!==typeView):Boolean(s.passed||s.archived||(todayView&&card.dataset.addedDate!==localDate()));
+      card.hidden=starView?!(s.starred||problemOf.variantOf!=null||variantSourceIndices.has(Number(card.dataset.index))):typeView?((problemOf.type||'').trim()!==typeView):Boolean(s.passed||s.archived||(todayView&&card.dataset.addedDate!==localDate()));
       el('.star-one',card).setAttribute('aria-pressed',String(Boolean(s.starred)));el('.star-note',card).hidden=!s.starred;
       (s.rows||[]).forEach((saved,i)=>{if(!rows[i])return;el('.side',rows[i]).value=saved.side||'D';el('.account',rows[i]).value=saved.account||'';el('.amount',rows[i]).value=saved.amount||'';el('.division',rows[i]).value=saved.division||'';el('.partner',rows[i]).value=saved.partner||'';el('.memo',rows[i]).value=saved.memo||''});
       if(s.graded){card.dataset.graded='true';card.dataset.correct=String(Boolean(s.correct));card.classList.toggle('correct',Boolean(s.correct));card.classList.toggle('wrong',!s.correct);const result=el('.result',card);result.className='result '+(s.correct?'ok':'no');result.textContent=s.correct?'정답입니다!':`마지막 채점은 오답입니다. (${s.matched||0}/${problems[Number(card.dataset.index)].answers.length}개 분개 일치)`}
@@ -678,7 +699,7 @@
       await saveLocalRecord(payload)
     }
     el('#saveTodayRecord').addEventListener('click',saveTodayRecord);
-    el('#resetLearning').addEventListener('click',()=>{if(confirm('34문제의 전표 입력, 채점 이력과 틀린 횟수를 모두 지울까요?')){localStorage.removeItem(STORAGE_KEY);location.reload()}});
+    el('#resetLearning').addEventListener('click',()=>{if(confirm('36문제의 전표 입력, 채점 이력과 틀린 횟수를 모두 지울까요?')){localStorage.removeItem(STORAGE_KEY);location.reload()}});
 
     // 영문 자판 상태의 일반적인 두벌식 입력을 한글로 조합한다.
     const C_MAP={r:'ㄱ',R:'ㄲ',s:'ㄴ',e:'ㄷ',E:'ㄸ',f:'ㄹ',a:'ㅁ',q:'ㅂ',Q:'ㅃ',t:'ㅅ',T:'ㅆ',d:'ㅇ',w:'ㅈ',W:'ㅉ',c:'ㅊ',z:'ㅋ',x:'ㅌ',v:'ㅍ',g:'ㅎ'};
@@ -706,12 +727,13 @@
       const tools='<div class="star-tools"><button class="btn secondary star-open-all" type="button">보기</button><button class="btn secondary star-close-all" type="button">접기</button></div>';
       if(!groups.size){box.innerHTML='<div class="notice">★ 표시한 문제가 아직 없습니다. 「일반전표 입력」에서 문제 아래의 「★ 특별 훈련」 버튼을 누르면 이곳에 유형별로 모입니다.</div>';return}
       const wrap=document.createElement('div');wrap.className='star-view';wrap.innerHTML=tools;
+      wrap.insertAdjacentHTML('afterbegin','<p class="notice">기존 문제 → 응용문제 순서로 한 유형씩 풀어보세요. 원문제의 통과 기록은 유지되며 이곳에서는 두 문제를 함께 볼 수 있습니다.</p>');
       groups.forEach((cards,type)=>{
         const group=document.createElement('section');group.className='star-group';group.innerHTML=`<h2 class="star-group-title">${type}<small>${cards.length}문제</small></h2>`;
         cards.sort((a,b)=>{const pa=problems[Number(a.dataset.index)],pb=problems[Number(b.dataset.index)];const ka=pa.variantOf!=null?pa.variantOf:Number(a.dataset.index),kb=pb.variantOf!=null?pb.variantOf:Number(b.dataset.index);return ka-kb||Number(pa.variantOf!=null)-Number(pb.variantOf!=null)||Number(a.dataset.index)-Number(b.dataset.index)});
         cards.forEach(card=>{
           const p=problems[Number(card.dataset.index)],s=cardState(card.dataset.index),item=document.createElement('details');item.className='star-item';
-          item.innerHTML=`<summary><span class="qnum">${Number(card.dataset.index)+1}</span><span>${p.title}</span>${p.variantOf!=null?`<span class="tag variant-badge">AI 응용</span>`:'<span class="tag">★</span>'}<span class="star-item-meta">채점 ${s.attempts||0}회 · 틀림 ${s.wrongCount||0}회${s.passed?' · 통과':''}</span></summary>`;
+          item.innerHTML=`<summary><span class="qnum">${Number(card.dataset.index)+1}</span><span>${p.title}</span>${p.variantOf!=null?`<span class="tag variant-badge">응용문제</span>`:'<span class="tag">기존 문제</span>'}<span class="star-item-meta">채점 ${s.attempts||0}회 · 틀림 ${s.wrongCount||0}회${s.passed?' · 통과':''}</span></summary>`;
           item.appendChild(card);group.appendChild(item);
         });
         wrap.appendChild(group);
