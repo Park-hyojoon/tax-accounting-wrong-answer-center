@@ -151,7 +151,7 @@
   </main>
 
   <script src="github-learning-sync.js?v=7"></script>
-  <script src="training-ui.js?v=1"></script>
+  <script src="training-ui.js?v=2"></script>
   <script>
     const problems = [
       {
@@ -521,9 +521,10 @@
     }
     function renderAttempt(card){const s=cardState(card.dataset.index);el('.attempt-info',card).textContent=`채점 ${s.attempts||0}회 · 틀림 ${s.wrongCount||0}회`}
     const todayView=new URLSearchParams(location.search).get('view')==='today';
+    const typeView=(new URLSearchParams(location.search).get('type')||'').trim();
     function restoreCard(card){
       const s=cardState(card.dataset.index),rows=els('.entry-row',card);
-      card.hidden=Boolean(s.passed||s.archived||(todayView&&card.dataset.addedDate!==localDate()));
+      card.hidden=typeView?((problems[Number(card.dataset.index)]?.type||'').trim()!==typeView):Boolean(s.passed||s.archived||(todayView&&card.dataset.addedDate!==localDate()));
       (s.rows||[]).forEach((saved,i)=>{if(!rows[i])return;el('.side',rows[i]).value=saved.side||'D';el('.account',rows[i]).value=saved.account||'';el('.amount',rows[i]).value=saved.amount||'';el('.division',rows[i]).value=saved.division||'';el('.partner',rows[i]).value=saved.partner||'';el('.memo',rows[i]).value=saved.memo||''});
       if(s.graded){card.dataset.graded='true';card.dataset.correct=String(Boolean(s.correct));card.classList.toggle('correct',Boolean(s.correct));card.classList.toggle('wrong',!s.correct);const result=el('.result',card);result.className='result '+(s.correct?'ok':'no');result.textContent=s.correct?'정답입니다!':`마지막 채점은 오답입니다. (${s.matched||0}/${problems[Number(card.dataset.index)].answers.length}개 분개 일치)`}
       updateTotals(card);renderAttempt(card)

@@ -59,3 +59,12 @@
   window.addEventListener('scroll',onScroll,{passive:true});
   apply();
 })();
+(function(){
+  // 홈의 TOP 5에서 ?type=유형 으로 들어오면 안내 띠를 보여준다(통과한 문제도 함께 표시됨).
+  const type=(new URLSearchParams(location.search).get('type')||'').trim();if(!type)return;
+  const host=document.querySelector('.toolbar,.dashboard')||document.querySelector('main')||document.body;
+  const band=document.createElement('div');band.className='type-filter-band';
+  band.innerHTML='<strong>유형 「'+type.replace(/</g,'&lt;')+'」 문제만 표시 중</strong> · 통과한 문제도 다시 풀 수 있게 함께 보입니다. <a href="'+location.pathname.split('/').pop()+'?view=all">전체 문제 보기</a> · <a href="오답_훈련센터.html">홈</a>';
+  const style=document.createElement('style');style.textContent='.type-filter-band{margin:14px 0;padding:12px 16px;border:2px solid #f0c36d;border-radius:14px;background:#fff8e1;color:#6b4a00;font-weight:800;line-height:1.5}.type-filter-band a{color:#0d5eaa;font-weight:900}';
+  document.head.appendChild(style);host.insertAdjacentElement(host.matches('.toolbar,.dashboard')?'beforebegin':'afterbegin',band);
+})();

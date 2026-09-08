@@ -134,7 +134,7 @@
   </main>
 
   <script src="github-learning-sync.js?v=7"></script>
-  <script src="training-ui.js?v=1"></script>
+  <script src="training-ui.js?v=2"></script>
   <script>
     const problems=[
       {
@@ -234,10 +234,11 @@
     function getProblem(id){return problems.find(p=>p.id===id)}
     function wrongCount(id){return (state.history[id]||[]).filter(h=>!h.correct).length}
     const todayView=new URLSearchParams(location.search).get('view')==='today';
+    const typeView=(new URLSearchParams(location.search).get('type')||'').trim();
     const sessionPassed=new Set();
     function renderCard(card){
       const id=card.dataset.id,p=getProblem(id),checked=state.checked[id],attempts=state.attempts[id]||0,result=$('.result',card);
-      card.hidden=Boolean((state.passed[id]&&!sessionPassed.has(id))||state.archived[id]||(todayView&&card.dataset.addedDate!==localDate()));
+      card.hidden=typeView?((p.type||'').trim()!==typeView):Boolean((state.passed[id]&&!sessionPassed.has(id))||state.archived[id]||(todayView&&card.dataset.addedDate!==localDate()));
       card.classList.toggle('correct',checked===true);card.classList.toggle('wrong',checked===false);
       result.className='result'+(checked===true?' ok':checked===false?' no':'');
       result.textContent=checked===true?'정답입니다! 통과 처리되어 다음 방문부터 숨겨집니다.':checked===false?`오답입니다. 다시 풀거나 정답·해설을 확인해보세요.`:state.answers[id]!==undefined?'선택 내용이 자동 저장되었습니다.':'';
