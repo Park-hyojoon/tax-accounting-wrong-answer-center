@@ -350,7 +350,7 @@
     <p class="footer">오답 훈련센터 · 「동기화」 또는 「오늘 학습기록 저장」을 누른 경우에만 GitHub로 기록을 보냅니다.</p>
   </main>
 
-  <script src="github-learning-sync.js?v=8"></script>
+  <script src="github-learning-sync.js?v=9"></script>
   <script src="training-ui.js?v=2"></script>
   <script>
     const SOURCES={
@@ -521,7 +521,7 @@
       Object.entries(SOURCES).forEach(([name,source])=>{roots[name]=readState(source.key)});
       records=META.map((meta,metaOrder)=>{
         const source=SOURCES[meta.source],root=roots[meta.source];
-        let saved={},history=[],attempts=0,wrong=0,passed=false,archived=false,selfPassed=false;
+        let saved={},history=[],attempts=0,wrong=0,passed=false,archived=false,selfPassed=false,deleted=false;
         if(meta.source==='theory'){
           history=Array.isArray(root.history?.[meta.id])?root.history[meta.id]:[];
           attempts=number(root.attempts?.[meta.id]);
@@ -529,6 +529,7 @@
           passed=isPassed(root.passed?.[meta.id],root.checked?.[meta.id],history,root.trainingCenterRestored?.[meta.id]);
           archived=Boolean(root.archived?.[meta.id]);
           selfPassed=Boolean(root.selfPassed?.[meta.id]);
+          deleted=Boolean(root.deleted?.[meta.id]);
         }else{
           const index=meta.source==='closing'?meta.index:meta.id;
           saved=(root.cards&&root.cards[index])||{};
@@ -539,10 +540,12 @@
           passed=isPassed(saved.passed,saved.correct,history,saved.trainingCenterRestored);
           archived=Boolean(saved.archived);
           selfPassed=Boolean(saved.selfPassed);
+          deleted=Boolean(saved.deleted);
         }
         const lastAttempt=history.reduce((latest,item)=>{const time=Date.parse(item?.at||'');return Number.isFinite(time)&&time>latest?time:latest},0);
-        return {...meta,metaOrder,category:source.label,file:source.file,key:source.key,history,attempts,wrong,passed,archived,selfPassed,lastAttempt};
+        return {...meta,metaOrder,category:source.label,file:source.file,key:source.key,history,attempts,wrong,passed,archived,selfPassed,deleted,lastAttempt};
       });
+      records=records.filter(record=>!record.deleted);
       $('#storageNotice').hidden=storageAvailable;
     }
 
@@ -631,7 +634,7 @@
     }
     function renderArchive(){
       const list=records.filter(record=>record.passed||record.archived).sort((a,b)=>b.registered.localeCompare(a.registered)||a.category.localeCompare(b.category,'ko'));
-      $('#archiveList').innerHTML=list.length?list.map(record=>problemItem(record,{restore:true})).join(''):emptyState('보관된 문제가 없습니다.','한 번 정답을 맞히거나 원본 문제에서 ‘정답으로 인정하고 통과’를 누르면 이곳에 보관됩니다.');
+      $('#archiveList').innerHTML=list.length?list.map(record=>problemItem(record,{restore:true})).join(''):emptyState('보관된 문제가 없습니다.','한 번 정답을 맞히거나 원본 문제에서 ‘이 문제 영구 삭제’를 누르면 이곳에 보관됩니다.');
     }
     function renderStats(){
       $('#statsBody').innerHTML=Object.entries(SOURCES).map(([source,info])=>{

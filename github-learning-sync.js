@@ -172,6 +172,14 @@
       const cards={};Object.entries(source.cards||{}).forEach(([index,card])=>{cards[index]={...card};delete cards[index].note});
       normalized={...source,cards};
     }
+    if(sourceName==='theory'){
+      const deleted={...(normalized.deleted||{})},deletedAt={...(normalized.deletedAt||{})};
+      Object.keys(normalized.selfPassed||{}).forEach(id=>{if(normalized.selfPassed[id]){deleted[id]=true;deletedAt[id]=deletedAt[id]||normalized.selfPassedAt?.[id]||new Date().toISOString()}});
+      Object.keys(deleted).forEach(id=>{['answers','checked','attempts','history','passed','archived','passedAt','archivedAt','restoredAt','trainingCenterRestored','selfPassed','selfPassedAt'].forEach(k=>{if(normalized[k]&&typeof normalized[k]==='object')delete normalized[k][id]})});
+      normalized.deleted=deleted;normalized.deletedAt=deletedAt;
+    }else{
+      Object.keys(normalized.cards||{}).forEach(index=>{const card=normalized.cards[index];if(card&&(card.deleted||card.selfPassed))normalized.cards[index]={deleted:true,deletedAt:card.deletedAt||card.selfPassedAt||new Date().toISOString()}});
+    }
     return normalized;
   }
   function readState(key){
@@ -210,6 +218,7 @@
   }
   function mergeCard(current,incoming,incomingNewer,currentUpdated,incomingUpdated){
     const a=(current&&typeof current==='object')?current:{},b=(incoming&&typeof incoming==='object')?incoming:{};
+    if(a.deleted||b.deleted)return {deleted:true,deletedAt:latestEventIso(a.deletedAt,b.deletedAt)||new Date().toISOString()};
     const merged={...(incomingNewer?a:b),...(incomingNewer?b:a)};
     merged.history=uniqueHistory(a.history,b.history);
     merged.attempts=Math.max(number(a.attempts),number(b.attempts),merged.history.length);
@@ -236,7 +245,9 @@
     merged.trainingCenterRestored=mergeMap(current.trainingCenterRestored||{},incoming.trainingCenterRestored||{},incomingNewer);
     merged.selfPassed=mergeMap(current.selfPassed||{},incoming.selfPassed||{},incomingNewer);
     merged.selfPassedAt=mergeMap(current.selfPassedAt||{},incoming.selfPassedAt||{},incomingNewer);
+    merged.deleted={...(current.deleted||{}),...(incoming.deleted||{})};merged.deletedAt=mergeMap(current.deletedAt||{},incoming.deletedAt||{},incomingNewer);
     ids.forEach(id=>{
+      if(merged.deleted[id]){['answers','checked','attempts','history','passed','archived','passedAt','archivedAt','restoredAt','trainingCenterRestored','selfPassed','selfPassedAt'].forEach(k=>{if(merged[k])delete merged[k][id]});return}
       const history=uniqueHistory(current.history?.[id],incoming.history?.[id]);
       merged.history[id]=history;
       merged.attempts[id]=Math.max(number(current.attempts?.[id]),number(incoming.attempts?.[id]),history.length);

@@ -165,7 +165,7 @@
     <p class="footer">학습용 자료 · 전표 입력 순서는 달라도 계정과목, 금액, 차·대변이 맞으면 정답으로 처리됩니다.</p>
   </main>
 
-  <script src="github-learning-sync.js?v=8"></script>
+  <script src="github-learning-sync.js?v=9"></script>
   <script src="training-ui.js?v=2"></script>
   <script>
     const problems = [
@@ -517,7 +517,7 @@
       </table></div>
       <div class="balance-panel" aria-live="polite"><div class="balance-item">차변 합계<strong class="debit-total">0원</strong></div><div class="balance-item">대변 합계<strong class="credit-total">0원</strong></div><div class="balance-item difference">차액<strong class="difference-total">0원 · 입력 대기</strong></div></div>
       <p class="tip">금액은 쉼표 없이 입력해도 됩니다. 판관비/제조원가 구분이 필요한 계정은 ‘판/제 선택’을 사용하세요.</p>
-      <div class="qactions"><button class="btn check-one" type="button">채점하기</button><button class="btn secondary clear-one" type="button">정답으로 인정하고 통과</button><button class="btn secondary star-one" type="button" aria-pressed="false" title="이 문제는 특별히 훈련이 필요합니다. AI가 학습기록에서 이 표시를 보면 숫자를 바꾼 응용문제 1개를 더 만듭니다.">★ 특별 훈련</button><span class="result" aria-live="polite"></span><span class="attempt-info"></span></div>
+      <div class="qactions"><button class="btn check-one" type="button">채점하기</button><button class="btn secondary clear-one" type="button">이 문제 영구 삭제</button><button class="btn secondary star-one" type="button" aria-pressed="false" title="이 문제는 특별히 훈련이 필요합니다. AI가 학습기록에서 이 표시를 보면 숫자를 바꾼 응용문제 1개를 더 만듭니다.">★ 특별 훈련</button><span class="result" aria-live="polite"></span><span class="attempt-info"></span></div>
       <details class="reveal answer-box"><summary>정답 · 해설 보기</summary><div class="reveal-body"><div>${p.answers.map(answerHtml).join('')}</div><p><strong>해설:</strong> ${p.explanation}</p></div></details>
     </article>`}
 
@@ -561,6 +561,8 @@
     const variantSourceIndices=new Set(problems.filter(p=>p.variantOf!=null).map(p=>p.variantOf));
     function restoreCard(card){
       const s=cardState(card.dataset.index),rows=els('.entry-row',card);
+      if(s.selfPassed&&!s.deleted){studyState.cards[Number(card.dataset.index)]={deleted:true,deletedAt:s.selfPassedAt||nowIso()};saveState();card.hidden=true;return}
+      if(s.deleted){card.hidden=true;return}
       const problemOf=problems[Number(card.dataset.index)]||{};
       card.hidden=starView?!(s.starred||problemOf.variantOf!=null||variantSourceIndices.has(Number(card.dataset.index))):typeView?((problemOf.type||'').trim()!==typeView):Boolean(s.passed||s.archived||(todayView&&card.dataset.addedDate!==localDate()));
       el('.star-one',card).setAttribute('aria-pressed',String(Boolean(s.starred)));el('.star-note',card).hidden=!s.starred;
@@ -603,8 +605,8 @@
       card.classList.remove('correct','wrong');delete card.dataset.graded;delete card.dataset.correct;el('.result',card).textContent='';el('.result',card).className='result';const s=cardState(card.dataset.index);s.rows=snapshotRows(card);s.graded=false;delete s.correct;saveState();updateTotals(card);updateProgress();
     }
     function archiveCard(card){
-      if(!confirm('이 문제를 정답으로 인정하고 통과 처리할까요?\n채점 이력과 오답 횟수는 그대로 남고, 학습기록에는 “스스로 인정”으로 표시됩니다. 센터 홈 보관함에서 복원할 수 있습니다.'))return;
-      const s=cardState(card.dataset.index);s.passed=true;s.passedAt=nowIso();s.selfPassed=true;s.selfPassedAt=nowIso();delete s.trainingCenterRestored;saveState();card.hidden=true;updateProgress();
+      if(!confirm('이 문제를 영구 삭제할까요?\n목록·보관함·통계에서 완전히 사라지고 복구할 수 없습니다.'))return;
+      studyState.cards[Number(card.dataset.index)]={deleted:true,deletedAt:nowIso()};saveState();card.hidden=true;updateProgress();
     }
 
     function toggleStar(card){
