@@ -251,12 +251,6 @@
       <p id="liveStatus" class="live-status" role="status" aria-live="polite"></p>
     </section>
 
-    <div class="summary-strip" aria-label="전체 학습 통계 요약">
-      <div class="stat-card"><span class="stat-label">등록 문제</span><strong class="stat-value" id="totalStat">0</strong></div>
-      <div class="stat-card"><span class="stat-label">아직 훈련 중</span><strong class="stat-value" id="activeStat">0</strong></div>
-      <div class="stat-card"><span class="stat-label">누적 오답</span><strong class="stat-value" id="wrongStat">0회</strong></div>
-      <div class="stat-card"><span class="stat-label">총 채점</span><strong class="stat-value" id="attemptStat">0회</strong></div>
-    </div>
 
     <section class="section" id="frequentSection">
       <div class="section-heading">
@@ -270,16 +264,6 @@
       <div class="rule-box">여기서는 집계와 연결만 합니다. 자동으로 변형문제를 만들지 않으며, 더 연습하고 싶은 유형은 AI에게 요청할 수 있습니다.</div>
     </section>
 
-    <section class="section" id="unpassedSection">
-      <div class="section-heading">
-        <div>
-          <h2>아직 통과하지 않은 문제 요약</h2>
-          <p>오늘 문제가 아니어도 아직 남아 있는 문제 수를 유형별로 확인할 수 있습니다.</p>
-        </div>
-      </div>
-      <div id="categorySummary" class="category-summary"></div>
-      <div id="unpassedDetails" class="details-list"></div>
-    </section>
 
 
     <section class="section" id="statsSection">
@@ -571,17 +555,6 @@
       if(currentSort==='recentRegistered')return b.registered.localeCompare(a.registered)||number(b.registeredOrder)-number(a.registeredOrder)||b.metaOrder-a.metaOrder;
       return registrationCompare(a,b)
     })}
-    function renderSummary(){
-      const passed=records.filter(record=>record.passed&&!record.archived).length;
-      const hidden=records.filter(record=>record.archived).length;
-      const active=visibleUnpassed().length;
-      const wrong=records.reduce((sum,record)=>sum+record.wrong,0);
-      const attempts=records.reduce((sum,record)=>sum+record.attempts,0);
-      $('#totalStat').textContent=records.length;
-      $('#activeStat').textContent=active;
-      $('#wrongStat').textContent=`${wrong}회`;
-      $('#attemptStat').textContent=`${attempts}회`;
-    }
     function renderTraining(){
       const today=localDateKey();
       // AI 응용문제(★ 특별 훈련용)는 오늘의 오답훈련에 노출하지 않는다.
@@ -617,15 +590,6 @@
         </article>`;
       }).join(''):emptyState('아직 집계할 기록이 없습니다.','문제를 채점하면 이곳에 순위가 나타납니다.');
     }
-    function renderUnpassed(){
-      const list=visibleUnpassed();
-      $('#categorySummary').innerHTML=Object.entries(SOURCES).map(([source,info])=>{
-        const sourceList=list.filter(record=>record.source===source);
-        return `<article class="category-card"><h3>${info.label}</h3><strong class="category-number">${sourceList.length}문제</strong><p>전체 ${records.filter(record=>record.source===source).length}문제 중 아직 훈련 중</p><a class="mini-link" href="${info.file}">${info.label} 문제 열기</a></article>`;
-      }).join('');
-      const grouped=Object.entries(SOURCES).map(([source,info])=>({source,info,list:list.filter(record=>record.source===source)})).filter(group=>group.list.length);
-      $('#unpassedDetails').innerHTML=grouped.length?grouped.map(group=>`<details class="unpassed-details"><summary>${group.info.label} · ${group.list.length}문제 보기</summary><div class="problem-list">${group.list.map(record=>problemItem(record)).join('')}</div></details>`).join(''):emptyState('남은 문제가 없습니다.','새 문제를 등록하면 이곳에 나타납니다.');
-    }
     function renderStats(){
       $('#statsBody').innerHTML=Object.entries(SOURCES).map(([source,info])=>{
         const list=records.filter(record=>record.source===source),passed=list.filter(record=>record.passed&&!record.archived).length,hidden=list.filter(record=>record.archived).length,active=list.filter(record=>!record.passed&&!record.archived).length,attempts=list.reduce((n,r)=>n+r.attempts,0),wrong=list.reduce((n,r)=>n+r.wrong,0);
@@ -641,7 +605,7 @@
       return {catalog,typeSummary,catalogAt:new Date().toISOString()};
     };
     function renderAll(message=''){
-      buildRecords();renderSummary();renderTraining();renderFrequent();renderUnpassed();renderStats();
+      buildRecords();renderTraining();renderFrequent();renderStats();
       $('#liveStatus').textContent=message;
     }
 
