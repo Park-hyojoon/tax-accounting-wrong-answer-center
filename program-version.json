@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "revision": 14,
-  "updatedAt": "2026-09-08T21:02:14+09:00",
+  "revision": 15,
+  "updatedAt": "2026-09-08T21:15:57+09:00",
   "files": [
     "오답_훈련센터.html",
     "일반전표_기본연습_24문제.html",
@@ -11,6 +11,7 @@
     "github-learning-sync.js",
     "program-version.json",
     "sync-helper.py",
+    "동기화도우미 시작.ps1",
     "오답훈련센터 시작.bat"
   ]
 }
