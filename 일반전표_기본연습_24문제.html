@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>전산회계 1급 일반전표 오답연습 41문제</title>
+  <title>전산회계 1급 일반전표 오답연습 43문제</title>
   <style>
     :root{--navy:#17345f;--blue:#3178c6;--sky:#eaf6ff;--mint:#e9fbf3;--yellow:#fff5bd;--red:#d84343;--green:#16845b;--line:#cdddec;--ink:#172033;--muted:#607089}
     *{box-sizing:border-box}
@@ -502,6 +502,25 @@
         accountSelect:true,
         accountOptions:['이자비용','미지급비용','미지급금','선급비용','현금','보통예금'],
         answers:[A('D','이자비용',400000),A('C','미지급비용',400000)]
+      },
+      {
+        type:'매도가능증권 취득', title:'장기투자 목적 주식 취득과 매입수수료', addedDate:'2026-09-08',
+        prompt:'[10월 16일] 장기투자 목적으로 ㈜다온상사의 보통주 1,500주를 1주당 12,000원(1주당 액면가액 5,000원)에 취득하고, 대금은 매입수수료 216,000원과 함께 보통예금 계좌에서 이체하여 지급하였다. 적절한 일반전표를 입력하시오.',
+        hint:'장기투자 목적의 주식은 매도가능증권으로 분류합니다. 취득과 직접 관련된 매입수수료는 취득원가에 포함하고 액면가액은 계산에 사용하지 않습니다.',
+        explanation:'주식 매입대금은 1,500주×12,000원=18,000,000원입니다. 장기투자 목적이므로 매도가능증권으로 분류하고 매입수수료 216,000원을 취득원가에 포함하여 18,216,000원으로 기록합니다. 액면가액은 취득원가 계산에 영향을 주지 않습니다.',
+        accountSelect:true,
+        accountOptions:['매도가능증권','단기매매증권','만기보유증권','투자주식','수수료비용','보통예금','현금'],
+        answers:[A('D','매도가능증권',18216000),A('C','보통예금',18216000)]
+      },
+      {
+        type:'차입금 유동성 구분 수정', title:'차입금 중 1년 이내 상환분을 단기차입금으로 수정', addedDate:'2026-09-08',
+        prompt:'[9월 12일] ㈜한결산업으로부터 8,000,000원을 차입하고 전액을 장기차입금으로 회계처리하였다. 확인 결과 그중 3,000,000원의 상환기일은 2026년 12월 10일이고, 나머지는 2028년에 상환하기로 한 금액이었다. 수정 후의 올바른 일반전표 전체를 입력하시오.',
+        hint:'거래일 현재 1년 이내에 상환할 차입금은 단기차입금, 그 이후에 상환할 금액은 장기차입금으로 구분합니다. 수정 후 전표 전체를 입력합니다.',
+        explanation:'차입금 8,000,000원 중 2026년 12월 10일에 상환할 3,000,000원은 거래일로부터 1년 이내 상환분이므로 단기차입금입니다. 나머지 5,000,000원은 장기차입금으로 기록합니다. 두 차입금 행에는 거래처 ㈜한결산업을 연결합니다.',
+        accountSelect:true,
+        accountOptions:['보통예금','현금','단기차입금','장기차입금','유동성장기부채','외상매입금'],
+        partnerOptions:['㈜한결산업','㈜초록산업','한빛은행'],
+        answers:[A('D','보통예금',8000000),A('C','장기차입금',5000000,'','','㈜한결산업'),A('C','단기차입금',3000000,'','','㈜한결산업')]
       }
     ];
 
@@ -518,7 +537,7 @@
     problems.forEach(p=>{if(!p.addedDate)p.addedDate='2026-09-01'});
     const STATE_VERSION='general-journal-27-v1';
     const OLD_TO_NEW_INDEX={4:0,6:1,8:2,9:3,10:4,11:5,12:6,13:7,14:8,15:9,16:10,17:11,18:12,19:13,20:14,21:15,22:16,23:17,24:18,25:19,26:20,27:21,28:22,29:23,30:24,31:25,32:26};
-    const defaultState=()=>({schemaVersion:STATE_VERSION,startedAt:nowIso(),updatedAt:nowIso(),cards:{},fileName:`일반전표_41문제_학습기록_${localDate()}`,koAuto:true});
+    const defaultState=()=>({schemaVersion:STATE_VERSION,startedAt:nowIso(),updatedAt:nowIso(),cards:{},fileName:`일반전표_43문제_학습기록_${localDate()}`,koAuto:true});
     let studyState=loadState();
     function migrateStateTo27(rawState={}){
       const source=rawState&&typeof rawState==='object'?rawState:{};
@@ -531,7 +550,7 @@
       const fileName=String(source.fileName||'').replace('일반전표_33문제','일반전표_27문제');
       return {...source,schemaVersion:STATE_VERSION,migratedAt:nowIso(),cards,...(fileName?{fileName}:{})};
     }
-    function loadState(){try{const raw=JSON.parse(localStorage.getItem(STORAGE_KEY)||'{}'),migrated=migrateStateTo27(raw),s=Object.assign(defaultState(),migrated);if(/^일반전표_(?:24|27|28|31|32|33|34|36|41)문제_학습기록_\d{4}-\d{2}-\d{2}$/.test(s.fileName||''))s.fileName=`일반전표_41문제_학습기록_${localDate()}`;Object.values(s.cards||{}).forEach(c=>{const wasCorrect=c.correct===true||(c.history||[]).some(h=>h.correct);c.passed=c.trainingCenterRestored?false:Boolean(c.passed||wasCorrect);c.archived=Boolean(c.archived);c.history=c.history||[];delete c.note});if(raw.schemaVersion!==STATE_VERSION)localStorage.setItem(STORAGE_KEY,JSON.stringify(s));return s}catch(e){return defaultState()}}
+    function loadState(){try{const raw=JSON.parse(localStorage.getItem(STORAGE_KEY)||'{}'),migrated=migrateStateTo27(raw),s=Object.assign(defaultState(),migrated);if(/^일반전표_(?:24|27|28|31|32|33|34|36|41|43)문제_학습기록_\d{4}-\d{2}-\d{2}$/.test(s.fileName||''))s.fileName=`일반전표_43문제_학습기록_${localDate()}`;Object.values(s.cards||{}).forEach(c=>{const wasCorrect=c.correct===true||(c.history||[]).some(h=>h.correct);c.passed=c.trainingCenterRestored?false:Boolean(c.passed||wasCorrect);c.archived=Boolean(c.archived);c.history=c.history||[];delete c.note});if(raw.schemaVersion!==STATE_VERSION)localStorage.setItem(STORAGE_KEY,JSON.stringify(s));return s}catch(e){return defaultState()}}
     function saveState(){studyState.updatedAt=nowIso();localStorage.setItem(STORAGE_KEY,JSON.stringify(studyState))}
     function cardState(index){const s=studyState.cards[index]||(studyState.cards[index]={rows:[],graded:false,correct:false,attempts:0,wrongCount:0,history:[],passed:false,archived:false});if(s.passed===undefined)s.passed=false;if(s.archived===undefined)s.archived=false;return s}
 
@@ -746,7 +765,7 @@
       await saveLocalRecord(payload)
     }
     el('#saveTodayRecord').addEventListener('click',saveTodayRecord);
-    el('#resetLearning').addEventListener('click',()=>{if(confirm('41문제의 전표 입력, 채점 이력과 틀린 횟수를 모두 지울까요?')){localStorage.removeItem(STORAGE_KEY);location.reload()}});
+    el('#resetLearning').addEventListener('click',()=>{if(confirm('43문제의 전표 입력, 채점 이력과 틀린 횟수를 모두 지울까요?')){localStorage.removeItem(STORAGE_KEY);location.reload()}});
 
     // 영문 자판 상태의 일반적인 두벌식 입력을 한글로 조합한다.
     const C_MAP={r:'ㄱ',R:'ㄲ',s:'ㄴ',e:'ㄷ',E:'ㄸ',f:'ㄹ',a:'ㅁ',q:'ㅂ',Q:'ㅃ',t:'ㅅ',T:'ㅆ',d:'ㅇ',w:'ㅈ',W:'ㅉ',c:'ㅊ',z:'ㅋ',x:'ㅌ',v:'ㅍ',g:'ㅎ'};
