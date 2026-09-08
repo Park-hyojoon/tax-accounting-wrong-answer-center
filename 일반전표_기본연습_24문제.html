@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>전산회계 1급 일반전표 오답연습 36문제</title>
+  <title>전산회계 1급 일반전표 오답연습 41문제</title>
   <style>
     :root{--navy:#17345f;--blue:#3178c6;--sky:#eaf6ff;--mint:#e9fbf3;--yellow:#fff5bd;--red:#d84343;--green:#16845b;--line:#cdddec;--ink:#172033;--muted:#607089}
     *{box-sizing:border-box}
@@ -457,6 +457,51 @@
         accountSelect:true,
         accountOptions:['보통예금','선납세금','이자수익','예수금','미지급세금','이자비용','법인세비용'],
         answers:[A('D','보통예금',2250000),A('D','선납세금',450000),A('C','이자수익',2700000)]
+      },
+      {
+        type:'고용보험료 납부', title:'전월분 고용보험료 현금 납부', addedDate:'2026-09-08',
+        prompt:'[12월 5일] 전월분 고용보험료를 다음과 같이 현금으로 납부하다(단, 하나의 전표로 처리하고, 회사부담금은 보험료로 처리할 것).\n\n박성실(생산부): 직원부담금 200,000원 · 회사부담금 245,000원 · 합계 445,000원\n이영업(영업부): 직원부담금 95,000원 · 회사부담금 118,000원 · 합계 213,000원\n합계: 직원부담금 295,000원 · 회사부담금 363,000원 · 합계 658,000원',
+        hint:'직원부담금은 급여 지급 시 이미 원천징수하여 예수금으로 잡아둔 금액이므로 납부 시 예수금을 제거합니다. 회사부담금은 보험료로 비용 처리하며, 생산직은 제조원가(제), 영업직은 판매비와관리비(판)로 구분합니다.',
+        explanation:'직원부담금 295,000원은 예수금에서 제거합니다. 회사부담금은 부서별로 나누어 박성실(생산부) 245,000원은 보험료(제), 이영업(영업부) 118,000원은 보험료(판)로 처리하고, 전액 현금 658,000원을 하나의 전표로 지급합니다.',
+        accountSelect:true,
+        accountOptions:['예수금','보험료','복리후생비','세금과공과','현금','보통예금'],
+        answers:[A('D','예수금',295000),A('D','보험료',245000,'제'),A('D','보험료',118000,'판'),A('C','현금',658000)]
+      },
+      {
+        type:'확정기여형 퇴직연금 납입', title:'영업부 확정기여형(DC) 퇴직연금 납입', addedDate:'2026-09-08',
+        prompt:'[11월 20일] 영업부 직원에 대한 확정기여형(DC) 퇴직연금 5,400,000원을 신한은행 보통예금 계좌에서 이체하여 납입하였다. 이 금액에는 연금운용에 대한 수수료 150,000원이 포함되어 있다.',
+        hint:'확정기여형(DC) 퇴직연금은 회사가 부담금을 납입하는 시점에 퇴직급여로 비용 처리합니다. 연금 운용에 대한 수수료는 퇴직급여와 구분하여 별도의 수수료비용으로 처리합니다.',
+        explanation:'수수료 150,000원을 제외한 5,250,000원을 퇴직급여(판)로, 수수료 150,000원은 수수료비용(판)으로 처리합니다. 실제 이체액 5,400,000원은 보통예금 감소로 기록합니다.',
+        accountSelect:true,
+        accountOptions:['퇴직급여','퇴직급여충당부채','수수료비용','보통예금','현금','예수금'],
+        answers:[A('D','퇴직급여/퇴직급여충당부채',5250000,'판'),A('D','수수료비용',150000,'판'),A('C','보통예금',5400000)]
+      },
+      {
+        type:'단기매매증권', title:'단기매매증권 처분(주식수 계산)', addedDate:'2026-09-08',
+        prompt:'[10월 18일] 일시보유목적으로 취득하였던 시장성 있는 ㈜한결의 주식 800주(1주당 장부금액 6,000원, 1주당 액면금액 5,000원, 1주당 처분금액 9,000원)를 처분하고 수수료 360,000원을 제외한 금액을 보통예금 계좌로 이체받았다.',
+        hint:'처분금액은 1주당 처분금액에 주식 수를 곱하여 구하고, 여기서 처분수수료를 뺀 순수령액과 장부금액(1주당 장부금액×주식 수)의 차이가 처분손익입니다. 액면금액은 계산에 쓰지 않습니다.',
+        explanation:'처분금액은 9,000원×800주=7,200,000원이며 수수료 360,000원을 제외한 순수령액은 6,840,000원입니다. 장부금액은 6,000원×800주=4,800,000원이므로 순수령액과의 차이 2,040,000원이 단기매매증권처분이익입니다.',
+        accountSelect:true,
+        accountOptions:['보통예금','단기매매증권','단기매매증권처분손실','단기매매증권처분이익','수수료비용','현금'],
+        answers:[A('D','보통예금',6840000),A('C','단기매매증권',4800000),A('C','단기매매증권처분이익',2040000)]
+      },
+      {
+        type:'미수수익 계상', title:'대여금 이자수익의 기간경과분 계상', addedDate:'2026-09-08',
+        prompt:'[12월 31일] 거래처 (주)한빛에 8월 1일 대여한 30,000,000원(상환약정일 2027년 7월 31일, 연 이자율 4%)에 대한 기간경과분 이자를 계상하다. 단, 이자는 월할 계산하고 매년 7월 31일에 원금과 함께 받기로 약정하였다.',
+        hint:'대여일부터 결산일까지 경과한 개월 수만큼만 이자수익을 인식합니다. 아직 받지 못한 이자이므로 미수수익(자산)으로 처리합니다.',
+        explanation:'8월 1일부터 12월 31일까지 5개월이 경과했으므로 이자수익은 30,000,000원×4%×5/12=500,000원입니다. 아직 받지 않은 이자이므로 미수수익을 차변에, 이자수익을 대변에 기록합니다.',
+        accountSelect:true,
+        accountOptions:['미수수익','이자수익','미수금','선수수익','현금','보통예금'],
+        answers:[A('D','미수수익',500000),A('C','이자수익',500000)]
+      },
+      {
+        type:'미지급비용 계상', title:'차입금 이자비용의 기간경과분 계상', addedDate:'2026-09-08',
+        prompt:'[12월 31일] 거래처 하나은행으로부터 9월 1일 차입한 20,000,000원(상환약정일 2027년 8월 31일, 연 이자율 6%)에 대한 기간경과분 이자비용을 계상하다. 단, 이자는 월할 계산하고 매년 8월 31일에 원금과 함께 지급하기로 약정하였다.',
+        hint:'차입일부터 결산일까지 경과한 개월 수만큼만 이자비용을 인식합니다. 아직 지급하지 않은 이자이므로 미지급비용(부채)으로 처리합니다. 이 문제는 앞의 미수수익 계상과 정반대로, 돈을 빌려준 쪽이 아니라 빌린 쪽의 결산정리입니다.',
+        explanation:'9월 1일부터 12월 31일까지 4개월이 경과했으므로 이자비용은 20,000,000원×6%×4/12=400,000원입니다. 아직 지급하지 않은 이자이므로 이자비용을 차변에, 미지급비용을 대변에 기록합니다.',
+        accountSelect:true,
+        accountOptions:['이자비용','미지급비용','미지급금','선급비용','현금','보통예금'],
+        answers:[A('D','이자비용',400000),A('C','미지급비용',400000)]
       }
     ];
 
@@ -473,7 +518,7 @@
     problems.forEach(p=>{if(!p.addedDate)p.addedDate='2026-09-01'});
     const STATE_VERSION='general-journal-27-v1';
     const OLD_TO_NEW_INDEX={4:0,6:1,8:2,9:3,10:4,11:5,12:6,13:7,14:8,15:9,16:10,17:11,18:12,19:13,20:14,21:15,22:16,23:17,24:18,25:19,26:20,27:21,28:22,29:23,30:24,31:25,32:26};
-    const defaultState=()=>({schemaVersion:STATE_VERSION,startedAt:nowIso(),updatedAt:nowIso(),cards:{},fileName:`일반전표_36문제_학습기록_${localDate()}`,koAuto:true});
+    const defaultState=()=>({schemaVersion:STATE_VERSION,startedAt:nowIso(),updatedAt:nowIso(),cards:{},fileName:`일반전표_41문제_학습기록_${localDate()}`,koAuto:true});
     let studyState=loadState();
     function migrateStateTo27(rawState={}){
       const source=rawState&&typeof rawState==='object'?rawState:{};
@@ -486,7 +531,7 @@
       const fileName=String(source.fileName||'').replace('일반전표_33문제','일반전표_27문제');
       return {...source,schemaVersion:STATE_VERSION,migratedAt:nowIso(),cards,...(fileName?{fileName}:{})};
     }
-    function loadState(){try{const raw=JSON.parse(localStorage.getItem(STORAGE_KEY)||'{}'),migrated=migrateStateTo27(raw),s=Object.assign(defaultState(),migrated);if(/^일반전표_(?:24|27|28|31|32|33|34|36)문제_학습기록_\d{4}-\d{2}-\d{2}$/.test(s.fileName||''))s.fileName=`일반전표_36문제_학습기록_${localDate()}`;Object.values(s.cards||{}).forEach(c=>{const wasCorrect=c.correct===true||(c.history||[]).some(h=>h.correct);c.passed=c.trainingCenterRestored?false:Boolean(c.passed||wasCorrect);c.archived=Boolean(c.archived);c.history=c.history||[];delete c.note});if(raw.schemaVersion!==STATE_VERSION)localStorage.setItem(STORAGE_KEY,JSON.stringify(s));return s}catch(e){return defaultState()}}
+    function loadState(){try{const raw=JSON.parse(localStorage.getItem(STORAGE_KEY)||'{}'),migrated=migrateStateTo27(raw),s=Object.assign(defaultState(),migrated);if(/^일반전표_(?:24|27|28|31|32|33|34|36|41)문제_학습기록_\d{4}-\d{2}-\d{2}$/.test(s.fileName||''))s.fileName=`일반전표_41문제_학습기록_${localDate()}`;Object.values(s.cards||{}).forEach(c=>{const wasCorrect=c.correct===true||(c.history||[]).some(h=>h.correct);c.passed=c.trainingCenterRestored?false:Boolean(c.passed||wasCorrect);c.archived=Boolean(c.archived);c.history=c.history||[];delete c.note});if(raw.schemaVersion!==STATE_VERSION)localStorage.setItem(STORAGE_KEY,JSON.stringify(s));return s}catch(e){return defaultState()}}
     function saveState(){studyState.updatedAt=nowIso();localStorage.setItem(STORAGE_KEY,JSON.stringify(studyState))}
     function cardState(index){const s=studyState.cards[index]||(studyState.cards[index]={rows:[],graded:false,correct:false,attempts:0,wrongCount:0,history:[],passed:false,archived:false});if(s.passed===undefined)s.passed=false;if(s.archived===undefined)s.archived=false;return s}
 
@@ -701,7 +746,7 @@
       await saveLocalRecord(payload)
     }
     el('#saveTodayRecord').addEventListener('click',saveTodayRecord);
-    el('#resetLearning').addEventListener('click',()=>{if(confirm('36문제의 전표 입력, 채점 이력과 틀린 횟수를 모두 지울까요?')){localStorage.removeItem(STORAGE_KEY);location.reload()}});
+    el('#resetLearning').addEventListener('click',()=>{if(confirm('41문제의 전표 입력, 채점 이력과 틀린 횟수를 모두 지울까요?')){localStorage.removeItem(STORAGE_KEY);location.reload()}});
 
     // 영문 자판 상태의 일반적인 두벌식 입력을 한글로 조합한다.
     const C_MAP={r:'ㄱ',R:'ㄲ',s:'ㄴ',e:'ㄷ',E:'ㄸ',f:'ㄹ',a:'ㅁ',q:'ㅂ',Q:'ㅃ',t:'ㅅ',T:'ㅆ',d:'ㅇ',w:'ㅈ',W:'ㅉ',c:'ㅊ',z:'ㅋ',x:'ㅌ',v:'ㅍ',g:'ㅎ'};
