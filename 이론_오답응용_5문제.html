@@ -100,7 +100,6 @@
   <script>(function(){var nav=document.querySelector('.top-nav');function sync(){document.documentElement.style.setProperty('--nav-h',(nav?nav.offsetHeight:60)+'px')}sync();window.addEventListener('resize',sync)})()</script>
   <main class="wrap">
     <div class="dashboard">
-      <button class="btn secondary" id="goSave" type="button">학습기록 저장</button>
       <label class="sort-label" for="sortOrder">정렬
         <select class="sort-select" id="sortOrder">
           <option value="registered">등록 순서</option>
@@ -282,7 +281,6 @@
       return a.index-b.index});
       const box=$('#questions');list.forEach(x=>box.appendChild(x.card))}
     $('#sortOrder').addEventListener('change',applySort);
-    $('#goSave').addEventListener('click',()=>$('#savePanel').scrollIntoView({behavior:'smooth'}));
     $('#fileName').addEventListener('input',e=>{state.fileName=e.target.value;persist()});
     $('#koAuto').addEventListener('change',e=>{state.koAuto=e.target.checked;persist();resetKoreanBuffers()});
     $('#copyPath').addEventListener('click',async()=>{

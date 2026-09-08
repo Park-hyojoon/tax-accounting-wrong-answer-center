@@ -113,7 +113,6 @@
   <script>(function(){var nav=document.querySelector('.top-nav');function sync(){document.documentElement.style.setProperty('--nav-h',(nav?nav.offsetHeight:60)+'px')}sync();window.addEventListener('resize',sync)})()</script>
   <main class="wrap">
     <div class="toolbar">
-      <button class="btn secondary" type="button" id="goSave">학습기록 저장</button>
       <label class="sort-label" for="sortOrder">정렬
         <select class="sort-select" id="sortOrder">
           <option value="registered">등록 순서</option>
@@ -595,7 +594,6 @@
       else{el('#grandScore').textContent='아직 채점하지 않았습니다.';el('#grandMessage').textContent='각 문제의 ‘채점하기’ 또는 채점해 보세요.'}
     }
 
-    el('#goSave').addEventListener('click',()=>el('#savePanel').scrollIntoView({behavior:'smooth'}));
     el('#recordFileName').value=studyState.fileName||defaultState().fileName;
     el('#koAuto').checked=studyState.koAuto!==false;
     el('#recordFileName').addEventListener('input',e=>{studyState.fileName=e.target.value;saveState()});
