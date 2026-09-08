@@ -437,7 +437,7 @@
     ];
 
     const META=[
-      ...practicalMeta.map((x,index)=>({source:'practical',id:index,type:x[0],title:x[1],registered:x[2]||'2026-09-01',registeredOrder:x[3]||index+1})),
+      ...practicalMeta.map((x,index)=>({source:'practical',id:index,type:x[0],title:x[1],registered:x[2]||'2026-09-01',registeredOrder:x[3]||index+1,variant:x[4]==='variant'||/\(응용\)\s*$/.test(x[1])})),
       ...theoryMeta.map(x=>({source:'theory',id:x[0],type:x[1],title:x[2],registered:'2026-09-01'})),
       ...closingMeta.map((x,index)=>({source:'closing',id:x[0],index,type:x[1],title:x[2],registered:x[3]||'2026-09-02',registeredOrder:x[4]||index+1})),
       ...voucherMeta.map((x,index)=>({source:'voucher',id:index,type:x[0],title:x[1],registered:x[2]||'2026-09-02',registeredOrder:x[3]||index+9}))
@@ -584,7 +584,8 @@
     }
     function renderTraining(){
       const today=localDateKey();
-      const list=sortTraining(visibleUnpassed().filter(record=>currentFilter==='all'||record.registered===today));
+      // AI 응용문제(★ 특별 훈련용)는 오늘의 오답훈련에 노출하지 않는다.
+      const list=sortTraining(visibleUnpassed().filter(record=>!record.variant&&(currentFilter==='all'||record.registered===today)));
       const target=$('#trainingList');
       if(list.length)target.innerHTML=list.map(record=>problemItem(record,{view:currentFilter,plain:true})).join('');
       else if(currentFilter==='today')target.innerHTML=emptyState('오늘 남아 있는 문제가 없습니다.',records.some(record=>record.registered===today)?'오늘 문제를 모두 맞혀 삭제되었습니다.':'오늘 날짜로 등록된 문제가 없습니다. ‘전체 미통과’를 누르면 이전 문제를 볼 수 있습니다.');
