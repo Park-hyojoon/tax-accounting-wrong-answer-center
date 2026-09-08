@@ -10,6 +10,16 @@
   style.textContent=`
     .nav-links{display:contents}
     .nav-menu-toggle,.nav-current{display:none}
+    .nav-link[href*="일반전표_"]:not(.nav-star){--menu-accent:#69b6df;--menu-soft:#e9f4fc;--menu-ink:#225f8e}
+    .nav-link[href*="이론_"]{--menu-accent:#8b6edb;--menu-soft:#f1ecff;--menu-ink:#5e3fa4}
+    .nav-link[href*="결산정리사항_"]{--menu-accent:#16a477;--menu-soft:#e9fbf3;--menu-ink:#116846}
+    .nav-link[href*="매입매출전표_"]{--menu-accent:#e4892d;--menu-soft:#fff0d9;--menu-ink:#8b4d08}
+    .nav-link[href*="일반전표_"]:not(.nav-star),.nav-link[href*="이론_"],.nav-link[href*="결산정리사항_"],.nav-link[href*="매입매출전표_"]{border-color:var(--menu-accent);background:var(--menu-soft);color:var(--menu-ink);transition:background .16s ease,border-color .16s ease,color .16s ease,box-shadow .16s ease}
+    .nav-link[href*="일반전표_"]:not(.nav-star):hover,.nav-link[href*="일반전표_"]:not(.nav-star):focus-visible,
+    .nav-link[href*="이론_"]:hover,.nav-link[href*="이론_"]:focus-visible,
+    .nav-link[href*="결산정리사항_"]:hover,.nav-link[href*="결산정리사항_"]:focus-visible,
+    .nav-link[href*="매입매출전표_"]:hover,.nav-link[href*="매입매출전표_"]:focus-visible{border-color:var(--menu-accent);background:color-mix(in srgb,var(--menu-accent) 22%,white);color:var(--menu-ink);outline:3px solid color-mix(in srgb,var(--menu-accent) 28%,transparent);outline-offset:2px}
+    .nav-link.active[href*="일반전표_"]:not(.nav-star),.nav-link.active[href*="이론_"],.nav-link.active[href*="결산정리사항_"],.nav-link.active[href*="매입매출전표_"]{border-color:var(--menu-accent);background:var(--menu-accent);color:#fff;box-shadow:0 4px 10px color-mix(in srgb,var(--menu-accent) 30%,transparent)}
     @media ${MOBILE}{
       .top-nav.nav-compact{transition:transform .22s ease}
       .top-nav.nav-compact.nav-hidden{transform:translateY(-100%)}
