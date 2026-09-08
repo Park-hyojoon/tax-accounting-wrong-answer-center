@@ -350,7 +350,7 @@
     <p class="footer">오답 훈련센터 · 「동기화」 또는 「오늘 학습기록 저장」을 누른 경우에만 GitHub로 기록을 보냅니다.</p>
   </main>
 
-  <script src="github-learning-sync.js?v=7"></script>
+  <script src="github-learning-sync.js?v=8"></script>
   <script src="training-ui.js?v=2"></script>
   <script>
     const SOURCES={
@@ -637,6 +637,14 @@
         return `<tr><td><strong>${info.label}</strong></td><td class="num">${list.length}</td><td class="num">${passed}</td><td class="num">${active}</td><td class="num">${hidden}</td><td class="num">${attempts}회</td><td class="num">${wrong}회</td></tr>`;
       }).join('');
     }
+    // 백업·동기화 파일에 문제 목록과 유형별 집계를 함께 넣는다(AI가 기록만 보고 분석할 수 있게).
+    window.TrainingCatalog=function(){
+      if(!records.length)buildRecords();
+      const catalog=records.map(r=>({source:r.source,category:r.category,id:r.id,...(r.index!==undefined?{index:r.index}:{}),title:r.title,type:r.type,registered:r.registered,attempts:r.attempts,wrong:r.wrong,passed:r.passed,selfPassed:r.selfPassed,archived:r.archived}));
+      const grouped=new Map();records.forEach(r=>{if(!grouped.has(r.type))grouped.set(r.type,{type:r.type,problems:0,wrong:0,unpassed:0});const g=grouped.get(r.type);g.problems++;g.wrong+=r.wrong;if(!r.passed&&!r.archived)g.unpassed++});
+      const typeSummary=[...grouped.values()].map(g=>({...g,score:g.wrong+g.problems})).sort((a,b)=>b.score-a.score||b.wrong-a.wrong);
+      return {catalog,typeSummary,catalogAt:new Date().toISOString()};
+    };
     function renderAll(message=''){
       buildRecords();renderSummary();renderTraining();renderFrequent();renderUnpassed();renderArchive();renderStats();
       $('#liveStatus').textContent=message;

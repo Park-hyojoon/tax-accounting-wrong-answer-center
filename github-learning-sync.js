@@ -262,9 +262,16 @@
     merged.cards=cards;merged.startedAt=a.startedAt&&b.startedAt?(Date.parse(a.startedAt)<=Date.parse(b.startedAt)?a.startedAt:b.startedAt):(a.startedAt||b.startedAt);
     merged.updatedAt=new Date().toISOString();return normalizeState(sourceName,merged);
   }
-  function backupPayload(){
+  // 문제 목록(유형·제목)과 유형별 집계를 함께 담아, 기록 파일만 봐도 어떤 문제를 얼마나 틀렸는지 알 수 있게 한다.
+  function catalogInfo(fallback){
+    try{if(typeof global.TrainingCatalog==='function'){const info=global.TrainingCatalog();if(info&&info.catalog)return info}}catch(error){}
+    return fallback&&fallback.catalog?{catalog:fallback.catalog,typeSummary:fallback.typeSummary||[],catalogAt:fallback.catalogAt||''}:null;
+  }
+  function backupPayload(fallback){
     const states={};Object.entries(SOURCES).forEach(([name,source])=>{states[name]=readState(source.key)});
-    return {format:'tax-accounting-training-center-backup',version:1,exportedAt:new Date().toISOString(),states};
+    const payload={format:'tax-accounting-training-center-backup',version:1,exportedAt:new Date().toISOString(),states};
+    const info=catalogInfo(fallback);if(info){payload.catalog=info.catalog;payload.typeSummary=info.typeSummary||[];payload.catalogAt=info.catalogAt||new Date().toISOString()}
+    return payload;
   }
   // 전달받은 states를 현재 브라우저 기록과 합쳐 저장한다. 실제로 바뀐 분야 수를 돌려준다.
   function mergeStatesIntoLocal(states){
@@ -280,8 +287,8 @@
     return changed;
   }
   function stripUpdatedAt(text){return String(text).replace(/"updatedAt":"[^"]*"/g,'')}
-  function buildSyncPayload(){
-    const payload=backupPayload();payload.syncedAt=new Date().toISOString();payload.device={id:getDeviceId(),name:getDeviceName()};
+  function buildSyncPayload(remoteJson){
+    const payload=backupPayload(remoteJson);payload.syncedAt=new Date().toISOString();payload.device={id:getDeviceId(),name:getDeviceName()};
     return payload;
   }
 
@@ -330,11 +337,11 @@
       let changedLocal=0,attempt=0;
       while(true){
         attempt++;
-        let remoteStates=null,base=null;
-        if(helper){const read=await helperPost('/api/learning/read');remoteStates=read.state?.states||null;base=read.base||''}
-        else{const remote=await getSyncState();remoteStates=remote?.json?.states||null;base=remote?.sha||null}
+        let remoteStates=null,base=null,remoteJson=null;
+        if(helper){const read=await helperPost('/api/learning/read');remoteJson=read.state||null;remoteStates=remoteJson?.states||null;base=read.base||''}
+        else{const remote=await getSyncState();remoteJson=remote?.json||null;remoteStates=remoteJson?.states||null;base=remote?.sha||null}
         changedLocal=mergeStatesIntoLocal(remoteStates);
-        const payload=buildSyncPayload();
+        const payload=buildSyncPayload(remoteJson);
         try{
           if(helper)await helperPost('/api/learning/write',{state:payload,base});
           else await putSyncState(payload,base);
