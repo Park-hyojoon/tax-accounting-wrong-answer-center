@@ -95,6 +95,19 @@
     .footer{text-align:center;color:var(--muted);margin-top:30px;font-size:15px}
     @media(max-width:720px){body{font-size:16px}.wrap{width:96vw}.hero,.question,.save-panel{padding:18px}.progress{width:100%;margin-left:0}.progress-bar{flex:1}.prompt{font-size:18px}.answer-line{grid-template-columns:55px 1fr}.answer-line span:nth-child(n+3){grid-column:2}.balance-panel{grid-template-columns:1fr}.save-row{grid-template-columns:1fr}.attempt-info{width:100%;margin-left:0}}
     @media print{.toolbar,.qactions,.source,.save-panel{display:none}.question{break-inside:avoid;box-shadow:none}.reveal:not([open]){display:none}}
+    .star-one[aria-pressed="true"]{background:#ffd54a;border-color:#e0b100;color:#5a3d00}
+    .star-note{margin:8px 0 0;padding:8px 12px;border-radius:10px;background:#fff4c2;color:#6b4a00;font-weight:900}
+    .variant-badge{background:#e8f0ff;color:#1d4d9b;margin-left:6px}
+    .star-tools{display:flex;justify-content:flex-end;gap:8px;margin:12px 0}
+    .star-group{margin:18px 0 26px}
+    .star-group-title{margin:0 0 10px;font-size:1.15rem;color:var(--navy)}.star-group-title small{margin-left:8px;font-size:.85rem;color:var(--muted)}
+    details.star-item{margin:8px 0;border:1px solid var(--line);border-radius:14px;background:#fff;overflow:hidden}
+    details.star-item>summary{display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:12px 16px;cursor:pointer;font-weight:900;list-style:none}
+    details.star-item>summary::-webkit-details-marker{display:none}
+    details.star-item>summary::before{content:'▸';color:var(--muted)}details.star-item[open]>summary::before{content:'▾'}
+    details.star-item>summary .qnum{width:30px;height:30px;font-size:.9rem}
+    .star-item-meta{margin-left:auto;font-size:.85rem;font-weight:700;color:var(--muted)}
+    details.star-item>.question{margin:0;border:0;border-top:1px dashed var(--line);border-radius:0;box-shadow:none}
   </style>
 </head>
 <body>
@@ -105,6 +118,7 @@
       <a class="nav-link" href="이론_오답응용_5문제.html">이론 오답</a>
       <a class="nav-link" href="결산정리사항_연습_7문제.html">결산 정리사항</a>
       <a class="nav-link" href="매입매출전표_오답연습_3문제.html?view=all">매입매출전표 입력</a>
+      <a class="nav-link nav-star" href="일반전표_기본연습_24문제.html?view=star" title="★ 표시한 문제와 AI 응용문제를 유형별로 모아 훈련합니다">★ 특별 훈련</a>
       <div class="nav-sync" aria-label="동기화">
         <button class="nav-sync-button primary" id="syncAll" type="button" title="PC·GitHub·모바일의 새 문제와 학습기록을 한 번에 최신으로 맞춥니다">🔄 동기화</button>
       </div>
@@ -475,7 +489,8 @@
     </tr>`}
 
     function questionHtml(p,i){return `<article class="question" data-index="${i}" data-added-date="${p.addedDate}">
-      <div class="qhead"><span class="qnum">${i+1}</span><div><h3>${p.title}</h3><span class="tag">${p.type}</span></div></div>
+      <div class="qhead"><span class="qnum">${i+1}</span><div><h3>${p.title}</h3><span class="tag">${p.type}</span>${p.variantOf!=null?`<span class="tag variant-badge">AI 응용문제 · 원문제 ${p.variantOf+1}번</span>`:''}</div></div>
+      <p class="star-note" hidden>★ 이 문제는 특별히 훈련이 필요합니다.</p>
       <div class="prompt">${p.prompt}</div>
       <div class="entry-wrap"><table>
         <thead><tr><th>구분</th><th>계정과목</th><th>금액</th><th>판 / 제 선택</th><th>거래처</th><th>적요코드</th><th>결과</th></tr></thead>
@@ -483,7 +498,7 @@
       </table></div>
       <div class="balance-panel" aria-live="polite"><div class="balance-item">차변 합계<strong class="debit-total">0원</strong></div><div class="balance-item">대변 합계<strong class="credit-total">0원</strong></div><div class="balance-item difference">차액<strong class="difference-total">0원 · 입력 대기</strong></div></div>
       <p class="tip">금액은 쉼표 없이 입력해도 됩니다. 판관비/제조원가 구분이 필요한 계정은 ‘판/제 선택’을 사용하세요.</p>
-      <div class="qactions"><button class="btn check-one" type="button">채점하기</button><button class="btn secondary clear-one" type="button">정답으로 인정하고 통과</button><span class="result" aria-live="polite"></span><span class="attempt-info"></span></div>
+      <div class="qactions"><button class="btn check-one" type="button">채점하기</button><button class="btn secondary clear-one" type="button">정답으로 인정하고 통과</button><button class="btn secondary star-one" type="button" aria-pressed="false" title="이 문제는 특별히 훈련이 필요합니다. AI가 학습기록에서 이 표시를 보면 숫자를 바꾼 응용문제 1개를 더 만듭니다.">★ 특별 훈련</button><span class="result" aria-live="polite"></span><span class="attempt-info"></span></div>
       <details class="reveal answer-box"><summary>정답 · 해설 보기</summary><div class="reveal-body"><div>${p.answers.map(answerHtml).join('')}</div><p><strong>해설:</strong> ${p.explanation}</p></div></details>
     </article>`}
 
@@ -522,9 +537,12 @@
     function renderAttempt(card){const s=cardState(card.dataset.index);el('.attempt-info',card).textContent=`채점 ${s.attempts||0}회 · 틀림 ${s.wrongCount||0}회`}
     const todayView=new URLSearchParams(location.search).get('view')==='today';
     const typeView=(new URLSearchParams(location.search).get('type')||'').trim();
+    const starView=new URLSearchParams(location.search).get('view')==='star';
     function restoreCard(card){
       const s=cardState(card.dataset.index),rows=els('.entry-row',card);
-      card.hidden=typeView?((problems[Number(card.dataset.index)]?.type||'').trim()!==typeView):Boolean(s.passed||s.archived||(todayView&&card.dataset.addedDate!==localDate()));
+      const problemOf=problems[Number(card.dataset.index)]||{};
+      card.hidden=starView?!(s.starred||problemOf.variantOf!=null):typeView?((problemOf.type||'').trim()!==typeView):Boolean(s.passed||s.archived||(todayView&&card.dataset.addedDate!==localDate()));
+      el('.star-one',card).setAttribute('aria-pressed',String(Boolean(s.starred)));el('.star-note',card).hidden=!s.starred;
       (s.rows||[]).forEach((saved,i)=>{if(!rows[i])return;el('.side',rows[i]).value=saved.side||'D';el('.account',rows[i]).value=saved.account||'';el('.amount',rows[i]).value=saved.amount||'';el('.division',rows[i]).value=saved.division||'';el('.partner',rows[i]).value=saved.partner||'';el('.memo',rows[i]).value=saved.memo||''});
       if(s.graded){card.dataset.graded='true';card.dataset.correct=String(Boolean(s.correct));card.classList.toggle('correct',Boolean(s.correct));card.classList.toggle('wrong',!s.correct);const result=el('.result',card);result.className='result '+(s.correct?'ok':'no');result.textContent=s.correct?'정답입니다!':`마지막 채점은 오답입니다. (${s.matched||0}/${problems[Number(card.dataset.index)].answers.length}개 분개 일치)`}
       updateTotals(card);renderAttempt(card)
@@ -568,15 +586,21 @@
       const s=cardState(card.dataset.index);s.passed=true;s.passedAt=nowIso();s.selfPassed=true;s.selfPassedAt=nowIso();delete s.trainingCenterRestored;saveState();card.hidden=true;updateProgress();
     }
 
+    function toggleStar(card){
+      const s=cardState(card.dataset.index);s.starred=!s.starred;if(s.starred)s.starredAt=nowIso();else delete s.starredAt;saveState();
+      el('.star-one',card).setAttribute('aria-pressed',String(s.starred));el('.star-note',card).hidden=!s.starred;
+    }
+
     els('.question').forEach(card=>{
       el('.check-one',card).addEventListener('click',()=>grade(card));
       el('.clear-one',card).addEventListener('click',()=>archiveCard(card));
+      el('.star-one',card).addEventListener('click',()=>toggleStar(card));
       els('.entry-row input,.entry-row select',card).forEach(x=>{x.addEventListener('input',()=>markChanged(card));x.addEventListener('change',()=>markChanged(card))});
     });
 
     const questionOrder=els('.question');
     function sortKeys(card){const s=cardState(card.dataset.index),history=s.history||[],last=history.length?Date.parse(history[history.length-1].at)||0:0;return{card,index:Number(card.dataset.index),wrong:s.wrongCount||0,attempts:s.attempts||0,last,added:card.dataset.addedDate||''}}
-    function applySort(){const mode=el('#sortOrder').value,list=questionOrder.map(sortKeys);list.sort((a,b)=>{
+    function applySort(){if(starView)return;const mode=el('#sortOrder').value,list=questionOrder.map(sortKeys);list.sort((a,b)=>{
       if(mode==='wrong')return b.wrong-a.wrong||b.attempts-a.attempts||a.index-b.index;
       if(mode==='unattempted')return Number(a.attempts>0)-Number(b.attempts>0)||a.index-b.index;
       if(mode==='recentAttempt')return b.last-a.last||a.index-b.index;
@@ -630,6 +654,8 @@
         todayHistory.forEach((h,n)=>{lines.push(`#### 오늘 ${n+1}차 시도 · ${fmtDate(h.at)} · ${h.correct?'정답':'오답'} (${h.matched}/${p.answers.length}개 일치)`,'',...rowTable(h.rows||[]),'')});
         lines.push('---','')
       });
+      const starred=all.filter(x=>x.s.starred);
+      if(starred.length){lines.push('## ★ 특별 훈련이 필요한 문제 (사용자 표시)','','사용자가 「★ 특별 훈련」으로 표시한 문제입니다. 응용문제가 없는 문제는 같은 구조로 숫자·날짜·거래처만 바꾼 응용문제를 **1개씩만** 만들어 `variantOf`에 원문제 인덱스를 적어 추가해 주세요.','');starred.forEach(x=>{const hasVariant=problems.some(q=>q.variantOf===x.i);lines.push(`- [${x.i+1}] ${x.p.title} (${x.p.type}) · 표시 ${fmtDate(x.s.starredAt||'')} · 응용문제 ${hasVariant?'있음':`없음 → 추가 필요 (variantOf:${x.i})`}`)});lines.push('')}
       lines.push('## AI에게 전달할 요청 예시','', '> 이 오늘 학습기록에서 틀린 문제와 반복해서 헷갈린 유형을 분석해 주세요. 같은 전표 구조를 유지하면서 숫자·날짜·상황을 바꾼 전산회계 1급 실무 응용문제를 만들어 주세요.','');
       return lines.join('\n')
     }
@@ -668,6 +694,33 @@
     function setupKoreanInput(field){field.dataset.koRaw='';field.dataset.koBase=field.value;field.addEventListener('focus',()=>{field.dataset.koRaw='';field.dataset.koBase=field.value});field.addEventListener('blur',()=>{field.dataset.koRaw='';field.dataset.koBase=field.value});field.addEventListener('keydown',e=>{if(!el('#koAuto').checked||e.ctrlKey||e.altKey||e.metaKey)return;const raw=field.dataset.koRaw||'',atEnd=field.selectionStart===field.value.length&&field.selectionEnd===field.value.length;if(e.key==='Backspace'&&raw&&atEnd){e.preventDefault();const next=raw.slice(0,-1);field.dataset.koRaw=next;field.value=(field.dataset.koBase||'')+romanToHangul(next);field.dispatchEvent(new Event('input',{bubbles:true}));return}if(/^[A-Za-z]$/.test(e.key)&&atEnd){e.preventDefault();if(!raw)field.dataset.koBase=field.value;const next=raw+e.key;field.dataset.koRaw=next;field.value=(field.dataset.koBase||'')+romanToHangul(next);field.dispatchEvent(new Event('input',{bubbles:true}));return}field.dataset.koRaw='';field.dataset.koBase=field.value})}
     els('[data-ko-auto]').forEach(setupKoreanInput);
     updateProgress();
+    function buildStarView(){
+      if(!starView)return;
+      document.title='★ 특별 훈련 · 일반전표';
+      const sortLabel=el('.sort-label');if(sortLabel)sortLabel.hidden=true;
+      const title=el('.section-title');if(title)title.textContent='★ 특별 훈련 문제 (유형별)';
+      els('.nav-link').forEach(a=>{const on=a.classList.contains('nav-star');a.classList.toggle('active',on);if(on)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current')});
+      const current=document.querySelector('.nav-current');if(current)current.textContent='★ 특별 훈련';
+      const box=el('#questions'),groups=new Map();
+      els('.question').filter(c=>!c.hidden).forEach(card=>{const p=problems[Number(card.dataset.index)];if(!groups.has(p.type))groups.set(p.type,[]);groups.get(p.type).push(card)});
+      const tools='<div class="star-tools"><button class="btn secondary star-open-all" type="button">보기</button><button class="btn secondary star-close-all" type="button">접기</button></div>';
+      if(!groups.size){box.innerHTML='<div class="notice">★ 표시한 문제가 아직 없습니다. 「일반전표 입력」에서 문제 아래의 「★ 특별 훈련」 버튼을 누르면 이곳에 유형별로 모입니다.</div>';return}
+      const wrap=document.createElement('div');wrap.className='star-view';wrap.innerHTML=tools;
+      groups.forEach((cards,type)=>{
+        const group=document.createElement('section');group.className='star-group';group.innerHTML=`<h2 class="star-group-title">${type}<small>${cards.length}문제</small></h2>`;
+        cards.sort((a,b)=>{const pa=problems[Number(a.dataset.index)],pb=problems[Number(b.dataset.index)];const ka=pa.variantOf!=null?pa.variantOf:Number(a.dataset.index),kb=pb.variantOf!=null?pb.variantOf:Number(b.dataset.index);return ka-kb||Number(pa.variantOf!=null)-Number(pb.variantOf!=null)||Number(a.dataset.index)-Number(b.dataset.index)});
+        cards.forEach(card=>{
+          const p=problems[Number(card.dataset.index)],s=cardState(card.dataset.index),item=document.createElement('details');item.className='star-item';
+          item.innerHTML=`<summary><span class="qnum">${Number(card.dataset.index)+1}</span><span>${p.title}</span>${p.variantOf!=null?`<span class="tag variant-badge">AI 응용</span>`:'<span class="tag">★</span>'}<span class="star-item-meta">채점 ${s.attempts||0}회 · 틀림 ${s.wrongCount||0}회${s.passed?' · 통과':''}</span></summary>`;
+          item.appendChild(card);group.appendChild(item);
+        });
+        wrap.appendChild(group);
+      });
+      wrap.insertAdjacentHTML('beforeend',tools);box.replaceChildren(wrap);
+      els('.star-open-all').forEach(b=>b.addEventListener('click',()=>els('details.star-item').forEach(d=>{d.open=true})));
+      els('.star-close-all').forEach(b=>b.addEventListener('click',()=>els('details.star-item').forEach(d=>{d.open=false})));
+    }
+    buildStarView();
     (function(){
     if(typeof window.TrainingGitHub?.installSyncBar!=='function'){const button=document.querySelector('#syncAll');if(button)button.addEventListener('click',()=>alert('동기화 기능을 불러오지 못했습니다. Ctrl+F5로 새로고침한 뒤 다시 눌러주세요.'));return}
     TrainingGitHub.installSyncBar({onNeedToken:({mobile})=>{if(mobile)TrainingGitHub.showToast('처음 한 번만 오답 훈련센터 홈 아래쪽에서 GitHub 토큰을 연결한 뒤 다시 눌러주세요.',8000)}});
