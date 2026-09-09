@@ -9,10 +9,10 @@ const data=require('../mistake-intake-data.js');
 const copy=value=>JSON.parse(JSON.stringify(value));
 const total=memory.analyze().total;
 
-function syncHarness(){
+function syncHarness(withSourceMemory=true){
   const store=new Map();
   const localStorage={getItem:key=>store.get(key)||null,setItem:(key,value)=>store.set(key,String(value)),removeItem:key=>store.delete(key)};
-  const sandbox={localStorage,TrainingMistakeMemory:memory,console};sandbox.window=sandbox;
+  const sandbox={localStorage,console};if(withSourceMemory)sandbox.TrainingMistakeMemory=memory;sandbox.window=sandbox;
   vm.runInNewContext(fs.readFileSync(path.join(base,'github-learning-sync.js'),'utf8'),sandbox);
   return {api:sandbox.TrainingGitHub,store,localStorage};
 }
@@ -65,7 +65,7 @@ test('deleted/correct cards and merged training attempts never remove or add sou
   assert.equal(memory.analyze(api.backupPayload().sourceMistakes).total,total);
 });
 
-test('non-home backups retain a newer source snapshot and reject malformed remote data',()=>{
+test('home backups retain a newer source snapshot and reject malformed remote data',()=>{
   const {api}=syncHarness(),remote=copy(data);remote.revision=data.revision+1;
   assert.equal(api.backupPayload({sourceMistakes:remote}).sourceMistakes.revision,remote.revision);
   for(const invalid of [{schemaVersion:1,revision:100,topics:{}},{...copy(data),entries:[null]},{...copy(data),entries:[{...data.entries[0],practiceRefs:{}}]}]){
@@ -74,6 +74,11 @@ test('non-home backups retain a newer source snapshot and reject malformed remot
   }
   const exported=api.backupPayload();exported.sourceMistakes.entries[0].title='changed snapshot';
   assert.notEqual(data.entries[0].title,'changed snapshot');
+});
+
+test('lightweight subject pages preserve the remote source snapshot without loading the ledger',()=>{
+  const {api}=syncHarness(false),remote=copy(data);remote.revision=data.revision+1;
+  assert.deepEqual(api.backupPayload({sourceMistakes:remote}).sourceMistakes,remote);
 });
 
 function checkCatalog(home){
@@ -92,18 +97,19 @@ function checkCatalog(home){
 test('catalog check catches a newly added source problem without intake, but permits an AI variant',()=>{
   const home=fs.readFileSync(path.join(base,'오답_훈련센터.html'),'utf8');
   assert.equal(checkCatalog(home).exitCode,0);
-  const add=title=>home.replace('    const $=',`    META.push({source:'voucher',id:30,type:'검사용 유형',title:'${title}',registered:'2026-09-09'});\n    const $=`);
+  const add=title=>home.replace('    const $=',`    META.push({source:'voucher',id:9999,type:'검사용 유형',title:'${title}',registered:'2026-09-09'});\n    const $=`);
   const missing=checkCatalog(add('새로 전달한 오답'));
   assert.equal(missing.exitCode,1);
   assert.ok(missing.errors.join('').includes('원본 접수가 없습니다'));
   assert.equal(checkCatalog(add('추가 집중훈련 (응용)')).exitCode,0);
 });
 
-test('all five screens load source memory before sync and all inline scripts parse',()=>{
+test('only the home loads source memory and all inline scripts parse',()=>{
   for(const file of ['오답_훈련센터.html','일반전표_기본연습_24문제.html','결산정리사항_연습_7문제.html','매입매출전표_오답연습_3문제.html','이론_오답응용_5문제.html']){
     const html=fs.readFileSync(path.join(base,file),'utf8');
-    const source=html.indexOf('src="mistake-intake-data.js?'),logic=html.indexOf('src="mistake-memory.js?'),sync=html.indexOf('src="github-learning-sync.js?v=12"');
-    assert.ok(source>=0&&source<logic&&logic<sync,file);
+    const source=html.search(/src=['"]mistake-intake-data\.js\?/),logic=html.search(/src=['"]mistake-memory\.js\?/),sync=html.search(/src=['"]github-learning-sync\.js\?v=\d+['"]/);
+    if(file==='오답_훈련센터.html')assert.ok(source>=0&&source<logic&&logic<sync,file);
+    else assert.ok(source<0&&logic<0&&sync>=0,file);
     for(const match of html.matchAll(/<script\b[^>]*>([\s\S]*?)<\/script>/gi))new vm.Script(match[1],{filename:file});
   }
 });

@@ -11,9 +11,9 @@
   'use strict';
   return {
     schemaVersion: 1,
-    revision: 1,
+    revision: 3,
     recordedOn: '2026-09-09',
-    coverageNote: '현재 대화에서 원문을 직접 확인할 수 있는 사용자 제출 오답 29건만 부분 복원했다. 전체 기간의 총 오답 수가 아니다. 대화의 전송 시각은 제공되지 않아 reportedAt은 모두 null이며, registeredDate는 연결된 연습문제의 등록일일 뿐 실제 오답 제출일이 아니다. 문제 본문의 거래일자도 오답 제출일로 사용하지 않는다. 첨부파일 이름만 있거나 원문 근거가 부족한 과거 문제, 초기 기본문제, AI가 추가한 대비·응용문제는 실제 제출 횟수에 넣지 않았다.',
+    coverageNote: '과거 대화에서 원문을 직접 확인해 부분 복원한 29건과 2026-09-09에 새로 전달받은 8건을 합쳐 사용자 제출 오답 37건을 확인했다. 과거 전체 기간의 총 오답 수는 아니다. 과거 복원분은 실제 채팅 전달시각이 없어 reportedAt을 null로 두었고, registeredDate는 연결된 연습문제 등록일일 뿐 실제 오답 제출일이 아니다. 새 접수분은 확인 가능한 실제 전달일을 reportedAt에 기록한다. 문제 본문의 거래일자도 오답 제출일로 사용하지 않는다. 첨부파일 이름만 있거나 원문 근거가 부족한 과거 문제, 초기 기본문제, AI가 추가한 대비·응용문제는 실제 제출 횟수에 넣지 않았다.',
     topics: [
       { id: 'repair-expense-card', label: '수선비의 수익적 지출과 카드결제' },
       { id: 'zero-rate-confirmation', label: '구매확인서 영세율 매출' },
@@ -36,7 +36,15 @@
       { id: 'supplies-allocation', label: '소모품 사용액과 부서별 배부' },
       { id: 'cash-shortage-closing', label: '현금과부족의 원인 규명과 결산' },
       { id: 'profit-versus-oci', label: '당기손익과 기타포괄손익 구분' },
-      { id: 'ending-equity', label: '기말자본 계산' }
+      { id: 'ending-equity', label: '기말자본 계산' },
+      { id: 'qualitative-characteristics', label: '재무정보의 목적적합성과 신뢰성' },
+      { id: 'cash-equivalents', label: '현금및현금성자산의 범위' },
+      { id: 'depreciation-calculation', label: '감가상각비 계산과 월할상각' },
+      { id: 'costing-method-industry', label: '개별·종합원가계산 적용업종' },
+      { id: 'overhead-allocation-variance', label: '제조간접원가 과대·과소배부' },
+      { id: 'vat-tax-base', label: '부가가치세 과세표준 포함 여부' },
+      { id: 'travel-advance-settlement', label: '출장 전도금 정산' },
+      { id: 'vat-vehicle-deduction', label: '차량 유류대의 매입세액 공제 여부' }
     ],
     entries: [
       {
@@ -328,7 +336,90 @@
         reportedAt: null, registeredDate: '2026-09-09', dateBasis: 'training-registration',
         practiceRefs: [{ source: 'theory', id: 'ending-equity-equation-20260909', type: '기말자본 계산' }],
         provenance: '이 대화에서 사용자가 “이번에는 이론 문제”로 전달한 ㈜수암골 기말자본 원문·표·보기·답안.'
-      }
+      },
+      {
+        id: 'original-relevance-characteristics-neutrality',
+        source: 'user-submitted', evidenceStatus: 'confirmed', topicId: 'qualitative-characteristics',
+        title: '목적적합성에 해당하지 않는 질적특성',
+        originalCue: '재무정보가 정보이용자의 의사결정 목적과 관련되어야 한다는 설명을 제시하고 예측가치·피드백가치·적시성·중립성 중 목적적합성에 해당하지 않는 항목을 묻는다. 정답은 ④ 중립성이다.',
+        learnerReason: null,
+        reportedAt: '2026-09-09', registeredDate: '2026-09-09',
+        practiceRefs: [{ source: 'theory', id: 'qualitative-relevance-20260909', type: '재무정보의 질적특성' }],
+        provenance: '이 대화에서 사용자가 “틀린 문제들입니다. 이론과 일반전표입력입니다”로 전달한 첫 번째 이론 원문·보기·답안.'
+      },
+      {
+        id: 'original-cash-equivalents-1000000',
+        source: 'user-submitted', evidenceStatus: 'confirmed', topicId: 'cash-equivalents',
+        title: '현금및현금성자산 해당 항목 합계',
+        originalCue: '선일자수표 500,000원, 타인발행수표 500,000원, 배당금지급통지서 500,000원, 만기 6개월 양도성예금증서 300,000원 중 현금및현금성자산 합계를 묻는다. 타인발행수표와 배당금지급통지서 합계 1,000,000원이 정답이다.',
+        learnerReason: null,
+        reportedAt: '2026-09-09', registeredDate: '2026-09-09',
+        practiceRefs: [{ source: 'theory', id: 'cash-equivalents-total-20260909', type: '현금및현금성자산' }],
+        provenance: '이 대화에서 사용자가 전달한 현금및현금성자산 원문·표 이미지·보기·답안.'
+      },
+      {
+        id: 'original-declining-balance-depreciation-3487500',
+        source: 'user-submitted', evidenceStatus: 'confirmed', topicId: 'depreciation-calculation',
+        title: '정률법 기계장치의 취득연도 월할상각과 차년도 감가상각',
+        originalCue: '기계장치 취득일 2022.07.01., 취득원가 10,000,000원, 정률 45%, 내용연수 5년, 잔존가치 500,000원. 2022년 6개월분 감가상각누계액 2,250,000원을 차감한 장부금액에 45%를 적용한 2023년 감가상각비 3,487,500원이 정답이다.',
+        learnerReason: null,
+        reportedAt: '2026-09-09', registeredDate: '2026-09-09',
+        practiceRefs: [{ source: 'theory', id: 'declining-balance-depreciation-20260909', type: '감가상각비 계산' }],
+        provenance: '이 대화에서 사용자가 전달한 기계장치 감가상각 원문·자료 이미지·보기·답안.'
+      },
+      {
+        id: 'original-job-order-costing-construction',
+        source: 'user-submitted', evidenceStatus: 'confirmed', topicId: 'costing-method-industry',
+        title: '개별원가계산 적용 업종 판단',
+        originalCue: '제분업·정유업·건설업·식품가공업 중 개별원가계산을 적용할 수 있는 업종을 묻는다. 정답은 ③ 건설업이며 나머지는 종합원가계산에 적합하다.',
+        learnerReason: null,
+        reportedAt: '2026-09-09', registeredDate: '2026-09-09',
+        practiceRefs: [{ source: 'theory', id: 'job-order-industry-20260909', type: '개별원가계산 적용업종' }],
+        provenance: '이 대화에서 사용자가 전달한 개별원가계산 적용업종 원문·보기·답안.'
+      },
+      {
+        id: 'original-overhead-underallocated-50000',
+        source: 'user-submitted', evidenceStatus: 'confirmed', topicId: 'overhead-allocation-variance',
+        title: '제조간접원가 예정배부와 과소배부 판단',
+        originalCue: '예상 직접노무시간 50,000시간, 제조간접원가 예상액 2,500,000원으로 예정배부율 50원/시간을 계산한다. 6월 실제 직접노무시간 5,000시간의 예정배부액은 250,000원이고 실제발생액 300,000원과의 차이 50,000원은 과소배부이다.',
+        learnerReason: null,
+        reportedAt: '2026-09-09', registeredDate: '2026-09-09',
+        practiceRefs: [{ source: 'theory', id: 'overhead-variance-20260909', type: '제조간접원가 배부차이' }],
+        provenance: '이 대화에서 사용자가 전달한 제조간접원가 배부차이 원문·보기·계산식·답안.'
+      },
+      {
+        id: 'original-vat-tax-base-sales-discount',
+        source: 'user-submitted', evidenceStatus: 'confirmed', topicId: 'vat-tax-base',
+        title: '부가가치세 과세표준에서 제외되는 매출할인액',
+        originalCue: '할부판매 시 이자상당액·개별소비세·매출할인액·대가 일부로 받는 운송비 중 부가가치세 과세표준에 포함하지 않는 항목을 묻는다. 정답은 ③ 매출할인액이다.',
+        learnerReason: null,
+        reportedAt: '2026-09-09', registeredDate: '2026-09-09',
+        practiceRefs: [{ source: 'theory', id: 'vat-tax-base-exclusion-20260909', type: '부가가치세 과세표준' }],
+        provenance: '이 대화에서 사용자가 전달한 부가가치세 과세표준 원문·보기·답안.'
+      },
+      {
+        id: 'original-withheld-payroll-tax-payment-22000',
+        source: 'user-submitted', evidenceStatus: 'confirmed', topicId: 'withholding-accounts',
+        title: '급여에서 원천징수한 세액의 납부',
+        originalCue: '2023.07.10. 6월 관리부 직원 급여에서 원천징수한 근로소득세 20,000원과 지방소득세 2,000원을 보통예금으로 납부한다. 예수금 22,000원 / 보통예금 22,000원으로 처리한다.',
+        learnerReason: null,
+        reportedAt: '2026-09-09', registeredDate: '2026-09-09',
+        practiceRefs: [{ source: 'practical', id: 44, type: '원천징수세액 납부' }],
+        provenance: '이 대화에서 사용자가 일반전표 오답으로 전달한 원천징수세액 납부 원문·답안.'
+      },
+      {
+        id: 'original-travel-advance-return-600000',
+        source: 'user-submitted', evidenceStatus: 'confirmed', topicId: 'travel-advance-settlement',
+        title: '출장 전도금의 실제 지출과 현금 잔액 반납',
+        originalCue: '2023.08.20. 영업부 김시성 과장이 대구세계가구박람회 출장 후 전도금 600,000원을 정산한다. 왕복항공권 350,000원과 식대 30,000원의 여비교통비(판) 380,000원, 현금 반납 220,000원 / 전도금 600,000원으로 처리한다.',
+        learnerReason: null,
+        reportedAt: '2026-09-09', registeredDate: '2026-09-09',
+        practiceRefs: [{ source: 'practical', id: 45, type: '출장비 정산' }],
+        provenance: '이 대화에서 사용자가 일반전표 오답으로 전달한 출장 정산 원문·지출결의서 이미지·답안.'
+      },
+      {id:'original-business-gift-product-300000-500000',source:'user-submitted',evidenceStatus:'confirmed',topicId:'product-free-transfer',title:'원재료 매입 거래처에 접대 목적으로 제품 무상제공',originalCue:'2023.08.10. 원재료 매입 거래처에 접대 목적으로 원가 300,000원·시가 500,000원의 제품을 무상 제공한다. 14.건별, 공급가액 500,000원·부가세 50,000원, 혼합분개로 기업업무추진비(제) 350,000원 / 부가세예수금 50,000원·제품 300,000원(적요 8)으로 처리한다.',learnerReason:'사용자가 너무 중요한 문제라고 강조하고 같은 구조의 훈련문제 2개를 요청했다.',reportedAt:'2026-09-09',registeredDate:'2026-09-09',practiceRefs:[{source:'voucher',id:30,type:'사업상증여·거래처 무상제공'},{source:'voucher',id:31,type:'사업상증여·거래처 무상제공'}],provenance:'이 대화에서 사용자가 전달한 매입매출전표 원문·답안.'},
+      {id:'original-deductible-small-car-fuel-card-44000',source:'user-submitted',evidenceStatus:'confirmed',topicId:'vat-vehicle-deduction',title:'매입세액 공제 가능한 소형승용차 유류대의 카드면세 수정',originalCue:'2023.08.17. 영업부 비영업용 소형승용차 800㏄의 경유대 44,000원을 비씨카드로 결제한 거래를 58.카면으로 입력했으나, 매입세액공제 가능 차량이므로 57.카과의 공급가액 40,000원·부가세 4,000원으로 수정한다.',learnerReason:null,reportedAt:'2026-09-09',registeredDate:'2026-09-09',practiceRefs:[{source:'voucher',id:32,type:'소형승용차 유류대·카드면세 수정'}],provenance:'이 대화에서 사용자가 전달한 매입매출전표 수정 원문·답안.'},
+      {id:'original-manufacturing-truck-depreciation-30000000',source:'user-submitted',evidenceStatus:'confirmed',topicId:'depreciation-calculation',title:'제조부 화물차의 정액법 감가상각',originalCue:'2023.04.15. 취득원가 30,000,000원·잔존가치 0원·내용연수 5년·정액법인 제조부 화물차 포터의 2023년 감가상각비를 계산한다. 답안은 4,500,000원, 4,250,000원 또는 4,290,410원을 인정하고 감가상각비(제) / 감가상각누계액으로 처리한다.',learnerReason:null,reportedAt:'2026-09-09',registeredDate:'2026-09-09',practiceRefs:[{source:'closing',id:17,type:'차량운반구 감가상각·월할계산'}],provenance:'이 대화에서 사용자가 전달한 결산자료·일반전표 답안과 차량 자료 이미지.'}
     ],
     signals: [
       {
@@ -345,7 +436,7 @@
       }
     ],
     notes: [
-      '이 파일의 29건은 직접 확인한 원본 오답 사건의 보수적인 최소 기록이다. 초기 등록문제 전체나 학습기록의 오답 횟수를 역산하여 과거 사건을 채우지 않는다.',
+      '초기 부분 복원 29건과 2026-09-09 신규 접수 8건, 합계 37건은 직접 확인한 원본 오답 사건의 보수적인 최소 기록이다. 초기 등록문제 전체나 학습기록의 오답 횟수를 역산하여 과거 사건을 채우지 않는다.',
       '빛나는간판 5,500,000원 문제는 대화에 여러 번 등장하지만 새 회차에서 다시 틀렸다는 확정 근거가 없어 한 번만 집계했다. 이후 실제 재오답이 확인되면 별도 사건 ID와 그 근거로 추가한다.',
       'AI가 만든 일반전표 34·35 특별훈련 응용문제, 요청된 일반전표 24·25 기부 대비문제, 매입매출전표 11·12 접대 대비문제는 원본 제출 사건에서 제외했다. 변형문제에 등록일이 있어도 실제 오답이 확인되지 않으면 제출 횟수는 증가하지 않는다.',
       'practiceRefs는 현재 연습문제와의 학습 연결이다. 원문의 숫자·거래처·조건이 그대로라는 뜻이 아니다. 특히 결산 9는 원문 환산손실에서 연습 환산이익으로, 결산 10은 최초 선급비용 처리에서 최초 비용 처리로 조건을 바꾸어 제작되었다.',

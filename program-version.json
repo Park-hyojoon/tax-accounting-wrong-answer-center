@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "revision": 23,
-  "updatedAt": "2026-09-09T20:05:00+09:00",
+  "revision": 26,
+  "updatedAt": "2026-09-10T07:06:15+09:00",
   "files": [
     "오답_훈련센터.html",
     "일반전표_기본연습_24문제.html",
@@ -13,9 +13,12 @@
     "account-search.js",
     "mistake-intake-data.js",
     "mistake-memory.js",
+    "training-tool.py",
+    "training-tool.cmd",
     "program-version.json",
     "sync-helper.py",
     "start-sync-helper.ps1",
     "오답훈련센터 시작.bat"
-  ]
+  ],
+  "note": "2026-09-10 경량 등록 기본화, 원장 홈 전용 복구, 미사용 hint와 고립 보충페이지 정리"
 }

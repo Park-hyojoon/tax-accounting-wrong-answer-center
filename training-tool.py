@@ -12,7 +12,7 @@ AI가 문제를 추가할 때 90KB짜리 HTML을 통째로 읽지 않도록 만�
   python training-tool.py mistakes foreign-exchange   그 유형의 원문 단서·학습자 설명
   python training-tool.py check                 문제·홈META·원장·버전 정합성 검사
   python training-tool.py add spec.json         문제와 원장 항목을 한 번에 삽입
-  python training-tool.py bump mistake-intake-data.js   다섯 화면의 ?v=N 일괄 증가
+  python training-tool.py bump mistake-intake-data.js   해당 스크립트를 불러오는 화면의 ?v=N 증가
 
 subject 값: practical(일반전표) theory(이론) closing(결산) voucher(매입매출전표)
 """
@@ -273,18 +273,19 @@ def append_push(text, snippet, nl=None):
 
 
 def bump_version(script, pages=None):
-    """다섯 화면의 <script src="파일?v=N"> 을 함께 올린다."""
+    """해당 스크립트를 실제로 불러오는 화면의 <script src="파일?v=N"> 을 함께 올린다."""
     pages = pages or PAGES
     numbers = []
+    page_text = {}
     for page in pages:
         text = read(page)
+        page_text[page] = text
         for m in re.finditer(re.escape(script) + r'\?v=(\d+)', text):
             numbers.append(int(m.group(1)))
     if not numbers:
         return None
     nxt = max(numbers) + 1
-    for page in pages:
-        text = read(page)
+    for page, text in page_text.items():
         new = re.sub(re.escape(script) + r'\?v=\d+', f'{script}?v={nxt}', text)
         if new != text:
             write(page, new)
@@ -306,21 +307,22 @@ def bump_program_version(note=''):
 def cmd_info():
     print('# 오답 훈련센터 현재 상태\n')
     total = 0
+    hub_text = read(HUB)
     print('| 분야 | 문제 | 홈 META | 다음 추가 위치 |')
     print('|---|---:|---:|---|')
     for key, info in SUBJECTS.items():
         items = problems_of(key)
-        rows = meta_rows(key)
+        rows = meta_rows(key, hub_text)
         total += len(items)
         nxt = f'인덱스 {len(items)}' if info['id_kind'] == 'index' else '새 문자열 id'
         print(f"| {info['label']}({key}) | {len(items)} | {len(rows)} | {nxt} |")
     print(f'\n핵심 문제 합계: {total}개\n')
 
-    print('## 스크립트 버전 (다섯 화면 공통)')
+    print('## 스크립트 버전과 로딩 화면 수')
     for script, pages in script_versions().items():
         vs = sorted(set(pages.values()))
         mark = '' if len(vs) == 1 else '  <- 화면마다 다름! bump 필요'
-        print(f'- {script}: v={",".join(vs)}{mark}')
+        print(f'- {script}: v={",".join(vs)} · {len(pages)}/{len(PAGES)}화면{mark}')
 
     entries = ledger_entries()
     text = read(LEDGER)
@@ -406,9 +408,11 @@ def cmd_check():
     problems_fail = []
     warn = []
     hub_text = read(HUB)
+    problem_cache = {}
 
     for key, info in SUBJECTS.items():
         items = problems_of(key)
+        problem_cache[key] = items
         rows = meta_rows(key, hub_text)
         if len(items) != len(rows):
             problems_fail.append(
@@ -431,6 +435,9 @@ def cmd_check():
             key_sets = [set(top_keys(x)) for x in items]
             common = set.intersection(*key_sets[:-1]) if len(key_sets) > 1 else set()
             for idx, ks in enumerate(key_sets):
+                if 'hint' in ks:
+                    problems_fail.append(
+                        f"{info['label']} {idx}번: 사용하지 않는 hint 필드는 넣지 않습니다")
                 missing = sorted(common - ks)
                 if missing:
                     problems_fail.append(
@@ -452,11 +459,20 @@ def cmd_check():
                     problems_fail.append(f"{info['label']} {idx}번: variantOf id '{raw.group(2)}' 없음")
 
     # 스크립트 버전이 다섯 화면에서 같은지
-    for script, pages in script_versions().items():
-        versions = set(pages.values())
-        if len(versions) > 1:
+    versions = script_versions()
+    for script, pages in versions.items():
+        version_values = set(pages.values())
+        if len(version_values) > 1:
             detail = ', '.join(f'{p}=v{v}' for p, v in pages.items())
             problems_fail.append(f'{script}: 화면마다 버전이 다름 ({detail})')
+
+    # 원장 43KB + 분석기 11KB는 TOP 5가 있는 홈에서만 필요하다.
+    # 분야 화면에 다시 넣으면 문제를 열 때마다 같은 데이터를 중복 로드한다.
+    for script in (LEDGER, 'mistake-memory.js'):
+        loaded = set(versions.get(script, {}))
+        if loaded != {HUB}:
+            problems_fail.append(
+                f"{script}: 홈에서만 불러와야 합니다 (현재 {', '.join(sorted(loaded)) or '없음'})")
 
     # 원장
     entries = ledger_entries()
@@ -467,7 +483,7 @@ def cmd_check():
         problems_fail.append(f'원장: 중복 사건 id {sorted(dup)}')
     all_types = {}
     for key in SUBJECTS:
-        all_types[key] = {field(x, 'type') for x in problems_of(key)}
+        all_types[key] = {field(x, 'type') for x in problem_cache[key]}
     for entry in entries:
         eid = field(entry, 'id') or '?'
         for ref in re.findall(r"\{[^{}]*?type\s*:\s*'([^']*)'[^{}]*?\}", entry):
@@ -487,7 +503,7 @@ def cmd_check():
             print(f'- {line}')
         if len(warn) > 10:
             print(f'- ... 외 {len(warn) - 10}건')
-    print('\n(Node 미설치 PC이므로 이 파이썬 검사기가 node mistake-memory.js --check 를 대신한다)')
+    print('\n(일상 문제 등록은 이 파이썬 검사만으로 끝내며 Node·브라우저 검사는 실행하지 않는다)')
     return 1 if problems_fail else 0
 
 
@@ -499,24 +515,33 @@ def cmd_add(spec_path):
     if not items and not mistakes:
         raise SystemExit('[오류] spec 에 items 또는 mistakes 가 없습니다')
 
-    added = {}
+    grouped = {}
     for item in items:
         subject = item['subject']
         if subject not in SUBJECTS:
             raise SystemExit(f"[오류] 알 수 없는 subject: {subject}")
+        grouped.setdefault(subject, []).append(item)
+
+    added = {}
+    changed_subjects = {}
+    hub = read(HUB)
+    for subject, subject_items in grouped.items():
         info = SUBJECTS[subject]
         text = read(info['file'])
-        # 이 파일이 problems.push(...) 로 새 문제를 붙여왔다면 같은 방식으로 맨 뒤에 붙인다.
-        # (배열 안에 끼워 넣으면 뒤 문제의 인덱스가 밀려 저장된 학습기록이 어긋난다.)
-        pushed = append_push(text, item['problem'])
-        text = pushed if pushed else insert_into_array(
-            text, r'(?:const|let)\s+problems\s*=\s*\[', item['problem'], info['label'])
-        write(info['file'], text)
-        hub = read(HUB)
-        hub = insert_into_array(hub, r'const\s+' + info['meta'] + r'\s*=\s*\[',
-                                item['meta'], info['meta'])
+        for item in subject_items:
+            # push 방식 파일은 맨 뒤 push, 나머지는 배열 끝에 붙여 인덱스를 보존한다.
+            pushed = append_push(text, item['problem'])
+            text = pushed if pushed else insert_into_array(
+                text, r'(?:const|let)\s+problems\s*=\s*\[', item['problem'], info['label'])
+            hub = insert_into_array(hub, r'const\s+' + info['meta'] + r'\s*=\s*\[',
+                                    item['meta'], info['meta'])
+        changed_subjects[info['file']] = text
+        added[subject] = len(subject_items)
+
+    for filename, text in changed_subjects.items():
+        write(filename, text)
+    if items:
         write(HUB, hub)
-        added[subject] = added.get(subject, 0) + 1
 
     ledger_rev = None
     if mistakes:
@@ -565,7 +590,7 @@ def main(argv):
         if len(argv) < 2:
             raise SystemExit('사용법: python training-tool.py bump <스크립트파일>')
         v = bump_version(argv[1])
-        print(f'{argv[1]}?v={v} 로 다섯 화면을 맞췄습니다' if v else '해당 스크립트 태그를 찾지 못했습니다')
+        print(f'{argv[1]}?v={v} 로 해당 로딩 화면을 맞췄습니다' if v else '해당 스크립트 태그를 찾지 못했습니다')
         return 0
     raise SystemExit(f'알 수 없는 명령: {cmd}\n{__doc__}')
 
