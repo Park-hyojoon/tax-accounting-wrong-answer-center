@@ -776,7 +776,8 @@
       if(!starView)return;
       document.title='★ 특별 훈련 · 일반전표';
       const sortLabel=el('.sort-label');if(sortLabel)sortLabel.hidden=true;
-      const title=el('.section-title');if(title)title.textContent='★ 특별 훈련 문제 (유형별)';
+      const title=el('.section-title');if(title)title.hidden=true;
+      const grand=el('.grand');if(grand)grand.hidden=true;
       els('.nav-link').forEach(a=>{const on=a.classList.contains('nav-star');a.classList.toggle('active',on);if(on)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current')});
       const current=document.querySelector('.nav-current');if(current)current.textContent='★ 특별 훈련';
       const box=el('#questions'),groups=new Map();
@@ -784,7 +785,6 @@
       const tools='<div class="star-tools"><button class="btn secondary star-open-all" type="button">보기</button><button class="btn secondary star-close-all" type="button">접기</button></div>';
       if(!groups.size){box.innerHTML='<div class="notice">★ 표시한 문제가 아직 없습니다. 「일반전표 입력」에서 문제 아래의 「★ 특별 훈련」 버튼을 누르면 이곳에 유형별로 모입니다.</div>';return}
       const wrap=document.createElement('div');wrap.className='star-view';wrap.innerHTML=tools;
-      wrap.insertAdjacentHTML('afterbegin','<p class="notice">기존 문제 → 응용문제 순서로 한 유형씩 풀어보세요. 원문제의 통과 기록은 유지되며 이곳에서는 두 문제를 함께 볼 수 있습니다.</p>');
       groups.forEach((cards,type)=>{
         const group=document.createElement('section');group.className='star-group';group.innerHTML=`<h2 class="star-group-title">${type}<small>${cards.length}문제</small></h2>`;
         cards.sort((a,b)=>{const pa=problems[Number(a.dataset.index)],pb=problems[Number(b.dataset.index)];const ka=pa.variantOf!=null?pa.variantOf:Number(a.dataset.index),kb=pb.variantOf!=null?pb.variantOf:Number(b.dataset.index);return ka-kb||Number(pa.variantOf!=null)-Number(pb.variantOf!=null)||Number(a.dataset.index)-Number(b.dataset.index)});
