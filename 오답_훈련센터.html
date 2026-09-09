@@ -256,10 +256,10 @@
       <div class="section-heading">
         <div>
           <h2>가장 많이 틀리는 문제 유형 TOP 5</h2>
-          <p>훈련에서 틀린 횟수와 오답으로 등록된 문제 수를 더해 순위를 매깁니다. 막대를 누르면 그 유형의 문제가 펼쳐지고, 「이 유형 풀기」를 누르면 통과한 문제까지 다시 풀 수 있습니다.</p>
+          <p id="intakeCoverage">직접 보내주신 오답 중 원문이 확인된 접수 기록으로 순위를 매깁니다. 막대를 누르면 집계 근거와 남아 있는 훈련문제를 볼 수 있습니다.</p>
         </div>
       </div>
-      <div class="top-legend"><span><i class="seg wrong"></i>훈련에서 틀린 횟수</span><span><i class="seg reg"></i>오답으로 등록된 문제 수</span><span class="top-legend-note">휴대전화 기록까지 합치려면 먼저 「동기화」를 누르세요.</span></div>
+      <div class="top-legend"><span><i class="seg reg"></i>확인된 원본 오답 접수</span><span class="top-legend-note">AI 응용문제·빈 답안 채점·자료 재전송은 제외합니다.</span></div>
       <div id="frequentList" class="top-types"></div>
       <div class="rule-box">여기서는 집계와 연결만 합니다. 자동으로 변형문제를 만들지 않으며, 더 연습하고 싶은 유형은 AI에게 요청할 수 있습니다.</div>
     </section>
@@ -323,7 +323,9 @@
     <p class="footer">오답 훈련센터 · 「동기화」 또는 「오늘 학습기록 저장」을 누른 경우에만 GitHub로 기록을 보냅니다.</p>
   </main>
 
-  <script src="github-learning-sync.js?v=11"></script>
+  <script src="mistake-intake-data.js?v=1"></script>
+  <script src="mistake-memory.js?v=1"></script>
+  <script src="github-learning-sync.js?v=12"></script>
   <script src="training-ui.js?v=3"></script>
   <script>
     const SOURCES={
@@ -441,9 +443,9 @@
 
     const META=[
       ...practicalMeta.map((x,index)=>({source:'practical',id:index,type:x[0],title:x[1],registered:x[2]||'2026-09-01',registeredOrder:x[3]||index+1,variant:x[4]==='variant'||/\(응용\)\s*$/.test(x[1])})),
-      ...theoryMeta.map(x=>({source:'theory',id:x[0],type:x[1],title:x[2],registered:x[3]||'2026-09-01',registeredOrder:x[4]||1})),
-      ...closingMeta.map((x,index)=>({source:'closing',id:x[0],index,type:x[1],title:x[2],registered:x[3]||'2026-09-02',registeredOrder:x[4]||index+1})),
-      ...voucherMeta.map((x,index)=>({source:'voucher',id:index,type:x[0],title:x[1],registered:x[2]||'2026-09-02',registeredOrder:x[3]||index+9}))
+      ...theoryMeta.map(x=>({source:'theory',id:x[0],type:x[1],title:x[2],registered:x[3]||'2026-09-01',registeredOrder:x[4]||1,variant:x[5]==='variant'||/\(응용\)\s*$/.test(x[2])})),
+      ...closingMeta.map((x,index)=>({source:'closing',id:x[0],index,type:x[1],title:x[2],registered:x[3]||'2026-09-02',registeredOrder:x[4]||index+1,variant:x[5]==='variant'||/\(응용\)\s*$/.test(x[2])})),
+      ...voucherMeta.map((x,index)=>({source:'voucher',id:index,type:x[0],title:x[1],registered:x[2]||'2026-09-02',registeredOrder:x[3]||index+9,variant:x[4]==='variant'||/\(응용\)\s*$/.test(x[1])}))
     ];
 
     const $=(selector,root=document)=>root.querySelector(selector);
@@ -584,30 +586,36 @@
       else target.innerHTML=emptyState('아직 통과하지 않은 문제가 없습니다.','현재 등록된 문제를 모두 맞혔거나 삭제했습니다.');
     }
     function renderFrequent(){
-      const grouped=new Map();
-      records.forEach(record=>{
-        if(!grouped.has(record.type))grouped.set(record.type,{type:record.type,count:0,wrong:0,unpassed:0,sources:new Map(),items:[]});
-        const item=grouped.get(record.type);item.count++;item.wrong+=record.wrong;if(!record.passed&&!record.archived)item.unpassed++;
-        if(!item.sources.has(record.source))item.sources.set(record.source,0);item.sources.set(record.source,item.sources.get(record.source)+1);item.items.push(record);
-      });
-      const list=[...grouped.values()].map(item=>({...item,score:item.wrong+item.count})).sort((a,b)=>b.score-a.score||b.wrong-a.wrong||a.type.localeCompare(b.type,'ko')).slice(0,5);
-      const max=Math.max(1,...list.map(item=>item.score));
+      const escape=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
+      let summary;
+      try{summary=TrainingMistakeMemory.analyze()}
+      catch(error){$('#frequentList').textContent='직접 전달한 오답 기록을 불러오지 못했습니다. 새로고침하거나 AI에게 원장 확인을 요청해 주세요.';return}
+      $('#intakeCoverage').textContent=`직접 보내주신 오답 중 확인된 원본 ${summary.total}건을 기준으로 집계합니다. 과거 기록은 일부만 복원했으며, 막대를 누르면 근거와 훈련문제를 볼 수 있습니다.`;
+      const list=summary.topics.filter(item=>item.count>0).slice(0,5);
+      const max=Math.max(1,...list.map(item=>item.count));
       $('#frequentList').innerHTML=list.length?list.map((item,rank)=>{
-        const typeQuery=`type=${encodeURIComponent(item.type)}`;
-        const links=[...item.sources.entries()].map(([source,n])=>`<a class="top-link" href="${SOURCES[source].file}?${typeQuery}">${SOURCES[source].label}에서 이 유형 풀기 (${n}문제)</a>`).join('');
-        return `<article class="top-type" data-type="${item.type}">
+        const types=new Map();item.refs.forEach(ref=>types.set(`${ref.source}:${ref.type}`,ref));
+        const live=records.filter(record=>!record.passed&&!record.archived&&types.has(`${record.source}:${record.type}`));
+        const links=[...types.values()].map(ref=>{
+          const matching=live.filter(record=>record.source===ref.source&&record.type===ref.type);
+          return matching.length?`<a class="top-link" href="${SOURCES[ref.source].file}?type=${encodeURIComponent(ref.type)}">${escape(ref.type)} 훈련 (${matching.length}문제)</a>`:'';
+        }).join('');
+        return `<article class="top-type" data-type="${escape(item.label)}">
           <button class="top-type-head" type="button" aria-expanded="false">
             <span class="top-rank">${rank+1}</span>
-            <span class="top-name">${item.type}<small>${[...item.sources.keys()].map(source=>SOURCES[source].label).join(' · ')}</small></span>
-            <span class="top-bar" aria-hidden="true"><span class="seg wrong" style="width:${item.wrong/max*100}%"></span><span class="seg reg" style="width:${item.count/max*100}%"></span></span>
-            <span class="top-score">틀림 ${item.wrong}회 · 등록 ${item.count}문제 · 미통과 ${item.unpassed}</span>
+            <span class="top-name">${escape(item.label)}<small>${item.signals.length?'반복해서 헷갈린다고 직접 설명한 유형':'원문 전달 근거가 확인된 유형'}</small></span>
+            <span class="top-bar" aria-hidden="true"><span class="seg reg" style="width:${item.count/max*100}%"></span></span>
+            <span class="top-score">직접 전달 ${item.count}건 · 훈련 가능 ${live.length}문제</span>
           </button>
           <div class="top-type-body" hidden>
-            <div class="top-links">${links}</div>
-            <div class="problem-list">${item.items.map(record=>problemItem(record,{query:typeQuery})).join('')}</div>
+            <p>과거 자료는 원문을 확인한 일부만 복원했습니다. 접수 건수는 전체 오답 횟수나 정답률이 아니며, 훈련문제 삭제와 무관하게 보존됩니다.</p>
+            ${item.signals.map(signal=>`<p><strong>학습자 직접 설명:</strong> ${escape(signal.statement)} <small>횟수는 임의로 추가하지 않습니다.</small></p>`).join('')}
+            <p>마지막 훈련 등록일: ${escape(item.latestRegistered||'미확인')} · 과거 실제 전달일이 확인되지 않은 건은 등록일을 참고합니다. 틀린 원인은 학습자가 설명한 경우에만 확정합니다.</p>
+            <div class="top-links">${links||'현재 남아 있는 연결 문제가 없습니다. 전달 이력은 남아 다음 훈련을 만들 때 참고합니다.'}</div>
+            <div class="problem-list">${live.map(record=>problemItem(record,{query:`type=${encodeURIComponent(record.type)}`})).join('')}</div>
           </div>
         </article>`;
-      }).join(''):emptyState('아직 집계할 기록이 없습니다.','문제를 채점하면 이곳에 순위가 나타납니다.');
+      }).join(''):emptyState('아직 확인된 원본 오답 접수가 없습니다.','AI에게 틀린 문제를 전달하면 원문 근거와 유형을 원장에 남깁니다.');
     }
     function renderStats(){
       $('#statsBody').innerHTML=Object.entries(SOURCES).map(([source,info])=>{

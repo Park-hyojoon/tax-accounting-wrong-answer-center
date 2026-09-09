@@ -285,6 +285,9 @@
     const states={};Object.entries(SOURCES).forEach(([name,source])=>{states[name]=readState(source.key)});
     const payload={format:'tax-accounting-training-center-backup',version:1,exportedAt:new Date().toISOString(),states};
     const info=catalogInfo(fallback);if(info){payload.catalog=info.catalog;payload.typeSummary=info.typeSummary||[];payload.catalogAt=info.catalogAt||new Date().toISOString()}
+    // 원본 접수는 답안 삭제·채점 횟수와 독립된 읽기 전용 기억이다. 모든 분야에서 AI 분석용 사본을 포함한다.
+    if(global.TrainingMistakeMemory)payload.sourceMistakes=global.TrainingMistakeMemory.snapshot(fallback?.sourceMistakes);
+    else if(fallback?.sourceMistakes)payload.sourceMistakes=fallback.sourceMistakes;
     return payload;
   }
   // 전달받은 states를 현재 브라우저 기록과 합쳐 저장한다. 실제로 바뀐 분야 수를 돌려준다.
