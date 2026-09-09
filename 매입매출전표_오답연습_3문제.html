@@ -216,6 +216,7 @@ function answerLine(a){return `<div class="answer-line"><strong>${a.side==='D'?'
   }
   $$('.question').forEach(installOfficialControls);
   function setupMoney(x){x.addEventListener('keydown',e=>{if(e.key==='+'||e.code==='NumpadAdd'){e.preventDefault();const negative=/^\s*-/.test(x.value),d=x.value.replace(/\D/g,'');x.value=(negative?'-':'')+(d?d+'000':'000').replace(/\B(?=(\d{3})+(?!\d))/g,',');x.dispatchEvent(new Event('input',{bubbles:true}))}});x.addEventListener('input',()=>{const negative=/^\s*-/.test(x.value),digits=x.value.replace(/\D/g,''),formatted=digits.replace(/\B(?=(\d{3})+(?!\d))/g,',');x.value=negative?(digits?'-'+formatted:'-'):formatted})}$$('.debit-amount,.credit-amount,.supply,.vat,.unit-price').forEach(setupMoney);
+  function setupSummaryAuto(x){x.addEventListener('input',()=>{if(x.value.trim()==='8')x.value='8(타계정으로 대체)'})}$$('.entry-summary').forEach(setupSummaryAuto);
   function formatNumber(n){return Number(n).toLocaleString('ko-KR')}
   function setupAutoVat(card){
     const supply=$('.supply',card),vat=$('.vat',card);
