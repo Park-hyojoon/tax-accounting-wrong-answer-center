@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "revision": 21,
-  "updatedAt": "2026-09-09T16:31:00+09:00",
+  "revision": 22,
+  "updatedAt": "2026-09-09T17:05:00+09:00",
   "files": [
     "오답_훈련센터.html",
     "일반전표_기본연습_24문제.html",
@@ -10,6 +10,7 @@
     "매입매출전표_오답연습_3문제.html",
     "github-learning-sync.js",
     "training-ui.js",
+    "account-search.js",
     "program-version.json",
     "sync-helper.py",
     "start-sync-helper.ps1",
