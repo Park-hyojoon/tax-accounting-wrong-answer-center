@@ -173,10 +173,10 @@
       normalized={...source,cards};
     }
     if(sourceName==='theory'){
-      const deleted={...(normalized.deleted||{})},deletedAt={...(normalized.deletedAt||{})};
-      const gone=new Set([...Object.keys(normalized.selfPassed||{}).filter(id=>normalized.selfPassed[id]),...Object.keys(normalized.passed||{}).filter(id=>normalized.passed[id]===true),...Object.keys(normalized.archived||{}).filter(id=>normalized.archived[id])]);
+      const deleted={...(normalized.deleted||{})},deletedAt={...(normalized.deletedAt||{})},starred=normalized.starred||{};
+      const gone=new Set([...Object.keys(normalized.selfPassed||{}).filter(id=>normalized.selfPassed[id]&&!starred[id]),...Object.keys(normalized.passed||{}).filter(id=>normalized.passed[id]===true&&!starred[id]),...Object.keys(normalized.archived||{}).filter(id=>normalized.archived[id]&&!starred[id])]);
       gone.forEach(id=>{deleted[id]=true;deletedAt[id]=deletedAt[id]||normalized.selfPassedAt?.[id]||normalized.passedAt?.[id]||normalized.archivedAt?.[id]||new Date().toISOString()});
-      Object.keys(deleted).forEach(id=>{['answers','checked','attempts','history','passed','archived','passedAt','archivedAt','restoredAt','trainingCenterRestored','selfPassed','selfPassedAt'].forEach(k=>{if(normalized[k]&&typeof normalized[k]==='object')delete normalized[k][id]})});
+      Object.keys(deleted).forEach(id=>{['answers','checked','attempts','history','passed','archived','passedAt','archivedAt','restoredAt','trainingCenterRestored','selfPassed','selfPassedAt','starred','starredAt'].forEach(k=>{if(normalized[k]&&typeof normalized[k]==='object')delete normalized[k][id]})});
       normalized.deleted=deleted;normalized.deletedAt=deletedAt;
     }else{
       Object.keys(normalized.cards||{}).forEach(index=>{const card=normalized.cards[index];if(card&&(card.deleted||card.selfPassed||((card.passed||card.archived)&&!card.starred)))normalized.cards[index]={deleted:true,deletedAt:card.deletedAt||card.selfPassedAt||card.passedAt||card.archivedAt||new Date().toISOString()}});
@@ -235,7 +235,7 @@
   function mergeMap(current,incoming,incomingNewer){return {...(incomingNewer?current:incoming),...(incomingNewer?incoming:current)}}
   function mergeTheory(current,incoming,incomingNewer){
     const merged={...(incomingNewer?current:incoming),...(incomingNewer?incoming:current)};
-    const ids=new Set([...Object.keys(current.history||{}),...Object.keys(incoming.history||{}),...Object.keys(current.answers||{}),...Object.keys(incoming.answers||{})]);
+    const ids=new Set([...Object.keys(current.history||{}),...Object.keys(incoming.history||{}),...Object.keys(current.answers||{}),...Object.keys(incoming.answers||{}),...Object.keys(current.starred||{}),...Object.keys(incoming.starred||{})]);
     merged.answers=mergeMap(current.answers||{},incoming.answers||{},incomingNewer);
     merged.checked=mergeMap(current.checked||{},incoming.checked||{},incomingNewer);
     delete merged.notes;
@@ -246,9 +246,11 @@
     merged.trainingCenterRestored=mergeMap(current.trainingCenterRestored||{},incoming.trainingCenterRestored||{},incomingNewer);
     merged.selfPassed=mergeMap(current.selfPassed||{},incoming.selfPassed||{},incomingNewer);
     merged.selfPassedAt=mergeMap(current.selfPassedAt||{},incoming.selfPassedAt||{},incomingNewer);
+    merged.starred=mergeMap(current.starred||{},incoming.starred||{},incomingNewer);
+    merged.starredAt=mergeMap(current.starredAt||{},incoming.starredAt||{},incomingNewer);
     merged.deleted={...(current.deleted||{}),...(incoming.deleted||{})};merged.deletedAt=mergeMap(current.deletedAt||{},incoming.deletedAt||{},incomingNewer);
     ids.forEach(id=>{
-      if(merged.deleted[id]){['answers','checked','attempts','history','passed','archived','passedAt','archivedAt','restoredAt','trainingCenterRestored','selfPassed','selfPassedAt'].forEach(k=>{if(merged[k])delete merged[k][id]});return}
+      if(merged.deleted[id]){['answers','checked','attempts','history','passed','archived','passedAt','archivedAt','restoredAt','trainingCenterRestored','selfPassed','selfPassedAt','starred','starredAt'].forEach(k=>{if(merged[k])delete merged[k][id]});return}
       const history=uniqueHistory(current.history?.[id],incoming.history?.[id]);
       merged.history[id]=history;
       merged.attempts[id]=Math.max(number(current.attempts?.[id]),number(incoming.attempts?.[id]),history.length);

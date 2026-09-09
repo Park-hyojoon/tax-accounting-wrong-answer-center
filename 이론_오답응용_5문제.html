@@ -80,6 +80,22 @@
     .save-status{min-height:29px;margin:12px 0 0;font-weight:900;color:var(--green)}
     .help{font-size:15px;color:var(--muted)}
     .footer{text-align:center;color:var(--muted);font-size:15px;margin-top:28px}
+    .star-note{margin:8px 0 0;padding:8px 12px;border-radius:10px;background:#fff4c2;color:#6b4a00;font-weight:900}
+    .variant-badge{background:#e8f0ff;color:#1d4d9b;margin-left:6px}
+    .star-one[aria-pressed="true"]{background:#ffd54a;border-color:#e0b100;color:#5a3d00}
+    .star-tools{display:flex;justify-content:flex-end;gap:8px;margin:12px 0}
+    .star-group{margin:18px 0 26px}
+    .star-group-title{margin:0 0 10px;font-size:1.15rem;color:var(--navy)}
+    .star-group-title small{margin-left:8px;font-size:.85rem;color:var(--muted)}
+    .star-item{margin:8px 0;border:1px solid var(--line);border-radius:14px;background:#fff;overflow:hidden}
+    .star-item>summary{display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:12px 16px;cursor:pointer;font-weight:900;list-style:none}
+    .star-item>summary::-webkit-details-marker{display:none}
+    .star-item>summary::before{content:'▸';color:var(--muted)}
+    .star-item[open]>summary::before{content:'▾'}
+    .star-item>summary .qnum{width:30px;height:30px;font-size:.9rem}
+    .star-item-meta{margin-left:auto;font-size:.85rem;font-weight:700;color:var(--muted)}
+    .star-item>.question{margin:0;border:0;border-top:1px dashed var(--line);border-radius:0;box-shadow:none}
+    .sort-label[hidden]{display:none}
     @media(max-width:760px){body{font-size:16px}.hero,.question,.save-panel{padding:18px}.prompt{font-size:18px}.dashboard{position:static}.filename-row{grid-template-columns:1fr}.attempt{width:100%;margin-left:0}}
     @media print{.dashboard,.actions,.save-panel,.footer{display:none}.question{break-inside:avoid;box-shadow:none}details:not([open]){display:none}}
   </style>
@@ -92,7 +108,7 @@
       <a class="nav-link active" href="이론_오답응용_5문제.html" aria-current="page">이론 오답</a>
       <a class="nav-link" href="결산정리사항_연습_7문제.html">결산 정리사항</a>
       <a class="nav-link" href="매입매출전표_오답연습_3문제.html?view=all">매입매출전표 입력</a>
-      <a class="nav-link nav-star" href="일반전표_기본연습_24문제.html?view=star" title="★ 표시한 문제와 AI 응용문제를 유형별로 모아 훈련합니다">★ 특별 훈련</a>
+      <a class="nav-link nav-star" href="이론_오답응용_5문제.html?view=star" title="★ 표시한 이론 문제와 AI 응용문제를 유형별로 모아 훈련합니다">★ 특별 훈련</a>
       <div class="nav-sync" aria-label="동기화">
         <button class="nav-sync-button primary" id="syncAll" type="button" title="PC·GitHub·모바일의 새 문제와 학습기록을 한 번에 최신으로 맞춥니다">🔄 동기화</button>
       </div>
@@ -113,6 +129,7 @@
       <div class="progress"><span id="progressText">채점 0 / 15</span><div class="progress-bar"><span id="progressFill"></span></div></div>
     </div>
 
+    <h2 class="section-title">이론 문제</h2>
     <section id="questions" aria-label="이론 문제"></section>
 
     <section class="save-panel" id="savePanel">
@@ -134,7 +151,7 @@
     <p class="footer">학습기록은 사용자 컴퓨터에만 저장되며 외부로 자동 전송되지 않습니다.</p>
   </main>
 
-  <script src="github-learning-sync.js?v=10"></script>
+  <script src="github-learning-sync.js?v=11"></script>
   <script src="training-ui.js?v=3"></script>
   <script>
     const problems=[
@@ -322,21 +339,22 @@
     const nowIso=()=>new Date().toISOString();
     const localDate=()=>{const d=new Date(),o=d.getTimezoneOffset()*60000;return new Date(d-o).toISOString().slice(0,10)};
     problems.forEach(p=>{if(!p.addedDate)p.addedDate='2026-09-01'});
-    const defaultState=()=>({startedAt:nowIso(),updatedAt:nowIso(),answers:{},checked:{},attempts:{},history:{},notes:{},passed:{},archived:{},passedAt:{},archivedAt:{},trainingCenterRestored:{},fileName:'이론_오답학습기록_2026-09-01',koAuto:true});
+    const defaultState=()=>({startedAt:nowIso(),updatedAt:nowIso(),answers:{},checked:{},attempts:{},history:{},notes:{},passed:{},archived:{},passedAt:{},archivedAt:{},trainingCenterRestored:{},starred:{},starredAt:{},fileName:'이론_오답학습기록_2026-09-01',koAuto:true});
     let state=loadState();
 
     function loadState(){
-      try{const s=Object.assign(defaultState(),JSON.parse(localStorage.getItem(STORAGE_KEY)||'{}'));s.passed=s.passed||{};s.archived=s.archived||{};s.passedAt=s.passedAt||{};s.archivedAt=s.archivedAt||{};s.trainingCenterRestored=s.trainingCenterRestored||{};problems.forEach(p=>{const wasCorrect=s.checked[p.id]===true||(s.history[p.id]||[]).some(h=>h.correct);s.passed[p.id]=s.trainingCenterRestored[p.id]?false:Boolean(s.passed[p.id]||wasCorrect);s.archived[p.id]=Boolean(s.archived[p.id])});return s}catch(e){return defaultState()}
+      try{const s=Object.assign(defaultState(),JSON.parse(localStorage.getItem(STORAGE_KEY)||'{}'));s.passed=s.passed||{};s.archived=s.archived||{};s.passedAt=s.passedAt||{};s.archivedAt=s.archivedAt||{};s.trainingCenterRestored=s.trainingCenterRestored||{};s.starred=s.starred||{};s.starredAt=s.starredAt||{};problems.forEach(p=>{const wasCorrect=s.checked[p.id]===true||(s.history[p.id]||[]).some(h=>h.correct);s.passed[p.id]=s.trainingCenterRestored[p.id]?false:Boolean(s.passed[p.id]||wasCorrect);s.archived[p.id]=Boolean(s.archived[p.id])});return s}catch(e){return defaultState()}
     }
     function persist(){state.updatedAt=nowIso();localStorage.setItem(STORAGE_KEY,JSON.stringify(state));updateDashboard()}
     function choiceText(p,n){return Number.isInteger(n)?`${circled[n]} ${p.choices[n]}`:'미선택'}
     function questionHtml(p,i){
       const selected=state.answers[p.id];
       return `<article class="question" data-id="${p.id}" data-added-date="${p.addedDate}">
-        <div class="qhead"><span class="qnum">${i+1}</span><div><h3>${p.prompt}</h3><span class="tag">${p.type}</span></div></div>
+        <div class="qhead"><span class="qnum">${i+1}</span><div><h3>${p.prompt}</h3><span class="tag">${p.type}</span>${p.variantOf!=null?`<span class="tag variant-badge">AI 응용문제</span>`:''}</div></div>
+        <p class="star-note" hidden>★ 이 문제는 특별히 훈련이 필요합니다.</p>
         ${p.data?`<div class="data-box">${p.data}</div>`:''}
         <div class="choices">${p.choices.map((c,n)=>`<label class="choice"><input type="radio" name="q-${p.id}" value="${n}" ${Number(selected)===n?'checked':''}><span class="choice-number">${circled[n]}</span><span>${c}</span></label>`).join('')}</div>
-        <div class="actions"><button class="btn check-one" type="button">채점하기</button><button class="btn secondary archive-one" type="button">이 문제 영구 삭제</button><span class="result" aria-live="polite"></span><span class="attempt"></span></div>
+        <div class="actions"><button class="btn check-one" type="button">채점하기</button><button class="btn secondary archive-one" type="button">이 문제 영구 삭제</button><button class="btn secondary star-one" type="button" aria-pressed="false" title="이 문제는 특별히 훈련이 필요합니다. AI가 학습기록에서 이 표시를 보면 응용문제 1개를 더 만듭니다.">★ 특별 훈련</button><span class="result" aria-live="polite"></span><span class="attempt"></span></div>
         <details><summary>정답 · 해설 보기</summary><div class="detail-body"><p><strong>정답: ${circled[p.answer]} ${p.choices[p.answer]}</strong></p><p>${p.explanation}</p><p><strong>핵심:</strong> ${p.key}</p></div></details>
       </article>`
     }
@@ -346,15 +364,24 @@
     $('#koAuto').checked=state.koAuto!==false;
 
     function getProblem(id){return problems.find(p=>p.id===id)}
-    function deleteTheory(id){state.deleted=state.deleted||{};state.deletedAt=state.deletedAt||{};state.deleted[id]=true;state.deletedAt[id]=state.selfPassedAt?.[id]||nowIso();['answers','checked','attempts','history','passed','archived','passedAt','archivedAt','restoredAt','trainingCenterRestored','selfPassed','selfPassedAt'].forEach(k=>{if(state[k]&&typeof state[k]==='object')delete state[k][id]});persist()}
+    function deleteTheory(id){state.deleted=state.deleted||{};state.deletedAt=state.deletedAt||{};state.deleted[id]=true;state.deletedAt[id]=state.selfPassedAt?.[id]||nowIso();['answers','checked','attempts','history','passed','archived','passedAt','archivedAt','restoredAt','trainingCenterRestored','selfPassed','selfPassedAt','starred','starredAt'].forEach(k=>{if(state[k]&&typeof state[k]==='object')delete state[k][id]});persist()}
+    function toggleStar(card){
+      const id=card.dataset.id;state.starred=state.starred||{};state.starredAt=state.starredAt||{};
+      if(state.starred[id]){delete state.starred[id];delete state.starredAt[id]}else{state.starred[id]=true;state.starredAt[id]=nowIso()}
+      persist();renderCard(card);
+    }
     function wrongCount(id){return (state.history[id]||[]).filter(h=>!h.correct).length}
     const todayView=new URLSearchParams(location.search).get('view')==='today';
     const typeView=(new URLSearchParams(location.search).get('type')||'').trim();
+    const starView=new URLSearchParams(location.search).get('view')==='star';
+    // 응용문제의 원문제도 ★ 상태와 관계없이 같은 묶음에 표시한다. 이론은 id 문자열로 원문제를 가리킨다.
+    const variantSourceIds=new Set(problems.filter(p=>p.variantOf!=null).map(p=>p.variantOf));
     const sessionPassed=new Set();
     function renderCard(card){
       const id=card.dataset.id,p=getProblem(id),checked=state.checked[id],attempts=state.attempts[id]||0,result=$('.result',card);
-      if((state.selfPassed?.[id]||((state.passed?.[id]===true||state.archived?.[id])&&!sessionPassed.has(id)))&&!state.deleted?.[id])deleteTheory(id);
-      card.hidden=state.deleted?.[id]?true:typeView?((p.type||'').trim()!==typeView):Boolean((state.passed[id]&&!sessionPassed.has(id))||state.archived[id]||(todayView&&card.dataset.addedDate!==localDate()));
+      if((state.selfPassed?.[id]||((state.passed?.[id]===true||state.archived?.[id])&&!sessionPassed.has(id)&&!state.starred?.[id]))&&!state.deleted?.[id])deleteTheory(id);
+      card.hidden=state.deleted?.[id]?true:starView?!(Boolean(state.starred?.[id])||p.variantOf!=null||variantSourceIds.has(id)):typeView?((p.type||'').trim()!==typeView):Boolean((state.passed[id]&&!sessionPassed.has(id))||state.archived[id]||(todayView&&card.dataset.addedDate!==localDate()));
+      $('.star-one',card).setAttribute('aria-pressed',String(Boolean(state.starred?.[id])));$('.star-note',card).hidden=!state.starred?.[id];
       card.classList.toggle('correct',checked===true);card.classList.toggle('wrong',checked===false);
       result.className='result'+(checked===true?' ok':checked===false?' no':'');
       result.textContent=checked===true?'정답입니다! 통과 처리되어 다음 방문부터 숨겨집니다.':checked===false?`오답입니다. 다시 풀거나 정답·해설을 확인해보세요.`:state.answers[id]!==undefined?'선택 내용이 자동 저장되었습니다.':'';
@@ -365,6 +392,7 @@
       $$('input[type="radio"]',card).forEach(r=>r.addEventListener('change',()=>{state.answers[id]=Number(r.value);delete state.checked[id];persist();renderCard(card)}));
       $('.check-one',card).addEventListener('click',()=>grade(card));
       $('.archive-one',card).addEventListener('click',()=>{if(!confirm('이 문제를 영구 삭제할까요?\n목록·통계에서 완전히 사라지고 복구할 수 없습니다.'))return;deleteTheory(id);card.hidden=true;updateDashboard()});
+      $('.star-one',card).addEventListener('click',()=>toggleStar(card));
       renderCard(card);
     });
 
@@ -390,7 +418,7 @@
     updateDashboard();
     const questionOrder=$$('.question').map((card,index)=>({card,index}));
     function sortKeys(entry){const id=entry.card.dataset.id,history=state.history[id]||[],last=history.length?Date.parse(history[history.length-1].at)||0:0;return{...entry,wrong:wrongCount(id),attempts:state.attempts[id]||0,last,added:entry.card.dataset.addedDate||''}}
-    function applySort(){const mode=$('#sortOrder').value,list=questionOrder.map(sortKeys);list.sort((a,b)=>{
+    function applySort(){if(starView)return;const mode=$('#sortOrder').value,list=questionOrder.map(sortKeys);list.sort((a,b)=>{
       if(mode==='wrong')return b.wrong-a.wrong||b.attempts-a.attempts||a.index-b.index;
       if(mode==='unattempted')return Number(a.attempts>0)-Number(b.attempts>0)||a.index-b.index;
       if(mode==='recentAttempt')return b.last-a.last||a.index-b.index;
@@ -438,6 +466,16 @@
         history.forEach((h,n)=>lines.push(`- ${n+1}차 (${fmtDate(h.at)}): ${choiceText(p,h.choice)} → ${h.correct?'정답':'오답'}`));
         lines.push('',`**핵심 학습 내용:** ${p.key}`,'',`**해설:** ${p.explanation}`,'','---','');
       });
+      const starredList=problems.filter(p=>Boolean(state.starred?.[p.id]));
+      if(starredList.length){
+        lines.push('## ★ 특별 훈련이 필요한 문제 (사용자 표시)','','사용자가 「★ 특별 훈련」으로 표시한 문제입니다. 응용문제가 없는 문제는 같은 구조로 숫자·보기를 바꾼 응용문제를 **1개씩만** 만들어 새 고유 id로 추가하고 `variantOf`에 원문제 id를 문자열로 적어 주세요(이론은 id가 문자열이므로 따옴표로 감싼 원문제 id를 그대로 씁니다).','');
+        starredList.forEach(p=>{
+          const hasVariant=problems.some(q=>q.variantOf===p.id);
+          const preview=p.prompt.length>44?p.prompt.slice(0,44)+'…':p.prompt;
+          lines.push(`- [${p.id}] ${p.type} — ${preview} · 표시 ${fmtDate(state.starredAt?.[p.id]||'')} · 응용문제 ${hasVariant?'있음':`없음 → 추가 필요 (variantOf:'${p.id}')`}`);
+        });
+        lines.push('');
+      }
       lines.push('## AI에게 전달할 요청 예시','', '> 오늘 학습기록에서 틀린 문제와 헷갈린 개념을 분석하고, 전산회계 1급 수준의 응용문제를 만들어 주세요. 원본 문제의 핵심 구조는 유지하되 숫자와 보기를 바꾸고, 정답과 해설은 처음에는 숨겨 주세요.','');
       return lines.join('\n')
     }
@@ -511,6 +549,38 @@
       })
     }
     $$('[data-ko-auto]').forEach(setupKoreanInput);
+    function buildStarView(){
+      if(!starView)return;
+      document.title='★ 특별 훈련 · 이론';
+      const sortLabel=$('.sort-label');if(sortLabel)sortLabel.hidden=true;
+      const title=$('.section-title');if(title)title.textContent='★ 특별 훈련 문제 (유형별)';
+      $$('.nav-link').forEach(a=>{const on=a.classList.contains('nav-star');a.classList.toggle('active',on);if(on)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current')});
+      const current=document.querySelector('.nav-current');if(current)current.textContent='★ 특별 훈련';
+      const box=$('#questions'),groups=new Map();
+      $$('.question').filter(c=>!c.hidden).forEach(card=>{const p=getProblem(card.dataset.id);if(!groups.has(p.type))groups.set(p.type,[]);groups.get(p.type).push(card)});
+      const tools='<div class="star-tools"><button class="btn secondary star-open-all" type="button">보기</button><button class="btn secondary star-close-all" type="button">접기</button></div>';
+      if(!groups.size){box.innerHTML='<div class="notice">★ 표시한 문제가 아직 없습니다. 「이론 오답」에서 문제 아래의 「★ 특별 훈련」 버튼을 누르면 이곳에 유형별로 모입니다.</div>';return}
+      const wrap=document.createElement('div');wrap.className='star-view';wrap.innerHTML=tools;
+      wrap.insertAdjacentHTML('afterbegin','<p class="notice">기존 문제 → 응용문제 순서로 한 유형씩 풀어보세요. 원문제의 통과 기록은 유지되며 이곳에서는 두 문제를 함께 볼 수 있습니다.</p>');
+      groups.forEach((cards,type)=>{
+        const group=document.createElement('section');group.className='star-group';group.innerHTML=`<h2 class="star-group-title">${type}<small>${cards.length}문제</small></h2>`;
+        cards.sort((a,b)=>{
+          const pa=getProblem(a.dataset.id),pb=getProblem(b.dataset.id);
+          const ka=pa.variantOf!=null?String(pa.variantOf):pa.id,kb=pb.variantOf!=null?String(pb.variantOf):pb.id;
+          return ka.localeCompare(kb,'ko')||Number(pa.variantOf!=null)-Number(pb.variantOf!=null)||problems.indexOf(pa)-problems.indexOf(pb);
+        });
+        cards.forEach(card=>{
+          const p=getProblem(card.dataset.id),attempts=state.attempts[p.id]||0,preview=p.prompt.length>50?p.prompt.slice(0,50)+'…':p.prompt,item=document.createElement('details');item.className='star-item';
+          item.innerHTML=`<summary><span class="qnum">${problems.indexOf(p)+1}</span><span>${preview}</span>${p.variantOf!=null?`<span class="tag variant-badge">응용문제</span>`:'<span class="tag">기존 문제</span>'}<span class="star-item-meta">채점 ${attempts}회 · 틀림 ${wrongCount(p.id)}회${state.passed?.[p.id]?' · 통과':''}</span></summary>`;
+          item.appendChild(card);group.appendChild(item);
+        });
+        wrap.appendChild(group);
+      });
+      wrap.insertAdjacentHTML('beforeend',tools);box.replaceChildren(wrap);
+      $$('.star-open-all').forEach(b=>b.addEventListener('click',()=>$$('details.star-item').forEach(d=>{d.open=true})));
+      $$('.star-close-all').forEach(b=>b.addEventListener('click',()=>$$('details.star-item').forEach(d=>{d.open=false})));
+    }
+    buildStarView();
     (function(){
     if(typeof window.TrainingGitHub?.installSyncBar!=='function'){const button=document.querySelector('#syncAll');if(button)button.addEventListener('click',()=>alert('동기화 기능을 불러오지 못했습니다. Ctrl+F5로 새로고침한 뒤 다시 눌러주세요.'));return}
     TrainingGitHub.installSyncBar({onNeedToken:({mobile})=>{if(mobile)TrainingGitHub.showToast('처음 한 번만 오답 훈련센터 홈 아래쪽에서 GitHub 토큰을 연결한 뒤 다시 눌러주세요.',8000)}});
