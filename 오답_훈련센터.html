@@ -603,11 +603,14 @@
       try{summary=TrainingMistakeMemory.analyze()}
       catch(error){$('#frequentList').textContent='직접 전달한 오답 기록을 불러오지 못했습니다. 새로고침하거나 AI에게 원장 확인을 요청해 주세요.';return}
       $('#intakeCoverage').textContent=`직접 보내주신 오답 중 확인된 원본 ${summary.total}건을 기준으로 집계합니다. 과거 기록은 일부만 복원했으며, 막대를 누르면 근거와 훈련문제를 볼 수 있습니다.`;
-      const list=summary.topics.filter(item=>item.count>0).slice(0,5);
-      const max=Math.max(1,...list.map(item=>item.count));
-      $('#frequentList').innerHTML=list.length?list.map((item,rank)=>{
+      const withLive=summary.topics.filter(item=>item.count>0).map(item=>{
         const types=new Map();item.refs.forEach(ref=>types.set(`${ref.source}:${ref.type}`,ref));
-        const live=records.filter(record=>!record.passed&&!record.archived&&types.has(`${record.source}:${record.type}`));
+        const live=records.filter(record=>!record.variant&&!record.passed&&!record.archived&&types.has(`${record.source}:${record.type}`));
+        return {item,types,live};
+      }).filter(entry=>entry.live.length>0);
+      const list=withLive.slice(0,5);
+      const max=Math.max(1,...list.map(entry=>entry.item.count));
+      $('#frequentList').innerHTML=list.length?list.map(({item,types,live},rank)=>{
         const links=[...types.values()].map(ref=>{
           const matching=live.filter(record=>record.source===ref.source&&record.type===ref.type);
           return matching.length?`<a class="top-link" href="${SOURCES[ref.source].file}?type=${encodeURIComponent(ref.type)}">${escape(ref.type)} 훈련 (${matching.length}문제)</a>`:'';
@@ -627,7 +630,7 @@
             <div class="problem-list">${live.map(record=>problemItem(record,{query:`type=${encodeURIComponent(record.type)}`})).join('')}</div>
           </div>
         </article>`;
-      }).join(''):emptyState('아직 확인된 원본 오답 접수가 없습니다.','AI에게 틀린 문제를 전달하면 원문 근거와 유형을 원장에 남깁니다.');
+      }).join(''):(summary.total>0?emptyState('확인된 오답 유형을 모두 훈련했습니다.','남은 훈련문제가 없는 유형은 목록에서 자동으로 빠집니다. 다시 틀리면 다음 접수에 반영됩니다.'):emptyState('아직 확인된 원본 오답 접수가 없습니다.','AI에게 틀린 문제를 전달하면 원문 근거와 유형을 원장에 남깁니다.'));
     }
     function renderStats(){
       $('#statsBody').innerHTML=Object.entries(SOURCES).map(([source,info])=>{
