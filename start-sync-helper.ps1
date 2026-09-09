@@ -2,7 +2,7 @@ $ErrorActionPreference = 'Stop'
 
 $helperScript = Join-Path $PSScriptRoot 'sync-helper.py'
 $statusUrl = 'http://127.0.0.1:8790/api/status'
-$failureLog = Join-Path $PSScriptRoot '또 틀렸다!\동기화도우미.log'
+$failureLog = Join-Path $PSScriptRoot '.sync-helper-launcher.log'
 
 function Test-SyncHelper {
     try {
@@ -36,10 +36,10 @@ if (Test-Path -LiteralPath $codexPython) {
 
 try {
     if (-not (Test-Path -LiteralPath $helperScript)) {
-        throw 'sync-helper.py 파일을 찾지 못했습니다.'
+        throw 'sync-helper.py was not found.'
     }
     if ($pythonCandidates.Count -eq 0) {
-        throw '사용할 수 있는 Python 실행환경을 찾지 못했습니다.'
+        throw 'No usable Python runtime was found.'
     }
 
     foreach ($pythonExe in $pythonCandidates) {
@@ -59,7 +59,7 @@ try {
         }
     }
 
-    throw '동기화 도우미가 5초 안에 시작되지 않았습니다.'
+    throw 'The sync helper did not start within five seconds.'
 }
 catch {
     $time = Get-Date -Format 'yyyy-MM-dd HH:mm:ss'

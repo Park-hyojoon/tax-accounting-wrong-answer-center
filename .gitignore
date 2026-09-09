@@ -6,6 +6,7 @@
 
 # 동기화 도우미 산출물
 .sync-helper.log
+.sync-helper-launcher.log
 __pycache__/
 전산회계1급_오답훈련센터_인수인계.md
 .claude/
