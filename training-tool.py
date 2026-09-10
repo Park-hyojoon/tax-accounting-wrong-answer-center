@@ -244,6 +244,31 @@ def ledger_entries():
     return [body[s:t] for s, t in split_items(body, '{')]
 
 
+def direct_intake_indices(entries=None):
+    """확인된 사용자 직접 제출 원장에 정확히 연결된 숫자형 문제 인덱스."""
+    result = {'practical': set(), 'voucher': set()}
+    for entry in entries if entries is not None else ledger_entries():
+        if field(entry, 'source') != 'user-submitted' or field(entry, 'evidenceStatus') != 'confirmed' or field(entry, 'duplicateOf'):
+            continue
+        for source, raw_id in re.findall(r"source\s*:\s*'(practical|voucher)'\s*,\s*id\s*:\s*(\d+)", entry):
+            result[source].add(int(raw_id))
+    return result
+
+
+def sync_direct_intake_sets():
+    """분야 화면의 경량 직접제출 목록을 원장 practiceRefs와 맞춘다."""
+    expected = direct_intake_indices()
+    pattern = r'const\s+DIRECT_INTAKE_INDICES\s*=\s*new\s+Set\s*\(\s*\[[^\]]*\]\s*\)\s*;'
+    for subject, indices in expected.items():
+        filename = SUBJECTS[subject]['file']
+        text = read(filename)
+        replacement = 'const DIRECT_INTAKE_INDICES=new Set([' + ','.join(map(str, sorted(indices))) + ']);'
+        text, count = re.subn(pattern, replacement, text, count=1)
+        if count != 1:
+            raise SystemExit(f'[오류] {filename}: DIRECT_INTAKE_INDICES 선언을 찾지 못했습니다')
+        write(filename, text)
+
+
 # ── 삽입 ────────────────────────────────────────────────────────────────────
 def insert_into_array(text, start_pattern, snippet, label):
     """배열의 마지막 항목 뒤에 snippet 을 새 줄로 넣는다. 닫는 괄호 들여쓰기는 그대로 둔다."""
@@ -490,6 +515,18 @@ def cmd_check():
             if not any(ref in types for types in all_types.values()):
                 warn.append(f"원장 {eid}: practiceRefs type '{ref}' 이 현재 문제에 없음(삭제되었을 수 있음)")
 
+    # 일반전표·매입매출전표 기본 목록은 확인된 직접 제출 문제만 노출한다.
+    expected_direct = direct_intake_indices(entries)
+    for subject, expected in expected_direct.items():
+        filename = SUBJECTS[subject]['file']
+        m = re.search(r'const\s+DIRECT_INTAKE_INDICES\s*=\s*new\s+Set\s*\(\s*\[([^\]]*)\]\s*\)\s*;', read(filename))
+        if not m:
+            problems_fail.append(f'{filename}: DIRECT_INTAKE_INDICES 선언 누락')
+            continue
+        actual = {int(x) for x in re.findall(r'\d+', m.group(1))}
+        if actual != expected:
+            problems_fail.append(f'{filename}: 사용자 직접 제출 문제 목록이 원장 practiceRefs와 다름')
+
     print('# 정합성 검사 결과\n')
     if problems_fail:
         print(f'## 실패 {len(problems_fail)}건')
@@ -555,6 +592,9 @@ def cmd_add(spec_path):
         write(LEDGER, text)
         new_v = bump_version(LEDGER)
         print(f'- 원장 {len(mistakes)}건 추가, revision {ledger_rev}, {LEDGER}?v={new_v}')
+
+    if items or mistakes:
+        sync_direct_intake_sets()
 
     rev = bump_program_version(spec.get('note', ''))
     for subject, n in added.items():

@@ -31,6 +31,11 @@
     .hero p{margin:8px 0}
     .notice{margin-top:18px;padding:14px 18px;border-radius:14px;background:var(--yellow);font-weight:700}
     .toolbar{display:flex;flex-wrap:wrap;gap:12px;margin:20px 0;position:sticky;top:calc(var(--nav-h,62px) + 8px);z-index:5;background:rgba(247,252,255,.94);padding:12px;border-radius:16px;backdrop-filter:blur(8px);border:1px solid #d7e7f4}
+    .type-filter{display:flex;align-items:center;gap:7px;flex:1 1 330px;font-weight:900;color:var(--navy)}
+    .type-filter input{min-width:150px;flex:1;min-height:44px;border:2px solid #c8dbea;border-radius:10px;padding:8px 12px;font:inherit;background:#fff;color:var(--ink)}
+    .type-filter input:focus{outline:3px solid rgba(34,126,189,.2);border-color:#227ebd}
+    .filter-clear{min-height:44px;padding:7px 12px;background:#fff;border:2px solid #c8dbea;border-radius:10px;font-weight:900;color:var(--navy);cursor:pointer}
+    .filter-status{align-self:center;color:var(--muted);font-weight:800;white-space:nowrap}
     .btn{border:0;border-radius:12px;padding:11px 18px;cursor:pointer;font-weight:800;background:var(--blue);color:#fff;box-shadow:0 4px 10px rgba(49,120,198,.18)}
     .btn:hover{filter:brightness(.96);transform:translateY(-1px)}
     .btn.secondary{background:#fff;color:var(--navy);border:2px solid var(--line);box-shadow:none}
@@ -94,7 +99,7 @@
     .save-status{min-height:29px;margin:12px 0 0;font-weight:900;color:var(--green)}
     .danger{background:#fff!important;color:var(--red)!important;border:2px solid #e8b3b8!important;box-shadow:none!important}
     .footer{text-align:center;color:var(--muted);margin-top:30px;font-size:15px}
-    @media(max-width:720px){body{font-size:16px}.wrap{width:96vw}.hero,.question,.save-panel{padding:18px}.progress{width:100%;margin-left:0}.progress-bar{flex:1}.prompt{font-size:18px}.answer-line{grid-template-columns:55px 1fr}.answer-line span:nth-child(n+3){grid-column:2}.balance-panel{grid-template-columns:1fr}.save-row{grid-template-columns:1fr}.attempt-info{width:100%;margin-left:0}}
+    @media(max-width:720px){body{font-size:16px}.wrap{width:96vw}.hero,.question,.save-panel{padding:18px}.progress{width:100%;margin-left:0}.progress-bar{flex:1}.prompt{font-size:18px}.answer-line{grid-template-columns:55px 1fr}.answer-line span:nth-child(n+3){grid-column:2}.balance-panel{grid-template-columns:1fr}.save-row{grid-template-columns:1fr}.attempt-info{width:100%;margin-left:0}.type-filter{flex-basis:100%}.filter-status{width:100%}}
     @media print{.toolbar,.qactions,.source,.save-panel{display:none}.question{break-inside:avoid;box-shadow:none}.reveal:not([open]){display:none}}
     .star-one[aria-pressed="true"]{background:#ffd54a;border-color:#e0b100;color:#5a3d00}
     .star-note{margin:8px 0 0;padding:8px 12px;border-radius:10px;background:#fff4c2;color:#6b4a00;font-weight:900}
@@ -137,6 +142,12 @@
           <option value="recentRegistered">최근 등록 순</option>
         </select>
       </label>
+      <label class="type-filter" for="typeFilter">유형 검색
+        <input id="typeFilter" type="search" lang="ko" list="typeFilterOptions" placeholder="예: 외화평가" autocomplete="off">
+        <datalist id="typeFilterOptions"></datalist>
+        <button class="filter-clear" id="clearTypeFilter" type="button">전체</button>
+      </label>
+      <span class="filter-status" id="typeFilterStatus" aria-live="polite"></span>
       <div class="progress"><span id="progressText">채점 0 / 46</span><div class="progress-bar"><span id="progressFill"></span></div></div>
     </div>
 
@@ -609,6 +620,7 @@
       updateTotals(card);saveState();updateProgress()
     }
     function renderAttempt(card){const s=cardState(card.dataset.index);el('.attempt-info',card).textContent=`채점 ${s.attempts||0}회 · 틀림 ${s.wrongCount||0}회`}
+    const DIRECT_INTAKE_INDICES=new Set([20,21,22,23,26,31,43,44,45]);
     const todayView=new URLSearchParams(location.search).get('view')==='today';
     const typeView=(new URLSearchParams(location.search).get('type')||'').trim();
     const starView=new URLSearchParams(location.search).get('view')==='star';
@@ -616,10 +628,10 @@
     const variantSourceIndices=new Set(problems.filter(p=>p.variantOf!=null).map(p=>p.variantOf));
     function restoreCard(card){
       const s=cardState(card.dataset.index),rows=els('.entry-row',card);
-      if((s.selfPassed||((s.passed||s.archived)&&!s.starred))&&!s.deleted){studyState.cards[Number(card.dataset.index)]={deleted:true,deletedAt:s.selfPassedAt||s.passedAt||s.archivedAt||nowIso()};saveState();card.hidden=true;return}
+      const index=Number(card.dataset.index),problemOf=problems[index]||{},isDirect=DIRECT_INTAKE_INDICES.has(index);
+      if(isDirect&&(s.selfPassed||((s.passed||s.archived)&&!s.starred))&&!s.deleted){studyState.cards[index]={deleted:true,deletedAt:s.selfPassedAt||s.passedAt||s.archivedAt||nowIso()};saveState();card.hidden=true;return}
       if(s.deleted){card.hidden=true;return}
-      const problemOf=problems[Number(card.dataset.index)]||{};
-      card.hidden=starView?!(s.starred||problemOf.variantOf!=null||variantSourceIndices.has(Number(card.dataset.index))):typeView?((problemOf.type||'').trim()!==typeView):Boolean(s.passed||s.archived||(todayView&&card.dataset.addedDate!==localDate()));
+      card.hidden=starView?!(s.starred||!isDirect||variantSourceIndices.has(index)):!isDirect?true:Boolean(s.passed||s.archived||(todayView&&card.dataset.addedDate!==localDate()));
       el('.star-one',card).setAttribute('aria-pressed',String(Boolean(s.starred)));el('.star-note',card).hidden=!s.starred;
       (s.rows||[]).forEach((saved,i)=>{if(!rows[i])return;el('.side',rows[i]).value=saved.side||'D';el('.account',rows[i]).value=saved.account||'';el('.amount',rows[i]).value=saved.amount||'';el('.division',rows[i]).value=saved.division||'';el('.partner',rows[i]).value=saved.partner||'';el('.memo',rows[i]).value=saved.memo||''});
       if(s.graded){card.dataset.graded='true';card.dataset.correct=String(Boolean(s.correct));card.classList.toggle('correct',Boolean(s.correct));card.classList.toggle('wrong',!s.correct);const result=el('.result',card);result.className='result '+(s.correct?'ok':'no');result.textContent=s.correct?'정답입니다!':`마지막 채점은 오답입니다. (${s.matched||0}/${problems[Number(card.dataset.index)].answers.length}개 분개 일치)`}
@@ -661,7 +673,7 @@
     }
     function archiveCard(card){
       if(!confirm('이 문제를 영구 삭제할까요?\n목록·통계에서 완전히 사라지고 복구할 수 없습니다.'))return;
-      studyState.cards[Number(card.dataset.index)]={deleted:true,deletedAt:nowIso()};saveState();card.hidden=true;updateProgress();
+      studyState.cards[Number(card.dataset.index)]={deleted:true,deletedAt:nowIso()};saveState();card.dataset.typeFilterBaseHidden='true';card.hidden=true;updateProgress();
     }
 
     function toggleStar(card){
@@ -677,6 +689,7 @@
     });
 
     const questionOrder=els('.question');
+    questionOrder.forEach(card=>{card.dataset.typeFilterBaseHidden=String(card.hidden)});
     function sortKeys(card){const s=cardState(card.dataset.index),history=s.history||[],last=history.length?Date.parse(history[history.length-1].at)||0:0;return{card,index:Number(card.dataset.index),wrong:s.wrongCount||0,attempts:s.attempts||0,last,added:card.dataset.addedDate||''}}
     function applySort(){if(starView)return;const mode=el('#sortOrder').value,list=questionOrder.map(sortKeys);list.sort((a,b)=>{
       if(mode==='wrong')return b.wrong-a.wrong||b.attempts-a.attempts||a.index-b.index;
@@ -800,6 +813,34 @@
       els('.star-close-all').forEach(b=>b.addEventListener('click',()=>els('details.star-item').forEach(d=>{d.open=false})));
     }
     buildStarView();
+    function installTypeFilter(){
+      const input=el('#typeFilter'),options=el('#typeFilterOptions'),status=el('#typeFilterStatus');
+      const normalize=value=>String(value||'').trim().replace(/\s+/g,'').toLocaleLowerCase('ko-KR');
+      const available=[...new Set(questionOrder.filter(card=>card.dataset.typeFilterBaseHidden!=='true').map(card=>problems[Number(card.dataset.index)]?.type).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'ko'));
+      options.replaceChildren(...available.map(type=>{const option=document.createElement('option');option.value=type;return option}));
+      function applyTypeFilter(){
+        const query=normalize(input.value);let visible=0;
+        questionOrder.forEach(card=>{
+          const baseHidden=card.dataset.typeFilterBaseHidden==='true',matches=!query||normalize(problems[Number(card.dataset.index)]?.type).includes(query);
+          if(starView){
+            const item=card.closest('details.star-item');if(!item)return;
+            card.hidden=!matches;item.hidden=!matches;if(matches)visible++;
+          }else{card.hidden=baseHidden||!matches;if(!card.hidden)visible++}
+        });
+        if(starView)els('.star-group').forEach(group=>{const count=els('details.star-item',group).filter(item=>!item.hidden).length;group.hidden=count===0;const small=el('.star-group-title small',group);if(small)small.textContent=`${count}문제`});
+        status.textContent=query?`검색 결과 ${visible}문제`:`전체 ${visible}문제`;
+        if(query&&!starView&&!visible){
+          const specialCount=questionOrder.filter(card=>!DIRECT_INTAKE_INDICES.has(Number(card.dataset.index))&&normalize(problems[Number(card.dataset.index)]?.type).includes(query)).length;
+          if(specialCount){const link=document.createElement('a');link.className='open-link';link.href=`일반전표_기본연습_24문제.html?view=star&type=${encodeURIComponent(input.value.trim())}`;link.textContent=`★ 특별훈련 ${specialCount}문제 보기`;status.append(' · ',link)}
+        }
+        updateProgress();
+        if(query&&!visible){el('#grandScore').textContent='검색 결과가 없습니다.';el('#grandMessage').textContent='유형 태그의 일부 글자만 입력하거나 「전체」를 눌러보세요.'}
+      }
+      input.value=typeView;input.addEventListener('input',applyTypeFilter);
+      el('#clearTypeFilter').addEventListener('click',()=>{input.value='';applyTypeFilter();input.focus()});
+      applyTypeFilter();
+    }
+    installTypeFilter();
     (function(){
     if(typeof window.TrainingGitHub?.installSyncBar!=='function'){const button=document.querySelector('#syncAll');if(button)button.addEventListener('click',()=>alert('동기화 기능을 불러오지 못했습니다. Ctrl+F5로 새로고침한 뒤 다시 눌러주세요.'));return}
     TrainingGitHub.installSyncBar({onNeedToken:({mobile})=>{if(mobile)TrainingGitHub.showToast('처음 한 번만 오답 훈련센터 홈 아래쪽에서 GitHub 토큰을 연결한 뒤 다시 눌러주세요.',8000)}});

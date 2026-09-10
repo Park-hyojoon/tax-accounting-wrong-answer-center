@@ -11,9 +11,9 @@
   'use strict';
   return {
     schemaVersion: 1,
-    revision: 3,
-    recordedOn: '2026-09-09',
-    coverageNote: '과거 대화에서 원문을 직접 확인해 부분 복원한 29건과 2026-09-09에 새로 전달받은 8건을 합쳐 사용자 제출 오답 37건을 확인했다. 과거 전체 기간의 총 오답 수는 아니다. 과거 복원분은 실제 채팅 전달시각이 없어 reportedAt을 null로 두었고, registeredDate는 연결된 연습문제 등록일일 뿐 실제 오답 제출일이 아니다. 새 접수분은 확인 가능한 실제 전달일을 reportedAt에 기록한다. 문제 본문의 거래일자도 오답 제출일로 사용하지 않는다. 첨부파일 이름만 있거나 원문 근거가 부족한 과거 문제, 초기 기본문제, AI가 추가한 대비·응용문제는 실제 제출 횟수에 넣지 않았다.',
+    revision: 5,
+    recordedOn: '2026-09-10',
+    coverageNote: '과거 대화에서 원문을 직접 확인해 부분 복원한 자료와 이후 사용자가 직접 전달한 오답만 집계한다. 과거 전체 기간의 총 오답 수는 아니다. 과거 복원분은 실제 채팅 전달시각이 없어 reportedAt을 null로 두었고, registeredDate는 연결된 대표 연습문제 등록일일 뿐 실제 오답 제출일이 아니다. 새 접수분은 확인 가능한 실제 전달일을 reportedAt에 기록한다. 문제 본문의 거래일자도 오답 제출일로 사용하지 않는다. 첨부파일 이름만 있거나 원문 근거가 부족한 과거 문제, 초기 기본문제, AI가 추가한 대비·응용문제는 실제 제출 횟수와 TOP 5 노출 대상에 넣지 않는다.',
     topics: [
       { id: 'repair-expense-card', label: '수선비의 수익적 지출과 카드결제' },
       { id: 'zero-rate-confirmation', label: '구매확인서 영세율 매출' },
@@ -417,9 +417,11 @@
         practiceRefs: [{ source: 'practical', id: 45, type: '출장비 정산' }],
         provenance: '이 대화에서 사용자가 일반전표 오답으로 전달한 출장 정산 원문·지출결의서 이미지·답안.'
       },
-      {id:'original-business-gift-product-300000-500000',source:'user-submitted',evidenceStatus:'confirmed',topicId:'product-free-transfer',title:'원재료 매입 거래처에 접대 목적으로 제품 무상제공',originalCue:'2023.08.10. 원재료 매입 거래처에 접대 목적으로 원가 300,000원·시가 500,000원의 제품을 무상 제공한다. 14.건별, 공급가액 500,000원·부가세 50,000원, 혼합분개로 기업업무추진비(제) 350,000원 / 부가세예수금 50,000원·제품 300,000원(적요 8)으로 처리한다.',learnerReason:'사용자가 너무 중요한 문제라고 강조하고 같은 구조의 훈련문제 2개를 요청했다.',reportedAt:'2026-09-09',registeredDate:'2026-09-09',practiceRefs:[{source:'voucher',id:30,type:'사업상증여·거래처 무상제공'},{source:'voucher',id:31,type:'사업상증여·거래처 무상제공'}],provenance:'이 대화에서 사용자가 전달한 매입매출전표 원문·답안.'},
+      {id:'original-business-gift-product-300000-500000',source:'user-submitted',evidenceStatus:'confirmed',topicId:'product-free-transfer',title:'원재료 매입 거래처에 접대 목적으로 제품 무상제공',originalCue:'2023.08.10. 원재료 매입 거래처에 접대 목적으로 원가 300,000원·시가 500,000원의 제품을 무상 제공한다. 14.건별, 공급가액 500,000원·부가세 50,000원, 혼합분개로 기업업무추진비(제) 350,000원 / 부가세예수금 50,000원·제품 300,000원(적요 8)으로 처리한다.',learnerReason:'사용자가 너무 중요한 문제라고 강조하고 같은 구조의 훈련문제 2개를 요청했다.',reportedAt:'2026-09-09',registeredDate:'2026-09-09',practiceRefs:[{source:'voucher',id:30,type:'사업상증여·거래처 무상제공'}],provenance:'이 대화에서 사용자가 전달한 매입매출전표 원문·답안.'},
       {id:'original-deductible-small-car-fuel-card-44000',source:'user-submitted',evidenceStatus:'confirmed',topicId:'vat-vehicle-deduction',title:'매입세액 공제 가능한 소형승용차 유류대의 카드면세 수정',originalCue:'2023.08.17. 영업부 비영업용 소형승용차 800㏄의 경유대 44,000원을 비씨카드로 결제한 거래를 58.카면으로 입력했으나, 매입세액공제 가능 차량이므로 57.카과의 공급가액 40,000원·부가세 4,000원으로 수정한다.',learnerReason:null,reportedAt:'2026-09-09',registeredDate:'2026-09-09',practiceRefs:[{source:'voucher',id:32,type:'소형승용차 유류대·카드면세 수정'}],provenance:'이 대화에서 사용자가 전달한 매입매출전표 수정 원문·답안.'},
-      {id:'original-manufacturing-truck-depreciation-30000000',source:'user-submitted',evidenceStatus:'confirmed',topicId:'depreciation-calculation',title:'제조부 화물차의 정액법 감가상각',originalCue:'2023.04.15. 취득원가 30,000,000원·잔존가치 0원·내용연수 5년·정액법인 제조부 화물차 포터의 2023년 감가상각비를 계산한다. 답안은 4,500,000원, 4,250,000원 또는 4,290,410원을 인정하고 감가상각비(제) / 감가상각누계액으로 처리한다.',learnerReason:null,reportedAt:'2026-09-09',registeredDate:'2026-09-09',practiceRefs:[{source:'closing',id:17,type:'차량운반구 감가상각·월할계산'}],provenance:'이 대화에서 사용자가 전달한 결산자료·일반전표 답안과 차량 자료 이미지.'}
+      {id:'original-manufacturing-truck-depreciation-30000000',source:'user-submitted',evidenceStatus:'confirmed',topicId:'depreciation-calculation',title:'제조부 화물차의 정액법 감가상각',originalCue:'2023.04.15. 취득원가 30,000,000원·잔존가치 0원·내용연수 5년·정액법인 제조부 화물차 포터의 2023년 감가상각비를 계산한다. 답안은 4,500,000원, 4,250,000원 또는 4,290,410원을 인정하고 감가상각비(제) / 감가상각누계액으로 처리한다.',learnerReason:null,reportedAt:'2026-09-09',registeredDate:'2026-09-09',practiceRefs:[{source:'closing',id:17,type:'차량운반구 감가상각·월할계산'}],provenance:'이 대화에서 사용자가 전달한 결산자료·일반전표 답안과 차량 자료 이미지.'},
+      {id:'original-taxable-product-sale-note-credit-20230902',source:'user-submitted',evidenceStatus:'confirmed',topicId:'sales-receivable-split',title:'제품매출 대금을 받을어음과 외상매출금으로 분할회수',originalCue:'2023.09.02. ㈜신도기전에 제품을 공급가액 10,000,000원·부가세 1,000,000원에 판매하고 전자세금계산서를 발급했다. 대금 중 8,000,000원은 거래처 발행 약속어음으로 받고 나머지 3,000,000원은 외상으로 두어 받을어음·외상매출금 / 부가세예수금·제품매출로 처리한다.',learnerReason:null,reportedAt:'2026-09-10',registeredDate:'2026-09-10',practiceRefs:[{source:'voucher',id:33,type:'과세 제품매출·어음과 외상 분할회수'}],provenance:'이 대화에서 사용자가 전달한 매입매출전표 원문·답안과 전자세금계산서 이미지.'},
+      {id:'original-exempt-books-cash-purchase-20231022',source:'user-submitted',evidenceStatus:'confirmed',topicId:'exempt-book-purchase',title:'영업부 직무교육용 도서의 면세 현금구입',originalCue:'2023.10.22. 영업부 직원 직무역량 강화용 도서를 영건서점에서 현금 1,375,000원에 구매하고 전자계산서를 받았다. 53.면세·전자 여·현금분개로 도서인쇄비(판) / 현금을 처리한다.',learnerReason:null,reportedAt:'2026-09-10',registeredDate:'2026-09-10',practiceRefs:[{source:'voucher',id:34,type:'면세 도서구입·현금 지급'}],provenance:'이 대화에서 사용자가 전달한 매입매출전표 원문·답안과 전자계산서 이미지.'}
     ],
     signals: [
       {

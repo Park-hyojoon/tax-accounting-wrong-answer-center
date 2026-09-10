@@ -409,7 +409,7 @@
     function renderCard(card){
       const id=card.dataset.id,p=getProblem(id),checked=state.checked[id],attempts=state.attempts[id]||0,result=$('.result',card);
       if((state.selfPassed?.[id]||((state.passed?.[id]===true||state.archived?.[id])&&!sessionPassed.has(id)&&!state.starred?.[id]))&&!state.deleted?.[id])deleteTheory(id);
-      card.hidden=state.deleted?.[id]?true:starView?!(Boolean(state.starred?.[id])||p.variantOf!=null||variantSourceIds.has(id)):typeView?((p.type||'').trim()!==typeView):Boolean((state.passed[id]&&!sessionPassed.has(id))||state.archived[id]||(todayView&&card.dataset.addedDate!==localDate()));
+      card.hidden=state.deleted?.[id]?true:starView?!(Boolean(state.starred?.[id])||p.variantOf!=null||variantSourceIds.has(id)):typeView?(p.variantOf!=null||(p.type||'').trim()!==typeView):Boolean((state.passed[id]&&!sessionPassed.has(id))||state.archived[id]||(todayView&&card.dataset.addedDate!==localDate()));
       $('.star-one',card).setAttribute('aria-pressed',String(Boolean(state.starred?.[id])));$('.star-note',card).hidden=!state.starred?.[id];
       card.classList.toggle('correct',checked===true);card.classList.toggle('wrong',checked===false);
       result.className='result'+(checked===true?' ok':checked===false?' no':'');
