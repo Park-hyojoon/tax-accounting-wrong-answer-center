@@ -11,7 +11,7 @@
   'use strict';
   return {
     schemaVersion: 1,
-    revision: 5,
+    revision: 6,
     recordedOn: '2026-09-10',
     coverageNote: '과거 대화에서 원문을 직접 확인해 부분 복원한 자료와 이후 사용자가 직접 전달한 오답만 집계한다. 과거 전체 기간의 총 오답 수는 아니다. 과거 복원분은 실제 채팅 전달시각이 없어 reportedAt을 null로 두었고, registeredDate는 연결된 대표 연습문제 등록일일 뿐 실제 오답 제출일이 아니다. 새 접수분은 확인 가능한 실제 전달일을 reportedAt에 기록한다. 문제 본문의 거래일자도 오답 제출일로 사용하지 않는다. 첨부파일 이름만 있거나 원문 근거가 부족한 과거 문제, 초기 기본문제, AI가 추가한 대비·응용문제는 실제 제출 횟수와 TOP 5 노출 대상에 넣지 않는다.',
     topics: [
@@ -45,6 +45,7 @@
       { id: 'vat-tax-base', label: '부가가치세 과세표준 포함 여부' },
       { id: 'travel-advance-settlement', label: '출장 전도금 정산' },
       { id: 'vat-vehicle-deduction', label: '차량 유류대의 매입세액 공제 여부' }
+      ,{ id: 'nonbusiness-input-vat', label: '사업무관 지출의 매입세액 불공제' }
     ],
     entries: [
       {
@@ -421,7 +422,11 @@
       {id:'original-deductible-small-car-fuel-card-44000',source:'user-submitted',evidenceStatus:'confirmed',topicId:'vat-vehicle-deduction',title:'매입세액 공제 가능한 소형승용차 유류대의 카드면세 수정',originalCue:'2023.08.17. 영업부 비영업용 소형승용차 800㏄의 경유대 44,000원을 비씨카드로 결제한 거래를 58.카면으로 입력했으나, 매입세액공제 가능 차량이므로 57.카과의 공급가액 40,000원·부가세 4,000원으로 수정한다.',learnerReason:null,reportedAt:'2026-09-09',registeredDate:'2026-09-09',practiceRefs:[{source:'voucher',id:32,type:'소형승용차 유류대·카드면세 수정'}],provenance:'이 대화에서 사용자가 전달한 매입매출전표 수정 원문·답안.'},
       {id:'original-manufacturing-truck-depreciation-30000000',source:'user-submitted',evidenceStatus:'confirmed',topicId:'depreciation-calculation',title:'제조부 화물차의 정액법 감가상각',originalCue:'2023.04.15. 취득원가 30,000,000원·잔존가치 0원·내용연수 5년·정액법인 제조부 화물차 포터의 2023년 감가상각비를 계산한다. 답안은 4,500,000원, 4,250,000원 또는 4,290,410원을 인정하고 감가상각비(제) / 감가상각누계액으로 처리한다.',learnerReason:null,reportedAt:'2026-09-09',registeredDate:'2026-09-09',practiceRefs:[{source:'closing',id:17,type:'차량운반구 감가상각·월할계산'}],provenance:'이 대화에서 사용자가 전달한 결산자료·일반전표 답안과 차량 자료 이미지.'},
       {id:'original-taxable-product-sale-note-credit-20230902',source:'user-submitted',evidenceStatus:'confirmed',topicId:'sales-receivable-split',title:'제품매출 대금을 받을어음과 외상매출금으로 분할회수',originalCue:'2023.09.02. ㈜신도기전에 제품을 공급가액 10,000,000원·부가세 1,000,000원에 판매하고 전자세금계산서를 발급했다. 대금 중 8,000,000원은 거래처 발행 약속어음으로 받고 나머지 3,000,000원은 외상으로 두어 받을어음·외상매출금 / 부가세예수금·제품매출로 처리한다.',learnerReason:null,reportedAt:'2026-09-10',registeredDate:'2026-09-10',practiceRefs:[{source:'voucher',id:33,type:'과세 제품매출·어음과 외상 분할회수'}],provenance:'이 대화에서 사용자가 전달한 매입매출전표 원문·답안과 전자세금계산서 이미지.'},
-      {id:'original-exempt-books-cash-purchase-20231022',source:'user-submitted',evidenceStatus:'confirmed',topicId:'exempt-book-purchase',title:'영업부 직무교육용 도서의 면세 현금구입',originalCue:'2023.10.22. 영업부 직원 직무역량 강화용 도서를 영건서점에서 현금 1,375,000원에 구매하고 전자계산서를 받았다. 53.면세·전자 여·현금분개로 도서인쇄비(판) / 현금을 처리한다.',learnerReason:null,reportedAt:'2026-09-10',registeredDate:'2026-09-10',practiceRefs:[{source:'voucher',id:34,type:'면세 도서구입·현금 지급'}],provenance:'이 대화에서 사용자가 전달한 매입매출전표 원문·답안과 전자계산서 이미지.'}
+      {id:'original-exempt-books-cash-purchase-20231022',source:'user-submitted',evidenceStatus:'confirmed',topicId:'exempt-book-purchase',title:'영업부 직무교육용 도서의 면세 현금구입',originalCue:'2023.10.22. 영업부 직원 직무역량 강화용 도서를 영건서점에서 현금 1,375,000원에 구매하고 전자계산서를 받았다. 53.면세·전자 여·현금분개로 도서인쇄비(판) / 현금을 처리한다.',learnerReason:null,reportedAt:'2026-09-10',registeredDate:'2026-09-10',practiceRefs:[{source:'voucher',id:34,type:'면세 도서구입·현금 지급'}],provenance:'이 대화에서 사용자가 전달한 매입매출전표 원문·답안과 전자계산서 이미지.'},
+      {id:'original-receivable-note-bank-20240725',source:'user-submitted',evidenceStatus:'confirmed',topicId:'receivable-payable-settlement',title:'외상매출금을 약속어음과 보통예금으로 분할회수',originalCue:'2024.07.25. ㈜고운상사 외상매출금 9,900,000원 중 5,500,000원은 거래처 발행 약속어음으로 받고 4,400,000원은 보통예금으로 입금받아 받을어음·보통예금 / 외상매출금으로 처리한다.',learnerReason:null,reportedAt:'2026-09-10',registeredDate:'2026-09-10',practiceRefs:[{source:'practical',id:49,type:'외상매출금 회수·어음과 예금 분할'}],provenance:'이 대화에서 사용자가 직접 전달한 일반전표 원문과 답안.'},
+      {id:'original-land-exempt-sale-split-20240723',source:'user-submitted',evidenceStatus:'confirmed',topicId:'asset-disposal-receivable',title:'토지 면세매각과 대금 분할회수',originalCue:'2024.07.23. 취득원가 62,000,000원의 토지를 돌상상회에 65,000,000원에 매각하고 전자계산서를 발급했다. 30,000,000원은 보통예금으로 받고 나머지는 미수금으로 처리하며 유형자산처분이익 3,000,000원을 인식한다.',learnerReason:null,reportedAt:'2026-09-10',registeredDate:'2026-09-10',practiceRefs:[{source:'voucher',id:38,type:'토지 면세매각·대금 분할회수'}],provenance:'이 대화에서 사용자가 직접 전달한 매입매출전표 원문과 답안.'},
+      {id:'original-raw-material-note-payable-20240817',source:'user-submitted',evidenceStatus:'confirmed',topicId:'receivable-payable-settlement',title:'원재료 매입대금을 지급어음과 외상매입금으로 분할결제',originalCue:'2024.08.17. ㈜고철상사에서 원재료를 공급가액 12,000,000원·부가세 1,200,000원에 매입하고 전자세금계산서를 받았다. 당사 발행 약속어음 5,000,000원과 외상매입금 8,200,000원으로 결제한다.',learnerReason:null,reportedAt:'2026-09-10',registeredDate:'2026-09-10',practiceRefs:[{source:'voucher',id:39,type:'원재료 과세매입·어음과 외상 분할결제'}],provenance:'이 대화에서 사용자가 직접 전달한 매입매출전표 원문·답안과 전자세금계산서 이미지.'},
+      {id:'original-nonbusiness-wedding-hotel-20241108',source:'user-submitted',evidenceStatus:'confirmed',topicId:'nonbusiness-input-vat',title:'대표이사 개인 결혼식장 대관료의 매입세액 불공제',originalCue:'2024.11.08. 대표이사 김영순의 업무무관 호텔 결혼식장 대관료 공급가액 25,000,000원·부가세 2,500,000원을 회사 보통예금으로 지급하고 전자세금계산서를 받았다. 54.불공·사유 ②로 입력하고 공급대가 전액을 대표이사 가지급금으로 처리한다.',learnerReason:null,reportedAt:'2026-09-10',registeredDate:'2026-09-10',practiceRefs:[{source:'voucher',id:40,type:'사업무관 지출·매입세액 불공제'}],provenance:'이 대화에서 사용자가 직접 전달한 매입매출전표 원문·답안과 전자세금계산서 이미지.'}
     ],
     signals: [
       {

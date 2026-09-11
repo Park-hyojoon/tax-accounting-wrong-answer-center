@@ -8,6 +8,7 @@
 
   const style=document.createElement('style');
   style.textContent=`
+    .question .qhead .tag{display:none!important}
     .nav-links{display:contents}
     .nav-menu-toggle,.nav-current{display:none}
     .nav-link[href*="일반전표_"]:not(.nav-star){--menu-accent:#69b6df;--menu-soft:#e9f4fc;--menu-ink:#225f8e}
