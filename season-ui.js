@@ -46,7 +46,12 @@
       card.dataset.typeFilterBaseHidden=String(card.hidden);
     }
     const notice=document.createElement('div');notice.className='notebook-toast';notice.hidden=true;notice.setAttribute('role','status');document.body.append(notice);
-    function report(text,undo){notice.replaceChildren(document.createTextNode(text+' '));if(undo){const b=document.createElement('button');b.type='button';b.textContent='되돌리기';b.onclick=()=>{undo();report('되돌렸습니다.')};notice.append(b)}notice.hidden=false}
+    let noticeTimer;
+    function report(text,undo){
+      clearTimeout(noticeTimer);notice.replaceChildren(document.createTextNode(text+' '));
+      if(undo){const b=document.createElement('button');b.type='button';b.textContent='되돌리기';b.onclick=()=>{undo();report('되돌렸습니다.')};notice.append(b)}
+      notice.hidden=false;noticeTimer=setTimeout(()=>{notice.hidden=true},undo?5000:2500);
+    }
     function refresh(card){visibility(card);a.refresh();const id=key(card),history=get(id,'history')||[];
       const count=history.filter(h=>!h.cancelledAt).length,wrong=history.filter(h=>h.correct===false&&!h.cancelledAt).length;
       const label=card.querySelector('.attempt,.attempt-info');if(label)label.textContent=`학습 ${count}회 · 틀림 ${wrong}회`;
@@ -81,7 +86,7 @@
   }
   function catalog(meta,sources){
     // Secondary settings stay available without lengthening the daily study screen.
-    for(const [id,label] of [['statsSection','학습 통계'],['backupSection','동기화 설정 · 학습기록 백업']]){
+    for(const [id,label] of [['backupSection','동기화 설정 · 학습기록 백업']]){
       const section=document.getElementById(id);if(!section)continue;
       const details=document.createElement('details');details.className='season-settings';
       const summary=document.createElement('summary');summary.textContent=label;details.append(summary);
