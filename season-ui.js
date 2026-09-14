@@ -1,6 +1,6 @@
 (function(){
   'use strict';
-  const style=document.createElement('link');style.rel='stylesheet';style.href='season.css?v=4';document.head.append(style);
+  const style=document.createElement('link');style.rel='stylesheet';style.href='season.css?v=5';document.head.append(style);
   const params=new URLSearchParams(location.search);
   const escape=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   function matches(p){return (!params.get('exam')||String(p.examRound)===params.get('exam'))&&(!params.get('tag')||(p.tags||[]).includes(params.get('tag')))}
@@ -26,7 +26,27 @@
       if(brief&&workspace){while(brief.firstChild)workspace.append(brief.firstChild);brief.remove()}
     });
     if(adapter)notebook(problems,adapter,bar);
+    if(host)mobileFilters(host,bar);
     if(!problems.length){const box=document.createElement('section');box.className='season-welcome';box.innerHTML='<span class="season-kicker">NEW CHAPTER</span><h2>다음 기출 오답부터<br>차근차근 쌓아가세요.</h2><p>회차와 틀린 문제를 보내주시면 원문은 회차별 MD로 보관하고,<br>숫자와 조건을 바꾼 응용문제를 이곳에 등록합니다.</p><a href="오답_훈련센터.html">학습 홈으로</a>';host?.after(box)}
+  }
+  function mobileFilters(host,bar){
+    const media=matchMedia('(max-width:760px)'),anchor=document.createComment('filter toolbar');host.before(anchor);
+    const compact=document.createElement('div');compact.className='mobile-filter-bar';
+    const open=document.createElement('button');open.type='button';open.className='mobile-filter-open';open.textContent='☷ 설정';open.setAttribute('aria-haspopup','dialog');
+    const hint=document.createElement('span');hint.textContent='정렬 · 검색';compact.append(open,hint);anchor.after(compact);
+    const dialog=document.createElement('dialog');dialog.className='mobile-filter-dialog';dialog.setAttribute('aria-labelledby','mobileFilterTitle');
+    dialog.innerHTML='<header><h2 id="mobileFilterTitle">정렬 · 검색 설정</h2><button type="button" class="mobile-filter-close" aria-label="설정 닫기">×</button></header><div class="mobile-filter-content"></div><footer><button type="button" class="mobile-filter-apply">문제 보기</button></footer>';
+    document.body.append(dialog);
+    const fields=[...bar.querySelectorAll('select')],keys=['exam','tag','status'];let snapshot=[];
+    bar.addEventListener('change',event=>{if(dialog.open&&fields.includes(event.target))event.stopImmediatePropagation()},true);
+    function close(){dialog.close()}
+    open.onclick=()=>{snapshot=fields.map(f=>f.value);dialog.showModal();document.body.classList.add('mobile-filter-active')};
+    dialog.querySelector('.mobile-filter-close').onclick=close;
+    dialog.addEventListener('click',event=>{if(event.target===dialog){const r=dialog.getBoundingClientRect();if(event.clientX<r.left||event.clientX>r.right||event.clientY<r.top||event.clientY>r.bottom)close()}});
+    dialog.addEventListener('close',()=>{fields.forEach((f,i)=>{if(snapshot[i]!==undefined)f.value=snapshot[i]});document.body.classList.remove('mobile-filter-active');if(media.matches)open.focus()});
+    dialog.querySelector('.mobile-filter-apply').onclick=()=>{const url=new URL(location.href);fields.forEach((f,i)=>{f.value?url.searchParams.set(keys[i],f.value):url.searchParams.delete(keys[i])});if(url.href!==location.href)location.href=url.href;else close()};
+    function layout(){if(media.matches){dialog.querySelector('.mobile-filter-content').append(host);compact.hidden=false}else{if(dialog.open)close();anchor.after(host);compact.hidden=true}}
+    media.addEventListener('change',layout);layout();
   }
   function notebook(problems,a,bar){
     const cards=[...document.querySelectorAll('.question')],theory=a.theory;
