@@ -9,7 +9,8 @@
   const PROGRAM_REPOSITORY='tax-accounting-wrong-answer-center';
   const PROGRAM_BRANCH='main';
   const API_ROOT=`https://api.github.com/repos/${OWNER}/${REPOSITORY}`;
-  const STATE_FILE='sync/learning-state.json';
+  const SEASON='exam-20260914';
+  const STATE_FILE=`sync/${SEASON}/learning-state.json`;
   const HELPER_URL=(()=>{try{return localStorage.getItem('tax-accounting-helper-url')||'http://127.0.0.1:8790'}catch(error){return 'http://127.0.0.1:8790'}})();
 
   const SESSION_TOKEN_KEY='tax-accounting-github-token-session';
@@ -22,10 +23,10 @@
 
   // 학습 화면별 localStorage 키. 훈련센터 홈과 학습상태 동기화가 함께 사용한다.
   const SOURCES=Object.freeze({
-    practical:{label:'일반전표',file:'일반전표_기본연습_24문제.html',key:'tax-accounting-practical-journal-24-v2'},
-    theory:{label:'이론',file:'이론_오답응용_5문제.html',key:'tax-accounting-theory-wrong-2026-09-01-v1'},
-    closing:{label:'결산',file:'결산정리사항_연습_7문제.html',key:'closing-adjustment-practice-7-v1'},
-    voucher:{label:'매입매출전표',file:'매입매출전표_오답연습_3문제.html',key:'purchase-sales-voucher-wrong-2026-09-02-v1'}
+    practical:{label:'일반전표',file:'일반전표_기본연습_24문제.html',key:'exam-20260914-practical'},
+    theory:{label:'이론',file:'이론_오답응용_5문제.html',key:'exam-20260914-theory'},
+
+    voucher:{label:'매입매출전표',file:'매입매출전표_오답연습_3문제.html',key:'exam-20260914-voucher'}
   });
 
   // ── 토큰 (모바일용) ──────────────────────────────────────────────────────────
@@ -144,7 +145,7 @@
   }
 
   // ── 학습상태 합치기 (기기별 고유 이력을 모두 보존) ───────────────────────────
-  const PRACTICAL_STATE_VERSION='general-journal-27-v1';
+  const PRACTICAL_STATE_VERSION='exam-20260914-practical-schema';
   const PRACTICAL_OLD_TO_NEW={4:0,6:1,8:2,9:3,10:4,11:5,12:6,13:7,14:8,15:9,16:10,17:11,18:12,19:13,20:14,21:15,22:16,23:17,24:18,25:19,26:20,27:21,28:22,29:23,30:24,31:25,32:26};
 
   function normalizeState(sourceName,value){
@@ -174,12 +175,12 @@
     }
     if(sourceName==='theory'){
       const deleted={...(normalized.deleted||{})},deletedAt={...(normalized.deletedAt||{})},starred=normalized.starred||{};
-      const gone=new Set([...Object.keys(normalized.selfPassed||{}).filter(id=>normalized.selfPassed[id]&&!starred[id]),...Object.keys(normalized.passed||{}).filter(id=>normalized.passed[id]===true&&!starred[id]),...Object.keys(normalized.archived||{}).filter(id=>normalized.archived[id]&&!starred[id])]);
+      const gone=new Set(); // 통과는 보존 상태이며 명시적 영구 삭제만 묘비로 유지한다.
       gone.forEach(id=>{deleted[id]=true;deletedAt[id]=deletedAt[id]||normalized.selfPassedAt?.[id]||normalized.passedAt?.[id]||normalized.archivedAt?.[id]||new Date().toISOString()});
       Object.keys(deleted).forEach(id=>{['answers','checked','attempts','history','passed','archived','passedAt','archivedAt','restoredAt','trainingCenterRestored','selfPassed','selfPassedAt','starred','starredAt'].forEach(k=>{if(normalized[k]&&typeof normalized[k]==='object')delete normalized[k][id]})});
       normalized.deleted=deleted;normalized.deletedAt=deletedAt;
     }else{
-      Object.keys(normalized.cards||{}).forEach(index=>{const card=normalized.cards[index];if(card&&(card.deleted||card.selfPassed||((card.passed||card.archived)&&!card.starred)))normalized.cards[index]={deleted:true,deletedAt:card.deletedAt||card.selfPassedAt||card.passedAt||card.archivedAt||new Date().toISOString()}});
+      Object.keys(normalized.cards||{}).forEach(index=>{const card=normalized.cards[index];if(card?.deleted)normalized.cards[index]={deleted:true,deletedAt:card.deletedAt||new Date().toISOString()}});
     }
     return normalized;
   }
@@ -196,10 +197,12 @@
   function correctInHistory(history){return Array.isArray(history)&&history.some(item=>item&&item.correct===true)}
   function number(value){const n=Number(value);return Number.isFinite(n)?n:0}
   function uniqueHistory(first,second){
-    const seen=new Set();
-    return [...(Array.isArray(first)?first:[]),...(Array.isArray(second)?second:[])].filter(item=>{
-      const key=JSON.stringify(item);if(seen.has(key))return false;seen.add(key);return true;
-    }).sort((a,b)=>Date.parse(a?.at||0)-Date.parse(b?.at||0));
+    const seen=new Map();
+    [...(Array.isArray(first)?first:[]),...(Array.isArray(second)?second:[])].forEach(item=>{
+      const key=item.id||JSON.stringify(item),old=seen.get(key);
+      if(!old||item.cancelledAt)seen.set(key,item);
+    });
+    return [...seen.values()].sort((a,b)=>Date.parse(a?.at||0)-Date.parse(b?.at||0));
   }
   function eventTime(value){const time=Date.parse(value||'');return Number.isFinite(time)?time:0}
   function latestEventIso(...values){
@@ -224,11 +227,12 @@
     merged.history=uniqueHistory(a.history,b.history);
     merged.attempts=Math.max(number(a.attempts),number(b.attempts),merged.history.length);
     merged.wrongCount=Math.max(number(a.wrongCount),number(b.wrongCount),merged.history.filter(item=>item?.correct===false).length);
+    if(merged.history.some(h=>h.source==='notebook')){merged.attempts=merged.history.filter(h=>!h.cancelledAt).length;merged.wrongCount=merged.history.filter(h=>h.correct===false&&!h.cancelledAt).length}
     const flags=resolveTrainingFlags(a,b,merged.history,currentUpdated,incomingUpdated);
     merged.passed=flags.passed;merged.archived=flags.archived;
     if(flags.passedAt)merged.passedAt=flags.passedAt;if(flags.archivedAt)merged.archivedAt=flags.archivedAt;if(flags.restoredAt)merged.restoredAt=flags.restoredAt;
     if(flags.trainingCenterRestored)merged.trainingCenterRestored=true;else delete merged.trainingCenterRestored;
-    if(merged.selfPassed){const selfAt=eventTime(merged.selfPassedAt||0);if(flags.trainingCenterRestored||merged.history.some(item=>item?.correct===true&&eventTime(item.at)>=selfAt)){delete merged.selfPassed;delete merged.selfPassedAt}}
+    if(merged.selfPassed){const selfAt=eventTime(merged.selfPassedAt||0);if(flags.trainingCenterRestored||merged.history.some(item=>item?.source!=='notebook'&&item?.correct===true&&eventTime(item.at)>=selfAt)){delete merged.selfPassed;delete merged.selfPassedAt}}
     delete merged.note;
     return merged;
   }
@@ -254,6 +258,7 @@
       const history=uniqueHistory(current.history?.[id],incoming.history?.[id]);
       merged.history[id]=history;
       merged.attempts[id]=Math.max(number(current.attempts?.[id]),number(incoming.attempts?.[id]),history.length);
+      if(history.some(h=>h.source==='notebook'))merged.attempts[id]=history.filter(h=>!h.cancelledAt).length;
       const flags=resolveTrainingFlags(
         {passed:current.passed?.[id],correct:current.checked?.[id],archived:current.archived?.[id],trainingCenterRestored:current.trainingCenterRestored?.[id],passedAt:current.passedAt?.[id],archivedAt:current.archivedAt?.[id],restoredAt:current.restoredAt?.[id]},
         {passed:incoming.passed?.[id],correct:incoming.checked?.[id],archived:incoming.archived?.[id],trainingCenterRestored:incoming.trainingCenterRestored?.[id],passedAt:incoming.passedAt?.[id],archivedAt:incoming.archivedAt?.[id],restoredAt:incoming.restoredAt?.[id]},
@@ -262,7 +267,7 @@
       merged.passed[id]=flags.passed;merged.archived[id]=flags.archived;
       if(flags.passedAt)merged.passedAt[id]=flags.passedAt;if(flags.archivedAt)merged.archivedAt[id]=flags.archivedAt;if(flags.restoredAt)merged.restoredAt[id]=flags.restoredAt;
       if(flags.trainingCenterRestored)merged.trainingCenterRestored[id]=true;else delete merged.trainingCenterRestored[id];
-      if(merged.selfPassed[id]){const selfAt=eventTime(merged.selfPassedAt[id]||0);if(flags.trainingCenterRestored||history.some(item=>item?.correct===true&&eventTime(item.at)>=selfAt)){delete merged.selfPassed[id];delete merged.selfPassedAt[id]}}
+      if(merged.selfPassed[id]){const selfAt=eventTime(merged.selfPassedAt[id]||0);if(flags.trainingCenterRestored||history.some(item=>item?.source!=='notebook'&&item?.correct===true&&eventTime(item.at)>=selfAt)){delete merged.selfPassed[id];delete merged.selfPassedAt[id]}}
     });
     return merged;
   }
@@ -283,7 +288,8 @@
   }
   function backupPayload(fallback){
     const states={};Object.entries(SOURCES).forEach(([name,source])=>{states[name]=readState(source.key)});
-    const payload={format:'tax-accounting-training-center-backup',version:1,exportedAt:new Date().toISOString(),states};
+    if(fallback&&fallback.season!==SEASON)fallback=null;
+    const payload={format:'tax-accounting-training-center-backup',version:1,season:SEASON,exportedAt:new Date().toISOString(),states};
     const info=catalogInfo(fallback);if(info){payload.catalog=info.catalog;payload.typeSummary=info.typeSummary||[];payload.catalogAt=info.catalogAt||new Date().toISOString()}
     // 홈은 원장 snapshot을 만들고, 경량 분야 화면은 원격 fallback 사본을 그대로 보존한다.
     if(global.TrainingMistakeMemory)payload.sourceMistakes=global.TrainingMistakeMemory.snapshot(fallback?.sourceMistakes);
@@ -312,7 +318,7 @@
   // ── 오늘 학습기록 Markdown 저장 ──────────────────────────────────────────────
   async function canSaveRemote(){return Boolean(await detectHelper())||hasToken()}
   async function saveDailyRecord(source,date,markdown){
-    const deviceId=getDeviceId().replace(/[^a-zA-Z0-9-]/g,'').slice(0,12),path=`records/${date}/${source}-${deviceId}.md`;
+    const deviceId=getDeviceId().replace(/[^a-zA-Z0-9-]/g,'').slice(0,12),path=`records/${SEASON}/${date}/${source}-${deviceId}.md`;
     if(await detectHelper())return helperPost('/api/record',{path,content:String(markdown)});
     return putFile(path,markdown,`학습기록 저장: ${date} ${getDeviceName()} ${source}`);
   }
@@ -331,6 +337,7 @@
     try{
       setStatus('동기화를 시작합니다…');
       const helper=await detectHelper();
+      if(helper&&helper.season!==SEASON)throw new Error('새 학습용 도우미가 필요합니다. 바탕화면의 「오답훈련센터 시작」을 다시 실행해 주세요.');
       let program=null;
       if(helper){
         setStatus('PC의 새 문제·프로그램과 GitHub를 맞추는 중…');
@@ -357,6 +364,7 @@
         let remoteStates=null,base=null,remoteJson=null;
         if(helper){const read=await helperPost('/api/learning/read');remoteJson=read.state||null;remoteStates=remoteJson?.states||null;base=read.base||''}
         else{const remote=await getSyncState();remoteJson=remote?.json||null;remoteStates=remoteJson?.states||null;base=remote?.sha||null}
+        if(remoteJson&&remoteJson.season!==SEASON)throw new Error('다른 학습 시즌의 기록이므로 합치지 않았습니다. PC 도우미를 다시 시작해 주세요.');
         changedLocal=mergeStatesIntoLocal(remoteStates);
         const payload=buildSyncPayload(remoteJson);
         try{
@@ -437,7 +445,7 @@
   }
 
   global.TrainingGitHub={
-    OWNER,REPOSITORY,BRANCH,PROGRAM_OWNER,PROGRAM_REPOSITORY,PROGRAM_BRANCH,SOURCES,HELPER_URL,
+    SEASON,OWNER,REPOSITORY,BRANCH,PROGRAM_OWNER,PROGRAM_REPOSITORY,PROGRAM_BRANCH,SOURCES,HELPER_URL,
     getSessionToken,setSessionToken,clearToken,hasToken,isTokenRemembered,connect,
     getFile,putFile,saveDailyRecord,canSaveRemote,getSyncState,putSyncState,
     getDeviceId,getDeviceName,setDeviceName,isMobileDevice,

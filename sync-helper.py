@@ -22,7 +22,8 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
 HELPER_NAME = 'tax-accounting-sync-helper'
-HELPER_VERSION = 1
+HELPER_VERSION = 2
+SEASON = 'exam-20260914'
 PORT = int(os.environ.get('TAX_SYNC_PORT', '8790'))
 
 BASE_DIR = Path(os.environ.get('TAX_SYNC_PROGRAM_DIR') or Path(__file__).resolve().parent)
@@ -31,7 +32,7 @@ PROGRAM_REMOTE = os.environ.get('TAX_SYNC_PROGRAM_REMOTE') or 'https://github.co
 LEARNING_DIR = Path(os.environ.get('TAX_SYNC_LEARNING_DIR') or (BASE_DIR / '또 틀렸다!' / 'GitHub학습기록'))
 LEARNING_REMOTE = os.environ.get('TAX_SYNC_LEARNING_REMOTE') or 'https://github.com/Park-hyojoon/tax-accounting-learning-sync.git'
 BRANCH = 'main'
-LEARNING_STATE_PATH = 'sync/learning-state.json'
+LEARNING_STATE_PATH = f'sync/{SEASON}/learning-state.json'
 LOG_PATH = LEARNING_DIR.parent / '동기화도우미.log'
 DEFAULT_USER_NAME = 'Park Hyojoon'
 DEFAULT_USER_EMAIL = 'phjoon7709@gmail.com'
@@ -232,7 +233,7 @@ def read_learning_state():
     try:
         pull_remote(LEARNING_DIR)
     except SyncConflict:
-        git(LEARNING_DIR, 'reset', '--hard', f'origin/{BRANCH}')
+        raise
     path = LEARNING_DIR / LEARNING_STATE_PATH
     state = None
     if path.exists():
@@ -261,12 +262,13 @@ def write_learning_files(files, message):
     try:
         push_remote(LEARNING_DIR)
     except SyncConflict:
-        git(LEARNING_DIR, 'reset', '--hard', f'origin/{BRANCH}')
         raise
     return True
 
 
 def write_learning_state(state, base):
+    if not isinstance(state, dict) or state.get('season') != SEASON:
+        raise GitError('다른 학습 시즌의 기록입니다. 페이지를 새로고침해 주세요.')
     path = LEARNING_DIR / LEARNING_STATE_PATH
     if file_hash(path) != (base or ''):
         raise SyncConflict('학습기록을 읽은 뒤 다른 기기가 먼저 저장했습니다. 다시 읽어서 합칩니다.')
@@ -283,7 +285,7 @@ def write_record(relative, content):
     try:
         pull_remote(LEARNING_DIR)
     except SyncConflict:
-        git(LEARNING_DIR, 'reset', '--hard', f'origin/{BRANCH}')
+        raise
     write_learning_files({relative: content}, f'학습기록 저장: {relative}')
     return {'path': relative, 'localPath': str(LEARNING_DIR / relative)}
 
@@ -319,7 +321,7 @@ class Handler(BaseHTTPRequestHandler):
     def do_GET(self):
         if self.path.split('?')[0] == '/api/status':
             self._send(200, {
-                'ok': True, 'helper': HELPER_NAME, 'version': HELPER_VERSION,
+                'ok': True, 'helper': HELPER_NAME, 'version': HELPER_VERSION, 'season': SEASON,
                 'programDir': str(PROGRAM_DIR), 'learningDir': str(LEARNING_DIR),
             })
             return

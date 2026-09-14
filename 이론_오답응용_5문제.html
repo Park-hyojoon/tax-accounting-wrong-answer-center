@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>전산회계 1급 이론 오답 응용연습 21문제</title>
+  <title>전산회계 1급 · 이론 기출 오답 훈련</title>
   <style>
     :root{--navy:#15345e;--blue:#2d78c5;--sky:#e7f5ff;--mint:#e9fbf3;--yellow:#fff4b8;--red:#ce3f4b;--green:#137e57;--line:#cadceb;--ink:#172235;--muted:#65748a}
     *{box-sizing:border-box}
@@ -106,7 +106,7 @@
       <a class="nav-link" href="오답_훈련센터.html">오늘의 오답훈련</a>
       <a class="nav-link" href="일반전표_기본연습_24문제.html">일반전표 입력</a>
       <a class="nav-link active" href="이론_오답응용_5문제.html" aria-current="page">이론 오답</a>
-      <a class="nav-link" href="결산정리사항_연습_7문제.html">결산 정리사항</a>
+
       <a class="nav-link" href="매입매출전표_오답연습_3문제.html?view=all">매입매출전표 입력</a>
       <a class="nav-link nav-star" href="이론_오답응용_5문제.html?view=star" title="★ 표시한 이론 문제와 AI 응용문제를 유형별로 모아 훈련합니다">★ 특별 훈련</a>
       <div class="nav-sync" aria-label="동기화">
@@ -114,6 +114,7 @@
       </div>
     </div>
   </nav>
+  <script src="data/theory.js?v=2"></script>
   <script>(function(){var nav=document.querySelector('.top-nav');function sync(){document.documentElement.style.setProperty('--nav-h',(nav?nav.offsetHeight:60)+'px')}sync();window.addEventListener('resize',sync)})()</script>
   <main class="wrap">
     <div class="dashboard">
@@ -151,225 +152,20 @@
     <p class="footer">학습기록은 사용자 컴퓨터에만 저장되며 외부로 자동 전송되지 않습니다.</p>
   </main>
 
-  <script src="github-learning-sync.js?v=13"></script>
-  <script src="training-ui.js?v=4"></script>
+  <script src="github-learning-sync.js?v=15"></script>
+  <script src="season-ui.js?v=5"></script>
+<script src="training-ui.js?v=5"></script>
   <script>
-    const problems=[
-      {
-        id:'operating-profit',type:'영업이익 계산',
-        prompt:'다음 자료를 이용하여 영업이익을 계산한 금액으로 옳은 것은? (기말재고는 제시된 금액을 사용한다.)',
-        data:'총매출액 820,000원  ·  매출환입 20,000원\n기초상품재고액 60,000원  ·  당기총매입액 460,000원  ·  매입할인 10,000원  ·  기말상품재고액 90,000원\n급여 35,000원  ·  광고선전비 25,000원  ·  감가상각비 20,000원  ·  임차료 30,000원\n이자비용 40,000원  ·  유형자산처분이익 50,000원  ·  배당금수익 15,000원',
-        choices:['230,000원','255,000원','270,000원','295,000원'],answer:2,
-        explanation:'순매출액은 820,000-20,000=800,000원입니다. 매출원가는 60,000+(460,000-10,000)-90,000=420,000원, 매출총이익은 380,000원입니다. 판매비와관리비는 35,000+25,000+20,000+30,000=110,000원이므로 영업이익은 270,000원입니다.',
-        key:'영업이익 = 순매출액 - 매출원가 - 판매비와관리비. 영업외수익과 영업외비용은 제외한다.'
-      },
-      {
-        id:'service-dept',type:'보조부문 원가배분',
-        prompt:'다음 중 보조부문 원가의 배분방법에 관한 설명으로 옳지 않은 것은?',
-        choices:[
-          '직접배분법은 보조부문 상호 간의 용역수수를 무시하고 보조부문 원가를 제조부문에만 배분한다.',
-          '단계배분법은 정해진 배분순서에 따라 배분하며, 이미 원가를 배분한 보조부문에는 다시 배분하지 않는다.',
-          '상호배분법은 보조부문 상호 간의 용역수수를 완전히 인식하므로 이론적으로 가장 타당하지만 계산이 복잡하다.',
-          '직접배분법은 보조부문의 배분순서에 따라 각 제조부문에 배분되는 금액이 달라진다.'
-        ],answer:3,
-        explanation:'④가 옳지 않습니다. 직접배분법은 보조부문 상호 간의 용역수수를 무시하고 제조부문에 직접 배분하므로 보조부문 배분순서의 영향을 받지 않습니다. 배분순서에 따라 결과가 달라질 수 있는 방법은 단계배분법입니다.',
-        key:'직접배분법은 상호용역과 배분순서를 무시하고, 단계배분법은 일부 상호용역을 순서대로, 상호배분법은 상호용역을 완전히 반영한다.'
-      },
-      {
-        id:'predetermined-overhead',type:'제조간접원가 예정배부',
-        prompt:'다음 자료를 이용하여 2026년 제조작업지시서 #A10의 제조간접원가 예정배부율과 예정배부액을 계산한 것으로 옳은 것은?',
-        data:'2025년 실제 제조간접원가 4,200,000원, 실제 기계작업시간 100,000시간\n2026년 연간 예정 제조간접원가 4,500,000원, 총예정기계작업시간 90,000시간\n2026년 제조작업지시서 #A10의 실제 기계작업시간 12,400시간',
-        choices:[
-          '45원/기계작업시간, 558,000원',
-          '50원/기계작업시간, 620,000원',
-          '52원/기계작업시간, 644,800원',
-          '55원/기계작업시간, 682,000원'
-        ],answer:1,
-        explanation:'예정배부율은 4,500,000원÷90,000시간=50원/기계작업시간입니다. #A10의 예정배부액은 50원×12,400시간=620,000원입니다.',
-        key:'예정배부율 = 예정 제조간접원가 ÷ 예정 조업도, 개별 작업 예정배부액 = 예정배부율 × 실제 조업도.'
-      },
-      {
-        id:'vat-taxpayer',type:'부가가치세 납세의무자',
-        prompt:'다음 중 부가가치세법상 납세의무자에 관한 설명으로 옳지 않은 것은?',
-        choices:[
-          '사업자는 과세유형에 따라 일반과세자와 간이과세자로 구분될 수 있다.',
-          '재화를 수입하는 자는 사업자인지 여부와 관계없이 수입 시 부가가치세 납세의무를 질 수 있다.',
-          '영세율을 적용받는 사업자는 매출세액이 0이므로 부가가치세법상 사업자등록의무가 없다.',
-          '국가와 지방자치단체도 과세대상 재화 또는 용역을 공급하는 경우 부가가치세 납세의무자가 될 수 있다.'
-        ],answer:2,
-        explanation:'③이 옳지 않습니다. 영세율 적용 사업도 부가가치세 과세사업이므로 사업자등록의무가 있습니다. 영세율은 매출세액이 0이면서 관련 매입세액 공제가 가능한 제도입니다.',
-        key:'영세율 사업자는 과세사업자이며 사업자등록의무가 있다. 재화의 수입자는 사업자 여부와 관계없이 납세의무자가 될 수 있다.'
-      },
-      {
-        id:'tax-invoice',type:'세금계산서 발급의무 면제',
-        prompt:'다음 중 부가가치세법상 세금계산서 발급의무가 면제되지 않는 경우는?',
-        choices:[
-          '일반 소비자를 대상으로 시내버스 운송용역을 제공하는 경우',
-          '목욕업자가 소비자에게 목욕용역을 제공하는 경우',
-          '제조업자가 구매확인서에 의하여 수출업자에게 재화를 공급하는 경우',
-          '부동산임대업자가 부동산임대용역의 간주임대료를 받는 경우'
-        ],answer:2,
-        explanation:'③은 세금계산서 발급의무가 면제되지 않습니다. 구매확인서에 의한 수출용 재화의 공급은 영세율이 적용되지만 영세율 세금계산서를 발급해야 합니다. 나머지는 세금계산서 발급의무가 면제되는 대표적인 경우입니다.',
-        key:'구매확인서 또는 내국신용장에 의한 수출용 재화 공급은 영세율 거래이며 세금계산서를 발급한다.'
-      },
-      {
-        id:'accounting-assumptions',type:'회계의 기본가정과 특징',addedDate:'2026-09-08',
-        prompt:'다음 중 회계의 기본가정 또는 특징에 관한 설명으로 옳지 않은 것은?',
-        choices:[
-          '기업실체의 가정에 따라 기업의 경제활동은 소유주의 경제활동과 구분하여 측정·보고한다.',
-          '계속기업의 가정은 기업이 예상 가능한 미래에도 영업을 계속한다고 전제한다.',
-          '기간별 보고를 위해 기업의 존속기간을 일정한 회계기간으로 나누어 정보를 측정·보고한다.',
-          '수익과 비용은 원칙적으로 현금이 실제로 들어오거나 나갈 때에만 인식한다.'
-        ],answer:3,
-        explanation:'④가 옳지 않습니다. 기업회계는 원칙적으로 발생주의를 적용하므로 현금의 수수 여부와 관계없이 수익이 실현되고 비용이 발생한 기간에 인식합니다.',
-        key:'기업실체·계속기업·기간별 보고는 기본가정이며, 수익과 비용은 현금주의가 아니라 발생주의로 인식한다.'
-      },
-      {
-        id:'financial-statements',type:'재무제표의 구성',addedDate:'2026-09-08',
-        prompt:'다음 중 일반적으로 재무제표를 구성하는 보고서에 해당하지 않는 것은?',
-        choices:[
-          '일정 시점의 자산·부채·자본을 나타내는 재무상태표',
-          '일정 기간의 경영성과를 나타내는 손익계산서',
-          '재무제표 항목에 관한 추가 정보를 제공하는 주석',
-          '각 계정의 차변·대변 합계와 잔액을 대조하는 합계잔액시산표'
-        ],answer:3,
-        explanation:'④ 합계잔액시산표는 계정 기록의 집계와 대차평균 확인을 위한 결산 보조자료이며 재무제표에 포함되지 않습니다.',
-        key:'재무제표에는 재무상태표·손익계산서·현금흐름표·자본변동표와 주석이 포함되며 시산표는 포함되지 않는다.'
-      },
-      {
-        id:'comprehensive-income-equity',type:'기타포괄손익과 자본',addedDate:'2026-09-08',
-        prompt:'다음의 자본 관련 항목 중 당기 포괄손익계산서의 기타포괄손익에 영향을 미치는 것은?',
-        choices:['주식발행초과금','매도가능증권평가이익','자기주식처분이익','감자차손'],answer:1,
-        explanation:'② 매도가능증권평가이익은 기타포괄손익누계액에 포함되며 그 증감은 포괄손익계산서의 기타포괄손익에 영향을 미칩니다.',
-        key:'매도가능증권평가손익은 기타포괄손익 항목이고, 주식발행·자기주식처분·감자에서 생기는 항목은 자본거래 항목이다.'
-      },
-      {
-        id:'service-dept-repeat-20260908',type:'보조부문 원가배분',addedDate:'2026-09-08',
-        prompt:'다음 중 보조부문 원가배분방법에 관한 설명으로 옳지 않은 것은?',
-        choices:[
-          '직접배분법은 보조부문 상호 간의 용역수수관계를 고려하지 않는다.',
-          '상호배분법은 보조부문 상호 간의 용역수수관계를 완전히 반영한다.',
-          '단계배분법은 보조부문 상호 간의 용역수수관계를 모두 완전히 반영한다.',
-          '어느 방법을 사용하더라도 보조부문의 원가는 최종적으로 제조부문에 배분된다.'
-        ],answer:2,
-        explanation:'③이 옳지 않습니다. 단계배분법은 정해진 순서에 따라 보조부문 상호 간의 용역수수관계를 일부만 반영합니다. 완전히 반영하는 방법은 상호배분법입니다.',
-        key:'직접배분법은 상호용역을 무시하고, 단계배분법은 일부 반영하며, 상호배분법은 완전히 반영한다.'
-      },
-      {
-        id:'total-manufacturing-cost',type:'당기총제조원가 계산',addedDate:'2026-09-08',
-        prompt:'다음 자료에 의한 당기총제조원가는 얼마인가? 단, 노무원가는 발생주의에 따라 계산한다.',
-        data:'기초원재료 420,000원  ·  기말원재료 500,000원\n당기원재료매입액 1,580,000원  ·  제조간접원가 760,000원\n전기미지급임금액 180,000원  ·  당기지급임금액 420,000원  ·  당기미지급임금액 280,000원\n기초재공품 310,000원',
-        choices:['2,590,000원','2,780,000원','3,090,000원','3,280,000원'],answer:1,
-        explanation:'직접재료원가는 420,000+1,580,000-500,000=1,500,000원입니다. 직접노무원가는 420,000+280,000-180,000=520,000원입니다. 따라서 당기총제조원가는 1,500,000+520,000+760,000=2,780,000원입니다.',
-        key:'당기총제조원가 = 직접재료원가 + 직접노무원가 + 제조간접원가. 기초재공품은 당기제품제조원가 계산 단계에서 사용한다.'
-      },
-      {
-        id:'process-costing',type:'종합원가계산',addedDate:'2026-09-08',
-        prompt:'다음 중 종합원가계산에 관한 설명으로 옳지 않은 것은?',
-        choices:[
-          '동종 제품을 연속적으로 대량 생산하는 업종에 적합하다.',
-          '정상공손원가는 일정한 조건 아래 양품의 원가에 포함될 수 있다.',
-          '평균법은 기초재공품원가와 당기발생원가를 합하여 완성품과 기말재공품에 배분한다.',
-          '제조원가를 개별 작업지시서별로 집계하여 각 주문의 원가를 계산한다.'
-        ],answer:3,
-        explanation:'④는 개별원가계산에 관한 설명입니다. 종합원가계산은 공정별로 원가를 집계하여 동종 제품의 평균 단위원가를 계산합니다.',
-        key:'종합원가계산은 연속 대량생산에, 개별원가계산은 주문·작업별 생산에 적합하다.'
-      },
-      {
-        id:'vat-bad-debt-reason',type:'부가가치세 대손사유',addedDate:'2026-09-08',
-        prompt:'다음 중 부가가치세법상 대손세액공제를 적용할 수 있는 대손사유에 해당하지 않는 것은?',
-        choices:[
-          '소멸시효가 완성된 어음 또는 수표',
-          '채무자의 파산이나 사업의 폐지로 회수할 수 없는 채권',
-          '부도발생일부터 6개월 이상 지난 중소기업의 외상매출금으로서 부도발생일 이전에 발생한 것',
-          '특수관계인과의 거래에서 발생한 중소기업의 외상매출금으로서 회수기일이 2년 이상 지난 것'
-        ],answer:3,
-        explanation:'④는 대손사유에 해당하지 않습니다. 회수기일이 2년 이상 지난 중소기업 외상매출금이라도 특수관계인과의 거래로 발생한 채권은 해당 대손사유에서 제외됩니다.',
-        key:'중소기업의 2년 경과 외상매출금 규정을 적용할 때 특수관계인 거래에서 발생한 채권은 제외한다.'
-      },
-      {
-        id:'vat-supply-timing',type:'부가가치세 공급시기',addedDate:'2026-09-08',
-        prompt:'다음 중 부가가치세법상 재화의 공급시기에 관한 설명으로 옳지 않은 것은?',
-        choices:[
-          '폐업 시 잔존재화는 폐업하는 때를 공급시기로 본다.',
-          '내국물품을 외국으로 반출하는 수출은 수출재화의 선적일을 공급시기로 본다.',
-          '무인판매기로 재화를 공급하는 경우 무인판매기에서 현금을 꺼내는 때를 공급시기로 본다.',
-          '위탁자를 알 수 있는 위탁판매는 위탁자가 수탁자에게 판매를 맡기는 때를 공급시기로 본다.'
-        ],answer:3,
-        explanation:'④가 옳지 않습니다. 위탁판매의 공급시기는 수탁자가 위탁재화를 실제로 공급하는 때입니다. 위탁자가 판매를 맡긴 때가 아닙니다.',
-        key:'위탁판매의 공급시기는 수탁자의 실제 판매 시점이다.'
-      },
-      {
-        id:'net-income-securities-property-20260909',type:'당기순이익 증감 계산',addedDate:'2026-09-09',
-        prompt:'다음의 거래를 적절하게 회계처리하였을 경우 당기순이익의 증감액은 얼마인가? 단, 주어진 자료 외의 거래는 없다고 가정한다.',
-        data:'매도가능증권: 장부금액 6,400,000원, 결산일 공정가치 5,700,000원\n단기매매증권: 장부금액 4,200,000원, 결산일 공정가치 4,680,000원\n투자부동산: 장부금액 12,000,000원, 처분금액 11,650,000원',
-        choices:['130,000원 감소','130,000원 증가','830,000원 감소','830,000원 증가'],answer:1,
-        explanation:'② 130,000원 증가가 정답입니다. 매도가능증권 평가손실 700,000원은 기타포괄손익누계액으로 처리하므로 당기순이익에서 제외합니다. 단기매매증권평가이익은 4,680,000원-4,200,000원=480,000원이고, 투자자산처분손실은 12,000,000원-11,650,000원=350,000원입니다. 따라서 당기순이익은 480,000원-350,000원=130,000원 증가합니다.',
-        key:'당기순이익에는 단기매매증권 평가손익과 투자자산 처분손익을 반영하지만, 매도가능증권 평가손익은 기타포괄손익으로 처리하여 제외한다.'
-      },
-      {
-        id:'ending-equity-equation-20260909',type:'기말자본 계산',addedDate:'2026-09-09',
-        prompt:'㈜푸른길의 재무상태와 당기 중 거래가 다음과 같을 때 기말자본은 얼마인가?',
-        data:'기초자산 1,200,000원  ·  기초부채 450,000원\n기말부채 920,000원  ·  당기 중 추가출자 180,000원  ·  이익배당액 80,000원\n총수익 1,500,000원  ·  총비용 1,220,000원',
-        choices:['1,050,000원','1,090,000원','1,130,000원','1,210,000원'],answer:2,
-        explanation:'③ 1,130,000원이 정답입니다. 기초자본은 기초자산 1,200,000원-기초부채 450,000원=750,000원이고, 당기순이익은 총수익 1,500,000원-총비용 1,220,000원=280,000원입니다. 따라서 기말자본은 750,000원+추가출자 180,000원-이익배당액 80,000원+당기순이익 280,000원=1,130,000원입니다.',
-        key:'기말자본 = 기초자본 + 추가출자 - 이익배당액 + 당기순이익. 기초자본은 기초자산-기초부채, 당기순이익은 총수익-총비용이다.'
-      },
-      {
-        id:'qualitative-relevance-20260909',type:'재무정보의 질적특성',addedDate:'2026-09-09',
-        prompt:'다음 중 재무정보가 정보이용자의 의사결정 목적과 관련되어야 한다는 목적적합성의 구성요소에 해당하지 않는 것은?',
-        choices:['피드백가치','중립성','적시성','예측가치'],answer:1,
-        explanation:'② 중립성이 정답입니다. 목적적합성은 예측가치와 피드백가치를 가지며 정보가 의사결정 시점에 이용 가능하도록 적시에 제공될 때 확보됩니다. 중립성은 표현의 충실성 및 검증가능성과 함께 신뢰성과 관련된 질적 특성입니다.',
-        key:'목적적합성: 예측가치·피드백가치·적시성. 중립성은 신뢰성과 관련된 특성이다.'
-      },
-      {
-        id:'cash-equivalents-total-20260909',type:'현금및현금성자산',addedDate:'2026-09-09',
-        prompt:'다음 항목 중 현금및현금성자산에 해당하는 항목의 합계액은 얼마인가?',
-        data:'선일자수표 420,000원\n타인발행수표 680,000원\n배당금지급통지서 320,000원\n만기 6개월 양도성예금증서 500,000원',
-        choices:['680,000원','1,000,000원','1,420,000원','1,920,000원'],answer:1,
-        explanation:'② 1,000,000원이 정답입니다. 타인발행수표 680,000원과 배당금지급통지서 320,000원은 현금으로 분류합니다. 선일자수표는 수표에 적힌 미래 날짜 전에는 현금으로 사용할 수 없고, 만기 6개월 양도성예금증서는 현금성자산의 통상적인 3개월 이내 요건을 충족하지 않습니다.',
-        key:'현금에는 타인발행수표와 배당금지급통지서가 포함된다. 선일자수표와 취득 당시 만기 3개월 초과 금융상품은 제외한다.'
-      },
-      {
-        id:'declining-balance-depreciation-20260909',type:'감가상각비 계산',addedDate:'2026-09-09',
-        prompt:'12월 말 결산법인 ㈜대한의 기계장치 자료가 다음과 같을 때 2023년 12월 31일에 계상할 감가상각비는 얼마인가? 단, 정률법을 적용하고 월할 상각한다.',
-        data:'취득일: 2022년 9월 1일\n상각률: 40%\n상각방법: 정률법\n취득원가: 12,000,000원\n내용연수: 5년\n잔존가치: 600,000원',
-        choices:['1,600,000원','3,840,000원','4,160,000원','4,800,000원'],answer:2,
-        explanation:'③ 4,160,000원이 정답입니다. 2022년 감가상각비는 12,000,000원×40%×4/12=1,600,000원입니다. 따라서 2023년 감가상각비는 (12,000,000원-1,600,000원)×40%=4,160,000원입니다.',
-        key:'정률법은 기초 장부금액에 상각률을 곱한다. 취득연도는 취득월부터 결산월까지 월할 계산한다.'
-      },
-      {
-        id:'job-order-industry-20260909',type:'개별원가계산 적용업종',addedDate:'2026-09-09',
-        prompt:'다음 중 개별원가계산을 적용하기에 가장 적합한 업종은?',
-        choices:['시멘트 제조업','조선업','제분업','정유업'],answer:1,
-        explanation:'② 조선업이 정답입니다. 선박은 개별 주문과 작업별로 원가를 집계하므로 개별원가계산이 적합합니다. 시멘트 제조업·제분업·정유업처럼 동종 제품을 연속 대량생산하는 업종에는 종합원가계산이 적합합니다.',
-        key:'개별원가계산은 건설업·조선업 등 주문별 생산에, 종합원가계산은 연속 대량생산에 적합하다.'
-      },
-      {
-        id:'overhead-variance-20260909',type:'제조간접원가 배부차이',addedDate:'2026-09-09',
-        prompt:'㈜새롬은 직접노무시간을 기준으로 제조간접원가를 배부한다. 연초 예상 직접노무시간은 60,000시간, 제조간접원가 예상액은 3,600,000원이다. 6월 실제 제조간접원가는 310,000원이고 실제 직접노무시간은 4,500시간일 때 6월의 제조간접원가 배부차이는 얼마인가?',
-        choices:['과대배부 40,000원','과소배부 40,000원','과대배부 60,000원','과소배부 60,000원'],answer:1,
-        explanation:'② 과소배부 40,000원이 정답입니다. 예정배부율은 3,600,000원÷60,000시간=60원/시간이고 예정배부액은 4,500시간×60원=270,000원입니다. 실제 발생액 310,000원이 예정배부액보다 40,000원 크므로 과소배부입니다.',
-        key:'실제 발생액이 예정배부액보다 크면 과소배부, 예정배부액이 더 크면 과대배부이다.'
-      },
-      {
-        id:'vat-tax-base-exclusion-20260909',type:'부가가치세 과세표준',addedDate:'2026-09-09',
-        prompt:'다음 중 부가가치세법상 과세표준에 포함하지 않는 것은?',
-        choices:['대가의 일부로 받는 운송비','매출에누리액','개별소비세','할부판매 시의 이자상당액'],answer:1,
-        explanation:'② 매출에누리액이 정답입니다. 재화나 용역 공급 시 품질·수량 또는 인도조건 등에 따라 통상의 대가에서 직접 공제하는 매출에누리액은 과세표준에 포함하지 않습니다. 대가의 일부인 운송비, 개별소비세, 할부판매 이자상당액은 과세표준에 포함됩니다.',
-        key:'매출에누리액과 매출할인액은 과세표준에 포함하지 않는다. 대가의 일부인 운송비·개별소비세·할부판매 이자상당액은 포함한다.'
-      },
-      {id:'scorecard-declining-balance-a-20260910',type:'감가상각비 계산',addedDate:'2026-09-10',prompt:'12월 말 결산법인 ㈜한결이 2022년 4월 1일 취득한 기계장치의 2023년 감가상각비는 얼마인가? 취득원가는 15,000,000원, 정률법 상각률은 35%, 잔존가치는 750,000원이며 월할 상각한다.',choices:['3,412,500원','3,871,875원','3,937,500원','5,250,000원'],answer:1,explanation:'2022년 감가상각비는 15,000,000원×35%×9/12=3,937,500원입니다. 2023년은 전기말 장부금액 11,062,500원에 35%를 적용하므로 3,871,875원입니다.',key:'정률법의 다음 연도 감가상각비는 취득원가가 아니라 전기말 장부금액에 상각률을 곱한다. 취득연도는 취득월을 포함하여 월할한다.',variantOf:'declining-balance-depreciation-20260909'}
-    ];
+    const problems=loadTrainingProblems();
 
-    const STORAGE_KEY='tax-accounting-theory-wrong-2026-09-01-v1';
+    const STORAGE_KEY='exam-20260914-theory';
     const circled=['①','②','③','④','⑤'];
     const $=(s,r=document)=>r.querySelector(s);
     const $$=(s,r=document)=>[...r.querySelectorAll(s)];
     const nowIso=()=>new Date().toISOString();
     const localDate=()=>{const d=new Date(),o=d.getTimezoneOffset()*60000;return new Date(d-o).toISOString().slice(0,10)};
     problems.forEach(p=>{if(!p.addedDate)p.addedDate='2026-09-01'});
-    const defaultState=()=>({startedAt:nowIso(),updatedAt:nowIso(),answers:{},checked:{},attempts:{},history:{},notes:{},passed:{},archived:{},passedAt:{},archivedAt:{},trainingCenterRestored:{},starred:{},starredAt:{},fileName:'이론_오답학습기록_2026-09-01',koAuto:true});
+    const defaultState=()=>({startedAt:nowIso(),updatedAt:nowIso(),answers:{},checked:{},attempts:{},history:{},notes:{},passed:{},archived:{},passedAt:{},archivedAt:{},trainingCenterRestored:{},starred:{},starredAt:{},fileName:`이론_새학습_학습기록_${localDate()}`,koAuto:true});
     let state=loadState();
 
     function loadState(){
@@ -400,7 +196,7 @@
       if(state.starred[id]){delete state.starred[id];delete state.starredAt[id]}else{state.starred[id]=true;state.starredAt[id]=nowIso()}
       persist();renderCard(card);
     }
-    function wrongCount(id){return (state.history[id]||[]).filter(h=>!h.correct).length}
+    function wrongCount(id){return (state.history[id]||[]).filter(h=>h.correct===false&&!h.cancelledAt).length}
     const todayView=new URLSearchParams(location.search).get('view')==='today';
     const typeView=(new URLSearchParams(location.search).get('type')||'').trim();
     const starView=new URLSearchParams(location.search).get('view')==='star';
@@ -409,8 +205,7 @@
     const sessionPassed=new Set();
     function renderCard(card){
       const id=card.dataset.id,p=getProblem(id),checked=state.checked[id],attempts=state.attempts[id]||0,result=$('.result',card);
-      if((state.selfPassed?.[id]||((state.passed?.[id]===true||state.archived?.[id])&&!sessionPassed.has(id)&&!state.starred?.[id]))&&!state.deleted?.[id])deleteTheory(id);
-      card.hidden=state.deleted?.[id]?true:starView?!(Boolean(state.starred?.[id])||p.variantOf!=null||variantSourceIds.has(id)):typeView?(p.variantOf!=null||(p.type||'').trim()!==typeView):Boolean((state.passed[id]&&!sessionPassed.has(id))||state.archived[id]||(todayView&&card.dataset.addedDate!==localDate()));
+      card.hidden=!TrainingSeason.matches(p)||state.deleted?.[id]?true:starView?!(Boolean(state.starred?.[id])||p.variantOf!=null||variantSourceIds.has(id)):typeView?(p.variantOf!=null||(p.type||'').trim()!==typeView):Boolean((state.passed[id]&&!sessionPassed.has(id))||state.archived[id]||(todayView&&card.dataset.addedDate!==localDate()));
       $('.star-one',card).setAttribute('aria-pressed',String(Boolean(state.starred?.[id])));$('.star-note',card).hidden=!state.starred?.[id];
       card.classList.toggle('correct',checked===true);card.classList.toggle('wrong',checked===false);
       result.className='result'+(checked===true?' ok':checked===false?' no':'');
@@ -443,7 +238,7 @@
       const wrong=problems.reduce((n,p)=>n+wrongCount(p.id),0);
       $('#progressText').textContent=`채점 ${solved} / ${visible.length} · 정답 ${correct} · 누적 오답 ${wrong}`;
       $('#progressFill').style.width=(visible.length?solved/visible.length*100:100)+'%';
-      let empty=$('#emptyState');if(!empty){empty=document.createElement('p');empty.id='emptyState';empty.className='notice';$('#questions').before(empty)}empty.hidden=visible.length>0;empty.textContent='현재 노출할 문제가 없습니다. 맞힌 문제는 다음 방문 때 자동으로 삭제됩니다.';
+      let empty=$('#emptyState');if(!empty){empty=document.createElement('p');empty.id='emptyState';empty.className='notice';$('#questions').before(empty)}empty.hidden=visible.length>0;empty.textContent='현재 선택한 범위에 훈련할 문제가 없습니다.';
     }
     updateDashboard();
     const questionOrder=$$('.question').map((card,index)=>({card,index}));
@@ -472,7 +267,7 @@
       const d=new Date(iso);if(Number.isNaN(d.getTime()))return false;
       return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`===localDate()
     }
-    function todayRecords(){return problems.map(p=>({p,history:(state.history[p.id]||[]).filter(h=>isToday(h.at))})).filter(x=>x.history.length)}
+    function todayRecords(){return problems.map(p=>({p,history:(state.history[p.id]||[]).filter(h=>!h.cancelledAt&&isToday(h.at))})).filter(x=>x.history.length)}
     function buildMarkdown(list=todayRecords()){
       const attempts=list.reduce((n,x)=>n+x.history.length,0);
       const correct=list.reduce((n,x)=>n+x.history.filter(h=>h.correct).length,0);
@@ -492,8 +287,8 @@
         lines.push(`## ${i+1}. ${p.type}`,'',`**문제:** ${p.prompt}`,'');
         if(p.data)lines.push('**자료:**','',...p.data.split('\n').map(x=>`- ${x}`),'');
         p.choices.forEach((c,n)=>lines.push(`- ${circled[n]} ${c}`));
-        lines.push('',`- 오늘 마지막 선택: ${choiceText(p,last.choice)}`,`- 정답: ${choiceText(p,p.answer)}`,`- 오늘 마지막 결과: ${last.correct?'정답':'오답'}`,...(state.selfPassed?.[p.id]?[`- 스스로 정답 인정(통과): ${new Date(state.selfPassedAt?.[p.id]||0).toLocaleString('ko-KR')}`]:[]),`- 오늘 채점 횟수: ${history.length}회`,`- 오늘 틀린 횟수: ${history.filter(h=>!h.correct).length}회`,'','**오늘 답변 이력:**');
-        history.forEach((h,n)=>lines.push(`- ${n+1}차 (${fmtDate(h.at)}): ${choiceText(p,h.choice)} → ${h.correct?'정답':'오답'}`));
+        lines.push('',`- 오늘 마지막 선택: ${choiceText(p,last.choice)}`,`- 정답: ${choiceText(p,p.answer)}`,`- 오늘 마지막 결과: ${last.correct?'정답':'오답'}`,...(state.selfPassed?.[p.id]?[`- 스스로 정답 인정(통과): ${new Date(state.selfPassedAt?.[p.id]||0).toLocaleString('ko-KR')}`]:[]),`- 오늘 채점 횟수: ${history.length}회`,`- 오늘 틀린 횟수: ${history.filter(h=>h.correct===false&&!h.cancelledAt).length}회`,'','**오늘 답변 이력:**');
+        history.forEach((h,n)=>lines.push(`- ${n+1}차 (${fmtDate(h.at)}): ${choiceText(p,h.choice)} → ${h.source==='notebook'?'노트 학습 · 직접 표시 / ':''}${h.correct?'정답':'오답'}`));
         lines.push('',`**핵심 학습 내용:** ${p.key}`,'',`**해설:** ${p.explanation}`,'','---','');
       });
       const starredList=problems.filter(p=>Boolean(state.starred?.[p.id]));
@@ -615,5 +410,6 @@
     TrainingGitHub.installSyncBar({onNeedToken:({mobile})=>{if(mobile)TrainingGitHub.showToast('처음 한 번만 오답 훈련센터 홈 아래쪽에서 GitHub 토큰을 연결한 뒤 다시 눌러주세요.',8000)}});
   })();
 </script>
+<script>TrainingSeason.install(problems,{state,theory:true,save:persist,refresh:updateDashboard});</script>
 </body>
 </html>

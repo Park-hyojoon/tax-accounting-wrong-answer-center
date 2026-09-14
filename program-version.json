@@ -1,12 +1,11 @@
 {
   "schemaVersion": 1,
-  "revision": 34,
-  "updatedAt": "2026-09-11T06:15:04+09:00",
+  "revision": 40,
+  "updatedAt": "2026-09-14T18:47:15+09:00",
   "files": [
     "오답_훈련센터.html",
     "일반전표_기본연습_24문제.html",
     "이론_오답응용_5문제.html",
-    "결산정리사항_연습_7문제.html",
     "매입매출전표_오답연습_3문제.html",
     "github-learning-sync.js",
     "training-ui.js",
@@ -18,7 +17,15 @@
     "program-version.json",
     "sync-helper.py",
     "start-sync-helper.ps1",
-    "오답훈련센터 시작.bat"
+    "오답훈련센터 시작.bat",
+    "season-ui.js",
+    "season.css",
+    "season-catalog.js",
+    "season.json",
+    "templates.json",
+    "data/practical.js",
+    "data/theory.js",
+    "data/voucher.js"
   ],
-  "note": "2026-09-11 54.불공 자동분개 연결 수정, 카드 분개 선택 복구, 풀이 전 유형 힌트 제거"
+  "note": "121회 응용문제 8개 등록"
 }

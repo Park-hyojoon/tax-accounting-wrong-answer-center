@@ -14,11 +14,15 @@ AI가 문제를 추가할 때 90KB짜리 HTML을 통째로 읽지 않도록 만�
   python training-tool.py add spec.json         문제와 원장 항목을 한 번에 삽입
   python training-tool.py bump mistake-intake-data.js   해당 스크립트를 불러오는 화면의 ?v=N 증가
 
-subject 값: practical(일반전표) theory(이론) closing(결산) voucher(매입매출전표)
+subject 값: practical(일반전표) theory(이론) voucher(매입매출전표)
+새 등록 계약: training-tool.cmd contract (회차별 원문 MD 자동 보관)
 """
 import json
 import re
 import sys
+import hashlib
+import tempfile
+import shutil
 from datetime import datetime
 from pathlib import Path
 
@@ -33,14 +37,12 @@ SUBJECTS = {
                       meta='practicalMeta', type_idx=0, title_idx=1, id_kind='index'),
     'theory': dict(label='이론', file='이론_오답응용_5문제.html',
                    meta='theoryMeta', type_idx=1, title_idx=2, id_kind='string'),
-    'closing': dict(label='결산', file='결산정리사항_연습_7문제.html',
-                    meta='closingMeta', type_idx=1, title_idx=2, id_kind='index'),
     'voucher': dict(label='매입매출전표', file='매입매출전표_오답연습_3문제.html',
                     meta='voucherMeta', type_idx=0, title_idx=1, id_kind='index'),
 }
 PAGES = [HUB] + [s['file'] for s in SUBJECTS.values()]
 SHARED_SCRIPTS = ['github-learning-sync.js', 'training-ui.js', 'account-search.js',
-                  LEDGER, 'mistake-memory.js']
+                  LEDGER, 'mistake-memory.js', 'season-ui.js', 'season-catalog.js']
 
 
 # ── 파일 입출력 (줄바꿈 형식 보존) ──────────────────────────────────────────
@@ -182,7 +184,7 @@ def row_strings(row_text):
 def problems_of(subject, text=None):
     """배열 리터럴의 문제 + 뒤따르는 problems.push(...) 안의 문제를 등록 순서대로 모은다."""
     info = SUBJECTS[subject]
-    text = read(info['file']) if text is None else text
+    text = read('data/' + subject + '.js') if text is None else text
     b, e, _ = find_array(text, r'(?:const|let)\s+problems\s*=\s*\[', info['label'])
     body = text[b:e]
     items = [body[s:t] for s, t in split_items(body, '{')]
@@ -331,6 +333,7 @@ def bump_program_version(note=''):
 # ── 명령: info ──────────────────────────────────────────────────────────────
 def cmd_info():
     print('# 오답 훈련센터 현재 상태\n')
+    print('새 학습: exam-20260914 · 회차별 원문 MD 필수 · 등록 계약: contract\n')
     total = 0
     hub_text = read(HUB)
     print('| 분야 | 문제 | 홈 META | 다음 추가 위치 |')
@@ -413,6 +416,14 @@ def cmd_sample(subject, count=1):
     info = SUBJECTS[subject]
     items = problems_of(subject)
     rows = meta_rows(subject)
+    if not items:
+        template = json.loads(read('templates.json'))[subject]
+        print(f'# {info["label"]}: 새 학습 0문제. 다음 인덱스 0 (이론은 새 id).')
+        print('아래는 형식 참고용이며 실제 등록된 문제가 아닙니다. variantOf는 제거하세요.')
+        print(template['problem'])
+        print('회차 원문은 originals에, 응용문제는 items에 같은 intakeId로 연결합니다.')
+        print('등록 계약: training-tool.cmd contract')
+        return
     count = max(1, min(count, len(items)))
     print(f"# {info['label']} 마지막 {count}개 (새 문제 작성 템플릿)\n")
     print(f"현재 {len(items)}문제. 새 문제는 배열 맨 뒤에 추가하며 "
@@ -456,6 +467,12 @@ def cmd_check():
                 problems_fail.append(
                     f"{info['label']} {idx}번: type 불일치 (문제 '{ptype}' vs 홈 '{mtype}')")
         # 필수 필드 누락: 그 분야 모든 문제가 갖고 있는 키가 빠지면 화면이 깨진다.
+        required={'theory':{'id','type','title','prompt','choices','answer','explanation'},
+                  'practical':{'type','title','prompt','answers'},
+                  'voucher':{'id','type','title','prompt','suppliers','accounts','voucher','variants','explanation'}}[key]
+        for idx,item in enumerate(items):
+            missing=required-set(top_keys(item))
+            if missing: problems_fail.append(f'{key} {idx}: 필수 필드 누락 {sorted(missing)}')
         if len(items) > 3:
             key_sets = [set(top_keys(x)) for x in items]
             common = set.intersection(*key_sets[:-1]) if len(key_sets) > 1 else set()
@@ -501,6 +518,15 @@ def cmd_check():
 
     # 원장
     entries = ledger_entries()
+    ledger_text=read(LEDGER)
+    b,e,_=find_array(ledger_text,r'\btopics\s*:\s*\[','topics')
+    topic_ids={field(ledger_text[b:e][s:t],'id') for s,t in split_items(ledger_text[b:e],'{')}
+    for entry in entries:
+        if field(entry,'topicId') not in topic_ids: problems_fail.append('원장 topicId 누락: '+str(field(entry,'id')))
+        for subject, raw_id, ptype in re.findall(r"source\s*:\s*'(theory|practical|voucher)'\s*,\s*id\s*:\s*('[^']+'|\d+)\s*,\s*type\s*:\s*'([^']+)'",entry):
+            candidates=problem_cache[subject]
+            target=next((p for p in candidates if field(p,'id')==raw_id.strip("'")),None) if subject=='theory' else (candidates[int(raw_id)] if int(raw_id)<len(candidates) else None)
+            if target is None or field(target,'type')!=ptype: problems_fail.append('원장 practiceRefs 연결 오류: '+str(field(entry,'id')))
     ids = [field(e, 'id') for e in entries]
     real_ids = [i for i in ids if i]
     dup = {i for i in real_ids if real_ids.count(i) > 1}
@@ -545,7 +571,7 @@ def cmd_check():
 
 
 # ── 명령: add ───────────────────────────────────────────────────────────────
-def cmd_add(spec_path):
+def apply_add(spec_path):
     spec = json.loads(Path(spec_path).read_text(encoding='utf-8'))
     items = spec.get('items') or []
     mistakes = spec.get('mistakes') or []
@@ -564,7 +590,7 @@ def cmd_add(spec_path):
     hub = read(HUB)
     for subject, subject_items in grouped.items():
         info = SUBJECTS[subject]
-        text = read(info['file'])
+        text = read('data/' + subject + '.js')
         for item in subject_items:
             # push 방식 파일은 맨 뒤 push, 나머지는 배열 끝에 붙여 인덱스를 보존한다.
             pushed = append_push(text, item['problem'])
@@ -572,17 +598,25 @@ def cmd_add(spec_path):
                 text, r'(?:const|let)\s+problems\s*=\s*\[', item['problem'], info['label'])
             hub = insert_into_array(hub, r'const\s+' + info['meta'] + r'\s*=\s*\[',
                                     item['meta'], info['meta'])
-        changed_subjects[info['file']] = text
+        changed_subjects['data/' + subject + '.js'] = text
         added[subject] = len(subject_items)
 
     for filename, text in changed_subjects.items():
         write(filename, text)
+        subject = Path(filename).stem
+        page = SUBJECTS[subject]['file']
+        html = read(page)
+        html = re.sub(re.escape(filename) + r'\?v=(\d+)', lambda m: filename+'?v='+str(int(m.group(1))+1), html)
+        write(page, html)
     if items:
         write(HUB, hub)
 
     ledger_rev = None
     if mistakes:
         text = read(LEDGER)
+        for topic in spec.get('topics',[]):
+            if not re.search(r"id\s*:\s*"+re.escape(js(topic['id'])),text):
+                text=insert_into_array(text,r'\btopics\s*:\s*\[',js(topic),'topics')
         for entry in mistakes:
             text = insert_into_array(text, r'\bentries\s*:\s*\[', entry, '원장 entries')
         m = re.search(r'(revision\s*:\s*)(\d+)', text)
@@ -604,12 +638,138 @@ def cmd_add(spec_path):
     return cmd_check()
 
 
+CONTRACT = '''# 새 기출 오답 등록 (spec 하나로 일괄 처리)
+{
+  "examRound": 121,
+  "reportedAt": "YYYY-MM-DD",
+  "originals": [{"id":"고유-접수-id", "subject":"theory|practical|voucher",
+    "questionNo":"2", "originalText":"사용자가 보낸 원문 전체(표 포함)",
+    "originalAnswer":"사용자가 보낸 답안 전체", "learnerReason":null,
+    "topicId":"유형-id", "type":"유형 이름", "tags":["유형 이름"],
+    "attachments":[], "recurrenceOf":null}],
+  "items":[{"subject":"theory", "intakeId":"고유-접수-id", "problem":"{...응용문제 JS 객체...}"}]
+}
+원본당 대표 응용문제 1개. meta와 mistakes는 자동 생성하므로 작성하지 않는다.
+문제 객체에는 type, title, prompt, addedDate 및 해당 분야 필수 답안 필드를 넣는다.
+회차 MD·원장·화면·유형목록·버전을 함께 갱신하며 실패 시 반영하지 않는다.
+기존 사건을 다시 제출할 때만 새 id와 recurrenceOf를 지정한다. 재첨부는 신규 사건이 아니다.
+추가 ★ 응용은 originals 없이 items에 variantOf가 있는 객체를 주고 examRound와 tags를 객체에 명시한다.
+실수 원인은 사용자가 말하지 않았으면 null. 태그는 학습 유형이며 원인 추측이 아니다.
+'''
+
+
+def js(value):
+    if isinstance(value, str):
+        return "'" + value.replace('\\', '\\\\').replace("'", "\\'").replace('\r', '\\r').replace('\n', '\\n').replace('</', '<\\/') + "'"
+    if isinstance(value, dict):
+        return '{'+','.join(k+':'+js(v) for k,v in value.items())+'}'
+    if isinstance(value, list): return '['+','.join(js(v) for v in value)+']'
+    return json.dumps(value, ensure_ascii=False)
+
+
+def cmd_add(spec_path):
+    """Stage complete batch + raw evidence; publish locally only after check passes."""
+    global ROOT
+    active_root = ROOT
+    spec = json.loads(Path(spec_path).read_text(encoding='utf-8'))
+    originals = spec.get('originals', [])
+    items = spec.get('items', [])
+    existing = json.loads(read('intake-index.json')) if (ROOT/'intake-index.json').exists() else []
+    ids = {x['id'] for x in existing}
+    round_no = spec.get('examRound')
+    date = spec.get('reportedAt', datetime.now().astimezone().strftime('%Y-%m-%d'))
+    if originals and (not isinstance(round_no, int) or round_no < 1):
+        raise SystemExit('[오류] examRound에 실제 기출 회차가 필요합니다.')
+    if not re.fullmatch(r'\d{4}-\d{2}-\d{2}',date): raise SystemExit('[오류] reportedAt 날짜 형식')
+    counts = {s:len(problems_of(s)) for s in SUBJECTS}
+    normalized=[]; mistakes=[]; topics=[]; catalog=json.loads(read('season-catalog.js').split('=',1)[1].strip().rstrip(';'))
+    by_id={}
+    for original in originals:
+        for key in ['id','subject','questionNo','originalText','originalAnswer','type']:
+            if not original.get(key): raise SystemExit(f'[오류] 원본 필수 항목 {key} 누락')
+        if original['subject'] not in SUBJECTS: raise SystemExit('[오류] 결산·장부 조회는 KcLep에서 훈련합니다.')
+        if original['id'] in ids: raise SystemExit('[오류] 이미 기록한 접수 id입니다: '+original['id'])
+        ids.add(original['id']); by_id[original['id']]=original
+        if original.get('recurrenceOf') and original['recurrenceOf'] not in {x['id'] for x in existing}:
+            raise SystemExit('[오류] recurrenceOf에 해당하는 기존 사건이 없습니다.')
+    linked=set()
+    for order,item in enumerate(items,1):
+        subject=item['subject']
+        if subject not in SUBJECTS: raise SystemExit('[오류] 지원하지 않는 분야')
+        problem=item['problem'].strip(); original=by_id.get(item.get('intakeId'))
+        is_variant='variantOf' in top_keys(problem)
+        if not original and not is_variant: raise SystemExit('[오류] 대표 응용문제에는 원본 intakeId가 필요합니다.')
+        if original and (original['id'] in linked or original['subject']!=subject): raise SystemExit('[오류] 원본당 같은 분야 대표문제 1개만 연결하세요.')
+        ptype=field(problem,'type'); title=field(problem,'title')
+        if not ptype or not title or field(problem,'addedDate')!=date: raise SystemExit('[오류] type/title/addedDate를 확인하세요.')
+        if original and original['type']!=ptype: raise SystemExit('[오류] 원본과 문제 type 불일치')
+        tags=(original or {}).get('tags') or [ptype]
+        if not isinstance(tags,list) or not all(isinstance(tag,str) and tag for tag in tags): raise SystemExit('[오류] tags는 문자열 배열입니다.')
+        pid=field(problem,'id') or f"exam-{round_no}-{subject}-{counts[subject]}"
+        extra={}
+        if not field(problem,'id'): extra['id']=pid
+        if original:
+            extra.update(examRound=round_no,sourceQuestionNo=str(original['questionNo']),intakeId=original['id'],tags=tags)
+        if extra: problem=problem[:-1].rstrip()+','+js(extra)[1:]
+        index=counts[subject]; counts[subject]+=1
+        ref_id=pid if subject=='theory' else index
+        meta=([pid,ptype,title,date,order] if subject=='theory' else [ptype,title,date,order])+(['variant'] if is_variant else [])
+        normalized.append({'subject':subject,'problem':problem,'meta':js(meta)})
+        catalog.append({'subject':subject,'id':ref_id,'examRound':round_no or int(field(problem,'examRound') or 0),'questionNo':str((original or {}).get('questionNo','')),'type':ptype,'tags':tags,'title':title})
+        if original:
+            linked.add(original['id']); topic=original.get('topicId') or 'topic-'+hashlib.sha256(ptype.encode()).hexdigest()[:12]
+            topics.append({'id':topic,'label':ptype})
+            entry={'id':original['id'],'source':'user-submitted','evidenceStatus':'confirmed','topicId':topic,'title':title,'originalCue':original['originalText'][:320],'learnerReason':original.get('learnerReason'),'reportedAt':date,'registeredDate':date,'examRound':round_no,'questionNo':str(original['questionNo']),'practiceRefs':[{'source':subject,'id':ref_id,'type':ptype}],'provenance':f'기출 원본 오답/{round_no}회 기출 문제 이론 실무 오답 데이터.md'}
+            if original.get('recurrenceOf'): entry.update(recurrenceOf=original['recurrenceOf'],recurrenceEvidence=original.get('recurrenceEvidence','사용자가 해당 기출을 다시 틀렸다고 직접 제출'))
+            mistakes.append(js(entry)); existing.append({'id':original['id'],'examRound':round_no,'subject':subject,'questionNo':str(original['questionNo']),'reportedAt':date})
+    if linked!=set(by_id): raise SystemExit('[오류] 모든 원본에 대표 응용문제 1개를 연결하세요.')
+    if not items: raise SystemExit('[오류] items가 없습니다.')
+    parent=ROOT/'또 틀렸다!';parent.mkdir(exist_ok=True)
+    with tempfile.TemporaryDirectory(prefix='registration-',dir=parent) as directory:
+        stage=Path(directory)
+        paths=PAGES+SHARED_SCRIPTS+[VERSION_FILE,'season-catalog.js']+['data/'+s+'.js' for s in SUBJECTS]
+        for name in paths:
+            target=stage/name;target.parent.mkdir(parents=True,exist_ok=True);shutil.copy2(ROOT/name,target)
+        stage_spec=stage/'batch.json';stage_spec.write_text(json.dumps({'items':normalized,'mistakes':mistakes,'topics':topics,'note':f'{round_no or "추가"}회 응용문제 {len(items)}개 등록'},ensure_ascii=False),encoding='utf-8')
+        try:
+            ROOT=stage
+            result=apply_add(stage_spec)
+            if result: return result
+            write('season-catalog.js','window.TrainingSeasonCatalog='+json.dumps(catalog,ensure_ascii=False,separators=(',',':'))+';\n')
+            bump_version('season-catalog.js')
+        finally: ROOT=active_root
+        updates={name:(stage/name).read_bytes() for name in paths}
+        if originals:
+            name=f'기출 원본 오답/{round_no}회 기출 문제 이론 실무 오답 데이터.md'
+            path=ROOT/name
+            content=path.read_text(encoding='utf-8') if path.exists() else f'# {round_no}회 기출 문제 이론 실무 오답 데이터\n\n사용자가 직접 제출한 원문 기록입니다. AI 응용문제와 훈련 중 채점 횟수를 실제 기출 오답으로 세지 않습니다.\n'
+            for original in originals:
+                content+=f'\n## {date} · {SUBJECTS[original["subject"]]["label"]} · {original["questionNo"]}번\n\n- 접수 ID: {original["id"]}\n- 유형: {original["type"]}\n- 학습자 설명: {original.get("learnerReason") or "미제공 (추정하지 않음)"}\n\n### 직접 제출 원문\n\n{original["originalText"]}\n\n### 직접 제출 답안\n\n{original["originalAnswer"]}\n'
+                if original.get('attachments'): content+='\n### 첨부 자료\n\n'+'\n'.join('- '+str(x) for x in original['attachments'])+'\n'
+            updates[name]=content.encode('utf-8');updates['intake-index.json']=(json.dumps(existing,ensure_ascii=False,indent=2)+'\n').encode('utf-8')
+        before={name:(ROOT/name).read_bytes() if (ROOT/name).exists() else None for name in updates}
+        try:
+            for name,data in updates.items():
+                path=ROOT/name;path.parent.mkdir(parents=True,exist_ok=True);path.write_bytes(data)
+        except Exception:
+            for name,data in before.items():
+                path=ROOT/name
+                if data is None: path.unlink(missing_ok=True)
+                else:path.write_bytes(data)
+            raise
+    print(f'새 학습 등록 완료: {len(items)}문제 / 원본 MD {len(originals)}건. 동기화 버튼으로 전송하세요.')
+    return 0
+
+
 # ── 진입점 ──────────────────────────────────────────────────────────────────
 def main(argv):
     if not argv or argv[0] in ('-h', '--help', 'help'):
         print(__doc__)
         return 0
     cmd = argv[0]
+    if cmd == 'contract':
+        print(CONTRACT)
+        return 0
     if cmd == 'info':
         cmd_info()
         return 0

@@ -7,7 +7,7 @@ $failureLog = Join-Path $PSScriptRoot '.sync-helper-launcher.log'
 function Test-SyncHelper {
     try {
         $response = Invoke-RestMethod -Uri $statusUrl -Method Get -TimeoutSec 2
-        return $response.helper -eq 'tax-accounting-sync-helper'
+        return $response.helper -eq 'tax-accounting-sync-helper' -and $response.season -eq 'exam-20260914'
     }
     catch {
         return $false
@@ -17,6 +17,11 @@ function Test-SyncHelper {
 if (Test-SyncHelper) {
     exit 0
 }
+
+# Restart only this folder's older helper after a program upgrade.
+Get-CimInstance Win32_Process -Filter "Name = 'python.exe' OR Name = 'pythonw.exe'" -ErrorAction SilentlyContinue |
+    Where-Object { $_.CommandLine -and $_.CommandLine.Contains($helperScript) } |
+    ForEach-Object { Stop-Process -Id $_.ProcessId -ErrorAction SilentlyContinue }
 
 $pythonCandidates = [System.Collections.Generic.List[string]]::new()
 $pythonw = Get-Command 'pythonw.exe' -ErrorAction SilentlyContinue
