@@ -11,7 +11,7 @@
   'use strict';
   return {
     schemaVersion: 1,
-    revision: 8,
+    revision: 10,
     recordedOn: '2026-09-14',
     coverageNote:'2026-09-14 새 학습 이후 사용자가 직접 제출한 기출 오답만 집계합니다.',
     topics: [
@@ -22,7 +22,13 @@
   {id:'prepaid-insurance-expensed-first',label:'보험료 기간배분과 선급비용'},
   {id:'accrued-interest-expense',label:'기간경과 이자비용과 미지급비용'},
   {id:'sales-freight-cash-receipt',label:'판매 운반비와 현금영수증 과세매입'},
-  {id:'production-welfare-credit-card',label:'생산부 복리후생비와 신용카드 과세매입'}
+  {id:'production-welfare-credit-card',label:'생산부 복리후생비와 신용카드 과세매입'},
+  {id:'development-cost-capitalization',label:'신제품 개발비의 자산 처리'},
+  {id:'individual-cash-sale-receipt',label:'비사업자 현금판매와 현금영수증'},
+  {id:'private-expense-nondeductible-vat',label:'업무무관 지출과 매입세액 불공제'},
+  {id:'operating-lease-card-exempt',label:'운용리스료 면세매입과 카드결제'},
+  {id:'purchase-freight-capitalized-correction',label:'상품 매입 운송비의 취득원가 처리'},
+  {id:'manufacturing-overhead-direct-labor-allocation',label:'직접노무비 기준 제조간접비 배부'}
 ],
     entries: [
   {id:'exam121-theory-reliability-20260914',source:'user-submitted',evidenceStatus:'confirmed',topicId:'reliability-qualitative-characteristics',title:'회계정보의 질적 특성 판단',originalCue:'다음 중 회계정보의 질적 특성 중 신뢰성과 관련이 없는 것은?\n\n① 표현의 충실성\n② 적시성\n③ 검증가능성\n④ 중립성',learnerReason:null,reportedAt:'2026-09-14',registeredDate:'2026-09-14',examRound:121,questionNo:'이론-회계정보 질적 특성',practiceRefs:[{source:'theory',id:'exam121-reliability-variant',type:'회계정보의 신뢰성 구성요소'}],provenance:'기출 원본 오답/121회 기출 문제 이론 실무 오답 데이터.md'},
@@ -32,7 +38,13 @@
   {id:'exam121-practical-prepaid-insurance-20260914',source:'user-submitted',evidenceStatus:'confirmed',topicId:'prepaid-insurance-expensed-first',title:'영업부 차량 보험료의 결산 정리',originalCue:'영업부 차량 보험료(보험기간: 2025년 4월 1일~2026년 3월 31일) 1,200,000원을 4월 1일에 법인카드로 결제하고 전액 보험료(판관비)로 회계처리하였다. 보험료는 월할 계산한다. 결산정리분개를 하시오.',learnerReason:null,reportedAt:'2026-09-14',registeredDate:'2026-09-14',examRound:121,questionNo:'실무-영업부 차량 보험료',practiceRefs:[{source:'practical',id:0,type:'보험료 기간배분과 선급비용'}],provenance:'기출 원본 오답/121회 기출 문제 이론 실무 오답 데이터.md'},
   {id:'exam121-practical-accrued-interest-20260914',source:'user-submitted',evidenceStatus:'confirmed',topicId:'accrued-interest-expense',title:'장기차입금 이자의 결산 정리',originalCue:'남부은행으로부터 2025년 7월 1일에 차입한 2년 만기 차입금 120,000,000원(원리금 일시상환, 이자율 연 10%)에 대한 기간경과분 이자비용을 일반전표에 입력하시오. 이자비용은 월할 계산한다.',learnerReason:null,reportedAt:'2026-09-14',registeredDate:'2026-09-14',examRound:121,questionNo:'실무-차입금 기간경과 이자',practiceRefs:[{source:'practical',id:1,type:'기간경과 이자비용과 미지급비용'}],provenance:'기출 원본 오답/121회 기출 문제 이론 실무 오답 데이터.md'},
   {id:'exam121-voucher-freight-cash-receipt-20260914',source:'user-submitted',evidenceStatus:'confirmed',topicId:'sales-freight-cash-receipt',title:'제품 출고 운송비 지급',originalCue:'2025년 8월 1일 제품판매를 위한 운반비를 현금으로 지출하고 현금영수증(지출증빙용)을 수취하였다. 현금영수증의 공급가액은 100,000원, 부가세는 10,000원, 총 거래금액은 110,000원이며 공급처는 ㈜달려라운수이다.',learnerReason:null,reportedAt:'2026-09-14',registeredDate:'2026-09-14',examRound:121,questionNo:'실무-매입매출전표 운반비',practiceRefs:[{source:'voucher',id:0,type:'판매 운반비와 현금영수증 과세매입'}],provenance:'기출 원본 오답/121회 기출 문제 이론 실무 오답 데이터.md'},
-  {id:'exam121-voucher-production-welfare-card-20260914',source:'user-submitted',evidenceStatus:'confirmed',topicId:'production-welfare-credit-card',title:'생산부 행사 기념품 구입',originalCue:'2025년 10월 2일 생산부 가족모임 야외행사 기념품 50개를 구입하여 사용하고 국민카드(법인)로 결제하였다. 신용카드매출전표의 공급가액은 1,000,000원, 부가세는 100,000원, 합계는 1,100,000원이며 공급처는 피크닉이다.',learnerReason:null,reportedAt:'2026-09-14',registeredDate:'2026-09-14',examRound:121,questionNo:'실무-매입매출전표 생산부 기념품',practiceRefs:[{source:'voucher',id:1,type:'생산부 복리후생비와 신용카드 과세매입'}],provenance:'기출 원본 오답/121회 기출 문제 이론 실무 오답 데이터.md'}
+  {id:'exam121-voucher-production-welfare-card-20260914',source:'user-submitted',evidenceStatus:'confirmed',topicId:'production-welfare-credit-card',title:'생산부 행사 기념품 구입',originalCue:'2025년 10월 2일 생산부 가족모임 야외행사 기념품 50개를 구입하여 사용하고 국민카드(법인)로 결제하였다. 신용카드매출전표의 공급가액은 1,000,000원, 부가세는 100,000원, 합계는 1,100,000원이며 공급처는 피크닉이다.',learnerReason:null,reportedAt:'2026-09-14',registeredDate:'2026-09-14',examRound:121,questionNo:'실무-매입매출전표 생산부 기념품',practiceRefs:[{source:'voucher',id:1,type:'생산부 복리후생비와 신용카드 과세매입'}],provenance:'기출 원본 오답/121회 기출 문제 이론 실무 오답 데이터.md'},
+  {id:'exam123-practical-development-cost-20260915',source:'user-submitted',evidenceStatus:'confirmed',topicId:'development-cost-capitalization',title:'외부기관 신제품 개발용역비 지급',originalCue:'12월 05일 한국대학교에 의뢰한 신제품 개발에 따른 연구용역비 30,000,000원을 보통예금에서 지급하였다(단, 자산으로 회계처리할 것).',learnerReason:null,reportedAt:'2026-09-15',registeredDate:'2026-09-15',examRound:123,questionNo:'문항 번호 미제공',practiceRefs:[{source:'practical',id:2,type:'신제품 개발비의 자산 처리'}],provenance:'기출 원본 오답/123회 기출 문제 이론 실무 오답 데이터.md'},
+  {id:'exam123-voucher-individual-cash-sale-20260915',source:'user-submitted',evidenceStatus:'confirmed',topicId:'individual-cash-sale-receipt',title:'개인 고객에게 제품 현금판매',originalCue:'2025년 9월 2일 비사업자인 개인 김영철에게 제품을 현금판매하고 현금영수증을 발행하였다. 현금영수증의 공급가액은 800,000원, 부가세는 80,000원, 총 거래금액은 880,000원이다.',learnerReason:null,reportedAt:'2026-09-15',registeredDate:'2026-09-15',examRound:123,questionNo:'문항 번호 미제공',practiceRefs:[{source:'voucher',id:2,type:'비사업자 현금판매와 현금영수증'}],provenance:'기출 원본 오답/123회 기출 문제 이론 실무 오답 데이터.md'},
+  {id:'exam123-voucher-private-expense-nondeductible-20260915',source:'user-submitted',evidenceStatus:'confirmed',topicId:'private-expense-nondeductible-vat',title:'대표이사 개인용 운동기구 구입',originalCue:'2025년 10월 12일 대표이사 김경안이 개인 건강관리를 위하여 ㈜건강나라에서 운동기구 1대를 1,320,000원(부가가치세 포함)에 구입하였다. 보통예금으로 이체하고 전자세금계산서를 발급받았다. 업무와 관련 없는 지출은 가지급금 계정을 사용하고 거래처는 김경안으로 선택한다.',learnerReason:null,reportedAt:'2026-09-15',registeredDate:'2026-09-15',examRound:123,questionNo:'문항 번호 미제공',practiceRefs:[{source:'voucher',id:3,type:'업무무관 지출과 매입세액 불공제'}],provenance:'기출 원본 오답/123회 기출 문제 이론 실무 오답 데이터.md'},
+  {id:'exam123-voucher-operating-lease-card-exempt-20260915',source:'user-submitted',evidenceStatus:'confirmed',topicId:'operating-lease-card-exempt',title:'영업부 차량 운용리스료 결제',originalCue:'2025년 11월 20일 운용리스로 사용 중인 영업부서 차량의 리스료 계산서를 발급받고 법인카드인 하나카드로 결제하였다. 계산서의 공급가액은 1,100,000원이고 공급자는 ㈜차차캐피탈이며 전자계산서이다. 임차료 계정을 사용한다.',learnerReason:null,reportedAt:'2026-09-15',registeredDate:'2026-09-15',examRound:123,questionNo:'문항 번호 미제공',practiceRefs:[{source:'voucher',id:4,type:'운용리스료 면세매입과 카드결제'}],provenance:'기출 원본 오답/123회 기출 문제 이론 실무 오답 데이터.md'},
+  {id:'exam123-voucher-purchase-freight-correction-20260915',source:'user-submitted',evidenceStatus:'confirmed',topicId:'purchase-freight-capitalized-correction',title:'상품 입고 운송비의 입력 수정',originalCue:'2025년 9월 10일 굿배송㈜에 현금으로 지급한 운송비 220,000원(부가가치세 포함)은 상품 매입 과정에서 발생했으나 일반전표에 운반비(판) 220,000원 / 현금 220,000원으로 입력하였다. 운송비의 전자세금계산서는 정상 발급받았다. 기존 일반전표를 삭제하고 매입매출전표를 입력한다.',learnerReason:null,reportedAt:'2026-09-15',registeredDate:'2026-09-15',examRound:123,questionNo:'문항 번호 미제공',practiceRefs:[{source:'voucher',id:5,type:'상품 매입 운송비의 취득원가 처리'}],provenance:'기출 원본 오답/123회 기출 문제 이론 실무 오답 데이터.md'},
+  {id:'exam123-theory-overhead-allocation-20260915',source:'user-submitted',evidenceStatus:'confirmed',topicId:'manufacturing-overhead-direct-labor-allocation',title:'제조지시서별 원가 배부',originalCue:'다음의 자료로 제조지시서#1의 제조간접비를 구하면 얼마인가? 단, 제조간접비는 직접노무비를 기준으로 배분한다.\n\n| 분류 | 제조지시서#1 | 총원가 |\n|---|---:|---:|\n| 직접재료비 | 100,000원 | 200,000원 |\n| 직접노무비 | 70,000원 | 140,000원 |\n| 제조간접비 | (     ) | 280,000원 |\n\n① 60,000원\n② 100,000원\n③ 120,000원\n④ 140,000원',learnerReason:null,reportedAt:'2026-09-15',registeredDate:'2026-09-15',examRound:123,questionNo:'문항 번호 미제공',practiceRefs:[{source:'theory',id:'exam123-overhead-allocation-variant',type:'직접노무비 기준 제조간접비 배부'}],provenance:'기출 원본 오답/123회 기출 문제 이론 실무 오답 데이터.md'}
 ],
     signals: [],
     notes: ['회차별 직접 제출 원문은 PC의 기출 원본 오답 폴더에 MD로 보관합니다.']

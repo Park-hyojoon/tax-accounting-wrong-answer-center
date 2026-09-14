@@ -176,6 +176,25 @@ def top_keys(obj_text):
     return keys
 
 
+def has_raw_linebreak_in_js_string(text):
+    """작은 JS 문제 조각의 따옴표 문자열 안에 실제 개행이 있는지 검사한다."""
+    quote = None
+    escaped = False
+    for ch in text:
+        if quote:
+            if escaped:
+                escaped = False
+            elif ch == '\\':
+                escaped = True
+            elif ch == quote:
+                quote = None
+            elif ch in '\r\n':
+                return True
+        elif ch in "'\"":
+            quote = ch
+    return False
+
+
 def row_strings(row_text):
     """META 한 행 ['a','b',...] 의 문자열 값들"""
     return re.findall(r"'((?:[^'\\]|\\.)*)'", row_text)
@@ -471,6 +490,9 @@ def cmd_check():
                   'practical':{'type','title','prompt','answers'},
                   'voucher':{'id','type','title','prompt','suppliers','accounts','voucher','variants','explanation'}}[key]
         for idx,item in enumerate(items):
+            if has_raw_linebreak_in_js_string(item):
+                problems_fail.append(
+                    f'{info["label"]} {idx}번: 따옴표 문자열 안의 실제 줄바꿈은 \\n으로 바꾸세요')
             missing=required-set(top_keys(item))
             if missing: problems_fail.append(f'{key} {idx}: 필수 필드 누락 {sorted(missing)}')
         if len(items) > 3:
@@ -697,6 +719,8 @@ def cmd_add(spec_path):
         subject=item['subject']
         if subject not in SUBJECTS: raise SystemExit('[오류] 지원하지 않는 분야')
         problem=item['problem'].strip(); original=by_id.get(item.get('intakeId'))
+        if has_raw_linebreak_in_js_string(problem):
+            raise SystemExit('[오류] problem의 따옴표 문자열 안에서는 실제 줄바꿈 대신 \\n을 사용하세요.')
         is_variant='variantOf' in top_keys(problem)
         if not original and not is_variant: raise SystemExit('[오류] 대표 응용문제에는 원본 intakeId가 필요합니다.')
         if original and (original['id'] in linked or original['subject']!=subject): raise SystemExit('[오류] 원본당 같은 분야 대표문제 1개만 연결하세요.')

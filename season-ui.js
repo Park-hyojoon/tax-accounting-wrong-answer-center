@@ -1,6 +1,6 @@
 (function(){
   'use strict';
-  const style=document.createElement('link');style.rel='stylesheet';style.href='season.css?v=3';document.head.append(style);
+  const style=document.createElement('link');style.rel='stylesheet';style.href='season.css?v=4';document.head.append(style);
   const params=new URLSearchParams(location.search);
   const escape=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   function matches(p){return (!params.get('exam')||String(p.examRound)===params.get('exam'))&&(!params.get('tag')||(p.tags||[]).includes(params.get('tag')))}
@@ -102,10 +102,28 @@
     }
     if(!entries.length){const p=document.createElement('p');p.className='season-empty';p.textContent='새 학습이 준비되었습니다. 아직 등록된 기출 오답은 없습니다.';host.append(p);return}
     const groups=document.createElement('div');groups.className='season-catalog';
-    [...new Set(entries.map(e=>e.examRound))].sort((a,b)=>b-a).forEach(round=>{const details=document.createElement('details');const summary=document.createElement('summary');summary.textContent=round+'회 기출 오답';details.append(summary);
-      ['theory','practical','voucher'].forEach(key=>{const rows=entries.filter(e=>e.examRound===round&&e.subject===key);if(!rows.length)return;const section=document.createElement('div');const title=document.createElement('h3');title.textContent=sources[key].label;section.append(title);
-        [...new Set(rows.flatMap(e=>e.tags||[e.type]))].forEach(tag=>{const a=document.createElement('a');a.className='season-tag';a.href=sources[key].file+'?exam='+encodeURIComponent(round)+'&tag='+encodeURIComponent(tag);a.textContent=tag+' · '+rows.filter(e=>(e.tags||[e.type]).includes(tag)).length;section.append(a)});details.append(section)});groups.append(details)});host.append(groups);
-    if(host.dataset.tagsOnly)groups.querySelectorAll(':scope>details').forEach(details=>details.open=true);
+    const title=document.createElement('h3');title.textContent='tag';groups.append(title);
+    const tags=new Map(),seen=new Set();
+    entries.filter(e=>!e.variant&&e.variantOf==null).forEach(e=>{
+      const id=e.subject+':'+e.id;if(seen.has(id))return;seen.add(id);
+      [...new Set(e.tags?.length?e.tags:[e.type])].filter(Boolean).forEach(tag=>{if(!tags.has(tag))tags.set(tag,[]);tags.get(tag).push(e)});
+    });
+    const ranked=[...tags].sort((a,b)=>b[1].length-a[1].length||a[0].localeCompare(b[0],'ko'));
+    const colors=['#155E9C','#70ABC9','#8FC4D8'];
+    ranked.forEach(([tag,rows],index)=>{
+      const subjects=[...new Set(rows.map(e=>e.subject))],a=document.createElement('a');a.className='season-tag';
+      a.textContent=tag+' · '+rows.length;a.title=rows.length+'문제 · 모든 회차 · 통과한 문제 포함';
+      a.href=subjects.length===1?sources[subjects[0]].file+'?tag='+encodeURIComponent(tag)+'&status=all':'오답_훈련센터.html?tag='+encodeURIComponent(tag);
+      if(index<3){a.style.backgroundColor=colors[index];a.style.color=index===0?'#fff':'#173042';a.dataset.rank=String(index+1)}
+      groups.append(a);
+    });host.append(groups);
+    // A shared tag spanning subjects opens each existing trainer, without loading all question data on home.
+    const selected=params.get('tag'),selectedRows=tags.get(selected);
+    if(selectedRows){
+      const panel=document.createElement('section');panel.className='section';const heading=document.createElement('h2');heading.textContent=selected+' · '+selectedRows.length+'문제';panel.append(heading);
+      [...new Set(selectedRows.map(e=>e.subject))].forEach(subject=>{const frame=document.createElement('iframe');frame.title=sources[subject].label+' · '+selected;frame.src=sources[subject].file+'?tag='+encodeURIComponent(selected)+'&status=all';frame.style.cssText='width:100%;height:80vh;border:1px solid #d5d9df;margin-top:12px';panel.append(frame)});
+      document.querySelector('main')?.prepend(panel);
+    }
   }
   window.TrainingSeason={matches,install,catalog};
 })();
