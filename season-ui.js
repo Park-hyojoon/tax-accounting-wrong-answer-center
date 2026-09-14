@@ -1,11 +1,11 @@
 (function(){
   'use strict';
-  const style=document.createElement('link');style.rel='stylesheet';style.href='season.css?v=6';document.head.append(style);
+  const style=document.createElement('link');style.rel='stylesheet';style.href='season.css?v=7';document.head.append(style);
   const params=new URLSearchParams(location.search);
   const escape=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   function matches(p){return (!params.get('exam')||String(p.examRound)===params.get('exam'))&&(!params.get('tag')||(p.tags||[]).includes(params.get('tag')))}
   function select(label,values,key){
-    const el=document.createElement('label');el.textContent=label+' ';const field=document.createElement('select');field.setAttribute('aria-label',label);
+    const el=document.createElement('label');const name=document.createElement('span');name.className='season-filter-name';name.textContent=label;el.append(name);const field=document.createElement('select');field.setAttribute('aria-label',label);
     field.add(new Option('전체',''));[...new Set(values.filter(Boolean).map(String))].sort((a,b)=>a.localeCompare(b,'ko',{numeric:true})).forEach(x=>field.add(new Option(key==='exam'?x+'회':x,x)));
     field.value=params.get(key)||'';
     field.onchange=()=>{const url=new URL(location.href);field.value?url.searchParams.set(key,field.value):url.searchParams.delete(key);location.href=url.href};el.append(field);return el;

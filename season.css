@@ -108,18 +108,27 @@ main{max-width:1560px!important}
 .mobile-filter-dialog footer{bottom:0;padding-bottom:max(8px,env(safe-area-inset-bottom));border-top:1px solid #e0e3e7}
 .mobile-filter-apply{width:100%;min-height:46px;border:0;border-radius:7px;background:#4b5563;color:#fff;font:inherit;font-weight:600}
 .mobile-filter-content{padding:6px 14px}
-.mobile-filter-dialog .study-toolbar{display:flex!important;flex-direction:column;align-items:stretch!important;padding:4px 0!important;margin:0!important;border:0!important;background:transparent!important;gap:8px!important}
-.mobile-filter-dialog .season-filters{display:grid!important;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:8px 10px;padding:0;margin:0;border:0;background:transparent}
-.mobile-filter-dialog .season-filters label{grid-column:1/-1}
-.mobile-filter-dialog .season-filters>a{display:flex;align-items:center;min-height:44px;padding:0 4px}
+.mobile-filter-dialog .study-toolbar{display:grid!important;grid-template-columns:minmax(118px,.82fr) minmax(0,1.55fr);align-items:center!important;padding:4px 0!important;margin:0!important;border:0!important;background:transparent!important;gap:8px 10px!important}
+.mobile-filter-dialog .season-filters{display:grid!important;grid-column:1/-1;grid-template-columns:minmax(0,1.45fr) minmax(100px,1fr) auto;align-items:center;gap:8px;padding:0;margin:0;border:0;background:transparent}
+.mobile-filter-dialog .season-filters label:first-child{grid-column:1/-1}
+.mobile-filter-dialog .season-filters label:nth-child(2){grid-column:auto}
+.mobile-filter-dialog .season-filters>a{display:flex;align-items:center;justify-content:center;min-height:44px;padding:0 2px;white-space:nowrap}
 .mobile-filter-dialog .study-toolbar label{display:flex;flex-direction:row!important;width:100%!important;align-items:center;justify-content:space-between;gap:10px;flex:initial!important;text-align:left;font-weight:400}
 .mobile-filter-dialog .study-toolbar label[hidden]{display:none!important}
 .mobile-filter-dialog .study-toolbar select,.mobile-filter-dialog .study-toolbar input{height:44px!important;max-width:100%!important;min-width:0!important}
-.mobile-filter-dialog .study-toolbar label select{width:calc(100% - 86px)}
+.mobile-filter-dialog .study-toolbar label select{width:calc(100% - 72px)}
+.mobile-filter-dialog .season-filters label:nth-child(2){gap:5px}
+.mobile-filter-dialog .season-filters label:nth-child(2) .season-filter-name{font-size:12px;white-space:nowrap}
+.mobile-filter-dialog .season-filters label:nth-child(2) select{width:calc(100% - 31px)}
+.mobile-filter-dialog .study-toolbar>.sort-label{grid-column:1}
+.mobile-filter-dialog .study-toolbar>.sort-label{gap:5px!important}
+.mobile-filter-dialog .study-toolbar>.sort-label select{width:calc(100% - 30px)}
+.mobile-filter-dialog .study-toolbar>.type-filter{grid-column:2;gap:5px!important}
+.mobile-filter-dialog .study-toolbar>.type-filter{font-size:12px!important;white-space:nowrap}
 .mobile-filter-dialog .study-toolbar .type-filter input{width:0!important;flex:1}
 .mobile-filter-dialog .study-toolbar .filter-clear{min-height:44px;padding:6px 10px}
-.mobile-filter-dialog .study-toolbar .filter-status{font-size:12px;margin:0;line-height:1.4}
-.mobile-filter-dialog .study-toolbar .progress{margin:0!important;padding:6px 0;border-top:1px solid #e0e3e7}
+.mobile-filter-dialog .study-toolbar .filter-status{grid-column:1/-1;font-size:12px;margin:0;line-height:1.4}
+.mobile-filter-dialog .study-toolbar .progress{grid-column:1/-1;margin:0!important;padding:6px 0;border-top:1px solid #e0e3e7}
 .mobile-filter-active{overflow:hidden!important}
 :focus-visible{outline:2px solid #778494!important;outline-offset:2px}
 @media(max-width:760px){.wrap,main.wrap{width:calc(100% - 16px)!important}.hero{padding:8px 12px!important}.hero h1{font-size:18px!important}.question,.section,.save-panel{padding:12px!important}.season-filters label{width:auto!important}.study-toolbar select{max-width:150px!important}.study-toolbar .progress{width:100%!important}.question-more{margin-left:0!important}.kclep-shell{font-size:13px!important}.season-subject strong{position:static!important}.notebook-toast{width:max-content}.question .qhead h2,.question .qhead h3{font-size:16px!important}}
