@@ -200,6 +200,21 @@ def row_strings(row_text):
     return re.findall(r"'((?:[^'\\]|\\.)*)'", row_text)
 
 
+def theory_security_code_is_178(problem):
+    """매도가능증권 계정코드를 묻는 이론 문제의 정답 선택지가 178인지 확인한다."""
+    cue = ' '.join(filter(None, (field(problem, 'type'), field(problem, 'title'), field(problem, 'prompt'))))
+    if '매도가능증권' not in cue or not re.search(r'계정\s*코드|코드\s*번호', cue):
+        return True
+    head = re.search(r'choices\s*:\s*\[', problem)
+    answer = field(problem, 'answer')
+    if not head or answer is None:
+        return False
+    close = match_close(problem, head.end() - 1)
+    choices = row_strings(problem[head.end():close]) if close >= 0 else []
+    index = int(answer)
+    return index < len(choices) and re.search(r'(?<!\d)178(?!\d)', choices[index]) is not None
+
+
 def problems_of(subject, text=None):
     """배열 리터럴의 문제 + 뒤따르는 problems.push(...) 안의 문제를 등록 순서대로 모은다."""
     info = SUBJECTS[subject]
@@ -493,6 +508,9 @@ def cmd_check():
             if has_raw_linebreak_in_js_string(item):
                 problems_fail.append(
                     f'{info["label"]} {idx}번: 따옴표 문자열 안의 실제 줄바꿈은 \\n으로 바꾸세요')
+            if key == 'theory' and not theory_security_code_is_178(item):
+                problems_fail.append(
+                    f'{info["label"]} {idx}번: 매도가능증권 계정코드 문제의 정답은 178이어야 합니다')
             missing=required-set(top_keys(item))
             if missing: problems_fail.append(f'{key} {idx}: 필수 필드 누락 {sorted(missing)}')
         if len(items) > 3:
@@ -530,13 +548,13 @@ def cmd_check():
             detail = ', '.join(f'{p}=v{v}' for p, v in pages.items())
             problems_fail.append(f'{script}: 화면마다 버전이 다름 ({detail})')
 
-    # 원장 43KB + 분석기 11KB는 TOP 5가 있는 홈에서만 필요하다.
-    # 분야 화면에 다시 넣으면 문제를 열 때마다 같은 데이터를 중복 로드한다.
+    # 원장과 분석기는 공개 학습 화면에서 불러오지 않는다.
+    # TOP 5를 제거했으므로 브라우저가 원장 전체를 읽을 이유가 없다.
     for script in (LEDGER, 'mistake-memory.js'):
         loaded = set(versions.get(script, {}))
-        if loaded != {HUB}:
+        if loaded:
             problems_fail.append(
-                f"{script}: 홈에서만 불러와야 합니다 (현재 {', '.join(sorted(loaded)) or '없음'})")
+                f"{script}: 공개 학습 화면에서 불러오면 안 됩니다 (현재 {', '.join(sorted(loaded))})")
 
     # 원장
     entries = ledger_entries()
@@ -721,6 +739,8 @@ def cmd_add(spec_path):
         problem=item['problem'].strip(); original=by_id.get(item.get('intakeId'))
         if has_raw_linebreak_in_js_string(problem):
             raise SystemExit('[오류] problem의 따옴표 문자열 안에서는 실제 줄바꿈 대신 \\n을 사용하세요.')
+        if subject == 'theory' and not theory_security_code_is_178(problem):
+            raise SystemExit('[오류] 매도가능증권 계정코드 이론 문제의 정답 선택지는 178이어야 합니다.')
         is_variant='variantOf' in top_keys(problem)
         if not original and not is_variant: raise SystemExit('[오류] 대표 응용문제에는 원본 intakeId가 필요합니다.')
         if original and (original['id'] in linked or original['subject']!=subject): raise SystemExit('[오류] 원본당 같은 분야 대표문제 1개만 연결하세요.')

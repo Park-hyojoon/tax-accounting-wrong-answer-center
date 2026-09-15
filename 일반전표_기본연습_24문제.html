@@ -178,7 +178,7 @@
   </main>
 
   <script src="github-learning-sync.js?v=15"></script>
-  <script src="season-ui.js?v=12"></script>
+  <script src="season-ui.js?v=16"></script>
 <script src="training-ui.js?v=5"></script>
   <script src="account-search.js?v=1"></script>
   <script>
@@ -214,12 +214,23 @@
     function saveState(){studyState.updatedAt=nowIso();localStorage.setItem(STORAGE_KEY,JSON.stringify(studyState))}
     function cardState(index){const s=studyState.cards[index]||(studyState.cards[index]={rows:[],graded:false,correct:false,attempts:0,wrongCount:0,history:[],passed:false,archived:false});if(s.passed===undefined)s.passed=false;if(s.archived===undefined)s.archived=false;return s}
 
-    function answerHtml(a){
+    const REQUIRED_ACCOUNT_CODES={'매도가능증권':'178'};
+    function accountParts(value){
+      if(value&&typeof value==='object')return{name:String(value.name||value.account||''),code:String(value.code||'')};
+      const raw=String(value||''),match=raw.match(/^(\d+)\|(.+)$/);
+      return match?{code:match[1],name:match[2]}:{code:'',name:raw};
+    }
+    function accountOptionHtml(value){
+      const a=accountParts(value),code=a.code||REQUIRED_ACCOUNT_CODES[a.name]||'',optionValue=code?`${code}|${a.name}`:a.name,label=code?`${code} ${a.name}`:a.name;
+      return `<option value="${optionValue}">${label}</option>`;
+    }
+    function answerHtml(a,p){
       const extra=[a.division?`구분: ${a.division}`:'',a.partner?`거래처: ${a.partner}`:'',a.memo?`적요: ${a.memo}`:''].filter(Boolean).join(' · ');
-      return `<div class="answer-line"><span class="answer-side">${a.side==='D'?'차변':'대변'}</span><span>${a.account}</span><span>${money(a.amount)}</span><span>${extra||'—'}</span></div>`;
+      const code=p.requiredAccountCodes?.[a.account]||REQUIRED_ACCOUNT_CODES[a.account];
+      return `<div class="answer-line"><span class="answer-side">${a.side==='D'?'차변':'대변'}</span><span>${code?`${code} `:''}${a.account}</span><span>${money(a.amount)}</span><span>${extra||'—'}</span></div>`;
     }
 
-    function accountField(p){return p.accountSelect?`<select class="account" lang="ko" aria-label="계정과목 선택"><option value="">계정과목 선택</option>${p.accountOptions.map(a=>`<option value="${a}">${a}</option>`).join('')}</select>`:'<input class="account" type="text" lang="ko" data-ko-auto autocomplete="off" placeholder="계정과목" aria-label="계정과목">'}
+    function accountField(p){return p.accountSelect?`<select class="account" lang="ko" aria-label="계정과목 선택"><option value="">계정과목 선택</option>${p.accountOptions.map(accountOptionHtml).join('')}</select>`:'<input class="account" type="text" lang="ko" data-ko-auto autocomplete="off" placeholder="계정과목" aria-label="계정과목">'}
     function partnerField(p){return p.partnerOptions?`<select class="partner" lang="ko" aria-label="거래처 선택"><option value="">해당 없음</option>${p.partnerOptions.map(a=>`<option value="${a}">${a}</option>`).join('')}</select>`:'<select class="partner" disabled aria-label="거래처 해당 없음"><option value="">해당 없음</option></select>'}
     function rowHtml(i,p){return `<tr class="entry-row">
       <td><select class="side" aria-label="차변 또는 대변"><option value="D">차변</option><option value="C">대변</option></select></td>
@@ -242,7 +253,7 @@
       <div class="balance-panel" aria-live="polite"><div class="balance-item">차변 합계<strong class="debit-total">0원</strong></div><div class="balance-item">대변 합계<strong class="credit-total">0원</strong></div><div class="balance-item difference">차액<strong class="difference-total">0원 · 입력 대기</strong></div></div>
       <p class="tip">금액은 쉼표 없이 입력해도 됩니다. 판관비/제조원가 구분이 필요한 계정은 ‘판/제 선택’을 사용하세요.</p>
       <div class="qactions"><button class="btn check-one" type="button">채점하기</button><button class="btn secondary clear-one" type="button">이 문제 영구 삭제</button><button class="btn secondary star-one" type="button" aria-pressed="false" title="이 문제는 특별히 훈련이 필요합니다. AI가 학습기록에서 이 표시를 보면 숫자를 바꾼 응용문제 1개를 더 만듭니다.">★ 특별 훈련</button><span class="result" aria-live="polite"></span><span class="attempt-info"></span></div>
-      <details class="reveal answer-box"><summary>정답 · 해설 보기</summary><div class="reveal-body"><div>${p.answers.map(answerHtml).join('')}</div><p><strong>해설:</strong> ${p.explanation}</p></div></details>
+      <details class="reveal answer-box"><summary>정답 · 해설 보기</summary><div class="reveal-body"><div>${p.answers.map(a=>answerHtml(a,p)).join('')}</div><p><strong>해설:</strong> ${p.explanation}</p></div></details>
     </article>`}
 
     el('#questions').innerHTML=problems.map(questionHtml).join('');
@@ -296,14 +307,17 @@
     }
     els('.question').forEach(restoreCard);
 
-    function readRows(card){return els('.entry-row',card).map((row,index)=>({
-      row,index,side:el('.side',row).value,account:el('.account',row).value,amount:normMoney(el('.amount',row).value),division:el('.division',row).value,partner:el('.partner',row).value,memo:normMemo(el('.memo',row).value),
+    function readRows(card){return els('.entry-row',card).map((row,index)=>{
+      const selected=accountParts(el('.account',row).value);
+      return {
+      row,index,side:el('.side',row).value,account:selected.name,accountCode:selected.code,amount:normMoney(el('.amount',row).value),division:el('.division',row).value,partner:el('.partner',row).value,memo:normMemo(el('.memo',row).value),
       filled:Boolean(el('.account',row).value.trim()||el('.amount',row).value.trim()||el('.division',row).value||el('.partner',row).value||el('.memo',row).value.trim())
-    })).filter(r=>r.filled)}
+    }}).filter(r=>r.filled)}
 
-    function isMatch(row,ans){
+    function isMatch(row,ans,p){
       const accountOptions=ans.account.split('/').map(normText);
-      return row.side===ans.side && accountOptions.includes(normText(row.account)) && row.amount===ans.amount && (ans.division?row.division===ans.division:!row.division) && (ans.partner?normText(row.partner)===normText(ans.partner):!row.partner) && (!ans.memo||row.memo===normMemo(ans.memo));
+      const requiredCode=p.requiredAccountCodes?.[ans.account]||REQUIRED_ACCOUNT_CODES[ans.account];
+      return row.side===ans.side && accountOptions.includes(normText(row.account)) && (!requiredCode||row.accountCode===String(requiredCode)) && row.amount===ans.amount && (ans.division?row.division===ans.division:!row.division) && (ans.partner?normText(row.partner)===normText(ans.partner):!row.partner) && (!ans.memo||row.memo===normMemo(ans.memo));
     }
 
     function grade(card,scroll=false){
@@ -311,7 +325,7 @@
       els('.entry-row',card).forEach(r=>{el('.row-state',r).textContent='';r.style.background=''});
       let matched=0;
       for(const ans of p.answers){
-        const found=rows.find(r=>!used.has(r.index)&&isMatch(r,ans));
+        const found=rows.find(r=>!used.has(r.index)&&isMatch(r,ans,p));
         if(found){used.add(found.index);matched++;el('.row-state',found.row).textContent='✓';found.row.style.background='#effcf6'}
       }
       rows.filter(r=>!used.has(r.index)).forEach(r=>{el('.row-state',r.row).textContent='✕';r.row.style.background='#fff2f2'});
@@ -387,7 +401,7 @@
       const lines=['| 차/대변 | 계정과목 | 금액 | 판/제 | 거래처 | 적요 |','|---|---|---:|---|---|---|'];
       const list=answerMode?rows:cleanRows(rows);
       if(!list.length){lines.push('| - | 입력 없음 | 0원 | - | - | - |');return lines}
-      list.forEach(r=>lines.push(`| ${r.side==='D'?'차변':'대변'} | ${mdSafe(r.account)||'미입력'} | ${money(answerMode?r.amount:normMoney(r.amount))} | ${r.division||'-'} | ${mdSafe(r.partner)||'-'} | ${r.memo||'-'} |`));return lines
+      list.forEach(r=>{const account=accountParts(r.account),code=account.code||REQUIRED_ACCOUNT_CODES[account.name]||'',label=code?`${code} ${account.name}`:account.name;lines.push(`| ${r.side==='D'?'차변':'대변'} | ${mdSafe(label)||'미입력'} | ${money(answerMode?r.amount:normMoney(r.amount))} | ${r.division||'-'} | ${mdSafe(r.partner)||'-'} | ${r.memo||'-'} |`)});return lines
     }
     function buildTodayRecord(today=localDate()){
       const all=problems.map((p,i)=>{const s=cardState(i),todayHistory=(s.history||[]).filter(h=>!h.cancelledAt&&localDate(h.at)===today);return{p,i,s,todayHistory}}),list=all.filter(x=>x.todayHistory.length);

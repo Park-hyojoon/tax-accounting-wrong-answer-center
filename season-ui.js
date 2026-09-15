@@ -1,6 +1,6 @@
 (function(){
   'use strict';
-  const style=document.createElement('link');style.rel='stylesheet';style.href='season.css?v=7';document.head.append(style);
+  const style=document.createElement('link');style.rel='stylesheet';style.href='season.css?v=9';document.head.append(style);
   const params=new URLSearchParams(location.search);
   const escape=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   function matches(p){return (!params.get('exam')||String(p.examRound)===params.get('exam'))&&(!params.get('tag')||(p.tags||[]).includes(params.get('tag')))}
@@ -11,10 +11,28 @@
     field.onchange=()=>{const url=new URL(location.href);field.value?url.searchParams.set(key,field.value):url.searchParams.delete(key);location.href=url.href};el.append(field);return el;
   }
   function install(problems,adapter){
+    // A tag is a fresh practice entry point: clear only the current answer fields
+    // once, while retaining pass state, attempts, wrong counts, and full history.
+    if(params.get('fresh')==='1'&&params.get('tag')&&adapter){
+      const targets=problems.map((problem,index)=>({problem,index})).filter(x=>matches(x.problem));
+      if(adapter.theory){
+        for(const {problem} of targets){
+          if(adapter.state.answers)delete adapter.state.answers[problem.id];
+          if(adapter.state.checked)delete adapter.state.checked[problem.id];
+        }
+      }else{
+        for(const {index} of targets){
+          const card=adapter.state.cards?.[index];if(!card)continue;
+          ['voucher','rows','graded','correct','matched'].forEach(key=>delete card[key]);
+        }
+      }
+      adapter.save();
+      const clean=new URL(location.href);clean.searchParams.delete('fresh');
+      location.replace(clean.href);return;
+    }
     const host=document.querySelector('.toolbar,.dashboard')||document.querySelector('main');
     const bar=document.createElement('div');bar.className='season-filters';
     bar.append(select('기출 회차',problems.map(p=>p.examRound),'exam'),select('유형 태그',problems.flatMap(p=>p.tags||[p.type]),'tag'));
-    const clear=document.createElement('a');const clean=new URL(location.href);['exam','tag','type'].forEach(k=>clean.searchParams.delete(k));clear.href=clean.href;clear.textContent='필터 해제';bar.append(clear);
     host?.classList.add('study-toolbar');host?.prepend(bar);
     document.body.classList.add('study-page');
     if(adapter?.theory)document.body.classList.add('study-theory');
@@ -55,7 +73,7 @@
     const put=(id,k,v)=>{const target=theory?(a.state[k]??={}):(a.state.cards[id]??={});target[theory?id:k]=v};
     const status=document.createElement('select');status.setAttribute('aria-label','학습 상태');
     [['active','학습할 문제'],['passed','통과한 문제'],['all','전체 기록']].forEach(([v,t])=>status.add(new Option(t,v)));
-    status.value=params.get('status')||'active';bar.insertBefore(status,bar.lastChild);
+    status.value=params.get('status')||'active';bar.append(status);
     status.onchange=()=>{const url=new URL(location.href);url.searchParams.set('status',status.value);location.href=url.href};
     function visibility(card){
       const id=key(card),p=theory?problems.find(p=>p.id===id):problems[Number(id)],passed=!!get(id,'passed'),star=!!get(id,'starred');
@@ -114,7 +132,6 @@
     }
     const host=document.querySelector('#seasonCatalog');if(!host)return;
     const entries=window.TrainingSeasonCatalog||[];
-    if(!entries.length)document.getElementById('frequentSection')?.setAttribute('hidden','');
     if(!host.dataset.tagsOnly){
       const descriptions={theory:'헷갈리는 개념을 정확하게',practical:'계정과 차·대변을 차근차근',voucher:'KcLep과 익숙한 입력 흐름'};
       const wrap=document.createElement('div');wrap.className='season-subjects';
@@ -129,19 +146,19 @@
       [...new Set(e.tags?.length?e.tags:[e.type])].filter(Boolean).forEach(tag=>{if(!tags.has(tag))tags.set(tag,[]);tags.get(tag).push(e)});
     });
     const ranked=[...tags].sort((a,b)=>b[1].length-a[1].length||a[0].localeCompare(b[0],'ko'));
-    const colors=['#155E9C','#70ABC9','#8FC4D8'];
+    const colors=['#155E9C','#70ABC9','#8FC4D8','#B8DCE8'];
     ranked.forEach(([tag,rows],index)=>{
       const subjects=[...new Set(rows.map(e=>e.subject))],a=document.createElement('a');a.className='season-tag';
       a.textContent=tag+' · '+rows.length;a.title=rows.length+'문제 · 모든 회차 · 통과한 문제 포함';
-      a.href=subjects.length===1?sources[subjects[0]].file+'?tag='+encodeURIComponent(tag)+'&status=all':'오답_훈련센터.html?tag='+encodeURIComponent(tag);
-      if(index<3){a.style.backgroundColor=colors[index];a.style.color=index===0?'#fff':'#173042';a.dataset.rank=String(index+1)}
+      a.href=subjects.length===1?sources[subjects[0]].file+'?tag='+encodeURIComponent(tag)+'&status=all&fresh=1':'오답_훈련센터.html?tag='+encodeURIComponent(tag);
+      if(index<4){a.style.backgroundColor=colors[index];a.style.color=index===0?'#fff':'#173042';a.dataset.rank=String(index+1)}
       groups.append(a);
     });host.append(groups);
     // A shared tag spanning subjects opens each existing trainer, without loading all question data on home.
     const selected=params.get('tag'),selectedRows=tags.get(selected);
     if(selectedRows){
       const panel=document.createElement('section');panel.className='section';const heading=document.createElement('h2');heading.textContent=selected+' · '+selectedRows.length+'문제';panel.append(heading);
-      [...new Set(selectedRows.map(e=>e.subject))].forEach(subject=>{const frame=document.createElement('iframe');frame.title=sources[subject].label+' · '+selected;frame.src=sources[subject].file+'?tag='+encodeURIComponent(selected)+'&status=all';frame.style.cssText='width:100%;height:80vh;border:1px solid #d5d9df;margin-top:12px';panel.append(frame)});
+      [...new Set(selectedRows.map(e=>e.subject))].forEach(subject=>{const frame=document.createElement('iframe');frame.title=sources[subject].label+' · '+selected;frame.src=sources[subject].file+'?tag='+encodeURIComponent(selected)+'&status=all&fresh=1';frame.style.cssText='width:100%;height:80vh;border:1px solid #d5d9df;margin-top:12px';panel.append(frame)});
       document.querySelector('main')?.prepend(panel);
     }
   }
