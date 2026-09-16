@@ -130,7 +130,7 @@
       </div>
     </div>
   </nav>
-  <script src="data/practical.js?v=4"></script>
+  <script src="data/practical.js?v=5"></script>
   <script>(function(){var nav=document.querySelector('.top-nav');function sync(){document.documentElement.style.setProperty('--nav-h',(nav?nav.offsetHeight:60)+'px')}sync();window.addEventListener('resize',sync)})()</script>
   <main class="wrap">
     <div class="toolbar">
@@ -178,7 +178,7 @@
   </main>
 
   <script src="github-learning-sync.js?v=16"></script>
-  <script src="season-ui.js?v=17"></script>
+  <script src="season-ui.js?v=21"></script>
 <script src="training-ui.js?v=5"></script>
   <script src="account-search.js?v=1"></script>
   <script>
@@ -289,7 +289,7 @@
       updateTotals(card);saveState();updateProgress()
     }
     function renderAttempt(card){const s=cardState(card.dataset.index);el('.attempt-info',card).textContent=`채점 ${s.attempts||0}회 · 틀림 ${s.wrongCount||0}회`}
-    const DIRECT_INTAKE_INDICES=new Set([0,1,2,3,5]);
+    const DIRECT_INTAKE_INDICES=new Set([0,1,2,3,5,6]);
     const todayView=new URLSearchParams(location.search).get('view')==='today';
     const typeView=(new URLSearchParams(location.search).get('type')||'').trim();
     const starView=new URLSearchParams(location.search).get('view')==='star';

@@ -80,6 +80,13 @@
     .section-heading h2{margin:0;font-size:clamp(1.45rem,3vw,2rem);line-height:1.25;letter-spacing:-.035em}
     .section-heading p{margin:5px 0 0;color:var(--muted)}
     .today-chip{white-space:nowrap;padding:7px 12px;border-radius:999px;background:var(--blue-soft);color:var(--blue-dark);font-weight:800}
+    .today-accordion>summary{display:flex;gap:14px;align-items:flex-start;justify-content:space-between;cursor:pointer;list-style:none}
+    .today-accordion>summary::-webkit-details-marker{display:none}
+    .today-summary-main{min-width:0}.today-summary-title{display:block;font-size:clamp(1.45rem,3vw,2rem);font-weight:900;line-height:1.25;letter-spacing:-.035em}
+    .today-summary-description{display:block;margin-top:5px;color:var(--muted);line-height:1.7}
+    .today-summary-side{display:flex;align-items:center;gap:10px}.today-summary-caret{font-size:18px;color:var(--muted)}
+    .today-summary-caret::before{content:'▸'}.today-accordion[open] .today-summary-caret::before{content:'▾'}
+    .today-accordion[open]>summary{margin-bottom:18px}
     .filter-bar{display:flex;flex-wrap:wrap;gap:9px;margin:0 0 18px}
     .filter-button,.refresh-button,.sort-select{
       border:2px solid #bcd8eb;border-radius:12px;padding:8px 14px;background:#fff;color:#30536d;font-weight:800
@@ -170,7 +177,7 @@
     @media (max-width:960px){.summary-strip{grid-template-columns:repeat(3,1fr)}.category-summary{grid-template-columns:1fr}}
     @media (max-width:680px){
       body{font-size:16px}.hero{padding-top:27px}.section{padding:19px 16px;border-radius:18px}
-      .section-heading{display:block}.today-chip{display:inline-block;margin-top:10px}.summary-strip{grid-template-columns:repeat(2,1fr)}
+      .section-heading{display:block}.today-accordion>summary{align-items:flex-start}.today-summary-side{flex-direction:column;align-items:flex-end}.today-chip{display:inline-block}.summary-strip{grid-template-columns:repeat(2,1fr)}
       .problem-item{grid-template-columns:1fr}.problem-actions{justify-content:flex-start}.open-link,.restore-button{flex:1 1 auto}
       .sort-label{width:100%;margin-left:0;align-items:flex-start;flex-direction:column}.sort-select{width:100%}.refresh-button{margin-left:0}.nav-inner{padding-inline:12px}.nav-link{padding:7px 12px}.backup-grid,.github-fields{grid-template-columns:1fr}.backup-button{width:100%}.github-actions .backup-button{flex:1 1 100%}
     }
@@ -207,30 +214,34 @@
     </div>
 
     <section class="section" id="todaySection">
-      <div class="section-heading">
-        <div>
-          <h2>오늘의 오답훈련</h2>
-          <p>새 학습에서 직접 제출한 기출 오답의 응용문제입니다. 회차와 유형별로 골라 훈련하세요.</p>
+      <details class="today-accordion" open>
+        <summary>
+          <span class="today-summary-main">
+            <span class="today-summary-title" role="heading" aria-level="2">오늘의 오답훈련</span>
+            <span class="today-summary-description">새 학습에서 직접 제출한 기출 오답의 응용문제입니다. 회차와 유형별로 골라 훈련하세요.</span>
+          </span>
+          <span class="today-summary-side"><span class="today-chip" id="todayLabel"></span><span class="today-summary-caret" aria-hidden="true"></span></span>
+        </summary>
+        <div class="today-accordion-body">
+          <div class="filter-bar" aria-label="오늘의 훈련 범위">
+            <button class="filter-button active" type="button" data-filter="today" aria-pressed="true">오늘 등록 문제</button>
+            <button class="filter-button" type="button" data-filter="all" aria-pressed="false">전체 미통과</button>
+            <label class="sort-label" for="sortOrder">정렬
+              <select class="sort-select" id="sortOrder">
+                <option value="registered">등록 순서</option>
+                <option value="wrong">오답 많은 순</option>
+                <option value="unattempted">아직 안 푼 문제 우선</option>
+                <option value="recentAttempt">최근에 푼 순</option>
+                <option value="recentRegistered">최근 등록 순</option>
+              </select>
+            </label>
+            <button class="refresh-button" id="refreshData" type="button">기록 새로고침</button>
+          </div>
+          <div id="trainingList" class="problem-list"></div>
+          <p class="training-note">분야별 응용문제를 푼 뒤 돌아오면 학습기록이 반영됩니다.</p>
+          <p id="liveStatus" class="live-status" role="status" aria-live="polite"></p>
         </div>
-        <span class="today-chip" id="todayLabel"></span>
-      </div>
-      <div class="filter-bar" aria-label="오늘의 훈련 범위">
-        <button class="filter-button active" type="button" data-filter="today" aria-pressed="true">오늘 등록 문제</button>
-        <button class="filter-button" type="button" data-filter="all" aria-pressed="false">전체 미통과</button>
-        <label class="sort-label" for="sortOrder">정렬
-          <select class="sort-select" id="sortOrder">
-            <option value="registered">등록 순서</option>
-            <option value="wrong">오답 많은 순</option>
-            <option value="unattempted">아직 안 푼 문제 우선</option>
-            <option value="recentAttempt">최근에 푼 순</option>
-            <option value="recentRegistered">최근 등록 순</option>
-          </select>
-        </label>
-        <button class="refresh-button" id="refreshData" type="button">기록 새로고침</button>
-      </div>
-      <div id="trainingList" class="problem-list"></div>
-      <p class="training-note">분야별 응용문제를 푼 뒤 돌아오면 학습기록이 반영됩니다.</p>
-      <p id="liveStatus" class="live-status" role="status" aria-live="polite"></p>
+      </details>
     </section>
 
 
@@ -278,8 +289,8 @@
   </main>
 
   <script src="github-learning-sync.js?v=16"></script>
-  <script src="season-catalog.js?v=6"></script>
-<script src="season-ui.js?v=17"></script>
+  <script src="season-catalog.js?v=7"></script>
+<script src="season-ui.js?v=21"></script>
 <script src="training-ui.js?v=5"></script>
   <script>
     const SOURCES={
@@ -295,7 +306,8 @@
   ['신제품 개발비의 자산 처리','외부기관 신제품 개발용역비 지급','2026-09-15',1],
   ['비정상 재고자산감모손실','도난으로 발생한 제품 수량 부족','2026-09-16',2],
   ['비정상 재고자산감모손실','파손으로 발생한 상품 수량 부족 (응용)','2026-09-16',3,'variant'],
-  ['임차보증금과 계약금 대체','사무실 임차보증금 잔금 지급','2026-09-16',13]
+  ['임차보증금과 계약금 대체','사무실 임차보증금 잔금 지급','2026-09-16',13],
+  ['장기차입금의 유동성 대체','장기차입금 상환기일의 유동성 분류','2026-09-16',2]
 ];
     const theoryMeta=[
   ['exam121-reliability-variant','회계정보의 신뢰성 구성요소','회계정보의 질적 특성 판단','2026-09-14',1],
@@ -317,7 +329,15 @@
   ['exam106-abnormal-spoilage-variant','비정상공손 수량 계산','완성품 기준 정상공손과 비정상공손 계산','2026-09-16',9],
   ['exam106-vat-taxable-scope-variant','부가가치세 과세대상 범위','부가가치세가 과세되는 거래 판단','2026-09-16',10],
   ['exam106-business-registration-variant','부가가치세 사업자등록 절차','사업자등록 신청 장소 판단','2026-09-16',11],
-  ['exam106-simplified-taxpayer-refund-variant','간이과세자의 초과 매입세액 처리','간이과세자의 세액공제 한도','2026-09-16',12]
+  ['exam106-simplified-taxpayer-refund-variant','간이과세자의 초과 매입세액 처리','간이과세자의 세액공제 한도','2026-09-16',12],
+  ['exam107-financial-statement-elements-variant','재무제표 구성요소의 정의','재무제표 구성요소 정의 판단','2026-09-16',3],
+  ['exam107-inventory-quantity-methods-variant','기말재고 수량 결정 방법','재고 수량과 단가 결정 방법 구분','2026-09-16',4],
+  ['exam107-ppe-acquisition-variant','유형자산 취득원가와 감가상각','유형자산 취득과 후속지출 판단','2026-09-16',5],
+  ['exam107-bond-issuance-variant','사채 발행과 유효이자율법','사채 할인·할증발행의 이자 흐름','2026-09-16',6],
+  ['exam107-capital-expenditure-error-variant','자본적지출의 비용처리 오류 영향','자본적지출 비용처리의 기간별 영향','2026-09-16',7],
+  ['exam107-variable-cost-behavior-variant','변동원가와 고정원가의 행태','조업도 변화에 따른 단위원가 판단','2026-09-16',8],
+  ['exam107-weighted-average-equivalent-units-variant','평균법 재료·가공 완성품환산량','공정초 투입 재료의 완성품환산량 계산','2026-09-16',9],
+  ['exam107-manufacturing-cogs-variant','제조기업의 매출원가 계산','재공품과 제품 재고를 이용한 매출원가 계산','2026-09-16',10]
 ];
     const closingMeta=[];
     const voucherMeta=[
@@ -327,7 +347,8 @@
   ['업무무관 지출과 매입세액 불공제','대표이사 개인용 운동기구 구입','2026-09-15',3],
   ['운용리스료 면세매입과 카드결제','영업부 차량 운용리스료 결제','2026-09-15',4],
   ['상품 매입 운송비의 취득원가 처리','상품 입고 운송비의 입력 수정','2026-09-15',5],
-  ['직수출 선수금 대체와 외상매출','해외 거래처 제품 직수출','2026-09-16',1]
+  ['직수출 선수금 대체와 외상매출','해외 거래처 제품 직수출','2026-09-16',1],
+  ['공장 전기요금 과세매입 수정','생산공장 전기요금 입력 수정','2026-09-16',1]
 ];
 
     const META=[

@@ -1,6 +1,6 @@
 (function(){
   'use strict';
-  const style=document.createElement('link');style.rel='stylesheet';style.href='season.css?v=9';document.head.append(style);
+  const style=document.createElement('link');style.rel='stylesheet';style.href='season.css?v=10';document.head.append(style);
   const params=new URLSearchParams(location.search);
   const escape=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   function matches(p){return (!params.get('exam')||String(p.examRound)===params.get('exam'))&&(!params.get('tag')||(p.tags||[]).includes(params.get('tag')))}
@@ -144,19 +144,25 @@
     if(!entries.length){const p=document.createElement('p');p.className='season-empty';p.textContent='새 학습이 준비되었습니다. 아직 등록된 기출 오답은 없습니다.';host.append(p);return}
     const groups=document.createElement('div');groups.className='season-catalog';
     const title=document.createElement('h3');title.textContent='tag';groups.append(title);
-    const tags=new Map(),seen=new Set();
+    const subjectOrder=['theory','practical','voucher'],tags=new Map(),subjectTags=new Map(subjectOrder.map(subject=>[subject,new Map()])),seen=new Set();
     entries.filter(e=>!e.variant&&e.variantOf==null).forEach(e=>{
       const id=e.subject+':'+e.id;if(seen.has(id))return;seen.add(id);
-      [...new Set(e.tags?.length?e.tags:[e.type])].filter(Boolean).forEach(tag=>{if(!tags.has(tag))tags.set(tag,[]);tags.get(tag).push(e)});
+      [...new Set(e.tags?.length?e.tags:[e.type])].filter(Boolean).forEach(tag=>{
+        if(!tags.has(tag))tags.set(tag,[]);tags.get(tag).push(e);
+        const scoped=subjectTags.get(e.subject);if(scoped){if(!scoped.has(tag))scoped.set(tag,[]);scoped.get(tag).push(e)}
+      });
     });
-    const ranked=[...tags].sort((a,b)=>b[1].length-a[1].length||a[0].localeCompare(b[0],'ko'));
-    const colors=['#155E9C','#70ABC9','#8FC4D8','#B8DCE8'];
-    ranked.forEach(([tag,rows],index)=>{
-      const subjects=[...new Set(rows.map(e=>e.subject))],a=document.createElement('a');a.className='season-tag';
-      a.textContent=tag+' · '+rows.length;a.title=rows.length+'문제 · 모든 회차 · 통과한 문제 포함';
-      a.href=subjects.length===1?sources[subjects[0]].file+'?tag='+encodeURIComponent(tag)+'&status=all&fresh=1':'오답_훈련센터.html?tag='+encodeURIComponent(tag);
-      if(index<4){a.style.backgroundColor=colors[index];a.style.color=index===0?'#fff':'#173042';a.dataset.rank=String(index+1)}
-      groups.append(a);
+    const colors=['#155E9C','#286FA4','#3B7FAC','#4E8FB4','#619FBC','#74AEC5','#86BACD','#97C5D4','#A5CDDA','#B3D5E0'];
+    subjectOrder.forEach(subject=>{
+      const section=document.createElement('section');section.className='season-tag-group';
+      const heading=document.createElement('h4');heading.className='season-tag-heading';heading.innerHTML=`${escape(sources[subject].label)} <small>TOP 10</small>`;section.append(heading);
+      const list=document.createElement('div');list.className='season-tag-list';
+      [...subjectTags.get(subject)].sort((a,b)=>b[1].length-a[1].length||a[0].localeCompare(b[0],'ko')).forEach(([tag,rows],index)=>{
+        const a=document.createElement('a');a.className='season-tag';a.textContent=tag+' · '+rows.length;a.title=`${sources[subject].label} ${rows.length}문제 · 모든 회차 · 통과한 문제 포함`;
+        a.href=sources[subject].file+'?tag='+encodeURIComponent(tag)+'&status=all&fresh=1';
+        if(index<10){a.style.backgroundColor=colors[index];a.style.color=index<5?'#fff':'#173042';a.dataset.rank=String(index+1)}
+        list.append(a);
+      });section.append(list);groups.append(section);
     });host.append(groups);
     // A shared tag spanning subjects opens each existing trainer, without loading all question data on home.
     const selected=params.get('tag'),selectedRows=tags.get(selected);
