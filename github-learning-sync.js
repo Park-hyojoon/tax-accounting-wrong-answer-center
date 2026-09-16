@@ -134,7 +134,7 @@
   async function helperPost(path,body={}){
     let response;
     try{response=await fetchWithTimeout(`${HELPER_URL}${path}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)},180000)}
-    catch(error){throw new Error('PC 동기화 도우미와 연결이 끊어졌습니다. 바탕화면의 「오답훈련센터 시작」을 다시 실행해 주세요.')}
+    catch(error){throw new Error('PC 동기화 도우미와 연결이 끊어졌습니다. 잠시 후 다시 누르거나 PC에 다시 로그인해 주세요.')}
     let data=null;try{data=await response.json()}catch(error){}
     if(!response.ok||!data?.ok){
       const error=new Error(data?.message||`도우미 요청 실패 (${response.status})`);
@@ -337,7 +337,7 @@
     try{
       setStatus('동기화를 시작합니다…');
       const helper=await detectHelper();
-      if(helper&&helper.season!==SEASON)throw new Error('새 학습용 도우미가 필요합니다. 바탕화면의 「오답훈련센터 시작」을 다시 실행해 주세요.');
+      if(helper&&helper.season!==SEASON)throw new Error('새 학습용 동기화 도우미가 필요합니다. PC에 다시 로그인한 뒤 동기화해 주세요.');
       let program=null;
       if(helper){
         setStatus('PC의 새 문제·프로그램과 GitHub를 맞추는 중…');
@@ -347,14 +347,14 @@
       }else if(!hasToken()){
         const hint=isMobileDevice()
           ?'처음 한 번만 오답 훈련센터 홈에서 GitHub 토큰을 연결해 주세요. 그 뒤로는 「동기화」 한 번이면 됩니다.'
-          :'PC 동기화 도우미가 꺼져 있습니다. 바탕화면의 「오답훈련센터 시작」을 실행하면 도우미가 켜지고, 이 화면에서 「동기화」만 누르면 됩니다.';
+          :'PC 동기화 도우미가 아직 준비되지 않았습니다. 잠시 후 다시 누르거나 PC에 다시 로그인해 주세요.';
         setStatus(hint);
         if(onNeedToken)onNeedToken({mobile:isMobileDevice(),hint});
         return {status:'no-transport'};
       }else if(!helperPossible()){
         summary.push('문제·프로그램은 GitHub 최신본입니다.');
       }else if(!isMobileDevice()){
-        summary.push('PC 동기화 도우미가 꺼져 있어 새 문제·프로그램 파일은 건너뛰고 학습기록만 합쳤습니다. 바탕화면의 「오답훈련센터 시작」을 실행하면 다음부터 함께 동기화됩니다.');
+        summary.push('PC 동기화 도우미가 준비되지 않아 새 문제·프로그램 파일은 건너뛰고 학습기록만 합쳤습니다. PC에 다시 로그인하면 자동으로 준비됩니다.');
       }
 
       setStatus('PC·모바일 학습기록을 합치는 중…');

@@ -259,7 +259,7 @@
       <p class="backup-status" id="backupStatus" role="status" aria-live="polite"></p>
       <div class="github-sync">
         <h3>GitHub 연결 (모바일은 처음 한 번만)</h3>
-        <p><strong>PC</strong>는 바탕화면의 「오답훈련센터 시작」으로 열면 동기화 도우미가 함께 켜지므로 토큰이 필요 없습니다. <strong>모바일</strong>은 처음 한 번만 아래에 토큰을 넣고 「연결」을 누르면 이 기기에 기억되고, 그 뒤로는 위 메뉴의 「동기화」 한 번이면 됩니다.</p>
+        <p><strong>PC</strong>는 로그인할 때 동기화 도우미가 조용히 자동 실행되므로 화면의 「동기화」만 누르면 됩니다. 토큰도 필요하지 않습니다. <strong>모바일</strong>은 처음 한 번만 아래에 토큰을 넣고 「연결」을 누르면 이 기기에 기억되고, 그 뒤로는 위 메뉴의 「동기화」 한 번이면 됩니다.</p>
         <div class="github-fields">
           <label class="github-field">기기 이름<input id="githubDeviceName" type="text" lang="ko" maxlength="30" placeholder="예: 내 휴대전화 또는 집 PC"></label>
           <label class="github-field">Fine-grained GitHub 토큰<input id="githubToken" type="password" autocomplete="off" spellcheck="false" placeholder="학습기록 저장소 Contents 권한 전용"></label>
@@ -277,9 +277,9 @@
     <p class="footer">오답 훈련센터 · 「동기화」 또는 「오늘 학습기록 저장」을 누른 경우에만 GitHub로 기록을 보냅니다.</p>
   </main>
 
-  <script src="github-learning-sync.js?v=15"></script>
-  <script src="season-catalog.js?v=5"></script>
-<script src="season-ui.js?v=16"></script>
+  <script src="github-learning-sync.js?v=16"></script>
+  <script src="season-catalog.js?v=6"></script>
+<script src="season-ui.js?v=17"></script>
 <script src="training-ui.js?v=5"></script>
   <script>
     const SOURCES={
@@ -292,7 +292,10 @@
     const practicalMeta=[
   ['보험료 기간배분과 선급비용','영업부 차량 보험료의 결산 정리','2026-09-14',5],
   ['기간경과 이자비용과 미지급비용','장기차입금 이자의 결산 정리','2026-09-14',6],
-  ['신제품 개발비의 자산 처리','외부기관 신제품 개발용역비 지급','2026-09-15',1]
+  ['신제품 개발비의 자산 처리','외부기관 신제품 개발용역비 지급','2026-09-15',1],
+  ['비정상 재고자산감모손실','도난으로 발생한 제품 수량 부족','2026-09-16',2],
+  ['비정상 재고자산감모손실','파손으로 발생한 상품 수량 부족 (응용)','2026-09-16',3,'variant'],
+  ['임차보증금과 계약금 대체','사무실 임차보증금 잔금 지급','2026-09-16',13]
 ];
     const theoryMeta=[
   ['exam121-reliability-variant','회계정보의 신뢰성 구성요소','회계정보의 질적 특성 판단','2026-09-14',1],
@@ -305,7 +308,16 @@
   ['exam124-moving-average-cogs-variant','이동평균법 상품매출원가','이동평균법에 따른 매출원가 계산','2026-09-15',3],
   ['exam124-operating-profit-items-variant','영업이익 영향 항목 구분','영업이익에 반영되는 비용 구분','2026-09-15',4],
   ['exam124-equivalent-units-methods-variant','평균법과 선입선출법 완성품환산량','완성품환산량 계산방법의 차이 판단','2026-09-15',5],
-  ['exam124-predetermined-overhead-rate-variant','제조간접원가 예정배부율','과대배부 자료를 이용한 예정배부율 계산','2026-09-15',6]
+  ['exam124-predetermined-overhead-rate-variant','제조간접원가 예정배부율','과대배부 자료를 이용한 예정배부율 계산','2026-09-15',6],
+  ['exam106-historical-cost-quality-variant','역사적 원가와 질적특성','역사적 원가 평가의 장단점','2026-09-16',4],
+  ['exam106-revenue-measurement-variant','이자·배당금·로열티 수익 인식','수익 유형별 인식시점 판단','2026-09-16',5],
+  ['exam106-periodic-cogs-variant','실지재고조사법 매출원가 계산','상품계정을 이용한 매출원가 계산','2026-09-16',6],
+  ['exam106-sales-cutoff-variant','결산일 매출 인식 누락 영향','연말 상품 인도와 수익의 기간귀속','2026-09-16',7],
+  ['exam106-semivariable-cost-variant','준변동원가의 원가행태','기본요금과 사용료가 결합된 원가','2026-09-16',8],
+  ['exam106-abnormal-spoilage-variant','비정상공손 수량 계산','완성품 기준 정상공손과 비정상공손 계산','2026-09-16',9],
+  ['exam106-vat-taxable-scope-variant','부가가치세 과세대상 범위','부가가치세가 과세되는 거래 판단','2026-09-16',10],
+  ['exam106-business-registration-variant','부가가치세 사업자등록 절차','사업자등록 신청 장소 판단','2026-09-16',11],
+  ['exam106-simplified-taxpayer-refund-variant','간이과세자의 초과 매입세액 처리','간이과세자의 세액공제 한도','2026-09-16',12]
 ];
     const closingMeta=[];
     const voucherMeta=[
@@ -314,7 +326,8 @@
   ['비사업자 현금판매와 현금영수증','개인 고객에게 제품 현금판매','2026-09-15',2],
   ['업무무관 지출과 매입세액 불공제','대표이사 개인용 운동기구 구입','2026-09-15',3],
   ['운용리스료 면세매입과 카드결제','영업부 차량 운용리스료 결제','2026-09-15',4],
-  ['상품 매입 운송비의 취득원가 처리','상품 입고 운송비의 입력 수정','2026-09-15',5]
+  ['상품 매입 운송비의 취득원가 처리','상품 입고 운송비의 입력 수정','2026-09-15',5],
+  ['직수출 선수금 대체와 외상매출','해외 거래처 제품 직수출','2026-09-16',1]
 ];
 
     const META=[
@@ -387,7 +400,7 @@
       const status=$('#githubStatus');
       if(status.textContent)return;
       const helper=await TrainingGitHub.detectHelper();
-      if(helper)status.textContent='PC 동기화 도우미가 켜져 있습니다. 이 PC에서는 토큰 없이 동기화됩니다.';
+      if(helper)status.textContent='PC 자동 동기화가 준비되었습니다. 이 PC에서는 토큰 없이 「동기화」만 누르면 됩니다.';
       else if(TrainingGitHub.hasToken())status.textContent=TrainingGitHub.isTokenRemembered()?'GitHub 토큰이 이 기기에 저장되어 있습니다. 위 메뉴의 「동기화」만 누르면 됩니다.':'GitHub 토큰이 이 브라우저 세션에 연결되어 있습니다.';
     }
 

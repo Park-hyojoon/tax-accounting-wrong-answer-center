@@ -71,17 +71,20 @@
     const key=c=>theory?c.dataset.id:c.dataset.index;
     const get=(id,k)=>theory?a.state[k]?.[id]:a.state.cards?.[id]?.[k];
     const put=(id,k,v)=>{const target=theory?(a.state[k]??={}):(a.state.cards[id]??={});target[theory?id:k]=v};
-    const status=document.createElement('select');status.setAttribute('aria-label','학습 상태');
-    [['active','학습할 문제'],['passed','통과한 문제'],['all','전체 기록']].forEach(([v,t])=>status.add(new Option(t,v)));
-    status.value=params.get('status')||'active';bar.append(status);
-    status.onchange=()=>{const url=new URL(location.href);url.searchParams.set('status',status.value);location.href=url.href};
+    const tagReplay=Boolean(params.get('tag')),status=document.createElement('select');status.setAttribute('aria-label','학습 상태');
+    status.add(new Option(tagReplay?'태그 전체 문제':'학습할 문제',tagReplay?'all':'active'));
+    status.value=tagReplay?'all':'active';bar.append(status);
     function visibility(card){
       const id=key(card),p=theory?problems.find(p=>p.id===id):problems[Number(id)],passed=!!get(id,'passed'),star=!!get(id,'starred');
       const search=document.querySelector('#typeFilter')?.value||params.get('type')||'';
       const match=matches(p)&&(!search||p.type.includes(search))&&(params.get('view')!=='today'||p.addedDate===new Date(Date.now()-new Date().getTimezoneOffset()*60000).toISOString().slice(0,10));
       const special=params.get('view')==='star',hasVariant=problems.some(x=>x.variantOf===(theory?id:Number(id)));
-      card.hidden=!!get(id,'deleted')||!match||(special&&!star&&p.variantOf==null&&!hasVariant)||(status.value==='passed'?!passed:status.value==='active'&&passed&&!star&&!special);
+      card.hidden=!!get(id,'deleted')||!match||(special&&!star&&p.variantOf==null&&!hasVariant)||(status.value==='active'&&passed);
       card.dataset.typeFilterBaseHidden=String(card.hidden);
+      if(special){
+        const item=card.closest('details.star-item');if(item)item.hidden=card.hidden;
+        const group=item?.closest('.star-group');if(group){const visible=[...group.querySelectorAll('details.star-item')].filter(x=>!x.hidden);group.hidden=visible.length===0;const count=group.querySelector('.star-group-title small');if(count)count.textContent=`${visible.length}문제`}
+      }
     }
     const notice=document.createElement('div');notice.className='notebook-toast';notice.hidden=true;notice.setAttribute('role','status');document.body.append(notice);
     let noticeTimer;
@@ -118,6 +121,7 @@
       actions.prepend(button('✓ 알고 있어요 · 통과',()=>mark(true),'notebook-pass'),button('↻ 틀렸어요 · 다시 연습',()=>mark(false),'notebook-wrong'));
       const restore=button('다시 학습하기',()=>{const at=new Date().toISOString();put(id,'passed',false);put(id,'archived',false);put(id,'selfPassed',false);put(id,'trainingCenterRestored',true);put(id,'restoredAt',at);a.save();refresh(card);report('학습할 문제로 옮겼습니다. 기존 기록은 보존됩니다.')},'notebook-restore');
       if(get(id,'passed'))actions.prepend(restore);
+      card.querySelector('.check-one')?.addEventListener('click',()=>setTimeout(()=>{visibility(card);a.refresh()},0));
       visibility(card);
     });
     a.refresh();
