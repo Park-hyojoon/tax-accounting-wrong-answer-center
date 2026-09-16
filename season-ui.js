@@ -68,6 +68,9 @@
   }
   function notebook(problems,a,bar){
     const cards=[...document.querySelectorAll('.question')],theory=a.theory;
+    // Keep newly passed questions visible until this page is reloaded or revisited,
+    // so learners can review the answer and explanation immediately after grading.
+    const passedThisVisit=new Set();
     const key=c=>theory?c.dataset.id:c.dataset.index;
     const get=(id,k)=>theory?a.state[k]?.[id]:a.state.cards?.[id]?.[k];
     const put=(id,k,v)=>{const target=theory?(a.state[k]??={}):(a.state.cards[id]??={});target[theory?id:k]=v};
@@ -79,7 +82,7 @@
       const search=document.querySelector('#typeFilter')?.value||params.get('type')||'';
       const match=matches(p)&&(!search||p.type.includes(search))&&(params.get('view')!=='today'||p.addedDate===new Date(Date.now()-new Date().getTimezoneOffset()*60000).toISOString().slice(0,10));
       const special=params.get('view')==='star',hasVariant=problems.some(x=>x.variantOf===(theory?id:Number(id)));
-      card.hidden=!!get(id,'deleted')||!match||(special&&!star&&p.variantOf==null&&!hasVariant)||(status.value==='active'&&passed);
+      card.hidden=!!get(id,'deleted')||!match||(special&&!star&&p.variantOf==null&&!hasVariant)||(status.value==='active'&&passed&&!passedThisVisit.has(String(id)));
       card.dataset.typeFilterBaseHidden=String(card.hidden);
       if(special){
         const item=card.closest('details.star-item');if(item)item.hidden=card.hidden;
@@ -109,9 +112,11 @@
         history.push(event);put(id,'history',history);put(id,'attempts',history.filter(h=>!h.cancelledAt).length);if(!theory)put(id,'wrongCount',history.filter(h=>h.correct===false&&!h.cancelledAt).length);
         put(id,'passed',correct);put(id,theory?'checked':'correct',correct);put(id,'selfPassed',correct);put(id,'selfPassedAt',correct?at:null);
         put(id,'trainingCenterRestored',!correct);put(id,correct?'passedAt':'restoredAt',at);if(!theory)put(id,'graded',true);
+        if(correct)passedThisVisit.add(String(id));else passedThisVisit.delete(String(id));
         a.save();refresh(card);card.querySelector('.result').textContent=correct?'노트 학습 · 직접 통과':'노트 학습 · 다시 연습';
         report(correct?'통과로 기록했습니다.':'오답으로 기록했습니다.',()=>{
           event.cancelledAt=new Date().toISOString();event.correct=null;
+          passedThisVisit.delete(String(id));
           Object.entries(before).forEach(([k,v])=>put(id,k,v??null));
           if(!before.passed){put(id,'trainingCenterRestored',true);put(id,'restoredAt',event.cancelledAt)}
           put(id,'attempts',history.filter(h=>!h.cancelledAt).length);if(!theory)put(id,'wrongCount',history.filter(h=>h.correct===false&&!h.cancelledAt).length);
@@ -119,9 +124,9 @@
         });
       }
       actions.prepend(button('✓ 알고 있어요 · 통과',()=>mark(true),'notebook-pass'),button('↻ 틀렸어요 · 다시 연습',()=>mark(false),'notebook-wrong'));
-      const restore=button('다시 학습하기',()=>{const at=new Date().toISOString();put(id,'passed',false);put(id,'archived',false);put(id,'selfPassed',false);put(id,'trainingCenterRestored',true);put(id,'restoredAt',at);a.save();refresh(card);report('학습할 문제로 옮겼습니다. 기존 기록은 보존됩니다.')},'notebook-restore');
+      const restore=button('다시 학습하기',()=>{const at=new Date().toISOString();passedThisVisit.delete(String(id));put(id,'passed',false);put(id,'archived',false);put(id,'selfPassed',false);put(id,'trainingCenterRestored',true);put(id,'restoredAt',at);a.save();refresh(card);report('학습할 문제로 옮겼습니다. 기존 기록은 보존됩니다.')},'notebook-restore');
       if(get(id,'passed'))actions.prepend(restore);
-      card.querySelector('.check-one')?.addEventListener('click',()=>setTimeout(()=>{visibility(card);a.refresh()},0));
+      card.querySelector('.check-one')?.addEventListener('click',()=>setTimeout(()=>{if(get(id,'passed'))passedThisVisit.add(String(id));visibility(card);a.refresh()},0));
       visibility(card);
     });
     a.refresh();
