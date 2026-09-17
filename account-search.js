@@ -35,6 +35,11 @@
   const list=overlay.querySelector('.account-search-list');
   let source=null,items=[],shown=[],active=0;
   const normalized=value=>String(value||'').toLocaleLowerCase('ko-KR').replace(/\s+/g,'');
+  function shuffle(values){
+    const result=[...values];
+    for(let i=result.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[result[i],result[j]]=[result[j],result[i]]}
+    return result;
+  }
 
   function closePicker(){
     if(overlay.hidden)return;
@@ -67,6 +72,10 @@
       else if(name.includes(query))contains.push(item);
     });
     shown=starts.concat(contains);
+    if(query)shown.sort((a,b)=>{
+      const an=normalized(a.label),bn=normalized(b.label),ae=an===query,be=bn===query;
+      return ae===be?a.label.localeCompare(b.label,'ko'):ae?-1:1;
+    });
     active=0;
     list.replaceChildren();
     if(!shown.length){
@@ -90,7 +99,7 @@
   function openPicker(select,prefill=''){
     if(select.disabled)return;
     source=select;
-    items=Array.from(select.options).filter(option=>option.value&&!option.disabled).map(option=>({value:option.value,label:option.textContent.trim()}));
+    items=shuffle(Array.from(select.options).filter(option=>option.value&&!option.disabled).map(option=>({value:option.value,label:option.textContent.trim()})));
     input.value=prefill;
     overlay.hidden=false;
     render();

@@ -1,6 +1,6 @@
 (function(){
   'use strict';
-  const style=document.createElement('link');style.rel='stylesheet';style.href='season.css?v=10';document.head.append(style);
+  const style=document.createElement('link');style.rel='stylesheet';style.href='season.css?v=14';document.head.append(style);
   const params=new URLSearchParams(location.search);
   const escape=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   function matches(p){return (!params.get('exam')||String(p.examRound)===params.get('exam'))&&(!params.get('tag')||(p.tags||[]).includes(params.get('tag')))}
@@ -33,6 +33,7 @@
     const host=document.querySelector('.toolbar,.dashboard')||document.querySelector('main');
     const bar=document.createElement('div');bar.className='season-filters';
     bar.append(select('기출 회차',problems.map(p=>p.examRound),'exam'),select('유형 태그',problems.flatMap(p=>p.tags||[p.type]),'tag'));
+    if(adapter)bar.append(currentTrainingSelect(problems,adapter));
     host?.classList.add('study-toolbar');host?.prepend(bar);
     document.body.classList.add('study-page');
     if(adapter?.theory)document.body.classList.add('study-theory');
@@ -47,6 +48,14 @@
     if(host)mobileFilters(host,bar);
     if(!problems.length){const box=document.createElement('section');box.className='season-welcome';box.innerHTML='<span class="season-kicker">NEW CHAPTER</span><h2>다음 기출 오답부터<br>차근차근 쌓아가세요.</h2><p>회차와 틀린 문제를 보내주시면 원문은 회차별 MD로 보관하고,<br>숫자와 조건을 바꾼 응용문제를 이곳에 등록합니다.</p><a href="오답_훈련센터.html">학습 홈으로</a>';host?.after(box)}
   }
+  function currentTrainingSelect(problems,adapter){
+    const label=document.createElement('label');label.className='current-training-filter';const name=document.createElement('span');name.className='season-filter-name';name.textContent='현재 훈련 필요 TOP 10';label.append(name);
+    const field=document.createElement('select');field.className='current-training-select';field.setAttribute('aria-label','현재 훈련 필요 TOP 10');
+    const passed=(problem,index)=>{if(adapter.theory){const id=problem.id,state=adapter.state;if(state.trainingCenterRestored?.[id])return false;return Boolean(state.passed?.[id]||state.checked?.[id]===true||(state.history?.[id]||[]).some(x=>x.correct===true&&!x.cancelledAt))}const card=adapter.state.cards?.[index]||{};if(card.trainingCenterRestored)return false;return Boolean(card.passed||card.correct===true||(card.history||[]).some(x=>x.correct===true&&!x.cancelledAt))};
+    const tags=new Map();problems.forEach((problem,index)=>{if(problem.variantOf!=null||problem.sourceQuestionNo===''||passed(problem,index))return;[...new Set(problem.tags?.length?problem.tags:[problem.type])].filter(Boolean).forEach(tag=>{if(!tags.has(tag))tags.set(tag,[]);tags.get(tag).push(problem)})});
+    const ranked=[...tags].sort((a,b)=>b[1].length-a[1].length||a[0].localeCompare(b[0],'ko')).slice(0,10);field.add(new Option(ranked.length?'학습 유형 선택':'현재 훈련할 미통과 문제가 없습니다.',''));ranked.forEach(([tag,rows],index)=>field.add(new Option(`${index+1}. ${tag} · ${rows.length}문제`,tag)));field.disabled=!ranked.length;
+    field.onchange=()=>{if(!field.value)return;const url=new URL(location.href);url.searchParams.set('tag',field.value);url.searchParams.set('fresh','1');url.searchParams.delete('exam');location.href=url.href};label.append(field);return label;
+  }
   function mobileFilters(host,bar){
     const media=matchMedia('(max-width:760px)'),anchor=document.createComment('filter toolbar');host.before(anchor);
     const compact=document.createElement('div');compact.className='mobile-filter-bar';
@@ -55,7 +64,7 @@
     const dialog=document.createElement('dialog');dialog.className='mobile-filter-dialog';dialog.setAttribute('aria-labelledby','mobileFilterTitle');
     dialog.innerHTML='<header><h2 id="mobileFilterTitle">정렬 · 검색 설정</h2><button type="button" class="mobile-filter-close" aria-label="설정 닫기">×</button></header><div class="mobile-filter-content"></div><footer><button type="button" class="mobile-filter-apply">문제 보기</button></footer>';
     document.body.append(dialog);
-    const fields=[...bar.querySelectorAll('select')],keys=['exam','tag','status'];let snapshot=[];
+    const fields=[...bar.querySelectorAll('select:not(.current-training-select)')],keys=['exam','tag','status'];let snapshot=[];
     bar.addEventListener('change',event=>{if(dialog.open&&fields.includes(event.target))event.stopImmediatePropagation()},true);
     function close(){dialog.close()}
     open.onclick=()=>{snapshot=fields.map(f=>f.value);dialog.showModal();document.body.classList.add('mobile-filter-active')};
@@ -135,7 +144,7 @@
     // Secondary settings stay available without lengthening the daily study screen.
     for(const [id,label] of [['backupSection','동기화 설정 · 학습기록 백업']]){
       const section=document.getElementById(id);if(!section)continue;
-      const details=document.createElement('details');details.className='season-settings';
+      const details=document.createElement('details');details.className='season-settings';details.open=true;
       const summary=document.createElement('summary');summary.textContent=label;details.append(summary);
       section.querySelector('.section-heading')?.remove();while(section.firstChild)details.append(section.firstChild);section.append(details);
     }
@@ -150,7 +159,20 @@
     const groups=document.createElement('div');groups.className='season-catalog';
     const title=document.createElement('h3');title.textContent='tag';groups.append(title);
     const subjectOrder=['theory','practical','voucher'],tags=new Map(),subjectTags=new Map(subjectOrder.map(subject=>[subject,new Map()])),seen=new Set();
-    entries.filter(e=>!e.variant&&e.variantOf==null).forEach(e=>{
+    const learningState={theory:readState('exam-20260914-theory'),practical:readState('exam-20260914-practical'),voucher:readState('exam-20260914-voucher')};
+    function readState(key){try{return JSON.parse(localStorage.getItem(key)||'{}')}catch(_){return {}}}
+    function isPassed(entry){
+      const state=learningState[entry.subject]||{};
+      if(entry.subject==='theory'){
+        if(state.trainingCenterRestored?.[entry.id])return false;
+        const history=state.history?.[entry.id]||[];
+        return Boolean(state.passed?.[entry.id]||state.checked?.[entry.id]===true||history.some(x=>x.correct===true&&!x.cancelledAt));
+      }
+      const card=state.cards?.[entry.id]||{};
+      if(card.trainingCenterRestored)return false;
+      return Boolean(card.passed||card.correct===true||(card.history||[]).some(x=>x.correct===true&&!x.cancelledAt));
+    }
+    entries.filter(e=>!e.variant&&e.variantOf==null&&e.questionNo!=='').forEach(e=>{
       const id=e.subject+':'+e.id;if(seen.has(id))return;seen.add(id);
       [...new Set(e.tags?.length?e.tags:[e.type])].filter(Boolean).forEach(tag=>{
         if(!tags.has(tag))tags.set(tag,[]);tags.get(tag).push(e);
@@ -158,18 +180,27 @@
       });
     });
     const colors=['#155E9C','#286FA4','#3B7FAC','#4E8FB4','#619FBC','#74AEC5','#86BACD','#97C5D4','#A5CDDA','#B3D5E0'];
+    const activeColors=['#A9470B','#B9570F','#C96816','#D87920','#E58A32','#EC9B47','#F1AB5B','#F4BA70','#F6C784','#F8D398'];
     subjectOrder.forEach(subject=>{
-      const section=document.createElement('section');section.className='season-tag-group';
-      const heading=document.createElement('h4');heading.className='season-tag-heading';heading.innerHTML=`${escape(sources[subject].label)} <small>TOP 10</small>`;section.append(heading);
+      const section=document.createElement('details');section.className='season-tag-group';section.open=true;
+      const heading=document.createElement('summary');heading.className='season-tag-heading';heading.innerHTML=`${escape(sources[subject].label)} · 기출 오답 누적 <small>TOP 10</small>`;section.append(heading);
       const list=document.createElement('div');list.className='season-tag-list';
       [...subjectTags.get(subject)].sort((a,b)=>b[1].length-a[1].length||a[0].localeCompare(b[0],'ko')).forEach(([tag,rows],index)=>{
         const a=document.createElement('a');a.className='season-tag';a.textContent=tag+' · '+rows.length;a.title=`${sources[subject].label} ${rows.length}문제 · 모든 회차 · 미통과 문제 훈련`;
         a.href=sources[subject].file+'?tag='+encodeURIComponent(tag)+'&fresh=1';
         if(index<10){a.style.backgroundColor=colors[index];a.style.color=index<5?'#fff':'#173042';a.dataset.rank=String(index+1)}
         list.append(a);
-      });section.append(list);groups.append(section);
+      });section.append(list);
+      const currentHeading=document.createElement('h5');currentHeading.className='season-tag-heading season-current-heading';currentHeading.innerHTML='현재 훈련 필요 <small>TOP 10</small>';section.append(currentHeading);
+      const currentList=document.createElement('div');currentList.className='season-tag-list season-current-list';
+      const activeTags=[...subjectTags.get(subject)].map(([tag,rows])=>[tag,rows.filter(row=>!isPassed(row))]).filter(([,rows])=>rows.length).sort((a,b)=>b[1].length-a[1].length||a[0].localeCompare(b[0],'ko')).slice(0,10);
+      activeTags.forEach(([tag,rows],index)=>{const a=document.createElement('a');a.className='season-tag season-current-tag';a.textContent=tag+' · '+rows.length;a.title=`${sources[subject].label} 현재 미통과 ${rows.length}문제 풀기`;a.href=sources[subject].file+'?tag='+encodeURIComponent(tag)+'&fresh=1';a.style.backgroundColor=activeColors[index];a.style.color=index<6?'#fff':'#5B2A0A';a.dataset.rank=String(index+1);currentList.append(a)});
+      if(!activeTags.length){const done=document.createElement('span');done.className='season-current-empty';done.textContent='현재 훈련할 미통과 문제가 없습니다.';currentList.append(done)}
+      section.append(currentList);groups.append(section);
     });host.append(groups);
     // A shared tag spanning subjects opens each existing trainer, without loading all question data on home.
+    window.addEventListener('pageshow',event=>{if(event.persisted)location.reload()},{once:true});
+    window.addEventListener('storage',event=>{if(/^exam-20260914-(theory|practical|voucher)$/.test(event.key||''))location.reload()},{once:true});
     const selected=params.get('tag'),selectedRows=tags.get(selected);
     if(selectedRows){
       const panel=document.createElement('section');panel.className='section';const heading=document.createElement('h2');heading.textContent=selected+' · '+selectedRows.length+'문제';panel.append(heading);

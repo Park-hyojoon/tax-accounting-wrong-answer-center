@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>전산회계 1급 · 약점 분석</title>
+  <style>
+    :root{--ink:#202b3c;--muted:#687386;--line:#d7dce3;--panel:#fff;--bg:#f3f4f6;--nav:#4b5563;--theory:#155e9c;--practical:#507d8d;--voucher:#88745f;--zero:#e4e7eb}
+    *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:"Malgun Gothic","Noto Sans KR",sans-serif}.top-nav{position:sticky;top:0;z-index:10;background:#fff;border-bottom:1px solid var(--line)}.nav-inner{display:flex;align-items:center;gap:7px;max-width:1500px;margin:auto;padding:9px 20px;overflow-x:auto}.nav-link{flex:none;padding:8px 13px;border:1px solid #ccd2da;border-radius:8px;color:#334155;text-decoration:none;font-weight:700;background:#fff}.nav-link.active{color:#fff;background:var(--nav);border-color:var(--nav)}main{max-width:1320px;margin:0 auto;padding:24px}.hero,.panel{background:var(--panel);border:1px solid var(--line);border-radius:14px}.hero{padding:22px 24px}.hero h1{margin:0 0 8px;font-size:1.55rem}.hero p{margin:5px 0;color:var(--muted);line-height:1.65}.filters{display:flex;flex-wrap:wrap;gap:8px;margin-top:17px}.filter{border:1px solid #cbd2da;border-radius:999px;padding:7px 13px;background:#fff;color:#364152;font:inherit;font-weight:700;cursor:pointer}.filter.active{background:#46515f;color:#fff;border-color:#46515f}.summary{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:16px 0}.summary article{padding:16px 18px;background:#fff;border:1px solid var(--line);border-radius:12px}.summary span{display:block;color:var(--muted);font-size:.86rem}.summary strong{display:block;margin-top:5px;font-size:1.45rem}.charts{display:grid;grid-template-columns:1fr 1fr;gap:16px}.panel{padding:20px}.panel h2{margin:0;font-size:1.15rem}.panel .description{min-height:42px;margin:7px 0 17px;color:var(--muted);font-size:.9rem;line-height:1.55}.chart{display:grid;gap:8px}.bar-row{display:grid;grid-template-columns:minmax(150px,230px) 1fr 36px;gap:10px;align-items:center;padding:5px 6px;border-radius:7px;color:inherit;text-decoration:none}.bar-row:hover,.bar-row:focus-visible{background:#f0f4f7;outline:none;box-shadow:0 0 0 2px #b9c8d5}.bar-label{font-size:.88rem;line-height:1.25;text-align:right;word-break:keep-all}.bar-track{height:22px;background:#eef0f3;border-radius:5px;overflow:hidden}.bar{height:100%;min-width:0;border-radius:5px;transition:width .25s ease}.bar.theory{background:var(--theory)}.bar.practical{background:var(--practical)}.bar.voucher{background:var(--voucher)}.bar.mixed{background:#5f7285}.bar.zero{background:var(--zero)}.bar-value{font-weight:800;font-variant-numeric:tabular-nums}.legend{display:flex;flex-wrap:wrap;gap:13px;margin-top:16px;padding-top:13px;border-top:1px solid #e5e7eb;color:var(--muted);font-size:.82rem}.legend i{display:inline-block;width:10px;height:10px;margin-right:5px;border-radius:2px}.empty{padding:30px;text-align:center;color:var(--muted);background:#f8f9fa;border-radius:8px}.note{margin-top:16px;padding:14px 17px;border:1px solid var(--line);border-radius:12px;background:#fff;color:var(--muted);font-size:.88rem;line-height:1.6}
+    @media(max-width:850px){main{padding:14px}.charts{grid-template-columns:1fr}.summary{grid-template-columns:1fr}.bar-row{grid-template-columns:minmax(105px,35%) 1fr 28px;gap:7px}.bar-label{font-size:.78rem}.panel{padding:15px}.hero{padding:17px}.nav-inner{padding:8px 12px}.nav-link{padding:7px 10px;font-size:.82rem}}
+  </style>
+</head>
+<body>
+  <nav class="top-nav"><div class="nav-inner">
+    <a class="nav-link" href="오답_훈련센터.html">오늘의 오답훈련</a>
+    <a class="nav-link" href="이론_오답응용_5문제.html">이론 오답</a>
+    <a class="nav-link" href="일반전표_기본연습_24문제.html">일반전표 입력</a>
+    <a class="nav-link" href="매입매출전표_오답연습_3문제.html?view=all">매입매출전표 입력</a>
+    <a class="nav-link" href="일반전표_기본연습_24문제.html?view=star">★ 특별 훈련</a>
+    <a class="nav-link active" href="약점_분석_임시.html" aria-current="page">약점 분석(임시)</a>
+  </div></nav>
+  <main>
+    <section class="hero">
+      <h1>나의 약점 분석</h1>
+      <p>새 기출 오답 훈련을 시작한 <strong>2026년 9월 14일</strong>부터 오늘까지의 기록입니다.</p>
+      <p>왼쪽은 기출에서 틀려 등록한 학습 유형, 오른쪽은 응용문제를 풀면서 다시 틀린 학습 유형입니다. 막대를 누르면 해당 문제를 바로 풀 수 있습니다.</p>
+      <div class="filters" role="group" aria-label="분야 선택">
+        <button class="filter active" data-subject="all" type="button">전체</button>
+        <button class="filter" data-subject="theory" type="button">이론</button>
+        <button class="filter" data-subject="practical" type="button">일반전표</button>
+        <button class="filter" data-subject="voucher" type="button">매입매출전표</button>
+      </div>
+    </section>
+    <section class="summary" aria-label="요약">
+      <article><span>등록된 기출 오답</span><strong id="intakeTotal">0문제</strong></article>
+      <article><span>반복 훈련 오답</span><strong id="trainingWrongTotal">0회</strong></article>
+      <article><span>현재 학습 유형</span><strong id="typeTotal">0개</strong></article>
+    </section>
+    <div class="charts">
+      <section class="panel"><h2>기출 오답 입력 학습 유형</h2><p class="description">기출문제를 풀고 처음 틀려서 학습센터에 등록한 문제 수입니다. 유형을 누르면 미통과 문제를 엽니다.</p><div class="chart" id="intakeChart"></div><div class="legend" id="intakeLegend"></div></section>
+      <section class="panel"><h2>반복 훈련에서 다시 틀린 학습 유형</h2><p class="description">응용문제를 채점하거나 ‘틀렸어요’를 눌러 기록된 실제 오답 횟수입니다. 유형을 누르면 다시 훈련할 문제를 엽니다.</p><div class="chart" id="trainingChart"></div><div class="legend" id="trainingLegend"></div></section>
+    </div>
+    <p class="note">그래프는 이 기기에 저장된 새 시즌 학습기록을 사용합니다. 취소한 기록은 제외하며, 통과한 문제도 과거의 오답 이력은 지우지 않습니다. 동기화 후 다른 기기에서도 최신 기록을 받아 보면 같은 방식으로 다시 계산됩니다.</p>
+  </main>
+  <script src="season-catalog.js?v=7"></script>
+  <script>
+  (()=>{
+    const entries=(window.TrainingSeasonCatalog||[]).filter(x=>x.questionNo!==''),labels={theory:'이론',practical:'일반전표',voucher:'매입매출전표'},files={theory:'이론_오답응용_5문제.html',practical:'일반전표_기본연습_24문제.html',voucher:'매입매출전표_오답연습_3문제.html'};
+    const states={theory:read('exam-20260914-theory'),practical:read('exam-20260914-practical'),voucher:read('exam-20260914-voucher')};
+    let subject='all';
+    function read(key){try{return JSON.parse(localStorage.getItem(key)||'{}')}catch(_){return {}}}
+    function history(entry){const state=states[entry.subject]||{};return entry.subject==='theory'?(state.history?.[entry.id]||[]):(state.cards?.[entry.id]?.history||[])}
+    function wrongs(entry){const list=history(entry);if(list.length)return list.filter(x=>x.correct===false&&!x.cancelledAt).length;const card=states[entry.subject]?.cards?.[entry.id];return Number(card?.wrongCount||0)}
+    function scoped(){return entries.filter(x=>subject==='all'||x.subject===subject)}
+    function aggregate(rows,metric){const map=new Map();rows.forEach(entry=>{const value=metric(entry);[...new Set(entry.tags?.length?entry.tags:[entry.type])].forEach(tag=>{const item=map.get(tag)||{name:tag,value:0,subjects:new Set()};item.value+=value;item.subjects.add(entry.subject);map.set(tag,item)})});return [...map.values()].sort((a,b)=>b.value-a.value||a.name.localeCompare(b.name,'ko')).slice(0,15)}
+    function tone(item){return item.subjects.size===1?[...item.subjects][0]:'mixed'}
+    function targetUrl(item){const subjects=[...item.subjects];if(subject!=='all')return files[subject]+'?tag='+encodeURIComponent(item.name)+'&fresh=1';if(subjects.length===1)return files[subjects[0]]+'?tag='+encodeURIComponent(item.name)+'&fresh=1';return '오답_훈련센터.html?tag='+encodeURIComponent(item.name)}
+    function chart(target,rows){const box=document.getElementById(target);box.replaceChildren();if(!rows.length){box.innerHTML='<div class="empty">아직 분석할 기록이 없습니다.</div>';return}const max=Math.max(1,...rows.map(x=>x.value));rows.forEach(item=>{const row=document.createElement('a');row.className='bar-row';row.href=targetUrl(item);row.title=`${item.name} 미통과 문제 풀기`;const width=item.value?Math.max(3,item.value/max*100):0;row.innerHTML=`<span class="bar-label">${item.name}</span><span class="bar-track"><span class="bar ${tone(item)} ${item.value?'':'zero'}" style="display:block;width:${item.value?width:100}%"></span></span><span class="bar-value">${item.value}</span>`;box.append(row)})}
+    function legend(id){document.getElementById(id).innerHTML='<span><i style="background:#155e9c"></i>이론</span><span><i style="background:#507d8d"></i>일반전표</span><span><i style="background:#88745f"></i>매입매출전표</span><span><i style="background:#e4e7eb"></i>오답 0회</span>'}
+    function render(){const rows=scoped(),intake=aggregate(rows,()=>1),training=aggregate(rows,wrongs);chart('intakeChart',intake);chart('trainingChart',training);document.getElementById('intakeTotal').textContent=rows.length+'문제';document.getElementById('trainingWrongTotal').textContent=rows.reduce((n,x)=>n+wrongs(x),0)+'회';document.getElementById('typeTotal').textContent=new Set(rows.flatMap(x=>x.tags?.length?x.tags:[x.type])).size+'개';legend('intakeLegend');legend('trainingLegend')}
+    document.querySelectorAll('.filter').forEach(button=>button.addEventListener('click',()=>{subject=button.dataset.subject;document.querySelectorAll('.filter').forEach(x=>x.classList.toggle('active',x===button));render()}));render();
+  })();
+  </script>
+</body>
+</html>

@@ -83,7 +83,7 @@
     details.reveal summary{cursor:pointer;padding:11px 15px;font-weight:800;color:#684d00;list-style:none}
     details.reveal summary::-webkit-details-marker{display:none}
     .reveal-body{padding:6px 16px 16px;border-top:1px solid #eee3bd}
-    .answer-line{display:grid;grid-template-columns:70px 1fr 150px 100px;gap:8px;padding:7px 0;border-bottom:1px dashed #d8d8d8}
+    .answer-line{display:grid;grid-template-columns:70px minmax(180px,.65fr) minmax(240px,1fr) 140px;gap:8px;padding:7px 0;border-bottom:1px dashed #d8d8d8}
     .answer-line:last-child{border-bottom:0}
     .answer-side{font-weight:900;color:var(--navy)}
     .grand{margin:34px 0;background:var(--navy);color:#fff;border-radius:22px;padding:25px;text-align:center}
@@ -125,6 +125,7 @@
 
       <a class="nav-link" href="매입매출전표_오답연습_3문제.html?view=all">매입매출전표 입력</a>
       <a class="nav-link nav-star" href="일반전표_기본연습_24문제.html?view=star" title="★ 표시한 문제와 AI 응용문제를 유형별로 모아 훈련합니다">★ 특별 훈련</a>
+      <a class="nav-link" href="약점_분석_임시.html">약점 분석(임시)</a>
       <div class="nav-sync" aria-label="동기화">
         <button class="nav-sync-button primary" id="syncAll" type="button" title="PC·GitHub·모바일의 새 문제와 학습기록을 한 번에 최신으로 맞춥니다">🔄 동기화</button>
       </div>
@@ -178,9 +179,9 @@
   </main>
 
   <script src="github-learning-sync.js?v=16"></script>
-  <script src="season-ui.js?v=23"></script>
+  <script src="season-ui.js?v=30"></script>
 <script src="training-ui.js?v=5"></script>
-  <script src="account-search.js?v=1"></script>
+  <script src="account-search.js?v=2"></script>
   <script>
     const problems = loadTrainingProblems();
 
@@ -227,7 +228,7 @@
     function answerHtml(a,p){
       const extra=[a.division?`구분: ${a.division}`:'',a.partner?`거래처: ${a.partner}`:'',a.memo?`적요: ${a.memo}`:''].filter(Boolean).join(' · ');
       const code=p.requiredAccountCodes?.[a.account]||REQUIRED_ACCOUNT_CODES[a.account];
-      return `<div class="answer-line"><span class="answer-side">${a.side==='D'?'차변':'대변'}</span><span>${code?`${code} `:''}${a.account}</span><span>${money(a.amount)}</span><span>${extra||'—'}</span></div>`;
+      return `<div class="answer-line"><span class="answer-side">${a.side==='D'?'차변':'대변'}</span><span>${code?`${code} `:''}${a.account}</span><span>${extra||'—'}</span><span>${money(a.amount)}</span></div>`;
     }
 
     function accountField(p){return p.accountSelect?`<select class="account" lang="ko" aria-label="계정과목 선택"><option value="">계정과목 선택</option>${p.accountOptions.map(accountOptionHtml).join('')}</select>`:'<input class="account" type="text" lang="ko" data-ko-auto autocomplete="off" placeholder="계정과목" aria-label="계정과목">'}
