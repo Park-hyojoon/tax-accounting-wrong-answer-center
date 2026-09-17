@@ -74,9 +74,9 @@
     const key=c=>theory?c.dataset.id:c.dataset.index;
     const get=(id,k)=>theory?a.state[k]?.[id]:a.state.cards?.[id]?.[k];
     const put=(id,k,v)=>{const target=theory?(a.state[k]??={}):(a.state.cards[id]??={});target[theory?id:k]=v};
-    const tagReplay=Boolean(params.get('tag')),status=document.createElement('select');status.setAttribute('aria-label','학습 상태');
-    status.add(new Option(tagReplay?'태그 전체 문제':'학습할 문제',tagReplay?'all':'active'));
-    status.value=tagReplay?'all':'active';bar.append(status);
+    const status=document.createElement('select');status.setAttribute('aria-label','학습 상태');
+    status.add(new Option('학습할 문제','active'));
+    status.value='active';bar.append(status);
     function visibility(card){
       const id=key(card),p=theory?problems.find(p=>p.id===id):problems[Number(id)],passed=!!get(id,'passed'),star=!!get(id,'starred');
       const search=document.querySelector('#typeFilter')?.value||params.get('type')||'';
@@ -163,8 +163,8 @@
       const heading=document.createElement('h4');heading.className='season-tag-heading';heading.innerHTML=`${escape(sources[subject].label)} <small>TOP 10</small>`;section.append(heading);
       const list=document.createElement('div');list.className='season-tag-list';
       [...subjectTags.get(subject)].sort((a,b)=>b[1].length-a[1].length||a[0].localeCompare(b[0],'ko')).forEach(([tag,rows],index)=>{
-        const a=document.createElement('a');a.className='season-tag';a.textContent=tag+' · '+rows.length;a.title=`${sources[subject].label} ${rows.length}문제 · 모든 회차 · 통과한 문제 포함`;
-        a.href=sources[subject].file+'?tag='+encodeURIComponent(tag)+'&status=all&fresh=1';
+        const a=document.createElement('a');a.className='season-tag';a.textContent=tag+' · '+rows.length;a.title=`${sources[subject].label} ${rows.length}문제 · 모든 회차 · 미통과 문제 훈련`;
+        a.href=sources[subject].file+'?tag='+encodeURIComponent(tag)+'&fresh=1';
         if(index<10){a.style.backgroundColor=colors[index];a.style.color=index<5?'#fff':'#173042';a.dataset.rank=String(index+1)}
         list.append(a);
       });section.append(list);groups.append(section);
@@ -173,7 +173,7 @@
     const selected=params.get('tag'),selectedRows=tags.get(selected);
     if(selectedRows){
       const panel=document.createElement('section');panel.className='section';const heading=document.createElement('h2');heading.textContent=selected+' · '+selectedRows.length+'문제';panel.append(heading);
-      [...new Set(selectedRows.map(e=>e.subject))].forEach(subject=>{const frame=document.createElement('iframe');frame.title=sources[subject].label+' · '+selected;frame.src=sources[subject].file+'?tag='+encodeURIComponent(selected)+'&status=all&fresh=1';frame.style.cssText='width:100%;height:80vh;border:1px solid #d5d9df;margin-top:12px';panel.append(frame)});
+      [...new Set(selectedRows.map(e=>e.subject))].forEach(subject=>{const frame=document.createElement('iframe');frame.title=sources[subject].label+' · '+selected;frame.src=sources[subject].file+'?tag='+encodeURIComponent(selected)+'&fresh=1';frame.style.cssText='width:100%;height:80vh;border:1px solid #d5d9df;margin-top:12px';panel.append(frame)});
       document.querySelector('main')?.prepend(panel);
     }
   }

@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "revision": 48,
-  "updatedAt": "2026-09-16T22:42:36+09:00",
+  "revision": 49,
+  "updatedAt": "2026-09-17T17:04:41+09:00",
   "files": [
     "오답_훈련센터.html",
     "일반전표_기본연습_24문제.html",
@@ -27,5 +27,5 @@
     "data/theory.js",
     "data/voucher.js"
   ],
-  "note": "107회 응용문제 10개 등록"
+  "note": "108회 응용문제 9개 등록"
 }
