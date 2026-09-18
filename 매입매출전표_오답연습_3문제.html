@@ -96,7 +96,7 @@
     </div>
   </div>
 </nav>
-<script src="data/voucher.js?v=7"></script>
+<script src="data/voucher.js?v=8"></script>
 <script>(function(){var nav=document.querySelector('.top-nav');function sync(){document.documentElement.style.setProperty('--nav-h',(nav?nav.offsetHeight:60)+'px')}sync();window.addEventListener('resize',sync)})()</script>
 <main class="wrap">
   <div class="toolbar">
@@ -199,7 +199,7 @@ function answerLine(a){return `<div class="answer-line"><strong>${a.side==='D'?'
     $('.archive-one',card).before(button);
     const note=document.createElement('p');note.className='star-note';note.hidden=true;note.textContent='★ 이 문제는 특별히 훈련이 필요합니다.';$('.qactions',card).before(note);
   });
-  const DIRECT_INTAKE_INDICES=new Set([0,1,2,3,4,5,6,7,8,9,10]);
+  const DIRECT_INTAKE_INDICES=new Set([0,1,2,3,4,5,6,7,8,9,10,11,12,13]);
   const viewParams=new URLSearchParams(location.search),todayView=viewParams.get('view')==='today',starView=viewParams.get('view')==='star',typeView=(viewParams.get('type')||'').trim();
   const variantSourceIndices=new Set(problems.filter(p=>p.variantOf!=null).map(p=>p.variantOf));
   function installOfficialControls(card){
