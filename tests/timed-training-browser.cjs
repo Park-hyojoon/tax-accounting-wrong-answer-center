@@ -26,7 +26,7 @@ const root=path.resolve(__dirname,'..'),url=(file,query='')=>pathToFileURL(path.
   const snapshot=await page.evaluate(()=>JSON.stringify(studyState.cards[0].history));
   await page.locator('.timer-retry').click();assert.equal(await page.evaluate(()=>JSON.stringify(studyState.cards[0].history)),snapshot);
   // Settings start immediately; reject duplicate shortcut and preserve key combination specificity.
-  await page.locator('.timer-config').click();await page.locator('.timer-minutes').selectOption('1');await page.locator('.timer-seconds').selectOption('30');
+  await page.locator('.timer-config').click();await page.locator('.timer-minutes').fill('01');await page.locator('.timer-seconds').fill('30');
   await page.locator('.shortcut-start').focus();await page.keyboard.press('Control+Alt+KeyS');
   await page.locator('.shortcut-stop').focus();await page.keyboard.press('Control+Alt+KeyD');
   await page.locator('.timer-save').click();assert.equal(await page.evaluate(()=>TrainingTimed.active.pending.targetSeconds),90);

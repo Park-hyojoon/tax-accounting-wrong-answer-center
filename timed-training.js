@@ -9,74 +9,91 @@
   const money=n=>Number(n).toLocaleString('ko-KR');
   const clock=ms=>{const s=Math.max(0,Math.ceil(ms/1000));return `${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`};
   const chord=e=>[e.ctrlKey?'Ctrl':'',e.altKey?'Alt':'',e.shiftKey?'Shift':'',e.metaKey?'Meta':'',e.code==='Space'?'Space':e.code].filter(Boolean).join('+');
-  function style(){if(document.getElementById('timedStyle'))return;const link=document.createElement('link');link.id='timedStyle';link.rel='stylesheet';link.href='timed-training.css?v=1';document.head.append(link)}
+  function style(){if(document.getElementById('timedStyle'))return;const link=document.createElement('link');link.id='timedStyle';link.rel='stylesheet';link.href='timed-training.css?v=12';document.head.append(link)}
   function install(problems,a){
     if(new URLSearchParams(location.search).get('timed')!=='1')return;
     style();document.body.classList.add('timed-mode');document.title='시간 훈련 · '+(a.subject==='practical'?'일반전표':'매입매출전표');
     const savePanel=document.querySelector('.save-panel');if(savePanel){const details=document.createElement('details');details.className='timed-records';details.innerHTML='<summary>오늘 학습기록 저장</summary>';savePanel.before(details);details.append(savePanel)}
-    let settings={...defaults,...read(settingsKey)},current=null;
+    let settings={...defaults,...read(settingsKey)},current=null,paper=false,visible=[];
     const cards=[...document.querySelectorAll('.question')];
     const state=card=>a.state.cards[card.dataset.index]||(a.state.cards[card.dataset.index]={history:[]});
-    const pending=()=>current?state(current).timedPending:null;
+    const pendingOf=card=>card?state(card).timedPending:null,pending=()=>pendingOf(current);
     const bar=document.createElement('section');bar.className='timed-bar';
-    bar.innerHTML=`<strong>시간 훈련</strong><a href="${files.practical}?timed=1" class="${a.subject==='practical'?'selected':''}">일반전표</a><a href="${files.voucher}?timed=1" class="${a.subject==='voucher'?'selected':''}">매입매출전표</a><label>회차 <select class="time-exam"><option value="">전체</option></select></label><label>유형 <select class="time-type"><option value="">전체</option></select></label><label>학습 상태 <select class="time-status"><option value="active">미통과 문제</option><option value="all">전체 기록 · 다시 훈련</option></select></label><label>문제 <select class="time-question"></select></label><button type="button" class="time-next">다음 문제</button><span class="time-count"></span>`;
+    bar.innerHTML=`<a href="${files.practical}?timed=1" class="timed-tab ${a.subject==='practical'?'selected':''}">일반전표</a><a href="${files.voucher}?timed=1" class="timed-tab ${a.subject==='voucher'?'selected':''}">매입매출전표</a><label>회차 <select class="time-exam"><option value="">전체</option></select></label><label>유형 <select class="time-type"><option value="">전체</option></select></label><label>학습 상태 <select class="time-status"><option value="active">미통과 문제</option><option value="all">전체 기록 · 다시 훈련</option></select></label><label>문제 <select class="time-question"></select></label>`;
     document.querySelector('#questions').before(bar);
     const exam=bar.querySelector('.time-exam'),type=bar.querySelector('.time-type'),status=bar.querySelector('.time-status'),select=bar.querySelector('.time-question');
     [...new Set(problems.map(p=>p.examRound))].sort((x,y)=>x-y).forEach(x=>exam.add(new Option(x+'회',x)));
     [...new Set(problems.map(p=>p.type))].sort((x,y)=>x.localeCompare(y,'ko')).forEach(x=>type.add(new Option(x,x)));
-    const params=new URLSearchParams(location.search);exam.value=params.get('exam')||'';type.value=params.get('type')||'';if(params.get('status')==='all')status.value='all';
+    const params=new URLSearchParams(location.search);{const asked=params.get('exam'),rounds=problems.map(p=>Number(p.examRound)||0);exam.value=asked===null?String(Math.max(0,...rounds)||''):asked==='all'?'':asked}type.value=params.get('type')||'';if(params.get('status')==='all')status.value='all';
     const panel=document.createElement('aside');panel.className='timer-panel';panel.setAttribute('aria-label','시간 훈련 타이머');
-    panel.innerHTML='<button class="timer-dial" type="button" aria-label="타이머 시작"><span><strong>1:00</strong><small>클릭하여 시작</small></span></button><p class="timer-state" role="status">시작 대기</p><div class="timer-buttons"><button type="button" class="timer-stop">정지</button><button type="button" class="timer-config">설정</button><button type="button" class="timer-retry">다시 풀기</button></div><p class="timer-help"></p>';
+    panel.innerHTML='<button class="timer-dial" type="button" aria-label="타이머 시작"><span><strong>1:00</strong></span></button><div class="timer-buttons"><div class="timer-pair"><button type="button" class="timer-pause" aria-label="일시정지" title="일시정지"><span aria-hidden="true">❚❚</span></button><button type="button" class="timer-resume" aria-label="계속" title="계속"><span aria-hidden="true">▶</span></button></div><button type="button" class="timer-retry">초기화</button><button type="button" class="timer-config">설정</button></div>';
     document.body.append(panel);
     const dialog=document.createElement('dialog');dialog.className='timer-settings';dialog.setAttribute('aria-labelledby','timerTitle');
-    dialog.innerHTML='<h2 id="timerTitle">시간 · 단축키 설정</h2><div class="timer-wheels"><label>분<select class="timer-minutes" aria-label="목표 분"></select></label><label>초<select class="timer-seconds" aria-label="목표 초"></select></label></div><label class="timer-shortcut">시작<input readonly class="shortcut-start" aria-label="시작 단축키" placeholder="원하는 키 조합을 누르세요"></label><label class="timer-shortcut">정지<input readonly class="shortcut-stop" aria-label="정지 단축키" placeholder="원하는 키 조합을 누르세요"></label><p>단축키 칸을 누른 후 원하는 조합을 입력하세요. Ctrl 또는 Alt를 포함해 주세요.</p><p class="timer-error" role="alert"></p><button class="timer-defaults" type="button">기본값</button> <button class="timer-cancel" type="button">취소</button> <button class="timer-save" type="button">저장 · 시작</button>';
+    dialog.innerHTML='<div class="timer-head"><h2 id="timerTitle">시간 · 단축키 설정</h2><button class="timer-close" type="button" aria-label="닫기">X</button></div><div class="timer-wheels"><label>분<input class="timer-minutes" type="text" inputmode="numeric" maxlength="2" autocomplete="off" aria-label="목표 분" value="01"></label><label>초<input class="timer-seconds" type="text" inputmode="numeric" maxlength="2" autocomplete="off" aria-label="목표 초" value="00"></label><button class="timer-save" type="button">완료</button></div><label class="timer-shortcut">시작<input readonly class="shortcut-start" aria-label="시작 단축키" placeholder="원하는 키 조합을 누르세요"></label><label class="timer-shortcut">정지<input readonly class="shortcut-stop" aria-label="정지 단축키" placeholder="원하는 키 조합을 누르세요"></label><p class="timer-error" role="alert"></p>';
     document.body.append(dialog);
     const minutes=dialog.querySelector('.timer-minutes'),seconds=dialog.querySelector('.timer-seconds');
-    for(let i=0;i<60;i++){minutes.add(new Option(String(i).padStart(2,'0'),i));seconds.add(new Option(String(i).padStart(2,'0'),i))}
-    function message(text){panel.querySelector('.timer-state').textContent=text}
-    function draw(){const p=pending(),elapsed=p?(p.elapsedMs??Math.max(0,Date.now()-p.startedMs)):0,target=(p?.targetSeconds||settings.targetSeconds)*1000,remaining=target-elapsed;
+    for(const box of [minutes,seconds]){box.addEventListener('focus',()=>box.select());box.addEventListener('input',()=>{box.value=box.value.replace(/[^0-9]/g,'').slice(0,2)});box.addEventListener('blur',()=>{box.value=String(Math.min(59,Number(box.value)||0)).padStart(2,'0')})}
+    function message(){}
+    const live=p=>Math.max(0,(p.pausedAt||Date.now())-p.startedMs-(p.pausedTotalMs||0));
+    function place(){if(matchMedia('(max-width:760px)').matches){panel.style.left='';panel.style.right='';return}const wrap=document.querySelector('main.wrap');if(!wrap)return;const r=wrap.getBoundingClientRect(),pad=parseFloat(getComputedStyle(wrap).paddingRight)||0,w=panel.offsetWidth;panel.style.left=Math.max(0,Math.min(r.right-pad+12,innerWidth-w-8))+'px';panel.style.right='auto'}
+    function draw(){const p=pending(),elapsed=p?(p.elapsedMs??live(p)):0,target=(p?.targetSeconds||settings.targetSeconds)*1000,remaining=target-elapsed;
       panel.querySelector('.timer-dial strong').textContent=(remaining<0?'+':'')+clock(Math.abs(remaining));
-      panel.querySelector('.timer-dial small').textContent=p?.phase==='running'?(remaining<0?'초과 시간':'남은 시간'):p?.phase==='stopped'||p?.phase==='graded'?'측정 완료':'클릭하여 시작';
+      
       panel.style.setProperty('--timer-fill',Math.max(0,Math.min(100,remaining/target*100))+'%');panel.classList.toggle('overtime',remaining<0);
-      panel.querySelector('.timer-stop').disabled=p?.phase!=='running';panel.querySelector('.timer-config').disabled=p?.phase==='running';
-      panel.querySelector('.timer-help').textContent=`시작 ${settings.start}\n정지 ${settings.stop}`;
+      const on=p?.phase==='running';panel.querySelector('.timer-pause').disabled=!on||!!p.pausedAt;panel.querySelector('.timer-resume').disabled=!on||!p.pausedAt;panel.querySelector('.timer-config').disabled=on;place();
     }
-    function lock(value){if(!current)return;current.querySelectorAll('.entry-wrap,.kclep-shell').forEach(x=>x.inert=value)}
-    function start(){if(!current)return;const p=pending();if(p?.phase==='running')return;if(p?.phase==='stopped'){message('채점 후 다시 풀기를 눌러주세요.');return}if(p?.phase==='graded'){message('다시 풀기 또는 다음 문제를 선택하세요.');return}
-      current.querySelectorAll('details').forEach(x=>x.open=false);lock(false);
-      state(current).timedPending={id:crypto.randomUUID(),phase:'running',startedMs:Date.now(),targetSeconds:settings.targetSeconds,assisted:false};a.save();message('측정 중 · 입력을 마치면 정지');draw();
+    function lockCard(card,value){if(card)card.querySelectorAll('.entry-wrap,.kclep-shell').forEach(x=>x.inert=value)}
+    function lock(value){lockCard(current,value)}
+    function start(){if(!current)return;const p=pending();if(p?.phase==='running'){if(p.pausedAt)resume();return}if(p)return;
+      current.querySelectorAll('details').forEach(x=>x.open=false);lock(false);if(paper)current.scrollIntoView({behavior:'smooth',block:'start'});
+      state(current).timedPending={id:crypto.randomUUID(),phase:'running',startedMs:Date.now(),pausedTotalMs:0,targetSeconds:settings.targetSeconds,assisted:false};a.save();message('측정 중 · 입력을 마치면 정지');draw();
       const first=current.querySelector('.entry-row .side,.date-month,.voucher-type');first?.focus({preventScroll:true});
     }
-    function stop(){const p=pending();if(p?.phase!=='running')return;p.elapsedMs=Math.max(0,Date.now()-p.startedMs);p.stoppedAt=new Date().toISOString();p.phase='stopped';a.save();lock(true);message(`완료 ${clock(p.elapsedMs)} · 채점해주세요`);draw()}
-    function reset(){if(!current)return;const p=pending();if(p&&(p.phase==='running'||p.phase==='stopped')&&!confirm('이번 미채점 측정을 버리고 다시 시작할까요? 이전 채점 이력은 보존됩니다.'))return;
-      delete state(current).timedPending;lock(false);a.clear(current);current.querySelectorAll('details').forEach(x=>x.open=false);current.querySelector('.check-one').disabled=false;current.querySelector('.check-one').textContent='채점하기';lock(true);a.save();message('입력 초기화 · 시작 대기');current.dispatchEvent(new Event('input',{bubbles:true}));draw();
-    }
+    function stopCard(card){const p=pendingOf(card);if(p?.phase!=='running')return false;p.elapsedMs=live(p);delete p.pausedAt;p.stoppedAt=new Date().toISOString();p.phase='stopped';a.save();lockCard(card,true);return true}
+    function advance(){const next=visible.slice(visible.indexOf(current)+1).find(c=>!pendingOf(c));if(next){show(next);start()}draw()}
+    function stop(){if(!stopCard(current))return;if(paper)advance();else draw()}
+    function pause(){const p=pending();if(p?.phase!=='running'||p.pausedAt)return;p.pausedAt=Date.now();a.save();draw()}
+    function resume(){const p=pending();if(p?.phase!=='running'||!p.pausedAt)return;p.pausedTotalMs=(p.pausedTotalMs||0)+Date.now()-p.pausedAt;delete p.pausedAt;a.save();draw()}
+    function resetCard(card){delete state(card).timedPending;lockCard(card,false);a.clear(card);card.querySelectorAll('details').forEach(x=>x.open=false);const b=card.querySelector('.check-one');b.disabled=false;b.textContent='채점하기';lockCard(card,true);card.dispatchEvent(new Event('input',{bubbles:true}))}
+    function redo(){if(paper){visible.forEach(resetCard);a.save();show(visible[0]);window.scrollTo({top:0,behavior:'smooth'})}else if(current){resetCard(current);a.save()}draw()}
+    function reset(){const p=pending();if(p?.phase!=='running')return;p.startedMs=Date.now();p.pausedTotalMs=0;if(p.pausedAt)p.pausedAt=p.startedMs;p.targetSeconds=settings.targetSeconds;a.save();draw()}
     function passed(s){return !s.trainingCenterRestored&&(s.passed||s.correct===true||(s.history||[]).some(h=>h.correct===true&&!h.cancelledAt))}
-    function eligible(card){const p=problems[card.dataset.index],s=state(card);return !s.deleted&&(!exam.value||String(p.examRound)===exam.value)&&(!type.value||p.type===type.value)&&(status.value==='all'||!passed(s)||['running','stopped'].includes(s.timedPending?.phase))}
-    function show(card){if(current&&current!==card&&pending()?.phase==='running'){message('먼저 타이머를 정지해주세요.');select.value=current.dataset.index;return}
-      current=card||null;cards.forEach(c=>c.hidden=c!==current);if(!current){message('선택한 범위에 미통과 문제가 없습니다. 전체 기록을 선택하면 다시 훈련할 수 있습니다.');draw();return}
-      select.value=current.dataset.index;sessionStorage.setItem('exam-20260914-timed-last-'+a.subject,current.dataset.index);
-      const address=new URL(location.href);for(const [key,value] of [['exam',exam.value],['type',type.value],['status',status.value],['problem',current.dataset.index]]){value?address.searchParams.set(key,value):address.searchParams.delete(key)}history.replaceState(null,'',address.href);
-      const p=pending();if(!p){a.clear(current);current.querySelectorAll('details').forEach(x=>x.open=false);message('준비되면 타이머를 시작하세요.')}else message(p.phase==='running'?'진행 중인 측정을 이어갑니다.':p.phase==='stopped'?`완료 ${clock(p.elapsedMs)} · 채점해주세요`:'채점 완료 · 다시 풀기 또는 다음 문제');
-      current.querySelector('.check-one').disabled=p?.phase==='graded';lock(p?.phase!=='running');current.dispatchEvent(new Event('input',{bubbles:true}));draw();
+    function eligible(card){const p=problems[card.dataset.index],s=state(card);return !s.deleted&&(!exam.value||String(p.examRound)===exam.value)&&(!type.value||p.type===type.value)&&(!!exam.value||status.value==='all'||!passed(s)||['running','stopped'].includes(s.timedPending?.phase))}
+    function prepareCard(card){const p=pendingOf(card);if(!p){a.clear(card);card.querySelectorAll('details').forEach(x=>x.open=false)}card.querySelector('.check-one').disabled=p?.phase==='graded';lockCard(card,p?.phase!=='running');card.dispatchEvent(new Event('input',{bubbles:true}))}
+    function show(card){if(current&&current!==card&&pending()?.phase==='running')return;
+      current=card||null;cards.forEach(c=>{c.hidden=paper?!visible.includes(c):c!==current;c.classList.toggle('timed-active',paper&&c===current)});if(!current){draw();return}
+      select.value=current.dataset.index;markList();sessionStorage.setItem('exam-20260914-timed-last-'+a.subject,current.dataset.index);
+      const address=new URL(location.href);for(const [key,value] of [['exam',exam.value||'all'],['type',type.value],['status',status.value],['problem',current.dataset.index]]){value?address.searchParams.set(key,value):address.searchParams.delete(key)}history.replaceState(null,'',address.href);
+      if(!paper)prepareCard(current);draw();
     }
-    function list(prefer){select.replaceChildren();const visible=cards.filter(eligible);visible.forEach(c=>{const p=problems[c.dataset.index];select.add(new Option(`${Number(c.dataset.index)+1}. ${p.title}`,c.dataset.index))});bar.querySelector('.time-count').textContent=`${visible.length}문제`;show(visible.find(c=>c.dataset.index===String(prefer))||visible[0])}
+    const listBox=document.createElement('section');listBox.className='timed-list';document.querySelector('#questions').after(listBox);
+    function markList(){listBox.querySelectorAll('button').forEach(b=>b.classList.toggle('current',!!current&&b.dataset.index===current.dataset.index))}
+    function renderList(){listBox.innerHTML='';const redoBtn=document.createElement('button');redoBtn.type='button';redoBtn.className='timed-redo';redoBtn.textContent=paper?'처음부터 다시 풀기':'이 문제 다시 풀기';redoBtn.onclick=redo;if(paper){const b=document.createElement('button');b.type='button';b.className='timed-grade-all';b.textContent='전체 채점하기';b.onclick=()=>{visible.forEach(c=>{const p=pendingOf(c);if(p&&(p.phase==='running'||p.phase==='stopped'))gradeCard(c,true)});draw()};listBox.append(b,redoBtn);return}
+      const groups=new Map();visible.forEach(c=>{const r=problems[c.dataset.index].examRound||0;(groups.get(r)||groups.set(r,[]).get(r)).push(c)});
+      [...groups.keys()].sort((x,y)=>x-y).forEach(r=>{const box=document.createElement('div');box.className='timed-list-group';const head=document.createElement('h4');head.textContent=`${r?r+'회':'기타'} · ${groups.get(r).length}문제`;box.append(head);
+        groups.get(r).forEach(c=>{const p=problems[c.dataset.index],b=document.createElement('button');b.type='button';b.dataset.index=c.dataset.index;b.textContent=`${Number(c.dataset.index)+1}. ${p.title}`;
+          b.onclick=()=>{if(pending()?.phase==='running')return;show(c)};box.append(b)});listBox.append(box)});listBox.append(redoBtn);markList()}
+    function list(prefer){select.replaceChildren();paper=!!exam.value;document.body.classList.toggle('timed-paper',paper);visible=cards.filter(eligible);visible.forEach(c=>{const p=problems[c.dataset.index];select.add(new Option(`${Number(c.dataset.index)+1}. ${p.title}`,c.dataset.index))});renderList();if(paper)visible.forEach(prepareCard);
+      show(visible.find(c=>c.dataset.index===String(prefer))||(paper?visible.find(c=>!pendingOf(c)):null)||visible[0])}
+    function gradeCard(card,quiet){let p=pendingOf(card);if(!p)return;let advanceAfter=false;
+      if(p.phase==='running'){stopCard(card);advanceAfter=paper&&card===current&&!quiet}
+      p=pendingOf(card);if(p.phase!=='stopped'){draw();return}
+      a.grade(card);const h=state(card).history.at(-1);h.id=p.id;h.source='timed';h.timing={elapsedMs:p.elapsedMs,targetSeconds:p.targetSeconds,startedAt:new Date(p.startedMs).toISOString(),stoppedAt:p.stoppedAt,assisted:p.assisted};h.problemType=problems[card.dataset.index].type;h.problemId=problems[card.dataset.index].id;p.phase='graded';a.save();card.hidden=false;card.querySelector('.check-one').disabled=true;lockCard(card,true);
+      if(advanceAfter)advance();else draw();
+    }
     cards.forEach(card=>{
       if(a.subject==='practical')practicalShell(card);
       card.querySelectorAll('details').forEach(detail=>detail.addEventListener('toggle',()=>{if(detail.open&&current===card&&pending()?.phase==='running'){pending().assisted=true;a.save();message('해설 확인 · 참고 풀이로 기록합니다.')}}));
-      card.querySelector('.check-one').addEventListener('click',event=>{event.preventDefault();event.stopImmediatePropagation();if(card!==current)return;stop();const p=pending();if(!p||p.phase!=='stopped'){message('타이머를 시작한 뒤 풀고 채점해주세요.');return}
-        a.grade(card);const h=state(card).history.at(-1);h.id=p.id;h.source='timed';h.timing={elapsedMs:p.elapsedMs,targetSeconds:p.targetSeconds,startedAt:new Date(p.startedMs).toISOString(),stoppedAt:p.stoppedAt,assisted:p.assisted};h.problemType=problems[card.dataset.index].type;h.problemId=problems[card.dataset.index].id;p.phase='graded';a.save();card.hidden=false;event.currentTarget.disabled=true;lock(true);message(`${h.correct?'정답':'오답'} · ${clock(p.elapsedMs)}${p.assisted?' · 참고 풀이':''}`);draw();
-      },true);
+      card.querySelector('.check-one').addEventListener('click',event=>{event.preventDefault();event.stopImmediatePropagation();if(!paper&&card!==current)return;gradeCard(card)},true);
     });
     for(const field of [exam,type,status])field.addEventListener('change',()=>{if(pending()?.phase==='running')stop();list()});
     select.onchange=()=>show(cards.find(c=>c.dataset.index===select.value));
-    bar.querySelector('.time-next').onclick=()=>{if(pending()?.phase==='running'){message('먼저 타이머를 정지해주세요.');return}const i=current?Number(current.dataset.index):-1,available=cards.filter(eligible);const next=available.find(c=>Number(c.dataset.index)>i)||available.find(c=>c!==current);if(next){list(next.dataset.index)}else{message('다음 미통과 문제가 없습니다. 전체 기록에서 다시 훈련할 수 있습니다.')}};
-    panel.querySelector('.timer-dial').onclick=start;panel.querySelector('.timer-stop').onclick=stop;panel.querySelector('.timer-retry').onclick=reset;
-    const loadSettings=s=>{minutes.value=Math.floor(s.targetSeconds/60);seconds.value=s.targetSeconds%60;dialog.querySelector('.shortcut-start').value=s.start;dialog.querySelector('.shortcut-stop').value=s.stop};
+    panel.querySelector('.timer-dial').onclick=()=>pending()?.phase==='running'?stop():start();panel.querySelector('.timer-pause').onclick=pause;panel.querySelector('.timer-resume').onclick=resume;panel.querySelector('.timer-retry').onclick=reset;window.addEventListener('resize',place);
+    const loadSettings=s=>{minutes.value=String(Math.floor(s.targetSeconds/60)).padStart(2,'0');seconds.value=String(s.targetSeconds%60).padStart(2,'0');dialog.querySelector('.shortcut-start').value=s.start;dialog.querySelector('.shortcut-stop').value=s.stop};
     panel.querySelector('.timer-config').onclick=()=>{loadSettings(settings);dialog.querySelector('.timer-error').textContent='';dialog.showModal()};
-    dialog.querySelector('.timer-cancel').onclick=()=>dialog.close();dialog.querySelector('.timer-defaults').onclick=()=>loadSettings(defaults);
+    dialog.querySelector('.timer-close').onclick=()=>dialog.close();
     dialog.querySelectorAll('input').forEach(input=>input.addEventListener('keydown',e=>{if(e.key==='Tab'||e.key==='Escape')return;e.preventDefault();if(e.code&&!['ControlLeft','ControlRight','AltLeft','AltRight','ShiftLeft','ShiftRight','MetaLeft','MetaRight'].includes(e.code)&&(e.ctrlKey||e.altKey))input.value=chord(e)}));
-    dialog.querySelector('.timer-save').onclick=()=>{const next={targetSeconds:Number(minutes.value)*60+Number(seconds.value),start:dialog.querySelector('.shortcut-start').value,stop:dialog.querySelector('.shortcut-stop').value};if(!next.targetSeconds||next.start===next.stop){dialog.querySelector('.timer-error').textContent='목표는 1초 이상, 시작과 정지는 서로 다른 키로 지정해주세요.';return}settings=next;localStorage.setItem(settingsKey,JSON.stringify(settings));dialog.close();draw();start()};
+    dialog.querySelector('.timer-save').onclick=()=>{const next={targetSeconds:(Number(minutes.value)||0)*60+Math.min(59,Number(seconds.value)||0),start:dialog.querySelector('.shortcut-start').value,stop:dialog.querySelector('.shortcut-stop').value};if(!next.targetSeconds||next.start===next.stop){dialog.querySelector('.timer-error').textContent='목표는 1초 이상, 시작과 정지는 서로 다른 키로 지정해주세요.';return}settings=next;localStorage.setItem(settingsKey,JSON.stringify(settings));dialog.close();draw();start()};
     document.addEventListener('keydown',e=>{if(dialog.open||e.repeat)return;const key=chord(e);if(key===settings.start||key===settings.stop){e.preventDefault();e.stopImmediatePropagation();key===settings.start?start():stop()}},true);
     document.addEventListener('click',e=>{if(pending()?.phase==='running'&&e.target.closest('a')){e.preventDefault();message('먼저 타이머를 정지한 뒤 이동해주세요.')}},true);
     window.addEventListener('beforeunload',e=>{if(pending()?.phase==='running'){e.preventDefault();e.returnValue=''}});
@@ -84,12 +101,12 @@
     const running=cards.find(c=>state(c).timedPending?.phase==='running'&&!state(c).deleted);
     list(params.get('problem')||running?.dataset.index||sessionStorage.getItem('exam-20260914-timed-last-'+a.subject));
     setInterval(draw,200);
-    global.TrainingTimed.active={start,stop,reset,get current(){return current},get pending(){return pending()}};
+    global.TrainingTimed.active={start,stop,pause,resume,reset,get current(){return current},get pending(){return pending()}};
   }
   function practicalShell(card){
     const wrap=card.querySelector('.entry-wrap'),table=wrap.querySelector('table');
     const shell=document.createElement('section');shell.className='timed-kclep';wrap.before(shell);
-    shell.innerHTML='<div class="timed-kclep-title">일반전표입력 · 시간 훈련</div><div class="timed-kclep-tools">계정과목 검색 · Enter 다음 칸 · 금액 +키 000</div><div class="timed-kclep-status"><span>대차차액: <strong class="timed-difference">0</strong></span><small>양수는 대변 부족 · 음수는 차변 부족</small></div>';
+    shell.innerHTML='<div class="timed-kclep-tools">계정과목 검색 · Enter 다음 칸 · 금액 +키 000</div><div class="timed-kclep-status"><span>대차차액: <strong class="timed-difference">0</strong></span><small>양수는 대변 부족 · 음수는 차변 부족</small></div>';
     shell.append(wrap);const balance=card.querySelector('.balance-panel');shell.append(balance);
     table.querySelector('thead').innerHTML='<tr><th>구분</th><th>계정과목</th><th>거래처</th><th>적요코드</th><th>차변</th><th>대변</th><th>결과</th></tr>';
     const preview=document.createElement('div');preview.className='timed-preview';shell.append(preview);
