@@ -63,6 +63,16 @@
     .qhead h3{margin:0;color:var(--navy);font-size:24px}
     .tag{display:inline-block;margin-top:3px;background:var(--sky);color:#246093;border-radius:99px;padding:2px 10px;font-size:14px;font-weight:800}
     .prompt{font-size:20px;margin:15px 0;padding:18px;background:#f8fbfe;border-left:6px solid #76b9e8;border-radius:8px}
+    .prompt-row{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);gap:16px;align-items:start;margin:15px 0}.prompt-row .prompt{margin:0;position:sticky;top:12px}.prompt-row .exhibit{margin:0}
+    @media(max-width:900px){.prompt-row{grid-template-columns:1fr}.prompt-row .prompt{position:static}}
+    .exhibit{margin:14px 0;padding:0;background:#fff;border:1px solid #9fb3c4;border-radius:6px;overflow:hidden;font-size:15px;color:#1f2d3a}
+    .exhibit-bank .bank-head{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 14px;background:#a3dcc9;font-weight:700;font-size:20px}.exhibit-bank .bank-head small{font-size:12px;font-weight:400;margin-left:2px}.exhibit-bank .bank-head b{font-size:26px;color:#1c3f3a;letter-spacing:2px}
+    .exhibit-bank .bank-body{padding:14px 18px}.exhibit-bank h4{margin:0 auto 14px;width:max-content;max-width:100%;padding:0 22px 4px;border-bottom:2px solid #1f2d3a;font-size:19px;text-align:center}
+    .exhibit-bank dl{display:grid;grid-template-columns:auto 1fr;gap:3px 10px;margin:0}.exhibit-bank dt{white-space:pre}.exhibit-bank dd{margin:0}.exhibit-bank .bank-info{display:grid;grid-template-columns:1fr 1fr;gap:6px 26px;margin-bottom:10px}
+    .exhibit-bank .bank-calc{display:flex;gap:12px;align-items:flex-start}.exhibit-bank .bank-label{white-space:nowrap}.exhibit-bank .bank-items{display:grid;grid-template-columns:1fr 1fr;gap:6px 26px;flex:1}.exhibit-bank .bank-side{align-self:end;margin-bottom:2px}
+    .exhibit-bank .bank-foot{display:flex;justify-content:space-between;gap:12px;padding:10px 18px;font-size:12px;color:#54606b}.exhibit-bank .bank-foot b{font-size:15px;color:#1f2d3a}
+    .exhibit-table figcaption{padding:9px 14px;background:#e9f1f8;font-weight:700}.exhibit-table table{width:100%;border-collapse:collapse}.exhibit-table th,.exhibit-table td{padding:8px 12px;border:1px solid #c4d1dc;text-align:right}.exhibit-table th{background:#f3f7fb;text-align:center;font-weight:600}.exhibit-table td:nth-child(-n+2){text-align:center}.exhibit-table tfoot td{font-weight:700;background:#fafcfe}.exhibit-table tfoot td:first-child{text-align:center}
+    @media(max-width:720px){.exhibit-bank .bank-info,.exhibit-bank .bank-items{grid-template-columns:1fr}.exhibit-bank .bank-calc{flex-direction:column;gap:4px}.exhibit-bank .bank-head{font-size:16px}.exhibit-bank .bank-head b{font-size:20px}}
     .entry-wrap{overflow-x:auto;margin-top:16px}
     table{width:100%;border-collapse:separate;border-spacing:0;min-width:850px;border:1px solid var(--line);border-radius:12px;overflow:hidden}
     th{background:#dff2ff;color:var(--navy);padding:10px 8px;font-size:16px;border-bottom:1px solid var(--line)}
@@ -246,7 +256,7 @@
     function questionHtml(p,i){return `<article class="question" data-index="${i}" data-added-date="${p.addedDate}">
       <div class="qhead"><span class="qnum">${i+1}</span><div><h3>${p.title}</h3><span class="tag">${p.type}</span>${p.variantOf!=null?`<span class="tag variant-badge">AI 응용문제 · 원문제 ${p.variantOf+1}번</span>`:''}</div></div>
       <p class="star-note" hidden>★ 이 문제는 특별히 훈련이 필요합니다.</p>
-      <div class="prompt">${p.prompt}</div>
+      ${p.exhibit?`<div class="prompt-row"><div class="prompt">${p.prompt}</div>${p.exhibit}</div>`:`<div class="prompt">${p.prompt}</div>`}
       <div class="entry-wrap"><table>
         <thead><tr><th>구분</th><th>계정과목</th><th>금액</th><th>판 / 제 선택</th><th>거래처</th><th>적요코드</th><th>결과</th></tr></thead>
         <tbody>${Array.from({length:Math.max(4,p.answers.length)},(_,r)=>rowHtml(r,p)).join('')}</tbody>
@@ -524,7 +534,7 @@
   })();
 </script>
 <script>TrainingSeason.install(problems,{state:studyState,save:saveState,refresh:updateProgress});</script>
-<script src="timed-training.js?v=16"></script>
+<script src="timed-training.js?v=22"></script>
 <script>TrainingTimed.install(problems,{subject:'practical',state:studyState,save:saveState,grade,clear:clearCard});</script>
 </body>
 </html>

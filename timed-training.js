@@ -9,7 +9,7 @@
   const money=n=>Number(n).toLocaleString('ko-KR');
   const clock=ms=>{const s=Math.max(0,Math.ceil(ms/1000));return `${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`};
   const chord=e=>[e.ctrlKey?'Ctrl':'',e.altKey?'Alt':'',e.shiftKey?'Shift':'',e.metaKey?'Meta':'',e.code==='Space'?'Space':e.code].filter(Boolean).join('+');
-  function style(){if(document.getElementById('timedStyle'))return;const link=document.createElement('link');link.id='timedStyle';link.rel='stylesheet';link.href='timed-training.css?v=12';document.head.append(link)}
+  function style(){if(document.getElementById('timedStyle'))return;const link=document.createElement('link');link.id='timedStyle';link.rel='stylesheet';link.href='timed-training.css?v=13';document.head.append(link)}
   function install(problems,a){
     if(new URLSearchParams(location.search).get('timed')!=='1')return;
     style();document.body.classList.add('timed-mode');document.title='시간 훈련 · '+(a.subject==='practical'?'일반전표':'매입매출전표');
@@ -26,7 +26,7 @@
     [...new Set(problems.map(p=>p.type))].sort((x,y)=>x.localeCompare(y,'ko')).forEach(x=>type.add(new Option(x,x)));
     const params=new URLSearchParams(location.search);{const asked=params.get('exam'),rounds=problems.map(p=>Number(p.examRound)||0);exam.value=asked===null?String(Math.max(0,...rounds)||''):asked==='all'?'':asked}type.value=params.get('type')||'';if(params.get('status')==='all')status.value='all';
     const panel=document.createElement('aside');panel.className='timer-panel';panel.setAttribute('aria-label','시간 훈련 타이머');
-    panel.innerHTML='<button class="timer-dial" type="button" aria-label="타이머 시작"><span><strong>1:00</strong></span></button><div class="timer-buttons"><div class="timer-pair"><button type="button" class="timer-pause" aria-label="일시정지" title="일시정지"><span aria-hidden="true">❚❚</span></button><button type="button" class="timer-resume" aria-label="계속" title="계속"><span aria-hidden="true">▶</span></button></div><button type="button" class="timer-retry">초기화</button><button type="button" class="timer-config">설정</button></div>';
+    panel.innerHTML='<button class="timer-dial" type="button" aria-label="타이머 시작"><span><strong>1:00</strong></span></button><div class="timer-buttons"><div class="timer-pair"><button type="button" class="timer-pause" aria-label="일시정지" title="일시정지"><span aria-hidden="true">❚❚</span></button><button type="button" class="timer-resume" aria-label="계속" title="계속"><span aria-hidden="true">▶</span></button></div><button type="button" class="timer-retry">초기화</button><button type="button" class="timer-config">설정</button></div><div class="timer-jump"><button type="button" class="jump-top" aria-label="맨 위로" title="맨 위로"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20V5M5 11l7-7 7 7"/></svg></button><button type="button" class="jump-bottom" aria-label="맨 아래로" title="맨 아래로"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v15M5 13l7 7 7-7"/></svg></button></div>';
     document.body.append(panel);
     const dialog=document.createElement('dialog');dialog.className='timer-settings';dialog.setAttribute('aria-labelledby','timerTitle');
     dialog.innerHTML='<div class="timer-head"><h2 id="timerTitle">시간 · 단축키 설정</h2><button class="timer-close" type="button" aria-label="닫기">X</button></div><div class="timer-wheels"><label>분<input class="timer-minutes" type="text" inputmode="numeric" maxlength="2" autocomplete="off" aria-label="목표 분" value="01"></label><label>초<input class="timer-seconds" type="text" inputmode="numeric" maxlength="2" autocomplete="off" aria-label="목표 초" value="00"></label><button class="timer-save" type="button">완료</button></div><label class="timer-shortcut">시작<input readonly class="shortcut-start" aria-label="시작 단축키" placeholder="원하는 키 조합을 누르세요"></label><label class="timer-shortcut">정지<input readonly class="shortcut-stop" aria-label="정지 단축키" placeholder="원하는 키 조합을 누르세요"></label><p class="timer-error" role="alert"></p>';
@@ -45,18 +45,17 @@
     function lockCard(card,value){if(card)card.querySelectorAll('.entry-wrap,.kclep-shell').forEach(x=>x.inert=value)}
     function lock(value){lockCard(current,value)}
     function start(){if(!current)return;const p=pending();if(p?.phase==='running'){if(p.pausedAt)resume();return}if(p)return;
-      current.querySelectorAll('details').forEach(x=>x.open=false);lock(false);if(paper)current.scrollIntoView({behavior:'smooth',block:'start'});
+      current.querySelectorAll('details').forEach(x=>x.open=false);lock(false);
       state(current).timedPending={id:crypto.randomUUID(),phase:'running',startedMs:Date.now(),pausedTotalMs:0,targetSeconds:settings.targetSeconds,assisted:false};a.save();message('측정 중 · 입력을 마치면 정지');draw();
       const first=current.querySelector('.entry-row .side,.date-month,.voucher-type');first?.focus({preventScroll:true});
     }
     function stopCard(card){const p=pendingOf(card);if(p?.phase!=='running')return false;p.elapsedMs=live(p);delete p.pausedAt;p.stoppedAt=new Date().toISOString();p.phase='stopped';a.save();lockCard(card,true);return true}
-    function advance(){const next=visible.slice(visible.indexOf(current)+1).find(c=>!pendingOf(c));if(next){show(next);start()}draw()}
-    function stop(){if(!stopCard(current))return;if(paper)advance();else draw()}
+    function stop(){if(!stopCard(current))return;draw()}
     function pause(){const p=pending();if(p?.phase!=='running'||p.pausedAt)return;p.pausedAt=Date.now();a.save();draw()}
     function resume(){const p=pending();if(p?.phase!=='running'||!p.pausedAt)return;p.pausedTotalMs=(p.pausedTotalMs||0)+Date.now()-p.pausedAt;delete p.pausedAt;a.save();draw()}
     function resetCard(card){delete state(card).timedPending;lockCard(card,false);a.clear(card);card.querySelectorAll('details').forEach(x=>x.open=false);const b=card.querySelector('.check-one');b.disabled=false;b.textContent='채점하기';lockCard(card,true);card.dispatchEvent(new Event('input',{bubbles:true}))}
     function redo(){if(paper){visible.forEach(resetCard);a.save();show(visible[0]);window.scrollTo({top:0,behavior:'smooth'})}else if(current){resetCard(current);a.save()}draw()}
-    function reset(){const p=pending();if(p?.phase!=='running')return;p.startedMs=Date.now();p.pausedTotalMs=0;if(p.pausedAt)p.pausedAt=p.startedMs;p.targetSeconds=settings.targetSeconds;a.save();draw()}
+    function reset(){if(pending()?.phase!=='running')return;delete state(current).timedPending;a.save();draw()}
     function passed(s){return !s.trainingCenterRestored&&(s.passed||s.correct===true||(s.history||[]).some(h=>h.correct===true&&!h.cancelledAt))}
     function eligible(card){const p=problems[card.dataset.index],s=state(card);return !s.deleted&&(!exam.value||String(p.examRound)===exam.value)&&(!type.value||p.type===type.value)&&(!!exam.value||status.value==='all'||!passed(s)||['running','stopped'].includes(s.timedPending?.phase))}
     function prepareCard(card){const p=pendingOf(card);if(!p){a.clear(card);card.querySelectorAll('details').forEach(x=>x.open=false)}card.querySelector('.check-one').disabled=p?.phase==='graded';lockCard(card,p?.phase!=='running');card.dispatchEvent(new Event('input',{bubbles:true}))}
@@ -75,24 +74,25 @@
           b.onclick=()=>{if(pending()?.phase==='running')return;show(c)};box.append(b)});listBox.append(box)});listBox.append(redoBtn);markList()}
     function list(prefer){select.replaceChildren();paper=!!exam.value;document.body.classList.toggle('timed-paper',paper);visible=cards.filter(eligible);visible.forEach(c=>{const p=problems[c.dataset.index];select.add(new Option(`${Number(c.dataset.index)+1}. ${p.title}`,c.dataset.index))});renderList();if(paper)visible.forEach(prepareCard);
       show(visible.find(c=>c.dataset.index===String(prefer))||(paper?visible.find(c=>!pendingOf(c)):null)||visible[0])}
-    function gradeCard(card,quiet){let p=pendingOf(card);if(!p)return;let advanceAfter=false;
-      if(p.phase==='running'){stopCard(card);advanceAfter=paper&&card===current&&!quiet}
+    function gradeCard(card,quiet){let p=pendingOf(card);if(!p)return;
+      if(p.phase==='running'){stopCard(card);}
       p=pendingOf(card);if(p.phase!=='stopped'){draw();return}
       a.grade(card);const h=state(card).history.at(-1);h.id=p.id;h.source='timed';h.timing={elapsedMs:p.elapsedMs,targetSeconds:p.targetSeconds,startedAt:new Date(p.startedMs).toISOString(),stoppedAt:p.stoppedAt,assisted:p.assisted};h.problemType=problems[card.dataset.index].type;h.problemId=problems[card.dataset.index].id;p.phase='graded';a.save();card.hidden=false;card.querySelector('.check-one').disabled=true;lockCard(card,true);
-      if(advanceAfter)advance();else draw();
+      draw();
     }
     cards.forEach(card=>{
       if(a.subject==='practical')practicalShell(card);
+      card.addEventListener('pointerdown',()=>{if(paper&&current!==card&&pending()?.phase!=='running'&&!pendingOf(card))show(card)},true);
       card.querySelectorAll('details').forEach(detail=>detail.addEventListener('toggle',()=>{if(detail.open&&current===card&&pending()?.phase==='running'){pending().assisted=true;a.save();message('해설 확인 · 참고 풀이로 기록합니다.')}}));
       card.querySelector('.check-one').addEventListener('click',event=>{event.preventDefault();event.stopImmediatePropagation();if(!paper&&card!==current)return;gradeCard(card)},true);
     });
     for(const field of [exam,type,status])field.addEventListener('change',()=>{if(pending()?.phase==='running')stop();list()});
     select.onchange=()=>show(cards.find(c=>c.dataset.index===select.value));
-    panel.querySelector('.timer-dial').onclick=()=>pending()?.phase==='running'?stop():start();panel.querySelector('.timer-pause').onclick=pause;panel.querySelector('.timer-resume').onclick=resume;panel.querySelector('.timer-retry').onclick=reset;window.addEventListener('resize',place);
+    panel.querySelector('.timer-dial').onclick=()=>pending()?.phase==='running'?stop():start();panel.querySelector('.timer-pause').onclick=pause;panel.querySelector('.timer-resume').onclick=resume;panel.querySelector('.timer-retry').onclick=reset;panel.querySelector('.jump-top').onclick=()=>window.scrollTo({top:0,behavior:'instant'});panel.querySelector('.jump-bottom').onclick=()=>window.scrollTo({top:document.documentElement.scrollHeight,behavior:'instant'});window.addEventListener('resize',place);
     const loadSettings=s=>{minutes.value=String(Math.floor(s.targetSeconds/60)).padStart(2,'0');seconds.value=String(s.targetSeconds%60).padStart(2,'0');dialog.querySelector('.shortcut-start').value=s.start;dialog.querySelector('.shortcut-stop').value=s.stop};
     panel.querySelector('.timer-config').onclick=()=>{loadSettings(settings);dialog.querySelector('.timer-error').textContent='';dialog.showModal()};
     dialog.querySelector('.timer-close').onclick=()=>dialog.close();
-    dialog.querySelectorAll('input').forEach(input=>input.addEventListener('keydown',e=>{if(e.key==='Tab'||e.key==='Escape')return;e.preventDefault();if(e.code&&!['ControlLeft','ControlRight','AltLeft','AltRight','ShiftLeft','ShiftRight','MetaLeft','MetaRight'].includes(e.code)&&(e.ctrlKey||e.altKey))input.value=chord(e)}));
+    dialog.querySelectorAll('.shortcut-start,.shortcut-stop').forEach(input=>input.addEventListener('keydown',e=>{if(e.key==='Tab'||e.key==='Escape')return;e.preventDefault();if(e.code&&!['ControlLeft','ControlRight','AltLeft','AltRight','ShiftLeft','ShiftRight','MetaLeft','MetaRight'].includes(e.code)&&(e.ctrlKey||e.altKey))input.value=chord(e)}));
     dialog.querySelector('.timer-save').onclick=()=>{const next={targetSeconds:(Number(minutes.value)||0)*60+Math.min(59,Number(seconds.value)||0),start:dialog.querySelector('.shortcut-start').value,stop:dialog.querySelector('.shortcut-stop').value};if(!next.targetSeconds||next.start===next.stop){dialog.querySelector('.timer-error').textContent='목표는 1초 이상, 시작과 정지는 서로 다른 키로 지정해주세요.';return}settings=next;localStorage.setItem(settingsKey,JSON.stringify(settings));dialog.close();draw();start()};
     document.addEventListener('keydown',e=>{if(dialog.open||e.repeat)return;const key=chord(e);if(key===settings.start||key===settings.stop){e.preventDefault();e.stopImmediatePropagation();key===settings.start?start():stop()}},true);
     document.addEventListener('click',e=>{if(pending()?.phase==='running'&&e.target.closest('a')){e.preventDefault();message('먼저 타이머를 정지한 뒤 이동해주세요.')}},true);
@@ -126,7 +126,7 @@
       ui.addEventListener('account-selected',()=>{(row.querySelector('.partner:not(:disabled)')||row.querySelector('.memo')).focus()});
       function reflect(){d.disabled=side.value!=='D';c.disabled=side.value!=='C';d.value=side.value==='D'?original.value:'';c.value=side.value==='C'?original.value:'';ui.value=JSON.stringify([account.value,division.value])}
       side.addEventListener('change',reflect);original.addEventListener('input',reflect);
-      side.addEventListener('keydown',e=>{if(e.key==='3'||e.key==='4'){e.preventDefault();side.value=e.key==='3'?'D':'C';side.dispatchEvent(new Event('change',{bubbles:true}));ui.focus()}});
+      side.addEventListener('keydown',e=>{const k={Digit3:'3',Numpad3:'3',Digit4:'4',Numpad4:'4'}[e.code]||e.key;if((k==='3'||k==='4')&&!e.ctrlKey&&!e.altKey&&!e.metaKey){e.preventDefault();side.value=k==='3'?'D':'C';side.dispatchEvent(new Event('change',{bubbles:true}));ui.focus()}});
       [d,c].forEach(input=>{
         input.addEventListener('input',()=>{input.value=money(num(input.value)).replace(/^0$/,'');original.value=input.value;original.dispatchEvent(new Event('input',{bubbles:true}));render()});
         input.addEventListener('keydown',e=>{if(e.key==='+'){e.preventDefault();input.value=String(num(input.value))+'000';input.dispatchEvent(new Event('input',{bubbles:true}))}});
