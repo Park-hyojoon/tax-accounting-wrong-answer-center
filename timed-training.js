@@ -9,7 +9,7 @@
   const money=n=>Number(n).toLocaleString('ko-KR');
   const clock=ms=>{const s=Math.max(0,Math.ceil(ms/1000));return `${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`};
   const chord=e=>[e.ctrlKey?'Ctrl':'',e.altKey?'Alt':'',e.shiftKey?'Shift':'',e.metaKey?'Meta':'',e.code==='Space'?'Space':e.code].filter(Boolean).join('+');
-  function style(){if(document.getElementById('timedStyle'))return;const link=document.createElement('link');link.id='timedStyle';link.rel='stylesheet';link.href='timed-training.css?v=18';document.head.append(link)}
+  function style(){if(document.getElementById('timedStyle'))return;const link=document.createElement('link');link.id='timedStyle';link.rel='stylesheet';link.href='timed-training.css?v=19';document.head.append(link)}
   function install(problems,a){
     if(new URLSearchParams(location.search).get('timed')!=='1')return;
     style();document.body.classList.add('timed-mode');document.title='시간 훈련 · '+(a.subject==='practical'?'일반전표':'매입매출전표');
@@ -18,10 +18,22 @@
     const cards=[...document.querySelectorAll('.question')];
     const state=card=>a.state.cards[card.dataset.index]||(a.state.cards[card.dataset.index]={history:[]});
     const pendingOf=card=>card?state(card).timedPending:null,pending=()=>pendingOf(current);
+    function markNotebook(card,correct){
+      const s=state(card),at=new Date().toISOString(),event={id:crypto.randomUUID(),at,correct,source:'notebook'};
+      s.history=s.history||[];s.history.push(event);s.attempts=s.history.filter(h=>!h.cancelledAt).length;s.wrongCount=s.history.filter(h=>h.correct===false&&!h.cancelledAt).length;
+      s.passed=correct;s.correct=correct;s.graded=true;s.selfPassed=correct;s.selfPassedAt=correct?at:null;s.trainingCenterRestored=!correct;
+      if(correct){s.passedAt=at;delete s.restoredAt}else{s.restoredAt=at;delete s.passedAt}
+      card.dataset.graded='true';card.dataset.correct=String(correct);card.classList.toggle('correct',correct);card.classList.toggle('wrong',!correct);
+      const result=card.querySelector('.result');if(result){result.className='result '+(correct?'ok':'no');result.textContent=correct?'노트 학습 · 직접 통과':'노트 학습 · 다시 연습'}
+      const attempt=card.querySelector('.attempt,.attempt-info');if(attempt)attempt.textContent=`학습 ${s.attempts}회 · 틀림 ${s.wrongCount}회`;
+      a.save();a.refresh?.();populateTop();draw();
+    }
+    function addNotebookButtons(card){const actions=card.querySelector('.qactions,.actions');if(!actions||actions.querySelector('.notebook-pass'))return;const make=(text,correct,cls)=>{const button=document.createElement('button');button.type='button';button.className='btn secondary '+cls;button.textContent=text;button.addEventListener('click',()=>markNotebook(card,correct));return button};actions.prepend(make('✓ 알고 있어요 · 통과',true,'notebook-pass'),make('↻ 틀렸어요 · 다시 연습',false,'notebook-wrong'))}
+    function placeVoucherAnswerBelow(card){const brief=card.querySelector('.question-brief'),answer=brief?.querySelector('.answer-reveal'),workspace=card.querySelector('.answer-workspace');if(!answer||!workspace)return;workspace.append(answer);if(!brief.children.length)brief.remove()}
     const bar=document.createElement('section');bar.className='timed-bar';
-    bar.innerHTML=`<a href="${files.practical}?timed=1" class="timed-tab ${a.subject==='practical'?'selected':''}">일반전표</a><a href="${files.voucher}?timed=1" class="timed-tab ${a.subject==='voucher'?'selected':''}">매입매출전표</a><label>회차 <select class="time-exam"><option value="">전체</option></select></label><label>유형 <select class="time-type"><option value="">전체</option></select></label><label>학습 상태 <select class="time-status"><option value="active">미통과 문제</option><option value="all">전체 기록 · 다시 훈련</option></select></label><label>문제 <select class="time-question"></select></label><b class="time-count"></b>`;
+    bar.innerHTML=`<a href="${files.practical}?timed=1" class="timed-tab ${a.subject==='practical'?'selected':''}">일반전표</a><a href="${files.voucher}?timed=1" class="timed-tab ${a.subject==='voucher'?'selected':''}">매입매출전표</a><label>회차 <select class="time-exam"><option value="">전체</option></select></label><label>유형 <select class="time-type"><option value="">전체</option></select></label><label class="time-top-label">현재 훈련 필요 TOP 10 <select class="time-top"><option value="">계산 중</option></select></label><label>학습 상태 <select class="time-status"><option value="active">미통과 문제</option><option value="all">전체 기록 · 다시 훈련</option></select></label><label>문제 <select class="time-question"></select></label><b class="time-count"></b>`;
     document.querySelector('#questions').before(bar);
-    const exam=bar.querySelector('.time-exam'),type=bar.querySelector('.time-type'),status=bar.querySelector('.time-status'),select=bar.querySelector('.time-question');
+    const exam=bar.querySelector('.time-exam'),type=bar.querySelector('.time-type'),top=bar.querySelector('.time-top'),status=bar.querySelector('.time-status'),select=bar.querySelector('.time-question');
     [...new Set(problems.map(p=>p.examRound))].sort((x,y)=>x-y).forEach(x=>exam.add(new Option(x+'회',x)));
     [...new Set(problems.map(p=>p.type))].sort((x,y)=>x.localeCompare(y,'ko')).forEach(x=>type.add(new Option(x,x)));
     const params=new URLSearchParams(location.search);{const asked=params.get('exam'),rounds=problems.map(p=>Number(p.examRound)||0);exam.value=asked===null?String(Math.max(0,...rounds)||''):asked==='all'?'':asked}type.value=params.get('type')||'';if(params.get('status')==='all')status.value='all';
@@ -56,12 +68,17 @@
     function redo(){if(paper){visible.forEach(resetCard);a.save();show(visible[0]);window.scrollTo({top:0,behavior:'smooth'})}else if(current){resetCard(current);a.save()}draw()}
     function reset(){if(!current||!pending())return;delete state(current).timedPending;a.save();draw()}
     function passed(s){return !s.trainingCenterRestored&&(s.passed||s.correct===true||(s.history||[]).some(h=>h.correct===true&&!h.cancelledAt))}
-    function eligible(card){const p=problems[card.dataset.index],s=state(card);return !s.deleted&&(!exam.value||String(p.examRound)===exam.value)&&(!type.value||p.type===type.value)&&(!!exam.value||status.value==='all'||!passed(s)||['running','stopped'].includes(s.timedPending?.phase))}
+    function populateTop(prefer=top.value||params.get('top')||''){
+      const tags=new Map();problems.forEach((problem,index)=>{const card=cards[index],s=card?state(card):{};if(problem.variantOf!=null||problem.sourceQuestionNo===''||passed(s))return;[...new Set(problem.tags?.length?problem.tags:[problem.type])].filter(Boolean).forEach(tag=>{if(!tags.has(tag))tags.set(tag,[]);tags.get(tag).push(problem)})});
+      const ranked=[...tags].sort((x,y)=>y[1].length-x[1].length||x[0].localeCompare(y[0],'ko')).slice(0,10);top.replaceChildren(new Option(ranked.length?'학습 유형 선택':'현재 훈련할 미통과 문제가 없습니다.',''));ranked.forEach(([tag,items],index)=>top.add(new Option(`${index+1}. ${tag} · ${items.length}문제`,tag)));top.disabled=!ranked.length;top.value=[...top.options].some(option=>option.value===prefer)?prefer:'';
+    }
+    populateTop(params.get('top')||'');
+    function eligible(card){const p=problems[card.dataset.index],s=state(card),tags=p.tags?.length?p.tags:[p.type];return !s.deleted&&(!exam.value||String(p.examRound)===exam.value)&&(!type.value||p.type===type.value)&&(!top.value||tags.includes(top.value))&&(!!exam.value||status.value==='all'||!passed(s)||['running','stopped'].includes(s.timedPending?.phase))}
     function prepareCard(card){const p=pendingOf(card);if(!p){a.clear(card);card.querySelectorAll('details').forEach(x=>x.open=false)}card.querySelector('.check-one').disabled=p?.phase==='graded';lockCard(card,p?.phase==='graded');card.dispatchEvent(new Event('input',{bubbles:true}))}
     function show(card){if(current&&current!==card&&pending()?.phase==='running')return;
       current=card||null;cards.forEach(c=>{c.hidden=paper?!visible.includes(c):c!==current;c.classList.toggle('timed-active',paper&&c===current)});if(!current){draw();return}
       select.value=current.dataset.index;markList();sessionStorage.setItem('exam-20260914-timed-last-'+a.subject,current.dataset.index);
-      const address=new URL(location.href);for(const [key,value] of [['exam',exam.value||'all'],['type',type.value],['status',status.value],['problem',current.dataset.index]]){value?address.searchParams.set(key,value):address.searchParams.delete(key)}history.replaceState(null,'',address.href);
+      const address=new URL(location.href);for(const [key,value] of [['exam',exam.value||'all'],['type',type.value],['top',top.value],['status',status.value],['problem',current.dataset.index]]){value?address.searchParams.set(key,value):address.searchParams.delete(key)}history.replaceState(null,'',address.href);
       if(!paper)prepareCard(current);draw();
     }
     const listBox=document.createElement('section');listBox.className='timed-list';document.querySelector('#questions').after(listBox);
@@ -73,19 +90,22 @@
           b.onclick=()=>{if(pending()?.phase==='running')return;show(c)};box.append(b)});listBox.append(box)});listBox.append(redoBtn);markList()}
     function list(prefer){select.replaceChildren();paper=!!exam.value;document.body.classList.toggle('timed-paper',paper);visible=cards.filter(eligible);visible.forEach(c=>{const p=problems[c.dataset.index];select.add(new Option(`${Number(c.dataset.index)+1}. ${p.title}`,c.dataset.index))});renderList();bar.querySelector('.time-count').textContent='현재 '+visible.length+'문제';if(paper)visible.forEach(prepareCard);
       show(visible.find(c=>c.dataset.index===String(prefer))||(paper?visible.find(c=>!pendingOf(c)):null)||visible[0])}
-    function gradeCard(card,quiet){let p=pendingOf(card);if(p?.phase==='graded')return;if(!p){a.grade(card);const h=state(card).history.at(-1);if(h){h.source='timed';h.problemType=problems[card.dataset.index].type;h.problemId=problems[card.dataset.index].id}state(card).timedPending={id:crypto.randomUUID(),phase:'graded',elapsedMs:0,targetSeconds:settings.targetSeconds};a.save();card.querySelector('.check-one').disabled=true;lockCard(card,true);draw();return}
+    function gradeCard(card,quiet){let p=pendingOf(card);if(p?.phase==='graded')return;if(!p){a.grade(card);const h=state(card).history.at(-1);if(h){h.source='timed';h.problemType=problems[card.dataset.index].type;h.problemId=problems[card.dataset.index].id}state(card).timedPending={id:crypto.randomUUID(),phase:'graded',elapsedMs:0,targetSeconds:settings.targetSeconds};a.save();populateTop();card.querySelector('.check-one').disabled=true;lockCard(card,true);draw();return}
       if(p.phase==='running'){stopCard(card);}
       p=pendingOf(card);if(p.phase!=='stopped'){draw();return}
-      a.grade(card);const h=state(card).history.at(-1);h.id=p.id;h.source='timed';h.timing={elapsedMs:p.elapsedMs,targetSeconds:p.targetSeconds,startedAt:new Date(p.startedMs).toISOString(),stoppedAt:p.stoppedAt,assisted:p.assisted};h.problemType=problems[card.dataset.index].type;h.problemId=problems[card.dataset.index].id;p.phase='graded';a.save();card.hidden=false;card.querySelector('.check-one').disabled=true;lockCard(card,true);
+      a.grade(card);const h=state(card).history.at(-1);h.id=p.id;h.source='timed';h.timing={elapsedMs:p.elapsedMs,targetSeconds:p.targetSeconds,startedAt:new Date(p.startedMs).toISOString(),stoppedAt:p.stoppedAt,assisted:p.assisted};h.problemType=problems[card.dataset.index].type;h.problemId=problems[card.dataset.index].id;p.phase='graded';a.save();populateTop();card.hidden=false;card.querySelector('.check-one').disabled=true;lockCard(card,true);
       draw();
     }
     cards.forEach(card=>{
       if(a.subject==='practical')practicalShell(card);
+      else placeVoucherAnswerBelow(card);
+      addNotebookButtons(card);
       card.addEventListener('pointerdown',()=>{if(paper&&current!==card&&pending()?.phase!=='running'&&!pendingOf(card))show(card)},true);
       card.querySelectorAll('details').forEach(detail=>detail.addEventListener('toggle',()=>{if(detail.open&&current===card&&pending()?.phase==='running'){pending().assisted=true;a.save();message('해설 확인 · 참고 풀이로 기록합니다.')}}));
       card.querySelector('.check-one').addEventListener('click',event=>{event.preventDefault();event.stopImmediatePropagation();if(!paper&&card!==current)return;gradeCard(card)},true);
     });
     for(const field of [exam,type,status])field.addEventListener('change',()=>{if(pending()?.phase==='running')stop();list()});
+    top.addEventListener('change',()=>{if(pending()?.phase==='running')stop();exam.value='';type.value='';status.value='active';list()});
     select.onchange=()=>show(cards.find(c=>c.dataset.index===select.value));
     panel.querySelector('.timer-dial').onclick=()=>pending()?.phase==='running'?stop():start();panel.querySelector('.timer-pause').onclick=pause;panel.querySelector('.timer-resume').onclick=resume;panel.querySelector('.timer-retry').onclick=reset;panel.querySelector('.jump-top').onclick=()=>window.scrollTo({top:0,behavior:'instant'});panel.querySelector('.jump-bottom').onclick=()=>window.scrollTo({top:document.documentElement.scrollHeight,behavior:'instant'});window.addEventListener('resize',place);
     const loadSettings=s=>{minutes.value=String(Math.floor(s.targetSeconds/60)).padStart(2,'0');seconds.value=String(s.targetSeconds%60).padStart(2,'0');dialog.querySelector('.shortcut-start').value=s.start;dialog.querySelector('.shortcut-stop').value=s.stop};
@@ -114,7 +134,8 @@
       const cells=[...row.children],side=row.querySelector('.side'),original=row.querySelector('.amount'),division=row.querySelector('.division'),account=row.querySelector('.account');
       cells[2].classList.add('time-hidden-cell');cells[3].classList.add('time-hidden-cell');
       const sideText=document.createElement('input');sideText.className='timed-side-text';sideText.setAttribute('aria-label','구분 (3 차변, 4 대변)');side.classList.add('timed-side-hidden');side.tabIndex=-1;side.after(sideText);side.addEventListener('focus',()=>sideText.focus({preventScroll:true}));
-      const oldPartner=row.querySelector('.partner'),partnerText=document.createElement('input');partnerText.className='partner timed-partner-text';partnerText.disabled=oldPartner.disabled;partnerText.placeholder=oldPartner.disabled?'해당 없음':'';partnerText.setAttribute('aria-label','거래처');partnerText.value=oldPartner.value;oldPartner.replaceWith(partnerText);
+      // 기존 거래처 select를 유지해야 원래 저장·채점 listener와 검색 선택지가 함께 보존된다.
+      const partner=row.querySelector('.partner');partner.classList.add('timed-partner-select');partner.lang='ko';
       // Keep the existing grading fields and listeners, and adapt only the visible input layout.
       const debit=document.createElement('td'),credit=document.createElement('td');debit.innerHTML='<input class="timed-money timed-debit" inputmode="numeric" aria-label="차변 금액">';credit.innerHTML='<input class="timed-money timed-credit" inputmode="numeric" aria-label="대변 금액">';
       row.replaceChildren(cells[0],cells[1],cells[4],cells[5],debit,credit,cells[6],cells[2],cells[3]);
@@ -123,8 +144,10 @@
       const expense=/^(보험료|임차료|퇴직급여|수수료비용|복리후생비|운반비|급여|여비교통비|기업업무추진비|소모품비|감가상각비|전력비|수도광열비|경상연구개발비|지급수수료|교육훈련비|세금과공과|차량유지비|수선비|통신비|도서인쇄비|광고선전비|잡급|사무용품비|수수료비용|외주가공비|가스수도료|잡비|포장비|견본비|협회비)$/;
       const ui=account.cloneNode(false);ui.className='timed-account account';account.className='account timed-original-account';account.hidden=true;account.tabIndex=-1;account.after(ui);
       const splitNames=new Set(problems.flatMap(q=>[...(q.answers||[]),...(q.alternateAnswers||[]).flat()]).filter(x=>x.division).flatMap(x=>String(x.account).split('/')));opts.forEach(o=>(expense.test(o.label)||splitNames.has(o.label)?['판','제']:['']).forEach(part=>ui.add(new Option(o.label+(part?`(${part})`:''),JSON.stringify([o.value,part])))));ui.value=JSON.stringify(['','']);
-      ui.addEventListener('change',()=>{const [value,part]=JSON.parse(ui.value);account.value=value;division.value=part;account.dispatchEvent(new Event('change',{bubbles:true}));(row.querySelector('.partner:not(:disabled)')||row.querySelector('.memo')).focus()});
-      ui.addEventListener('account-selected',()=>{(row.querySelector('.partner:not(:disabled)')||row.querySelector('.memo')).focus()});
+      function nextAfterAccount(){const partnerField=row.querySelector('.partner:not(:disabled)');if(partnerField&&global.TrainingSearchPicker)global.TrainingSearchPicker.open(partnerField);else (partnerField||row.querySelector('.memo')).focus()}
+      ui.addEventListener('change',()=>{const [value,part]=JSON.parse(ui.value);account.value=value;division.value=part;account.dispatchEvent(new Event('change',{bubbles:true}))});
+      ui.addEventListener('account-selected',nextAfterAccount);
+      partner.addEventListener('partner-selected',()=>row.querySelector('.memo').focus());
       function reflect(){sideText.value=side.value==='C'?'대변':'차변';d.disabled=side.value!=='D';c.disabled=side.value!=='C';d.value=side.value==='D'?original.value:'';c.value=side.value==='C'?original.value:'';ui.value=JSON.stringify([account.value,division.value])}
       side.addEventListener('change',reflect);original.addEventListener('input',reflect);
       sideText.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();ui.focus();return}const k={Digit3:'3',Numpad3:'3',Digit4:'4',Numpad4:'4'}[e.code]||e.key;if((k==='3'||k==='4')&&!e.ctrlKey&&!e.altKey&&!e.metaKey){e.preventDefault();side.value=k==='3'?'D':'C';side.dispatchEvent(new Event('change',{bubbles:true}));ui.focus()}});

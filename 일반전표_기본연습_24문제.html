@@ -191,7 +191,7 @@
   <script src="github-learning-sync.js?v=16"></script>
   <script src="season-ui.js?v=34"></script>
 <script src="training-ui.js?v=6"></script>
-  <script src="account-search.js?v=3"></script>
+  <script src="account-search.js?v=4"></script>
   <script>
     const problems = loadTrainingProblems();
 
@@ -199,7 +199,8 @@
     const el = (s,root=document)=>root.querySelector(s);
     const els = (s,root=document)=>[...root.querySelectorAll(s)];
     const money = n=>Number(n).toLocaleString('ko-KR')+'원';
-    const normText = s=>(s||'').replace(/[\s()·._-]/g,'').toLowerCase();
+    // NFKC는 거래처명의 ㈜와 (주)처럼 모양만 다른 호환 문자를 같은 값으로 맞춘다.
+    const normText = s=>String(s||'').normalize('NFKC').replace(/[\s()·._-]/g,'').toLowerCase();
     const normMoney = s=>Number(String(s||'').replace(/[^0-9-]/g,''))||0;
     const normMemo = s=>normText(s).replace('적요','').replace('적용','');
     const STORAGE_KEY='exam-20260914-practical';
@@ -534,7 +535,7 @@
   })();
 </script>
 <script>TrainingSeason.install(problems,{state:studyState,save:saveState,refresh:updateProgress});</script>
-<script src="timed-training.js?v=35"></script>
+<script src="timed-training.js?v=39"></script>
 <script>TrainingTimed.install(problems,{subject:'practical',state:studyState,save:saveState,grade,clear:clearCard});</script>
 </body>
 </html>
