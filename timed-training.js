@@ -9,7 +9,7 @@
   const money=n=>Number(n).toLocaleString('ko-KR');
   const clock=ms=>{const s=Math.max(0,Math.ceil(ms/1000));return `${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`};
   const chord=e=>[e.ctrlKey?'Ctrl':'',e.altKey?'Alt':'',e.shiftKey?'Shift':'',e.metaKey?'Meta':'',e.code==='Space'?'Space':e.code].filter(Boolean).join('+');
-  function style(){if(document.getElementById('timedStyle'))return;const link=document.createElement('link');link.id='timedStyle';link.rel='stylesheet';link.href='timed-training.css?v=16';document.head.append(link)}
+  function style(){if(document.getElementById('timedStyle'))return;const link=document.createElement('link');link.id='timedStyle';link.rel='stylesheet';link.href='timed-training.css?v=18';document.head.append(link)}
   function install(problems,a){
     if(new URLSearchParams(location.search).get('timed')!=='1')return;
     style();document.body.classList.add('timed-mode');document.title='시간 훈련 · '+(a.subject==='practical'?'일반전표':'매입매출전표');
@@ -44,21 +44,20 @@
     }
     function lockCard(card,value){if(card)card.querySelectorAll('.entry-wrap,.kclep-shell').forEach(x=>x.inert=value)}
     function lock(value){lockCard(current,value)}
-    function start(){if(!current)return;const p=pending();if(p?.phase==='running'){if(p.pausedAt)resume();return}if(p)return;
+    function start(){if(paper&&pending()?.phase!=='running'){const f=document.activeElement?.closest?.('.question');const vis=visible.filter(c=>!c.hidden);const inView=f&&vis.includes(f)?f:vis.find(c=>{const r=c.getBoundingClientRect();return r.bottom>innerHeight*0.3})||current;if(inView&&inView!==current)show(inView)}if(!current)return;const p=pending();if(p?.phase==='running'){if(p.pausedAt)resume();return}if(p)return;
       current.querySelectorAll('details').forEach(x=>x.open=false);lock(false);
       state(current).timedPending={id:crypto.randomUUID(),phase:'running',startedMs:Date.now(),pausedTotalMs:0,targetSeconds:settings.targetSeconds,assisted:false};a.save();message('측정 중 · 입력을 마치면 정지');draw();
-      const first=current.querySelector('.entry-row .side,.date-month,.voucher-type');first?.focus({preventScroll:true});
     }
-    function stopCard(card){const p=pendingOf(card);if(p?.phase!=='running')return false;p.elapsedMs=live(p);delete p.pausedAt;p.stoppedAt=new Date().toISOString();p.phase='stopped';a.save();lockCard(card,true);return true}
+    function stopCard(card){const p=pendingOf(card);if(p?.phase!=='running')return false;p.elapsedMs=live(p);delete p.pausedAt;p.stoppedAt=new Date().toISOString();p.phase='stopped';a.save();return true}
     function stop(){if(!stopCard(current))return;draw()}
     function pause(){const p=pending();if(p?.phase!=='running'||p.pausedAt)return;p.pausedAt=Date.now();a.save();draw()}
     function resume(){const p=pending();if(p?.phase!=='running'||!p.pausedAt)return;p.pausedTotalMs=(p.pausedTotalMs||0)+Date.now()-p.pausedAt;delete p.pausedAt;a.save();draw()}
-    function resetCard(card){delete state(card).timedPending;lockCard(card,false);a.clear(card);card.querySelectorAll('details').forEach(x=>x.open=false);const b=card.querySelector('.check-one');b.disabled=false;b.textContent='채점하기';lockCard(card,true);card.dispatchEvent(new Event('input',{bubbles:true}))}
+    function resetCard(card){delete state(card).timedPending;lockCard(card,false);a.clear(card);card.querySelectorAll('details').forEach(x=>x.open=false);const b=card.querySelector('.check-one');b.disabled=false;b.textContent='채점하기';lockCard(card,false);card.dispatchEvent(new Event('input',{bubbles:true}))}
     function redo(){if(paper){visible.forEach(resetCard);a.save();show(visible[0]);window.scrollTo({top:0,behavior:'smooth'})}else if(current){resetCard(current);a.save()}draw()}
-    function reset(){if(pending()?.phase!=='running')return;delete state(current).timedPending;a.save();draw()}
+    function reset(){if(!current||!pending())return;delete state(current).timedPending;a.save();draw()}
     function passed(s){return !s.trainingCenterRestored&&(s.passed||s.correct===true||(s.history||[]).some(h=>h.correct===true&&!h.cancelledAt))}
     function eligible(card){const p=problems[card.dataset.index],s=state(card);return !s.deleted&&(!exam.value||String(p.examRound)===exam.value)&&(!type.value||p.type===type.value)&&(!!exam.value||status.value==='all'||!passed(s)||['running','stopped'].includes(s.timedPending?.phase))}
-    function prepareCard(card){const p=pendingOf(card);if(!p){a.clear(card);card.querySelectorAll('details').forEach(x=>x.open=false)}card.querySelector('.check-one').disabled=p?.phase==='graded';lockCard(card,p?.phase!=='running');card.dispatchEvent(new Event('input',{bubbles:true}))}
+    function prepareCard(card){const p=pendingOf(card);if(!p){a.clear(card);card.querySelectorAll('details').forEach(x=>x.open=false)}card.querySelector('.check-one').disabled=p?.phase==='graded';lockCard(card,p?.phase==='graded');card.dispatchEvent(new Event('input',{bubbles:true}))}
     function show(card){if(current&&current!==card&&pending()?.phase==='running')return;
       current=card||null;cards.forEach(c=>{c.hidden=paper?!visible.includes(c):c!==current;c.classList.toggle('timed-active',paper&&c===current)});if(!current){draw();return}
       select.value=current.dataset.index;markList();sessionStorage.setItem('exam-20260914-timed-last-'+a.subject,current.dataset.index);
@@ -67,14 +66,14 @@
     }
     const listBox=document.createElement('section');listBox.className='timed-list';document.querySelector('#questions').after(listBox);
     function markList(){listBox.querySelectorAll('button').forEach(b=>b.classList.toggle('current',!!current&&b.dataset.index===current.dataset.index))}
-    function renderList(){listBox.innerHTML='';const redoBtn=document.createElement('button');redoBtn.type='button';redoBtn.className='timed-redo';redoBtn.textContent=paper?'처음부터 다시 풀기':'이 문제 다시 풀기';redoBtn.onclick=redo;if(paper){const b=document.createElement('button');b.type='button';b.className='timed-grade-all';b.textContent='전체 채점하기';b.onclick=()=>{visible.forEach(c=>{const p=pendingOf(c);if(p&&(p.phase==='running'||p.phase==='stopped'))gradeCard(c,true)});draw()};listBox.append(b,redoBtn);return}
+    function renderList(){listBox.innerHTML='';const redoBtn=document.createElement('button');redoBtn.type='button';redoBtn.className='timed-redo';redoBtn.textContent=paper?'처음부터 다시 풀기':'이 문제 다시 풀기';redoBtn.onclick=redo;if(paper){const b=document.createElement('button');b.type='button';b.className='timed-grade-all';b.textContent='전체 채점하기';b.onclick=()=>{visible.forEach(c=>{const p=pendingOf(c);if(p?.phase!=='graded'&&(p||c.querySelector('.entry-row .amount')?.value||c.querySelector('.timed-original-account')?.value))gradeCard(c,true)});draw()};listBox.append(b,redoBtn);return}
       const groups=new Map();visible.forEach(c=>{const r=problems[c.dataset.index].examRound||0;(groups.get(r)||groups.set(r,[]).get(r)).push(c)});
       [...groups.keys()].sort((x,y)=>x-y).forEach(r=>{const box=document.createElement('div');box.className='timed-list-group';const head=document.createElement('h4');head.textContent=`${r?r+'회':'기타'} · ${groups.get(r).length}문제`;box.append(head);
         groups.get(r).forEach(c=>{const p=problems[c.dataset.index],b=document.createElement('button');b.type='button';b.dataset.index=c.dataset.index;b.textContent=`${Number(c.dataset.index)+1}. ${p.title}`;
           b.onclick=()=>{if(pending()?.phase==='running')return;show(c)};box.append(b)});listBox.append(box)});listBox.append(redoBtn);markList()}
     function list(prefer){select.replaceChildren();paper=!!exam.value;document.body.classList.toggle('timed-paper',paper);visible=cards.filter(eligible);visible.forEach(c=>{const p=problems[c.dataset.index];select.add(new Option(`${Number(c.dataset.index)+1}. ${p.title}`,c.dataset.index))});renderList();bar.querySelector('.time-count').textContent='현재 '+visible.length+'문제';if(paper)visible.forEach(prepareCard);
       show(visible.find(c=>c.dataset.index===String(prefer))||(paper?visible.find(c=>!pendingOf(c)):null)||visible[0])}
-    function gradeCard(card,quiet){let p=pendingOf(card);if(!p)return;
+    function gradeCard(card,quiet){let p=pendingOf(card);if(p?.phase==='graded')return;if(!p){a.grade(card);const h=state(card).history.at(-1);if(h){h.source='timed';h.problemType=problems[card.dataset.index].type;h.problemId=problems[card.dataset.index].id}state(card).timedPending={id:crypto.randomUUID(),phase:'graded',elapsedMs:0,targetSeconds:settings.targetSeconds};a.save();card.querySelector('.check-one').disabled=true;lockCard(card,true);draw();return}
       if(p.phase==='running'){stopCard(card);}
       p=pendingOf(card);if(p.phase!=='stopped'){draw();return}
       a.grade(card);const h=state(card).history.at(-1);h.id=p.id;h.source='timed';h.timing={elapsedMs:p.elapsedMs,targetSeconds:p.targetSeconds,startedAt:new Date(p.startedMs).toISOString(),stoppedAt:p.stoppedAt,assisted:p.assisted};h.problemType=problems[card.dataset.index].type;h.problemId=problems[card.dataset.index].id;p.phase='graded';a.save();card.hidden=false;card.querySelector('.check-one').disabled=true;lockCard(card,true);
@@ -94,7 +93,7 @@
     dialog.querySelector('.timer-close').onclick=()=>dialog.close();
     dialog.querySelectorAll('.shortcut-start,.shortcut-stop').forEach(input=>input.addEventListener('keydown',e=>{if(e.key==='Tab'||e.key==='Escape')return;e.preventDefault();if(e.code&&!['ControlLeft','ControlRight','AltLeft','AltRight','ShiftLeft','ShiftRight','MetaLeft','MetaRight'].includes(e.code)&&(e.ctrlKey||e.altKey))input.value=chord(e)}));
     dialog.querySelector('.timer-save').onclick=()=>{const next={targetSeconds:(Number(minutes.value)||0)*60+Math.min(59,Number(seconds.value)||0),start:dialog.querySelector('.shortcut-start').value,stop:dialog.querySelector('.shortcut-stop').value};if(!next.targetSeconds||next.start===next.stop){dialog.querySelector('.timer-error').textContent='목표는 1초 이상, 시작과 정지는 서로 다른 키로 지정해주세요.';return}settings=next;localStorage.setItem(settingsKey,JSON.stringify(settings));dialog.close();draw();start()};
-    document.addEventListener('keydown',e=>{if(dialog.open||e.repeat)return;const key=chord(e);if(key===settings.start||key===settings.stop){e.preventDefault();e.stopImmediatePropagation();key===settings.start?start():stop()}},true);
+    document.addEventListener('keydown',e=>{if(dialog.open||e.repeat)return;const key=chord(e);if(e.ctrlKey&&e.altKey&&!e.shiftKey&&e.code==='KeyR'){e.preventDefault();e.stopImmediatePropagation();reset();return}if(key===settings.start||key===settings.stop){e.preventDefault();e.stopImmediatePropagation();key===settings.start||pending()?.phase!=='running'?start():stop()}},true);
     document.addEventListener('click',e=>{if(pending()?.phase==='running'&&e.target.closest('a')){e.preventDefault();message('먼저 타이머를 정지한 뒤 이동해주세요.')}},true);
     window.addEventListener('beforeunload',e=>{if(pending()?.phase==='running'){e.preventDefault();e.returnValue=''}});
     document.addEventListener('visibilitychange',draw);
@@ -114,19 +113,22 @@
     rows.forEach(row=>{
       const cells=[...row.children],side=row.querySelector('.side'),original=row.querySelector('.amount'),division=row.querySelector('.division'),account=row.querySelector('.account');
       cells[2].classList.add('time-hidden-cell');cells[3].classList.add('time-hidden-cell');
+      const sideText=document.createElement('input');sideText.className='timed-side-text';sideText.setAttribute('aria-label','구분 (3 차변, 4 대변)');side.classList.add('timed-side-hidden');side.tabIndex=-1;side.after(sideText);side.addEventListener('focus',()=>sideText.focus({preventScroll:true}));
+      const oldPartner=row.querySelector('.partner'),partnerText=document.createElement('input');partnerText.className='partner timed-partner-text';partnerText.disabled=oldPartner.disabled;partnerText.placeholder=oldPartner.disabled?'해당 없음':'';partnerText.setAttribute('aria-label','거래처');partnerText.value=oldPartner.value;oldPartner.replaceWith(partnerText);
       // Keep the existing grading fields and listeners, and adapt only the visible input layout.
       const debit=document.createElement('td'),credit=document.createElement('td');debit.innerHTML='<input class="timed-money timed-debit" inputmode="numeric" aria-label="차변 금액">';credit.innerHTML='<input class="timed-money timed-credit" inputmode="numeric" aria-label="대변 금액">';
       row.replaceChildren(cells[0],cells[1],cells[4],cells[5],debit,credit,cells[6],cells[2],cells[3]);
       const d=debit.firstChild,c=credit.firstChild;
       const opts=[...account.options].map(o=>({value:o.value,label:o.textContent}));
-      const expense=/^(보험료|임차료|퇴직급여|수수료비용|복리후생비|운반비|급여|여비교통비|기업업무추진비|소모품비|감가상각비|전력비|수도광열비|경상연구개발비|지급수수료|교육훈련비)$/;
+      const expense=/^(보험료|임차료|퇴직급여|수수료비용|복리후생비|운반비|급여|여비교통비|기업업무추진비|소모품비|감가상각비|전력비|수도광열비|경상연구개발비|지급수수료|교육훈련비|세금과공과|차량유지비|수선비|통신비|도서인쇄비|광고선전비|잡급|사무용품비|수수료비용|외주가공비|가스수도료|잡비|포장비|견본비|협회비)$/;
       const ui=account.cloneNode(false);ui.className='timed-account account';account.className='account timed-original-account';account.hidden=true;account.tabIndex=-1;account.after(ui);
-      opts.forEach(o=>(expense.test(o.label)?['판','제']:['']).forEach(part=>ui.add(new Option(o.label+(part?`(${part})`:''),JSON.stringify([o.value,part])))));ui.value=JSON.stringify(['','']);
+      const splitNames=new Set(problems.flatMap(q=>[...(q.answers||[]),...(q.alternateAnswers||[]).flat()]).filter(x=>x.division).flatMap(x=>String(x.account).split('/')));opts.forEach(o=>(expense.test(o.label)||splitNames.has(o.label)?['판','제']:['']).forEach(part=>ui.add(new Option(o.label+(part?`(${part})`:''),JSON.stringify([o.value,part])))));ui.value=JSON.stringify(['','']);
       ui.addEventListener('change',()=>{const [value,part]=JSON.parse(ui.value);account.value=value;division.value=part;account.dispatchEvent(new Event('change',{bubbles:true}));(row.querySelector('.partner:not(:disabled)')||row.querySelector('.memo')).focus()});
       ui.addEventListener('account-selected',()=>{(row.querySelector('.partner:not(:disabled)')||row.querySelector('.memo')).focus()});
-      function reflect(){d.disabled=side.value!=='D';c.disabled=side.value!=='C';d.value=side.value==='D'?original.value:'';c.value=side.value==='C'?original.value:'';ui.value=JSON.stringify([account.value,division.value])}
+      function reflect(){sideText.value=side.value==='C'?'대변':'차변';d.disabled=side.value!=='D';c.disabled=side.value!=='C';d.value=side.value==='D'?original.value:'';c.value=side.value==='C'?original.value:'';ui.value=JSON.stringify([account.value,division.value])}
       side.addEventListener('change',reflect);original.addEventListener('input',reflect);
-      side.addEventListener('keydown',e=>{const k={Digit3:'3',Numpad3:'3',Digit4:'4',Numpad4:'4'}[e.code]||e.key;if((k==='3'||k==='4')&&!e.ctrlKey&&!e.altKey&&!e.metaKey){e.preventDefault();side.value=k==='3'?'D':'C';side.dispatchEvent(new Event('change',{bubbles:true}));ui.focus()}});
+      sideText.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();ui.focus();return}const k={Digit3:'3',Numpad3:'3',Digit4:'4',Numpad4:'4'}[e.code]||e.key;if((k==='3'||k==='4')&&!e.ctrlKey&&!e.altKey&&!e.metaKey){e.preventDefault();side.value=k==='3'?'D':'C';side.dispatchEvent(new Event('change',{bubbles:true}));ui.focus()}});
+      sideText.addEventListener('change',()=>{const v=sideText.value;if(/대|4|C/i.test(v))side.value='C';else if(/차|3|D/i.test(v))side.value='D';side.dispatchEvent(new Event('change',{bubbles:true}));reflect()});sideText.addEventListener('focus',()=>sideText.select());
       [d,c].forEach(input=>{
         input.addEventListener('input',()=>{input.value=money(num(input.value)).replace(/^0$/,'');original.value=input.value;original.dispatchEvent(new Event('input',{bubbles:true}));render()});
         input.addEventListener('keydown',e=>{if(e.key==='+'){e.preventDefault();input.value=String(num(input.value))+'000';input.dispatchEvent(new Event('input',{bubbles:true}))}});
