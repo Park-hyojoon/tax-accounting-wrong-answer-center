@@ -179,9 +179,9 @@
   </main>
 
   <script src="github-learning-sync.js?v=16"></script>
-  <script src="season-ui.js?v=31"></script>
-<script src="training-ui.js?v=5"></script>
-  <script src="account-search.js?v=2"></script>
+  <script src="season-ui.js?v=32"></script>
+<script src="training-ui.js?v=6"></script>
+  <script src="account-search.js?v=3"></script>
   <script>
     const problems = loadTrainingProblems();
 
@@ -414,7 +414,7 @@
       list.forEach(({p,s,todayHistory},order)=>{
         const last=todayHistory[todayHistory.length-1],todayWrong=todayHistory.filter(h=>!h.correct).length;
         lines.push(`## ${order+1}. ${p.title} (${p.type})`,'',`**문제:** ${p.prompt}`,'',`- 오늘 마지막 결과: ${last.correct?'정답':'오답'}`,...(s.selfPassed?[`- 스스로 정답 인정(통과): ${fmtDate(s.selfPassedAt)}`]:[]),`- 오늘 채점 횟수: ${todayHistory.length}회`,`- 오늘 틀린 횟수: ${todayWrong}회`,'','### 현재 입력','',...rowTable(s.rows||[]),'','### 정답','',...rowTable(p.answers,true),'',`**해설:** ${p.explanation}`,'','### 오늘 채점 이력','');
-        todayHistory.forEach((h,n)=>{lines.push(`#### 오늘 ${n+1}차 시도 · ${fmtDate(h.at)} · ${h.source==='notebook'?'노트 학습 · 직접 표시 / ':''}${h.correct?'정답':'오답'} (${h.matched}/${p.answers.length}개 일치)`,'',...rowTable(h.rows||[]),'')});
+        todayHistory.forEach((h,n)=>{lines.push(`#### 오늘 ${n+1}차 시도 · ${fmtDate(h.at)} · ${h.source==='notebook'?'노트 학습 · 직접 표시 / ':''}${h.correct?'정답':'오답'} (${h.matched}/${p.answers.length}개 일치)`,'',...(h.timing?[`- 시간 훈련: ${(h.timing.elapsedMs/1000).toFixed(1)}초 / 목표 ${h.timing.targetSeconds}초${h.timing.assisted?' (해설 참고)':''}`,'']:[]),...rowTable(h.rows||[]),'')});
         lines.push('---','')
       });
       const starred=all.filter(x=>x.s.starred);
@@ -519,5 +519,7 @@
   })();
 </script>
 <script>TrainingSeason.install(problems,{state:studyState,save:saveState,refresh:updateProgress});</script>
+<script src="timed-training.js?v=1"></script>
+<script>TrainingTimed.install(problems,{subject:'practical',state:studyState,save:saveState,grade,clear:clearCard});</script>
 </body>
 </html>

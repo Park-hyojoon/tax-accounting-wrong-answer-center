@@ -4,6 +4,10 @@
   const MOBILE='(max-width:760px)';
   const nav=document.querySelector('.top-nav');if(!nav)return;
   const inner=nav.querySelector('.nav-inner')||nav;
+  const timedLink=document.createElement('a');timedLink.className='nav-link';timedLink.href='시간_훈련.html';timedLink.textContent='시간 훈련';
+  const timedMode=new URLSearchParams(location.search).get('timed')==='1';
+  if(timedMode){inner.querySelectorAll('.active').forEach(x=>{x.classList.remove('active');x.removeAttribute('aria-current')});timedLink.classList.add('active');timedLink.setAttribute('aria-current','page')}
+  (inner.querySelector('a[href="약점_분석_임시.html"]')||inner.querySelector('a:last-of-type'))?.after(timedLink);
   const links=[...inner.querySelectorAll('a.nav-link')];if(!links.length)return;
 
   const style=document.createElement('style');

@@ -51,9 +51,11 @@
 
   function choose(item){
     if(!source||!item)return;
+    const field=source;
     source.value=item.value;
     source.dispatchEvent(new Event('change',{bubbles:true}));
     closePicker();
+    field.dispatchEvent(new Event('account-selected',{bubbles:true}));
   }
 
   function markActive(next){

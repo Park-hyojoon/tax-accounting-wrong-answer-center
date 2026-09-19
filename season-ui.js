@@ -11,6 +11,11 @@
     field.onchange=()=>{const url=new URL(location.href);field.value?url.searchParams.set(key,field.value):url.searchParams.delete(key);location.href=url.href};el.append(field);return el;
   }
   function install(problems,adapter){
+    if(params.get('timed')==='1'&&!adapter?.theory){
+      document.body.classList.add('study-page');
+      document.querySelectorAll('.question').forEach(card=>{const p=problems[Number(card.dataset.index)];if(!p)return;const origin=document.createElement('p');origin.className='season-origin';origin.textContent=`${p.examRound||''}회 · ${p.sourceQuestionNo||''} 원문에서 만든 응용문제`;card.querySelector('.qhead')?.after(origin)});
+      return;
+    }
     // A tag is a fresh practice entry point: clear only the current answer fields
     // once, while retaining pass state, attempts, wrong counts, and full history.
     if(params.get('fresh')==='1'&&params.get('tag')&&adapter){
