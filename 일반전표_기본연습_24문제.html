@@ -62,9 +62,9 @@
     .qnum{display:grid;place-items:center;min-width:48px;height:48px;background:var(--navy);color:#fff;border-radius:14px;font-size:22px;font-weight:900}
     .qhead h3{margin:0;color:var(--navy);font-size:24px}
     .tag{display:inline-block;margin-top:3px;background:var(--sky);color:#246093;border-radius:99px;padding:2px 10px;font-size:14px;font-weight:800}
-    .prompt{font-size:20px;margin:15px 0;padding:18px;background:#f8fbfe;border-left:6px solid #76b9e8;border-radius:8px}
-    .prompt-row{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);gap:16px;align-items:start;margin:15px 0}.prompt-row .prompt{margin:0;position:sticky;top:12px}.prompt-row .exhibit{margin:0}
-    @media(max-width:900px){.prompt-row{grid-template-columns:1fr}.prompt-row .prompt{position:static}}
+    .prompt{font-size:20px;font-weight:700;margin:15px 0;padding:18px;background:#f8fbfe;border-left:6px solid #76b9e8;border-radius:8px}
+    .exhibit-layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);gap:16px;align-items:start;margin:15px 0}.exhibit-layout{align-items:stretch}.question .exhibit-layout>.prompt{margin:0!important;align-self:end}.exhibit-layout .exhibit{margin:0}
+    @media(max-width:900px){.exhibit-layout{grid-template-columns:1fr}.exhibit-layout>.prompt{align-self:start}}
     .exhibit{margin:14px 0;padding:0;background:#fff;border:1px solid #9fb3c4;border-radius:6px;overflow:hidden;font-size:15px;color:#1f2d3a}
     .exhibit-bank .bank-head{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 14px;background:#a3dcc9;font-weight:700;font-size:20px}.exhibit-bank .bank-head small{font-size:12px;font-weight:400;margin-left:2px}.exhibit-bank .bank-head b{font-size:26px;color:#1c3f3a;letter-spacing:2px}
     .exhibit-bank .bank-body{padding:14px 18px}.exhibit-bank h4{margin:0 auto 14px;width:max-content;max-width:100%;padding:0 22px 4px;border-bottom:2px solid #1f2d3a;font-size:19px;text-align:center}
@@ -189,7 +189,7 @@
   </main>
 
   <script src="github-learning-sync.js?v=16"></script>
-  <script src="season-ui.js?v=32"></script>
+  <script src="season-ui.js?v=34"></script>
 <script src="training-ui.js?v=6"></script>
   <script src="account-search.js?v=3"></script>
   <script>
@@ -256,7 +256,7 @@
     function questionHtml(p,i){return `<article class="question" data-index="${i}" data-added-date="${p.addedDate}">
       <div class="qhead"><span class="qnum">${i+1}</span><div><h3>${p.title}</h3><span class="tag">${p.type}</span>${p.variantOf!=null?`<span class="tag variant-badge">AI 응용문제 · 원문제 ${p.variantOf+1}번</span>`:''}</div></div>
       <p class="star-note" hidden>★ 이 문제는 특별히 훈련이 필요합니다.</p>
-      ${p.exhibit?`<div class="prompt-row"><div class="prompt">${p.prompt}</div>${p.exhibit}</div>`:`<div class="prompt">${p.prompt}</div>`}
+      ${p.exhibit?`<div class="exhibit-layout"><div class="prompt">${p.prompt}</div>${p.exhibit}</div>`:`<div class="prompt">${p.prompt}</div>`}
       <div class="entry-wrap"><table>
         <thead><tr><th>구분</th><th>계정과목</th><th>금액</th><th>판 / 제 선택</th><th>거래처</th><th>적요코드</th><th>결과</th></tr></thead>
         <tbody>${Array.from({length:Math.max(4,p.answers.length)},(_,r)=>rowHtml(r,p)).join('')}</tbody>
@@ -534,7 +534,7 @@
   })();
 </script>
 <script>TrainingSeason.install(problems,{state:studyState,save:saveState,refresh:updateProgress});</script>
-<script src="timed-training.js?v=22"></script>
+<script src="timed-training.js?v=26"></script>
 <script>TrainingTimed.install(problems,{subject:'practical',state:studyState,save:saveState,grade,clear:clearCard});</script>
 </body>
 </html>

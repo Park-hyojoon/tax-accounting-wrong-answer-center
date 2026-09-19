@@ -9,7 +9,7 @@
   const money=n=>Number(n).toLocaleString('ko-KR');
   const clock=ms=>{const s=Math.max(0,Math.ceil(ms/1000));return `${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`};
   const chord=e=>[e.ctrlKey?'Ctrl':'',e.altKey?'Alt':'',e.shiftKey?'Shift':'',e.metaKey?'Meta':'',e.code==='Space'?'Space':e.code].filter(Boolean).join('+');
-  function style(){if(document.getElementById('timedStyle'))return;const link=document.createElement('link');link.id='timedStyle';link.rel='stylesheet';link.href='timed-training.css?v=13';document.head.append(link)}
+  function style(){if(document.getElementById('timedStyle'))return;const link=document.createElement('link');link.id='timedStyle';link.rel='stylesheet';link.href='timed-training.css?v=16';document.head.append(link)}
   function install(problems,a){
     if(new URLSearchParams(location.search).get('timed')!=='1')return;
     style();document.body.classList.add('timed-mode');document.title='시간 훈련 · '+(a.subject==='practical'?'일반전표':'매입매출전표');
@@ -19,7 +19,7 @@
     const state=card=>a.state.cards[card.dataset.index]||(a.state.cards[card.dataset.index]={history:[]});
     const pendingOf=card=>card?state(card).timedPending:null,pending=()=>pendingOf(current);
     const bar=document.createElement('section');bar.className='timed-bar';
-    bar.innerHTML=`<a href="${files.practical}?timed=1" class="timed-tab ${a.subject==='practical'?'selected':''}">일반전표</a><a href="${files.voucher}?timed=1" class="timed-tab ${a.subject==='voucher'?'selected':''}">매입매출전표</a><label>회차 <select class="time-exam"><option value="">전체</option></select></label><label>유형 <select class="time-type"><option value="">전체</option></select></label><label>학습 상태 <select class="time-status"><option value="active">미통과 문제</option><option value="all">전체 기록 · 다시 훈련</option></select></label><label>문제 <select class="time-question"></select></label>`;
+    bar.innerHTML=`<a href="${files.practical}?timed=1" class="timed-tab ${a.subject==='practical'?'selected':''}">일반전표</a><a href="${files.voucher}?timed=1" class="timed-tab ${a.subject==='voucher'?'selected':''}">매입매출전표</a><label>회차 <select class="time-exam"><option value="">전체</option></select></label><label>유형 <select class="time-type"><option value="">전체</option></select></label><label>학습 상태 <select class="time-status"><option value="active">미통과 문제</option><option value="all">전체 기록 · 다시 훈련</option></select></label><label>문제 <select class="time-question"></select></label><b class="time-count"></b>`;
     document.querySelector('#questions').before(bar);
     const exam=bar.querySelector('.time-exam'),type=bar.querySelector('.time-type'),status=bar.querySelector('.time-status'),select=bar.querySelector('.time-question');
     [...new Set(problems.map(p=>p.examRound))].sort((x,y)=>x-y).forEach(x=>exam.add(new Option(x+'회',x)));
@@ -72,7 +72,7 @@
       [...groups.keys()].sort((x,y)=>x-y).forEach(r=>{const box=document.createElement('div');box.className='timed-list-group';const head=document.createElement('h4');head.textContent=`${r?r+'회':'기타'} · ${groups.get(r).length}문제`;box.append(head);
         groups.get(r).forEach(c=>{const p=problems[c.dataset.index],b=document.createElement('button');b.type='button';b.dataset.index=c.dataset.index;b.textContent=`${Number(c.dataset.index)+1}. ${p.title}`;
           b.onclick=()=>{if(pending()?.phase==='running')return;show(c)};box.append(b)});listBox.append(box)});listBox.append(redoBtn);markList()}
-    function list(prefer){select.replaceChildren();paper=!!exam.value;document.body.classList.toggle('timed-paper',paper);visible=cards.filter(eligible);visible.forEach(c=>{const p=problems[c.dataset.index];select.add(new Option(`${Number(c.dataset.index)+1}. ${p.title}`,c.dataset.index))});renderList();if(paper)visible.forEach(prepareCard);
+    function list(prefer){select.replaceChildren();paper=!!exam.value;document.body.classList.toggle('timed-paper',paper);visible=cards.filter(eligible);visible.forEach(c=>{const p=problems[c.dataset.index];select.add(new Option(`${Number(c.dataset.index)+1}. ${p.title}`,c.dataset.index))});renderList();bar.querySelector('.time-count').textContent='현재 '+visible.length+'문제';if(paper)visible.forEach(prepareCard);
       show(visible.find(c=>c.dataset.index===String(prefer))||(paper?visible.find(c=>!pendingOf(c)):null)||visible[0])}
     function gradeCard(card,quiet){let p=pendingOf(card);if(!p)return;
       if(p.phase==='running'){stopCard(card);}
