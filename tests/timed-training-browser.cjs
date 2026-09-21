@@ -13,6 +13,7 @@ const root=path.resolve(__dirname,'..'),url=(file,query='')=>pathToFileURL(path.
   assert.equal(await page.locator('.question:visible').count(),1);
   assert.equal(await page.locator('.question:visible .entry-wrap').evaluate(x=>x.inert),false);
   assert.equal(await page.locator('.question:visible .notebook-pass').count(),1);assert.equal(await page.locator('.question:visible .notebook-wrong').count(),1);
+  assert.equal(await page.locator('.question:visible .reset-one').count(),1);
   assert.ok(await page.locator('.time-top option').count()>1);assert.notEqual(await page.locator('.time-top-label').evaluate(x=>getComputedStyle(x).backgroundColor),'rgba(0, 0, 0, 0)');
   await page.keyboard.press('Control+Alt+Space');
   assert.equal(await page.evaluate(()=>TrainingTimed.active.pending.phase),'running');
@@ -27,7 +28,7 @@ const root=path.resolve(__dirname,'..'),url=(file,query='')=>pathToFileURL(path.
   assert.equal(first.correct,true);assert.equal(first.source,'timed');assert.ok(first.id);assert.ok(first.timing.elapsedMs>=0);
   assert.equal(await page.locator('.question:visible .check-one').isDisabled(),true);
   const snapshot=await page.evaluate(index=>JSON.stringify(studyState.cards[index].history),practicalIndex);
-  await page.locator('.timed-redo').click();assert.equal(await page.evaluate(index=>JSON.stringify(studyState.cards[index].history),practicalIndex),snapshot);
+  await page.locator('.question:visible .reset-one').click();assert.equal(await page.evaluate(index=>JSON.stringify(studyState.cards[index].history),practicalIndex),snapshot);assert.equal(await page.evaluate(()=>TrainingTimed.active.pending==null),true);assert.equal(await page.locator('.question:visible .check-one').isEnabled(),true);
   // Settings start immediately; reject duplicate shortcut and preserve key combination specificity.
   await page.locator('.timer-config').click();await page.locator('.timer-minutes').fill('01');await page.locator('.timer-seconds').fill('30');
   await page.locator('.shortcut-start').focus();await page.keyboard.press('Control+Alt+KeyS');
@@ -47,6 +48,7 @@ const root=path.resolve(__dirname,'..'),url=(file,query='')=>pathToFileURL(path.
   // Switching to another subject is explicit and starts in ready mode.
   await page.goto(url('매입매출전표_오답연습_3문제.html','?timed=1&exam=all&status=all&problem=0'));
   await page.waitForFunction(()=>window.TrainingTimed?.active?.current);
+  assert.equal(await page.locator('.question:visible .reset-one').count(),1);
   assert.equal(await page.evaluate(()=>{const card=TrainingTimed.active.current,actions=card.querySelector('.qactions'),answer=card.querySelector('.answer-reveal');return answer.parentElement.classList.contains('answer-workspace')&&Boolean(actions.compareDocumentPosition(answer)&Node.DOCUMENT_POSITION_FOLLOWING)}),true);
   await page.keyboard.press('Control+Alt+KeyS');
   await page.evaluate(()=>{const card=TrainingTimed.active.current,p=problems[card.dataset.index],variant=p.variants.find(x=>x.journal==='혼합')||p.variants[0],typeNo=Number(String(p.voucher.type).match(/^\d+/)?.[0]||0),trade=typeNo>=50?'purchase':'sales';$('.trade-mode',card).value=trade;setTypeMode(card,trade,false);syncPartsFromDate(card,p.voucher.date);$('.voucher-type',card).value=p.voucher.type;$('.item-name',card).value=p.item;$('.supply',card).value=p.voucher.supply;$('.vat',card).value=p.voucher.vat;$('.supplier',card).value=p.voucher.supplier||'';$('.electronic',card).value=p.voucher.electronic||'';$('.journal',card).value=variant.journal;$('.card-company',card).value=p.voucher.cardCompany||'';$('.zero-rate',card).value=p.voucher.zeroRate||'';syncDeductReason(card);$('.deduct-reason',card).value=p.voucher.deductReason||'';clearJournalRows(card);variant.rows.forEach((row,index)=>putStoredRow($$('.entry-row',card)[index],row));applyJournalForm(card);totals(card)});
@@ -92,6 +94,10 @@ const root=path.resolve(__dirname,'..'),url=(file,query='')=>pathToFileURL(path.
   await page.locator('.question:visible .notebook-wrong').click();assert.deepEqual(await page.evaluate(()=>{const h=studyState.cards[TrainingTimed.active.current.dataset.index].history.at(-1);return{source:h.source,correct:h.correct}}),{source:'notebook',correct:false});
   await page.locator('.question:visible .notebook-pass').click();assert.deepEqual(await page.evaluate(()=>{const h=studyState.cards[TrainingTimed.active.current.dataset.index].history.at(-1);return{source:h.source,correct:h.correct}}),{source:'notebook',correct:true});
   const topValue=await page.locator('.time-top option:not([value=""])').first().getAttribute('value');await page.locator('.time-top').selectOption(topValue);assert.equal(await page.locator('.time-exam').inputValue(),'');assert.equal(await page.locator('.question:visible').count(),1);
+  await page.goto(url('일반전표_기본연습_24문제.html','?timed=1&exam=all&status=all'));await page.waitForFunction(()=>window.TrainingTimed?.active?.current);
+  assert.equal(await page.evaluate(()=>[...document.querySelector('.time-question').options].some(option=>problems[option.value]?.timeTraining===false)),false);
+  await page.goto(url('매입매출전표_오답연습_3문제.html','?timed=1&exam=all&status=all'));await page.waitForFunction(()=>window.TrainingTimed?.active?.current);
+  assert.equal(await page.evaluate(()=>[...document.querySelector('.time-question').options].some(option=>problems[option.value]?.timeTraining===false)),false);
   await page.goto(url('일반전표_기본연습_24문제.html'));assert.equal(await page.locator('.timer-panel').count(),0);assert.equal(await page.locator('.timed-kclep').count(),0);
   assert.deepEqual(errors,[]);console.log('PASS: shortcuts, balance Enter, real grading, duplicate prevention, retry history, reload/overtime, both subjects, analysis, responsive layout, normal-mode isolation');
  }finally{await browser.close()}

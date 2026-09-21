@@ -1,7 +1,7 @@
 .timed-mode .toolbar,.timed-mode .dashboard,.timed-mode .hero,.timed-mode .footer,.timed-mode .mobile-filter-bar{display:none!important}
 .timed-mode main.wrap{max-width:1450px!important;width:calc(100% - 36px)!important;padding-right:172px!important;margin-top:16px!important}
 .timed-mode .question[hidden]{display:none!important}
-.timed-mode .question .clear-one,.timed-mode .question .archive-one,.timed-mode .question .reset-one{display:none!important}
+.timed-mode .question .clear-one,.timed-mode .question .archive-one{display:none!important}
 .timed-mode .question .tip{display:none}
 .timed-bar{display:flex;flex-wrap:wrap;gap:12px;align-items:center;background:#f5f9fc;border:1px solid #cad8e4;padding:12px;border-radius:8px;color:#24445c;font-size:14px}
 .timed-bar label{display:flex;align-items:center;gap:6px}.timed-bar select{max-width:240px;padding:6px;border:1px solid #cad8e4;border-radius:5px;font:inherit;background:white}

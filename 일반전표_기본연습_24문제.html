@@ -141,17 +141,17 @@
       </div>
     </div>
   </nav>
-  <script src="data/practical.js?v=9"></script>
+  <script src="data/practical.js?v=13"></script>
   <script>(function(){var nav=document.querySelector('.top-nav');function sync(){document.documentElement.style.setProperty('--nav-h',(nav?nav.offsetHeight:60)+'px')}sync();window.addEventListener('resize',sync)})()</script>
   <main class="wrap">
     <div class="toolbar">
       <label class="sort-label" for="sortOrder">정렬
         <select class="sort-select" id="sortOrder">
+          <option value="recentRegistered" selected>최근 등록 순</option>
           <option value="registered">등록 순서</option>
           <option value="wrong">오답 많은 순</option>
           <option value="unattempted">아직 안 푼 문제 우선</option>
           <option value="recentAttempt">최근에 푼 순</option>
-          <option value="recentRegistered">최근 등록 순</option>
         </select>
       </label>
       <label class="type-filter" for="typeFilter">유형 검색
@@ -189,7 +189,7 @@
   </main>
 
   <script src="github-learning-sync.js?v=16"></script>
-  <script src="season-ui.js?v=34"></script>
+  <script src="season-ui.js?v=36"></script>
 <script src="training-ui.js?v=6"></script>
   <script src="account-search.js?v=4"></script>
   <script>
@@ -301,7 +301,7 @@
       updateTotals(card);saveState();updateProgress()
     }
     function renderAttempt(card){const s=cardState(card.dataset.index);el('.attempt-info',card).textContent=`채점 ${s.attempts||0}회 · 틀림 ${s.wrongCount||0}회`}
-    const DIRECT_INTAKE_INDICES=new Set([0,1,2,3,5,6,7,8,9,10,11,12,15,17,18,19,20,21,22,23,24,25,26,27,28,29]);
+    const DIRECT_INTAKE_INDICES=new Set([0,1,2,3,5,6,7,8,9,10,11,12,15,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41]);
     const todayView=new URLSearchParams(location.search).get('view')==='today';
     const typeView=(new URLSearchParams(location.search).get('type')||'').trim();
     const starView=new URLSearchParams(location.search).get('view')==='star';
@@ -387,6 +387,7 @@
       return a.index-b.index});
       const box=el('#questions');list.forEach(x=>box.appendChild(x.card))}
     el('#sortOrder').addEventListener('change',applySort);
+    applySort();
 
     function updateProgress(){
       const cards=els('.question').filter(c=>!c.hidden),graded=cards.filter(c=>c.dataset.graded==='true').length,correct=cards.filter(c=>c.dataset.correct==='true').length;
@@ -535,7 +536,7 @@
   })();
 </script>
 <script>TrainingSeason.install(problems,{state:studyState,save:saveState,refresh:updateProgress});</script>
-<script src="timed-training.js?v=39"></script>
+<script src="timed-training.js?v=41"></script>
 <script>TrainingTimed.install(problems,{subject:'practical',state:studyState,save:saveState,grade,clear:clearCard});</script>
 </body>
 </html>

@@ -1,6 +1,6 @@
 (function(){
   'use strict';
-  const style=document.createElement('link');style.rel='stylesheet';style.href='season.css?v=17';document.head.append(style);
+  const style=document.createElement('link');style.rel='stylesheet';style.href='season.css?v=18';document.head.append(style);
   const params=new URLSearchParams(location.search);
   const escape=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   function matches(p){return (!params.get('exam')||String(p.examRound)===params.get('exam'))&&(!params.get('tag')||(p.tags||[]).includes(params.get('tag')))}
@@ -37,6 +37,8 @@
     }
     const host=document.querySelector('.toolbar,.dashboard')||document.querySelector('main');
     const bar=document.createElement('div');bar.className='season-filters';
+    // Keep the study controls in the learner's reading order: sort, round, tag, then TOP 10.
+    const sortLabel=host?.querySelector('.sort-label');if(sortLabel)bar.append(sortLabel);
     bar.append(select('기출 회차',problems.map(p=>p.examRound),'exam'),select('유형 태그',problems.flatMap(p=>p.tags||[p.type]),'tag'));
     if(adapter)bar.append(currentTrainingSelect(problems,adapter));
     host?.classList.add('study-toolbar');host?.prepend(bar);
@@ -69,7 +71,7 @@
     const dialog=document.createElement('dialog');dialog.className='mobile-filter-dialog';dialog.setAttribute('aria-labelledby','mobileFilterTitle');
     dialog.innerHTML='<header><h2 id="mobileFilterTitle">정렬 · 검색 설정</h2><button type="button" class="mobile-filter-close" aria-label="설정 닫기">×</button></header><div class="mobile-filter-content"></div><footer><button type="button" class="mobile-filter-apply">문제 보기</button></footer>';
     document.body.append(dialog);
-    const fields=[...bar.querySelectorAll('select:not(.current-training-select)')],keys=['exam','tag','status'];let snapshot=[];
+    const fields=[...bar.querySelectorAll('[aria-label="기출 회차"],[aria-label="유형 태그"]')],keys=['exam','tag'];let snapshot=[];
     bar.addEventListener('change',event=>{if(dialog.open&&fields.includes(event.target))event.stopImmediatePropagation()},true);
     function close(){dialog.close()}
     open.onclick=()=>{snapshot=fields.map(f=>f.value);dialog.showModal();document.body.classList.add('mobile-filter-active')};
@@ -88,15 +90,12 @@
     const key=c=>theory?c.dataset.id:c.dataset.index;
     const get=(id,k)=>theory?a.state[k]?.[id]:a.state.cards?.[id]?.[k];
     const put=(id,k,v)=>{const target=theory?(a.state[k]??={}):(a.state.cards[id]??={});target[theory?id:k]=v};
-    const status=document.createElement('select');status.setAttribute('aria-label','학습 상태');
-    status.add(new Option('학습할 문제','active'));
-    status.value='active';bar.append(status);
     function visibility(card){
       const id=key(card),p=theory?problems.find(p=>p.id===id):problems[Number(id)],passed=!!get(id,'passed'),star=!!get(id,'starred');
       const search=document.querySelector('#typeFilter')?.value||params.get('type')||'';
       const match=matches(p)&&(!search||p.type.includes(search))&&(params.get('view')!=='today'||p.addedDate===new Date(Date.now()-new Date().getTimezoneOffset()*60000).toISOString().slice(0,10));
       const special=params.get('view')==='star',hasVariant=problems.some(x=>x.variantOf===(theory?id:Number(id)));
-      card.hidden=!!get(id,'deleted')||!match||(special&&!star&&p.variantOf==null&&!hasVariant)||(status.value==='active'&&passed&&!passedThisVisit.has(String(id)));
+      card.hidden=!!get(id,'deleted')||!match||(special&&!star&&p.variantOf==null&&!hasVariant)||(passed&&!passedThisVisit.has(String(id)));
       card.dataset.typeFilterBaseHidden=String(card.hidden);
       if(special){
         const item=card.closest('details.star-item');if(item)item.hidden=card.hidden;
@@ -203,6 +202,14 @@
       if(!activeTags.length){const done=document.createElement('span');done.className='season-current-empty';done.textContent='현재 훈련할 미통과 문제가 없습니다.';currentList.append(done)}
       section.append(currentList);groups.append(section);
     });host.append(groups);
+    if(host.dataset.tagsOnly){
+      groups.querySelectorAll('.season-tag-list:not(.season-current-list)').forEach((list,index)=>{
+        list.classList.add('season-tag-list-collapsible','is-collapsed');list.id=`seasonTagList${index+1}`;
+        const more=document.createElement('button');more.type='button';more.className='season-tag-more';more.textContent='더 보기';more.setAttribute('aria-expanded','false');more.setAttribute('aria-controls',list.id);
+        more.onclick=()=>{const collapsed=list.classList.toggle('is-collapsed');more.textContent=collapsed?'더 보기':'접기';more.setAttribute('aria-expanded',String(!collapsed))};list.after(more);
+        requestAnimationFrame(()=>{if(list.scrollHeight<=list.clientHeight+2){list.classList.remove('is-collapsed','season-tag-list-collapsible');more.remove()}});
+      });
+    }
     // A shared tag spanning subjects opens each existing trainer, without loading all question data on home.
     window.addEventListener('pageshow',event=>{if(event.persisted)location.reload()},{once:true});
     window.addEventListener('storage',event=>{if(/^exam-20260914-(theory|practical|voucher)$/.test(event.key||''))location.reload()},{once:true});

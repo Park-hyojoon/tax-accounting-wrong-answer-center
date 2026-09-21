@@ -9,7 +9,7 @@
   const money=n=>Number(n).toLocaleString('ko-KR');
   const clock=ms=>{const s=Math.max(0,Math.ceil(ms/1000));return `${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`};
   const chord=e=>[e.ctrlKey?'Ctrl':'',e.altKey?'Alt':'',e.shiftKey?'Shift':'',e.metaKey?'Meta':'',e.code==='Space'?'Space':e.code].filter(Boolean).join('+');
-  function style(){if(document.getElementById('timedStyle'))return;const link=document.createElement('link');link.id='timedStyle';link.rel='stylesheet';link.href='timed-training.css?v=19';document.head.append(link)}
+  function style(){if(document.getElementById('timedStyle'))return;const link=document.createElement('link');link.id='timedStyle';link.rel='stylesheet';link.href='timed-training.css?v=20';document.head.append(link)}
   function install(problems,a){
     if(new URLSearchParams(location.search).get('timed')!=='1')return;
     style();document.body.classList.add('timed-mode');document.title='시간 훈련 · '+(a.subject==='practical'?'일반전표':'매입매출전표');
@@ -29,6 +29,7 @@
       a.save();a.refresh?.();populateTop();draw();
     }
     function addNotebookButtons(card){const actions=card.querySelector('.qactions,.actions');if(!actions||actions.querySelector('.notebook-pass'))return;const make=(text,correct,cls)=>{const button=document.createElement('button');button.type='button';button.className='btn secondary '+cls;button.textContent=text;button.addEventListener('click',()=>markNotebook(card,correct));return button};actions.prepend(make('✓ 알고 있어요 · 통과',true,'notebook-pass'),make('↻ 틀렸어요 · 다시 연습',false,'notebook-wrong'))}
+    function connectProblemReset(card){const actions=card.querySelector('.qactions,.actions');if(!actions)return;let button=actions.querySelector('.reset-one');if(!button){button=document.createElement('button');button.type='button';button.className='btn secondary reset-one';button.textContent='이 문제 초기화';const anchor=actions.querySelector('.star-one');anchor?anchor.before(button):actions.append(button)}button.addEventListener('click',event=>{event.preventDefault();event.stopImmediatePropagation();resetCard(card);a.save();draw()},true)}
     function placeVoucherAnswerBelow(card){const brief=card.querySelector('.question-brief'),answer=brief?.querySelector('.answer-reveal'),workspace=card.querySelector('.answer-workspace');if(!answer||!workspace)return;workspace.append(answer);if(!brief.children.length)brief.remove()}
     const bar=document.createElement('section');bar.className='timed-bar';
     bar.innerHTML=`<a href="${files.practical}?timed=1" class="timed-tab ${a.subject==='practical'?'selected':''}">일반전표</a><a href="${files.voucher}?timed=1" class="timed-tab ${a.subject==='voucher'?'selected':''}">매입매출전표</a><label>회차 <select class="time-exam"><option value="">전체</option></select></label><label>유형 <select class="time-type"><option value="">전체</option></select></label><label class="time-top-label">현재 훈련 필요 TOP 10 <select class="time-top"><option value="">계산 중</option></select></label><label>학습 상태 <select class="time-status"><option value="active">미통과 문제</option><option value="all">전체 기록 · 다시 훈련</option></select></label><label>문제 <select class="time-question"></select></label><b class="time-count"></b>`;
@@ -69,11 +70,11 @@
     function reset(){if(!current||!pending())return;delete state(current).timedPending;a.save();draw()}
     function passed(s){return !s.trainingCenterRestored&&(s.passed||s.correct===true||(s.history||[]).some(h=>h.correct===true&&!h.cancelledAt))}
     function populateTop(prefer=top.value||params.get('top')||''){
-      const tags=new Map();problems.forEach((problem,index)=>{const card=cards[index],s=card?state(card):{};if(problem.variantOf!=null||problem.sourceQuestionNo===''||passed(s))return;[...new Set(problem.tags?.length?problem.tags:[problem.type])].filter(Boolean).forEach(tag=>{if(!tags.has(tag))tags.set(tag,[]);tags.get(tag).push(problem)})});
+      const tags=new Map();problems.forEach((problem,index)=>{const card=cards[index],s=card?state(card):{};if(problem.timeTraining===false||problem.variantOf!=null||problem.sourceQuestionNo===''||passed(s))return;[...new Set(problem.tags?.length?problem.tags:[problem.type])].filter(Boolean).forEach(tag=>{if(!tags.has(tag))tags.set(tag,[]);tags.get(tag).push(problem)})});
       const ranked=[...tags].sort((x,y)=>y[1].length-x[1].length||x[0].localeCompare(y[0],'ko')).slice(0,10);top.replaceChildren(new Option(ranked.length?'학습 유형 선택':'현재 훈련할 미통과 문제가 없습니다.',''));ranked.forEach(([tag,items],index)=>top.add(new Option(`${index+1}. ${tag} · ${items.length}문제`,tag)));top.disabled=!ranked.length;top.value=[...top.options].some(option=>option.value===prefer)?prefer:'';
     }
     populateTop(params.get('top')||'');
-    function eligible(card){const p=problems[card.dataset.index],s=state(card),tags=p.tags?.length?p.tags:[p.type];return !s.deleted&&(!exam.value||String(p.examRound)===exam.value)&&(!type.value||p.type===type.value)&&(!top.value||tags.includes(top.value))&&(!!exam.value||status.value==='all'||!passed(s)||['running','stopped'].includes(s.timedPending?.phase))}
+    function eligible(card){const p=problems[card.dataset.index],s=state(card),tags=p.tags?.length?p.tags:[p.type];return p.timeTraining!==false&&!s.deleted&&(!exam.value||String(p.examRound)===exam.value)&&(!type.value||p.type===type.value)&&(!top.value||tags.includes(top.value))&&(!!exam.value||status.value==='all'||!passed(s)||['running','stopped'].includes(s.timedPending?.phase))}
     function prepareCard(card){const p=pendingOf(card);if(!p){a.clear(card);card.querySelectorAll('details').forEach(x=>x.open=false)}card.querySelector('.check-one').disabled=p?.phase==='graded';lockCard(card,p?.phase==='graded');card.dispatchEvent(new Event('input',{bubbles:true}))}
     function show(card){if(current&&current!==card&&pending()?.phase==='running')return;
       current=card||null;cards.forEach(c=>{c.hidden=paper?!visible.includes(c):c!==current;c.classList.toggle('timed-active',paper&&c===current)});if(!current){draw();return}
@@ -100,6 +101,7 @@
       if(a.subject==='practical')practicalShell(card);
       else placeVoucherAnswerBelow(card);
       addNotebookButtons(card);
+      connectProblemReset(card);
       card.addEventListener('pointerdown',()=>{if(paper&&current!==card&&pending()?.phase!=='running'&&!pendingOf(card))show(card)},true);
       card.querySelectorAll('details').forEach(detail=>detail.addEventListener('toggle',()=>{if(detail.open&&current===card&&pending()?.phase==='running'){pending().assisted=true;a.save();message('해설 확인 · 참고 풀이로 기록합니다.')}}));
       card.querySelector('.check-one').addEventListener('click',event=>{event.preventDefault();event.stopImmediatePropagation();if(!paper&&card!==current)return;gradeCard(card)},true);
