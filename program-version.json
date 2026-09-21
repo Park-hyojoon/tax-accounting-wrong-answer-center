@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "revision": 61,
-  "updatedAt": "2026-09-21T18:16:47+09:00",
+  "revision": 62,
+  "updatedAt": "2026-09-21T19:05:00+09:00",
   "files": [
     "오답_훈련센터.html",
     "일반전표_기본연습_24문제.html",
@@ -32,5 +32,5 @@
     "timed-analysis.js",
     "약점_분석_임시.html"
   ],
-  "note": "110회 응용문제 6개 등록"
+  "note": "모바일 동기화 완료 후 최신 화면 강제 새로고침"
 }

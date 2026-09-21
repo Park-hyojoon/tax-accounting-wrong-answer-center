@@ -438,7 +438,10 @@
         if(onDone){onDone(result);return}
         setSyncMessage(result.message);
         showToast('동기화 완료. 최신 화면으로 새로고침합니다…',0);
-        setTimeout(()=>location.reload(),700);
+        setTimeout(()=>{
+          const stamp=readStorage(global.localStorage,CACHE_BUST_KEY)||String(Date.now());
+          const url=new URL(location.href);url.searchParams.set('r',stamp);location.replace(url.href);
+        },700);
       }else if(result.status==='error')showToast(result.message,10000,{error:true});
       else showToast(lastText,8000);
     });
