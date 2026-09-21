@@ -1,5 +1,5 @@
 :root{--season-ink:#263d4e;--season-muted:#677981;--season-line:#dce4e4;--season-paper:#fff;--season-green:#38685f}
-body{background:#f4f5f2!important;color:var(--season-ink);font-family:'맑은 고딕','Malgun Gothic',sans-serif}
+body{background:#f4f5f2!important;color:var(--season-ink);font-family:'NanumGothic','나눔고딕','Malgun Gothic','맑은 고딕',sans-serif}
 .hero{background:#243e3c!important;color:#fff!important;border:0!important}
 .hero-inner{max-width:1180px;margin:auto;padding:40px 26px!important}
 .hero h1{font-size:clamp(25px,3vw,38px);letter-spacing:-1.5px;color:#fff!important}

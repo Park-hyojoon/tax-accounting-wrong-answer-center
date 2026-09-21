@@ -1,6 +1,6 @@
 (function(){
   'use strict';
-  const style=document.createElement('link');style.rel='stylesheet';style.href='season.css?v=18';document.head.append(style);
+  const style=document.createElement('link');style.rel='stylesheet';style.href='season.css?v=19';document.head.append(style);
   const params=new URLSearchParams(location.search);
   const escape=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   function matches(p){return (!params.get('exam')||String(p.examRound)===params.get('exam'))&&(!params.get('tag')||(p.tags||[]).includes(params.get('tag')))}
