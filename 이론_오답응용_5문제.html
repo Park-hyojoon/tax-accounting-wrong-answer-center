@@ -115,7 +115,7 @@
       </div>
     </div>
   </nav>
-  <script src="data/theory.js?v=10"></script>
+  <script src="data/theory.js?v=15"></script>
   <script>(function(){var nav=document.querySelector('.top-nav');function sync(){document.documentElement.style.setProperty('--nav-h',(nav?nav.offsetHeight:60)+'px')}sync();window.addEventListener('resize',sync)})()</script>
   <main class="wrap">
     <div class="dashboard">
@@ -124,6 +124,7 @@
           <option value="recentRegistered" selected>최근 등록 순</option>
           <option value="registered">등록 순서</option>
           <option value="wrong">오답 많은 순</option>
+          <option value="repeatWrong">반복해서 틀린 문제</option>
           <option value="unattempted">아직 안 푼 문제 우선</option>
           <option value="recentAttempt">최근에 푼 순</option>
         </select>
@@ -154,7 +155,7 @@
   </main>
 
   <script src="github-learning-sync.js?v=17"></script>
-  <script src="season-ui.js?v=37"></script>
+  <script src="season-ui.js?v=38"></script>
 <script src="training-ui.js?v=6"></script>
   <script>
     const problems=loadTrainingProblems();
@@ -233,7 +234,7 @@
       state.checked[id]=correct;persist();renderCard(card);return correct
     }
     function updateDashboard(){
-      const visible=problems.filter(p=>{const card=$(`.question[data-id="${p.id}"]`);return card&&!card.hidden});
+      const visible=problems.filter(p=>{const card=$(`.question[data-id="${p.id}"]`);return card&&!card.hidden&&!card.classList.contains('repeat-filter-hidden')});
       const solved=visible.filter(p=>(state.attempts[p.id]||0)>0).length;
       const correct=visible.filter(p=>state.checked[p.id]===true).length;
       const wrong=problems.reduce((n,p)=>n+wrongCount(p.id),0);
@@ -243,14 +244,15 @@
     }
     updateDashboard();
     const questionOrder=$$('.question').map((card,index)=>({card,index}));
-    function sortKeys(entry){const id=entry.card.dataset.id,history=state.history[id]||[],last=history.length?Date.parse(history[history.length-1].at)||0:0;return{...entry,wrong:wrongCount(id),attempts:state.attempts[id]||0,last,added:entry.card.dataset.addedDate||''}}
+    function sortKeys(entry){const id=entry.card.dataset.id,history=state.history[id]||[],last=history.length?Date.parse(history[history.length-1].at)||0:0;return{...entry,recurrent:Boolean(getProblem(id)?.recurrenceOf),wrong:wrongCount(id),attempts:state.attempts[id]||0,last,added:entry.card.dataset.addedDate||''}}
     function applySort(){if(starView)return;const mode=$('#sortOrder').value,list=questionOrder.map(sortKeys);list.sort((a,b)=>{
+      if(mode==='repeatWrong')return Number(b.recurrent)-Number(a.recurrent)||b.added.localeCompare(a.added)||b.index-a.index;
       if(mode==='wrong')return b.wrong-a.wrong||b.attempts-a.attempts||a.index-b.index;
       if(mode==='unattempted')return Number(a.attempts>0)-Number(b.attempts>0)||a.index-b.index;
       if(mode==='recentAttempt')return b.last-a.last||a.index-b.index;
       if(mode==='recentRegistered')return b.added.localeCompare(a.added)||b.index-a.index;
       return a.index-b.index});
-      const box=$('#questions');list.forEach(x=>box.appendChild(x.card))}
+      const box=$('#questions');list.forEach(x=>{x.card.classList.toggle('repeat-filter-hidden',mode==='repeatWrong'&&!x.recurrent);box.appendChild(x.card)});updateDashboard()}
     $('#sortOrder').addEventListener('change',applySort);
     applySort();
     $('#fileName').addEventListener('input',e=>{state.fileName=e.target.value;persist()});

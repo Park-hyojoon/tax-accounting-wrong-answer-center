@@ -754,12 +754,17 @@ def cmd_add(spec_path):
         if not field(problem,'id'): extra['id']=pid
         if original:
             extra.update(examRound=round_no,sourceQuestionNo=str(original['questionNo']),intakeId=original['id'],tags=tags)
+            if original.get('recurrenceOf'):
+                extra['recurrenceOf']=original['recurrenceOf']
         if extra: problem=problem[:-1].rstrip()+','+js(extra)[1:]
         index=counts[subject]; counts[subject]+=1
         ref_id=pid if subject=='theory' else index
         meta=([pid,ptype,title,date,order] if subject=='theory' else [ptype,title,date,order])+(['variant'] if is_variant else [])
         normalized.append({'subject':subject,'problem':problem,'meta':js(meta)})
-        catalog.append({'subject':subject,'id':ref_id,'examRound':round_no or int(field(problem,'examRound') or 0),'questionNo':str((original or {}).get('questionNo','')),'type':ptype,'tags':tags,'title':title})
+        catalog_entry={'subject':subject,'id':ref_id,'examRound':round_no or int(field(problem,'examRound') or 0),'questionNo':str((original or {}).get('questionNo','')),'type':ptype,'tags':tags,'title':title}
+        if original and original.get('recurrenceOf'):
+            catalog_entry['recurrenceOf']=original['recurrenceOf']
+        catalog.append(catalog_entry)
         if original:
             linked.add(original['id']); topic=original.get('topicId') or 'topic-'+hashlib.sha256(ptype.encode()).hexdigest()[:12]
             topics.append({'id':topic,'label':ptype})

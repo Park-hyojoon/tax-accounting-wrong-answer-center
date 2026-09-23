@@ -141,7 +141,7 @@
       </div>
     </div>
   </nav>
-  <script src="data/practical.js?v=14"></script>
+  <script src="data/practical.js?v=16"></script>
   <script>(function(){var nav=document.querySelector('.top-nav');function sync(){document.documentElement.style.setProperty('--nav-h',(nav?nav.offsetHeight:60)+'px')}sync();window.addEventListener('resize',sync)})()</script>
   <main class="wrap">
     <div class="toolbar">
@@ -150,6 +150,7 @@
           <option value="recentRegistered" selected>최근 등록 순</option>
           <option value="registered">등록 순서</option>
           <option value="wrong">오답 많은 순</option>
+          <option value="repeatWrong">반복해서 틀린 문제</option>
           <option value="unattempted">아직 안 푼 문제 우선</option>
           <option value="recentAttempt">최근에 푼 순</option>
         </select>
@@ -189,7 +190,7 @@
   </main>
 
   <script src="github-learning-sync.js?v=17"></script>
-  <script src="season-ui.js?v=37"></script>
+  <script src="season-ui.js?v=38"></script>
 <script src="training-ui.js?v=6"></script>
   <script src="account-search.js?v=4"></script>
   <script>
@@ -301,7 +302,7 @@
       updateTotals(card);saveState();updateProgress()
     }
     function renderAttempt(card){const s=cardState(card.dataset.index);el('.attempt-info',card).textContent=`채점 ${s.attempts||0}회 · 틀림 ${s.wrongCount||0}회`}
-    const DIRECT_INTAKE_INDICES=new Set([0,1,2,3,5,6,7,8,9,10,11,12,15,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46]);
+    const DIRECT_INTAKE_INDICES=new Set([0,1,2,3,5,6,7,8,9,10,11,12,15,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49]);
     const todayView=new URLSearchParams(location.search).get('view')==='today';
     const typeView=(new URLSearchParams(location.search).get('type')||'').trim();
     const starView=new URLSearchParams(location.search).get('view')==='star';
@@ -378,19 +379,20 @@
 
     const questionOrder=els('.question');
     questionOrder.forEach(card=>{card.dataset.typeFilterBaseHidden=String(card.hidden)});
-    function sortKeys(card){const s=cardState(card.dataset.index),history=s.history||[],last=history.length?Date.parse(history[history.length-1].at)||0:0;return{card,index:Number(card.dataset.index),wrong:s.wrongCount||0,attempts:s.attempts||0,last,added:card.dataset.addedDate||''}}
+    function sortKeys(card){const index=Number(card.dataset.index),s=cardState(index),history=s.history||[],last=history.length?Date.parse(history[history.length-1].at)||0:0;return{card,index,recurrent:Boolean(problems[index]?.recurrenceOf),wrong:s.wrongCount||0,attempts:s.attempts||0,last,added:card.dataset.addedDate||''}}
     function applySort(){if(starView)return;const mode=el('#sortOrder').value,list=questionOrder.map(sortKeys);list.sort((a,b)=>{
+      if(mode==='repeatWrong')return Number(b.recurrent)-Number(a.recurrent)||b.added.localeCompare(a.added)||b.index-a.index;
       if(mode==='wrong')return b.wrong-a.wrong||b.attempts-a.attempts||a.index-b.index;
       if(mode==='unattempted')return Number(a.attempts>0)-Number(b.attempts>0)||a.index-b.index;
       if(mode==='recentAttempt')return b.last-a.last||a.index-b.index;
       if(mode==='recentRegistered')return b.added.localeCompare(a.added)||b.index-a.index;
       return a.index-b.index});
-      const box=el('#questions');list.forEach(x=>box.appendChild(x.card))}
+      const box=el('#questions');list.forEach(x=>{x.card.classList.toggle('repeat-filter-hidden',mode==='repeatWrong'&&!x.recurrent);box.appendChild(x.card)});updateProgress()}
     el('#sortOrder').addEventListener('change',applySort);
     applySort();
 
     function updateProgress(){
-      const cards=els('.question').filter(c=>!c.hidden),graded=cards.filter(c=>c.dataset.graded==='true').length,correct=cards.filter(c=>c.dataset.correct==='true').length;
+      const cards=els('.question').filter(c=>!c.hidden&&!c.classList.contains('repeat-filter-hidden')),graded=cards.filter(c=>c.dataset.graded==='true').length,correct=cards.filter(c=>c.dataset.correct==='true').length;
       const wrong=Object.values(studyState.cards).reduce((n,s)=>n+(s.wrongCount||0),0);
       el('#progressText').textContent=`채점 ${graded} / ${cards.length} · 정답 ${correct} · 누적 오답 ${wrong}`;
       el('#progressFill').style.width=(cards.length?graded/cards.length*100:100)+'%';

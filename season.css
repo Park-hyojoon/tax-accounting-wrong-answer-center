@@ -34,6 +34,7 @@ main{max-width:1240px;margin-inline:auto;padding-inline:24px}
 #seasonCatalog[data-tags-only] .season-tag-more:hover{background:#f0f2f4}#seasonCatalog[data-tags-only] .season-tag-more:focus-visible{outline-offset:-2px!important}
 .btn,.backup-button,.filter-button{border-radius:8px!important;box-shadow:none!important}.question .qnum{border-radius:10px!important}.question .prompt{line-height:1.85!important}
 :focus-visible{outline:3px solid #658d80!important;outline-offset:3px}
+.repeat-filter-hidden{display:none!important}
 .season-settings>summary{cursor:pointer;font-size:18px;font-weight:700;color:#304e47;padding:4px 0}.season-settings[open]>summary{margin-bottom:22px}
 .section[hidden]{display:none!important}.filter-button.active,.nav-link.active[aria-current="page"][href="오답_훈련센터.html"]{background:#38685f!important;border-color:#38685f!important;color:#fff!important}
 @media(max-width:760px){main{padding-inline:12px}.hero-inner{padding:26px 16px!important}.section{padding:20px!important}.season-subjects{grid-template-columns:1fr;gap:10px}.season-subject{padding:16px 20px;position:relative}.season-subject strong{position:absolute;right:20px;top:6px;font-size:28px}.season-subject b{margin-top:10px}.season-filters{gap:12px;padding:14px}.season-filters label{width:100%;display:flex;justify-content:space-between;align-items:center}.season-filters select{max-width:72%}.season-welcome{padding:32px 15px}.season-welcome h2{font-size:25px}}
