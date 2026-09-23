@@ -393,6 +393,12 @@
   function applyCacheBust(){
     if(location.protocol!=='https:')return;
     const stamp=readStorage(global.localStorage,CACHE_BUST_KEY);if(!stamp)return;
+    const current=new URL(location.href);
+    if(current.searchParams.get('r')!==stamp){
+      current.searchParams.set('r',stamp);
+      location.replace(current.href);
+      return;
+    }
     document.querySelectorAll('a.nav-link[href],a.open-link[href],a.mini-link[href]').forEach(link=>{
       const href=link.getAttribute('href')||'';
       if(!/\.html(\?|$)/.test(href)||/^https?:/.test(href))return;

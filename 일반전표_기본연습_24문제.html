@@ -2,6 +2,9 @@
 <html lang="ko">
 <head>
   <meta charset="utf-8">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>전산회계 1급 · 일반전표 기출 오답 훈련</title>
   <style>
@@ -93,9 +96,14 @@
     details.reveal summary{cursor:pointer;padding:11px 15px;font-weight:800;color:#684d00;list-style:none}
     details.reveal summary::-webkit-details-marker{display:none}
     .reveal-body{padding:6px 16px 16px;border-top:1px solid #eee3bd}
-    .answer-line{display:grid;grid-template-columns:70px minmax(180px,.65fr) minmax(240px,1fr) 140px;gap:8px;padding:7px 0;border-bottom:1px dashed #d8d8d8}
+    .answer-columns{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:8px}
+    .answer-column{min-width:0;border:1px solid #d8dee6;border-radius:8px;overflow:hidden;background:#fff}
+    .answer-column-title{padding:7px 10px;background:#eef1f4;color:var(--navy);font-weight:900;text-align:center}
+    .answer-line{display:grid;grid-template-columns:minmax(110px,1fr) minmax(90px,.85fr) auto;gap:8px;align-items:center;padding:8px 10px;border-bottom:1px dashed #d8d8d8}
     .answer-line:last-child{border-bottom:0}
-    .answer-side{font-weight:900;color:var(--navy)}
+    .answer-side{display:none}.answer-empty{padding:14px;text-align:center;color:var(--muted)}
+    .entry-toggle{margin-top:14px;border:1px solid var(--line);border-radius:9px;background:#fafafa;overflow:hidden}
+    .entry-toggle>summary{cursor:pointer;padding:10px 13px;font-weight:800;color:var(--navy);list-style:none}.entry-toggle>summary::-webkit-details-marker{display:none}.entry-toggle>summary::before{content:'＋ ';font-weight:900}.entry-toggle[open]>summary::before{content:'－ '}.entry-toggle-body{padding:0 10px 10px}
     .grand{margin:34px 0;background:var(--navy);color:#fff;border-radius:22px;padding:25px;text-align:center}
     .grand strong{font-size:34px}.grand p{margin:8px 0}
     .tip{font-size:16px;color:var(--muted)}
@@ -109,7 +117,7 @@
     .save-status{min-height:29px;margin:12px 0 0;font-weight:900;color:var(--green)}
     .danger{background:#fff!important;color:var(--red)!important;border:2px solid #e8b3b8!important;box-shadow:none!important}
     .footer{text-align:center;color:var(--muted);margin-top:30px;font-size:15px}
-    @media(max-width:720px){body{font-size:16px}.wrap{width:96vw}.hero,.question,.save-panel{padding:18px}.progress{width:100%;margin-left:0}.progress-bar{flex:1}.prompt{font-size:18px}.answer-line{grid-template-columns:55px 1fr}.answer-line span:nth-child(n+3){grid-column:2}.balance-panel{grid-template-columns:1fr}.save-row{grid-template-columns:1fr}.attempt-info{width:100%;margin-left:0}.type-filter{flex-basis:100%}.filter-status{width:100%}}
+    @media(max-width:720px){body{font-size:16px}.wrap{width:96vw}.hero,.question,.save-panel{padding:18px}.progress{width:100%;margin-left:0}.progress-bar{flex:1}.prompt{font-size:18px}.answer-columns{gap:7px}.answer-line{grid-template-columns:1fr;padding:7px}.answer-line span{grid-column:auto!important}.answer-line span:nth-child(2){font-weight:700}.answer-line span:last-child{text-align:right}.balance-panel{grid-template-columns:1fr}.save-row{grid-template-columns:1fr}.attempt-info{width:100%;margin-left:0}.type-filter{flex-basis:100%}.filter-status{width:100%}}
     @media print{.toolbar,.qactions,.source,.save-panel{display:none}.question{break-inside:avoid;box-shadow:none}.reveal:not([open]){display:none}}
     .star-one[aria-pressed="true"]{background:#ffd54a;border-color:#e0b100;color:#5a3d00}
     .star-note{margin:8px 0 0;padding:8px 12px;border-radius:10px;background:#fff4c2;color:#6b4a00;font-weight:900}
@@ -189,7 +197,7 @@
     <p class="footer">학습용 자료 · 전표 입력 순서는 달라도 계정과목, 금액, 차·대변이 맞으면 정답으로 처리됩니다.</p>
   </main>
 
-  <script src="github-learning-sync.js?v=17"></script>
+  <script src="github-learning-sync.js?v=18"></script>
   <script src="season-ui.js?v=38"></script>
 <script src="training-ui.js?v=6"></script>
   <script src="account-search.js?v=4"></script>
@@ -242,6 +250,10 @@
       const code=p.requiredAccountCodes?.[a.account]||REQUIRED_ACCOUNT_CODES[a.account];
       return `<div class="answer-line"><span class="answer-side">${a.side==='D'?'차변':'대변'}</span><span>${code?`${code} `:''}${a.account}</span><span>${extra||'—'}</span><span>${money(a.amount)}</span></div>`;
     }
+    function answerColumns(p){
+      const column=(side,label)=>{const rows=p.answers.filter(a=>a.side===side).map(a=>answerHtml(a,p)).join('');return `<section class="answer-column"><div class="answer-column-title">${label}</div>${rows||'<div class="answer-empty">해당 없음</div>'}</section>`};
+      return `<div class="answer-columns">${column('D','차변')}${column('C','대변')}</div>`;
+    }
 
     function accountField(p){return p.accountSelect?`<select class="account" lang="ko" aria-label="계정과목 선택"><option value="">계정과목 선택</option>${p.accountOptions.map(accountOptionHtml).join('')}</select>`:'<input class="account" type="text" lang="ko" data-ko-auto autocomplete="off" placeholder="계정과목" aria-label="계정과목">'}
     function partnerField(p){return p.partnerOptions?`<select class="partner" lang="ko" aria-label="거래처 선택"><option value="">해당 없음</option>${p.partnerOptions.map(a=>`<option value="${a}">${a}</option>`).join('')}</select>`:'<select class="partner" disabled aria-label="거래처 해당 없음"><option value="">해당 없음</option></select>'}
@@ -259,14 +271,14 @@
       <div class="qhead"><span class="qnum">${i+1}</span><div><h3>${p.title}</h3><span class="tag">${p.type}</span>${p.variantOf!=null?`<span class="tag variant-badge">AI 응용문제 · 원문제 ${p.variantOf+1}번</span>`:''}</div></div>
       <p class="star-note" hidden>★ 이 문제는 특별히 훈련이 필요합니다.</p>
       ${p.exhibit?`<div class="exhibit-layout"><div class="prompt">${p.prompt}</div>${p.exhibit}</div>`:`<div class="prompt">${p.prompt}</div>`}
-      <div class="entry-wrap"><table>
+      <details class="entry-toggle"><summary>전표 입력 영역 열기</summary><div class="entry-toggle-body"><div class="entry-wrap"><table>
         <thead><tr><th>구분</th><th>계정과목</th><th>금액</th><th>판 / 제 선택</th><th>거래처</th><th>적요코드</th><th>결과</th></tr></thead>
         <tbody>${Array.from({length:Math.max(4,p.answers.length)},(_,r)=>rowHtml(r,p)).join('')}</tbody>
       </table></div>
       <div class="balance-panel" aria-live="polite"><div class="balance-item">차변 합계<strong class="debit-total">0원</strong></div><div class="balance-item">대변 합계<strong class="credit-total">0원</strong></div><div class="balance-item difference">차액<strong class="difference-total">0원 · 입력 대기</strong></div></div>
-      <p class="tip">금액은 쉼표 없이 입력해도 됩니다. 판관비/제조원가 구분이 필요한 계정은 ‘판/제 선택’을 사용하세요.</p>
+      <p class="tip">금액은 쉼표 없이 입력해도 됩니다. 판관비/제조원가 구분이 필요한 계정은 ‘판/제 선택’을 사용하세요.</p></div></details>
       <div class="qactions"><button class="btn check-one" type="button">채점하기</button><button class="btn secondary clear-one" type="button">이 문제 영구 삭제</button><button class="btn secondary star-one" type="button" aria-pressed="false" title="이 문제는 특별히 훈련이 필요합니다. AI가 학습기록에서 이 표시를 보면 숫자를 바꾼 응용문제 1개를 더 만듭니다.">★ 특별 훈련</button><span class="result" aria-live="polite"></span><span class="attempt-info"></span></div>
-      <details class="reveal answer-box"><summary>정답 · 해설 보기</summary><div class="reveal-body"><div>${p.answers.map(a=>answerHtml(a,p)).join('')}</div><p><strong>해설:</strong> ${p.explanation}</p></div></details>
+      <details class="reveal answer-box"><summary>정답 · 해설 보기</summary><div class="reveal-body">${answerColumns(p)}<p><strong>해설:</strong> ${p.explanation}</p></div></details>
     </article>`}
 
     el('#questions').innerHTML=problems.map(questionHtml).join('');
