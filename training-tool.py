@@ -718,7 +718,7 @@ def cmd_add(spec_path):
     ids = {x['id'] for x in existing}
     round_no = spec.get('examRound')
     date = spec.get('reportedAt', datetime.now().astimezone().strftime('%Y-%m-%d'))
-    if originals and (not isinstance(round_no, int) or round_no < 1):
+    if originals and not all(x.get('examRound',round_no) is None or (isinstance(x.get('examRound',round_no),int) and x.get('examRound',round_no)>0) for x in originals):
         raise SystemExit('[오류] examRound에 실제 기출 회차가 필요합니다.')
     if not re.fullmatch(r'\d{4}-\d{2}-\d{2}',date): raise SystemExit('[오류] reportedAt 날짜 형식')
     counts = {s:len(problems_of(s)) for s in SUBJECTS}
@@ -752,8 +752,9 @@ def cmd_add(spec_path):
         pid=field(problem,'id') or f"exam-{round_no}-{subject}-{counts[subject]}"
         extra={}
         if not field(problem,'id'): extra['id']=pid
+        original_round=original.get('examRound',round_no) if original else round_no
         if original:
-            extra.update(examRound=round_no,sourceQuestionNo=str(original['questionNo']),intakeId=original['id'],tags=tags)
+            extra.update(examRound=original_round,sourceQuestionNo=str(original['questionNo']),intakeId=original['id'],tags=tags)
             if original.get('recurrenceOf'):
                 extra['recurrenceOf']=original['recurrenceOf']
         if extra: problem=problem[:-1].rstrip()+','+js(extra)[1:]
@@ -761,16 +762,17 @@ def cmd_add(spec_path):
         ref_id=pid if subject=='theory' else index
         meta=([pid,ptype,title,date,order] if subject=='theory' else [ptype,title,date,order])+(['variant'] if is_variant else [])
         normalized.append({'subject':subject,'problem':problem,'meta':js(meta)})
-        catalog_entry={'subject':subject,'id':ref_id,'examRound':round_no or int(field(problem,'examRound') or 0),'questionNo':str((original or {}).get('questionNo','')),'type':ptype,'tags':tags,'title':title}
+        catalog_entry={'subject':subject,'id':ref_id,'examRound':original_round or int(field(problem,'examRound') or 0),'questionNo':str((original or {}).get('questionNo','')),'type':ptype,'tags':tags,'title':title}
         if original and original.get('recurrenceOf'):
             catalog_entry['recurrenceOf']=original['recurrenceOf']
         catalog.append(catalog_entry)
         if original:
             linked.add(original['id']); topic=original.get('topicId') or 'topic-'+hashlib.sha256(ptype.encode()).hexdigest()[:12]
             topics.append({'id':topic,'label':ptype})
-            entry={'id':original['id'],'source':'user-submitted','evidenceStatus':'confirmed','topicId':topic,'title':title,'originalCue':original['originalText'][:320],'learnerReason':original.get('learnerReason'),'reportedAt':date,'registeredDate':date,'examRound':round_no,'questionNo':str(original['questionNo']),'practiceRefs':[{'source':subject,'id':ref_id,'type':ptype}],'provenance':f'기출 원본 오답/{round_no}회 기출 문제 이론 실무 오답 데이터.md'}
+            entry={'id':original['id'],'source':'user-submitted','evidenceStatus':'confirmed','topicId':topic,'title':title,'originalCue':original['originalText'][:320],'learnerReason':original.get('learnerReason'),'reportedAt':date,'registeredDate':date,'examRound':original_round,'questionNo':str(original['questionNo']),'practiceRefs':[{'source':subject,'id':ref_id,'type':ptype}],'provenance':f'기출 원본 오답/{original_round}회 기출 문제 이론 실무 오답 데이터.md'}
+            if not original_round: entry['provenance']='기출 원본 오답/회차 미지정 오답 데이터.md'
             if original.get('recurrenceOf'): entry.update(recurrenceOf=original['recurrenceOf'],recurrenceEvidence=original.get('recurrenceEvidence','사용자가 해당 기출을 다시 틀렸다고 직접 제출'))
-            mistakes.append(js(entry)); existing.append({'id':original['id'],'examRound':round_no,'subject':subject,'questionNo':str(original['questionNo']),'reportedAt':date})
+            mistakes.append(js(entry)); existing.append({'id':original['id'],'examRound':original_round,'subject':subject,'questionNo':str(original['questionNo']),'reportedAt':date})
     if linked!=set(by_id): raise SystemExit('[오류] 모든 원본에 대표 응용문제 1개를 연결하세요.')
     if not items: raise SystemExit('[오류] items가 없습니다.')
     parent=ROOT/'또 틀렸다!';parent.mkdir(exist_ok=True)
@@ -789,13 +791,15 @@ def cmd_add(spec_path):
         finally: ROOT=active_root
         updates={name:(stage/name).read_bytes() for name in paths}
         if originals:
-            name=f'기출 원본 오답/{round_no}회 기출 문제 이론 실무 오답 데이터.md'
+          for md_round in sorted({x.get('examRound',round_no) for x in originals},key=lambda x:x or 0):
+            name=f'기출 원본 오답/{md_round}회 기출 문제 이론 실무 오답 데이터.md' if md_round else '기출 원본 오답/회차 미지정 오답 데이터.md'
             path=ROOT/name
-            content=path.read_text(encoding='utf-8') if path.exists() else f'# {round_no}회 기출 문제 이론 실무 오답 데이터\n\n사용자가 직접 제출한 원문 기록입니다. AI 응용문제와 훈련 중 채점 횟수를 실제 기출 오답으로 세지 않습니다.\n'
-            for original in originals:
+            content=path.read_text(encoding='utf-8') if path.exists() else f'# {str(md_round)+"회 기출 문제 이론 실무" if md_round else "회차 미지정"} 오답 데이터\n\n사용자가 직접 제출한 원문 기록입니다. AI 응용문제와 훈련 중 채점 횟수를 실제 기출 오답으로 세지 않습니다.\n'
+            for original in (x for x in originals if x.get('examRound',round_no)==md_round):
                 content+=f'\n## {date} · {SUBJECTS[original["subject"]]["label"]} · {original["questionNo"]}번\n\n- 접수 ID: {original["id"]}\n- 유형: {original["type"]}\n- 학습자 설명: {original.get("learnerReason") or "미제공 (추정하지 않음)"}\n\n### 직접 제출 원문\n\n{original["originalText"]}\n\n### 직접 제출 답안\n\n{original["originalAnswer"]}\n'
                 if original.get('attachments'): content+='\n### 첨부 자료\n\n'+'\n'.join('- '+str(x) for x in original['attachments'])+'\n'
-            updates[name]=content.encode('utf-8');updates['intake-index.json']=(json.dumps(existing,ensure_ascii=False,indent=2)+'\n').encode('utf-8')
+            updates[name]=content.encode('utf-8')
+          updates['intake-index.json']=(json.dumps(existing,ensure_ascii=False,indent=2)+'\n').encode('utf-8')
         before={name:(ROOT/name).read_bytes() if (ROOT/name).exists() else None for name in updates}
         try:
             for name,data in updates.items():
@@ -806,6 +810,11 @@ def cmd_add(spec_path):
                 if data is None: path.unlink(missing_ok=True)
                 else:path.write_bytes(data)
             raise
+    import runpy
+    builder=ROOT/'build-weakness.py'
+    if builder.exists():
+        runpy.run_path(str(builder))['build'](ROOT)
+        bump_version('weakness-data.js')
     print(f'새 학습 등록 완료: {len(items)}문제 / 원본 MD {len(originals)}건. 동기화 버튼으로 전송하세요.')
     return 0
 
@@ -816,6 +825,11 @@ def main(argv):
         print(__doc__)
         return 0
     cmd = argv[0]
+    if cmd == 'weakness':
+        import runpy
+        runpy.run_path(str(ROOT/'build-weakness.py'))['build'](ROOT)
+        bump_version('weakness-data.js')
+        return 0
     if cmd == 'contract':
         print(CONTRACT)
         return 0

@@ -23,12 +23,14 @@ LABELS = {
     'problem_reset': '문제 초기화',
     'exam_toggle': '시험 시작·일시정지',
     'exam_reset': '시험 초기화',
+    'settings_open': '설정 창 열기',
 }
 DEFAULT_KEYS = {
     'problem_toggle': 'Ctrl+Space',
     'problem_reset': 'Ctrl+Alt+R',
     'exam_toggle': 'Ctrl+Space',
     'exam_reset': 'Ctrl+Alt+Shift+R',
+    'settings_open': 'Ctrl+,',
 }
 
 
@@ -41,12 +43,14 @@ def parse_key(combo):
         raise ValueError('Ctrl 또는 Alt를 함께 누르세요')
     if key == 'SPACE':
         vk = 0x20
+    elif key == ',':
+        vk = 0xBC  # VK_OEM_COMMA
     elif len(key) == 1 and key in 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789':
         vk = ord(key)
     elif key.startswith('F') and key[1:].isdigit() and 1 <= int(key[1:]) <= 12:
         vk = 0x70 + int(key[1:]) - 1
     else:
-        raise ValueError('영문·숫자·Space·F1~F12를 사용하세요')
+        raise ValueError('영문·숫자·쉼표·Space·F1~F12를 사용하세요')
     flags = (MOD_CTRL if 'Ctrl' in mods else 0) | (MOD_ALT if 'Alt' in mods else 0)
     return flags | (MOD_SHIFT if 'Shift' in mods else 0), vk
 
@@ -241,6 +245,8 @@ class Timer:
                     self.problem.reset()
                 elif value == 'exam_reset':
                     self.exam.reset()
+                elif value == 'settings_open':
+                    self.shortcut_dialog()
             elif kind == 'status':
                 self.status.config(text=value)
                 if value:
@@ -350,6 +356,8 @@ class Timer:
                 return 'break'
             if key == 'SPACE':
                 key = 'Space'
+            elif key == 'COMMA':
+                key = ','
             user32 = ctypes.windll.user32
             ctrl = bool(user32.GetKeyState(0x11) & 0x8000)
             alt = bool(user32.GetKeyState(0x12) & 0x8000)
@@ -380,7 +388,8 @@ class Timer:
             if waiting[0] is not None:
                 error.config(text='단축키 입력을 마치세요')
                 return
-            unique = (draft['problem_toggle'], draft['problem_reset'], draft['exam_reset'])
+            unique = (draft['problem_toggle'], draft['problem_reset'],
+                      draft['exam_reset'], draft['settings_open'])
             if len(set(unique)) != len(unique):
                 error.config(text='시작·중단을 제외한 단축키는 서로 달라야 합니다')
                 return
@@ -401,7 +410,7 @@ class Timer:
         user32.PeekMessageW(ctypes.byref(message), None, 0, 0, 0)
         self.key_ready.set()
         # One Windows registration starts/pauses both timers; registering the same key twice fails.
-        actions = ('problem_toggle', 'problem_reset', 'exam_reset')
+        actions = ('problem_toggle', 'problem_reset', 'exam_reset', 'settings_open')
 
         def register(bindings):
             for hotkey_id in range(1, len(actions) + 1):

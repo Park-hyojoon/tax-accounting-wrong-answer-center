@@ -182,6 +182,8 @@
     }else{
       Object.keys(normalized.cards||{}).forEach(index=>{const card=normalized.cards[index];if(card?.deleted)normalized.cards[index]={deleted:true,deletedAt:card.deletedAt||new Date().toISOString()}});
     }
+    if(sourceName==='theory'){normalized.starred={};normalized.starredAt={}}
+    else Object.values(normalized.cards||{}).forEach(card=>{card.starred=false;delete card.starredAt});
     return normalized;
   }
   function readState(key){

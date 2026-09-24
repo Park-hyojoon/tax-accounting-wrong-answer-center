@@ -115,7 +115,7 @@
       </div>
     </div>
   </nav>
-  <script src="data/theory.js?v=15"></script>
+  <script src="data/theory.js?v=16"></script>
   <script>(function(){var nav=document.querySelector('.top-nav');function sync(){document.documentElement.style.setProperty('--nav-h',(nav?nav.offsetHeight:60)+'px')}sync();window.addEventListener('resize',sync)})()</script>
   <main class="wrap">
     <div class="dashboard">
@@ -154,9 +154,9 @@
     <p class="footer">학습기록은 사용자 컴퓨터에만 저장되며 외부로 자동 전송되지 않습니다.</p>
   </main>
 
-  <script src="github-learning-sync.js?v=18"></script>
-  <script src="season-ui.js?v=38"></script>
-<script src="training-ui.js?v=6"></script>
+  <script src="github-learning-sync.js?v=19"></script>
+  <script src="season-ui.js?v=39"></script>
+<script src="training-ui.js?v=8"></script>
   <script>
     const problems=loadTrainingProblems();
 
@@ -202,12 +202,13 @@
     const todayView=new URLSearchParams(location.search).get('view')==='today';
     const typeView=(new URLSearchParams(location.search).get('type')||'').trim();
     const starView=new URLSearchParams(location.search).get('view')==='star';
+    const weaknessRefs=new Set((new URLSearchParams(location.search).get('weakrefs')||'').split(',').filter(Boolean));
     // 응용문제의 원문제도 ★ 상태와 관계없이 같은 묶음에 표시한다. 이론은 id 문자열로 원문제를 가리킨다.
     const variantSourceIds=new Set(problems.filter(p=>p.variantOf!=null).map(p=>p.variantOf));
     const sessionPassed=new Set();
     function renderCard(card){
       const id=card.dataset.id,p=getProblem(id),checked=state.checked[id],attempts=state.attempts[id]||0,result=$('.result',card);
-      card.hidden=!TrainingSeason.matches(p)||state.deleted?.[id]?true:starView?!(Boolean(state.starred?.[id])||p.variantOf!=null||variantSourceIds.has(id)):typeView?(p.variantOf!=null||(p.type||'').trim()!==typeView):Boolean((state.passed[id]&&!sessionPassed.has(id))||state.archived[id]||(todayView&&card.dataset.addedDate!==localDate()));
+      card.hidden=!TrainingSeason.matches(p)||state.deleted?.[id]?true:starView?!(Boolean(state.starred?.[id])||p.variantOf!=null||variantSourceIds.has(id)):typeView?(p.variantOf!=null||(p.type||'').trim()!==typeView):Boolean(!weaknessRefs.has(id)&&((state.passed[id]&&!sessionPassed.has(id))||state.archived[id]||(todayView&&card.dataset.addedDate!==localDate())));
       $('.star-one',card).setAttribute('aria-pressed',String(Boolean(state.starred?.[id])));$('.star-note',card).hidden=!state.starred?.[id];
       card.classList.toggle('correct',checked===true);card.classList.toggle('wrong',checked===false);
       result.className='result'+(checked===true?' ok':checked===false?' no':'');

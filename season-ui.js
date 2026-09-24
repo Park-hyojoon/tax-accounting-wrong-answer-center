@@ -11,6 +11,12 @@
     field.onchange=()=>{const url=new URL(location.href);field.value?url.searchParams.set(key,field.value):url.searchParams.delete(key);location.href=url.href};el.append(field);return el;
   }
   function install(problems,adapter){
+    const weakIds=new Set((params.get('weakrefs')||'').split(',').filter(Boolean));
+    if(weakIds.size&&adapter){
+      document.body.classList.add('weakness-practice');
+      const target=document.createElement('p');target.textContent='반복 약점 다시 풀기 · 이전 통과 기록도 보존됩니다.';
+      const back=document.createElement('a');back.href='오답_훈련센터.html?weakness=1';back.textContent=' 약점 목록으로';target.append(back);document.querySelector('main')?.prepend(target);
+    }
     if(params.get('timed')==='1'&&!adapter?.theory){
       document.body.classList.add('study-page');
       document.querySelectorAll('.question').forEach(card=>{const p=problems[Number(card.dataset.index)];if(!p)return;const origin=document.createElement('p');origin.className='season-origin';origin.textContent=`${p.examRound||''}회 · ${p.sourceQuestionNo||''} 원문에서 만든 응용문제`;card.querySelector('.qhead')?.after(origin)});
@@ -18,8 +24,8 @@
     }
     // A tag is a fresh practice entry point: clear only the current answer fields
     // once, while retaining pass state, attempts, wrong counts, and full history.
-    if(params.get('fresh')==='1'&&params.get('tag')&&adapter){
-      const targets=problems.map((problem,index)=>({problem,index})).filter(x=>matches(x.problem));
+    if(params.get('fresh')==='1'&&(params.get('tag')||weakIds.size)&&adapter){
+      const targets=problems.map((problem,index)=>({problem,index})).filter(x=>weakIds.size?weakIds.has(String(adapter.theory?x.problem.id:x.index)):matches(x.problem));
       if(adapter.theory){
         for(const {problem} of targets){
           if(adapter.state.answers)delete adapter.state.answers[problem.id];
@@ -95,7 +101,8 @@
       const search=document.querySelector('#typeFilter')?.value||params.get('type')||'';
       const match=matches(p)&&(!search||p.type.includes(search))&&(params.get('view')!=='today'||p.addedDate===new Date(Date.now()-new Date().getTimezoneOffset()*60000).toISOString().slice(0,10));
       const special=params.get('view')==='star',hasVariant=problems.some(x=>x.variantOf===(theory?id:Number(id)));
-      card.hidden=!!get(id,'deleted')||!match||(special&&!star&&p.variantOf==null&&!hasVariant)||(passed&&!passedThisVisit.has(String(id)));
+      const weakIds=new Set((params.get('weakrefs')||'').split(',').filter(Boolean));
+      card.hidden=!!get(id,'deleted')||(weakIds.size?!weakIds.has(String(id)):(!match||(special&&!star&&p.variantOf==null&&!hasVariant)||(passed&&!passedThisVisit.has(String(id)))));
       card.dataset.typeFilterBaseHidden=String(card.hidden);
       if(special){
         const item=card.closest('details.star-item');if(item)item.hidden=card.hidden;

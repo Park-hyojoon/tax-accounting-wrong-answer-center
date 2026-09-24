@@ -1,9 +1,26 @@
 (function(){
   'use strict';
+  if(new URLSearchParams(location.search).get('view')==='star'){
+    location.replace('오답_훈련센터.html?weakness=1');return;
+  }
+  // 수동 별표 기능을 종료한다. 기존 학습·통과·채점 기록은 보존한다.
+  ['theory','practical','voucher'].forEach(subject=>{
+    const key='exam-20260914-'+subject;
+    try{const raw=localStorage.getItem(key);if(!raw)return;const state=JSON.parse(raw);
+      if(subject==='theory'){state.starred={};state.starredAt={}}
+      else Object.values(state.cards||{}).forEach(card=>{card.starred=false;delete card.starredAt});
+      localStorage.setItem(key,JSON.stringify(state));
+    }catch(_){}
+  });
   // 모바일(760px 이하)에서 상단 메뉴를 얇은 한 줄 바로 접고, 아래로 스크롤하면 숨긴다. PC에서는 아무것도 바꾸지 않는다.
   const MOBILE='(max-width:760px)';
   const nav=document.querySelector('.top-nav');if(!nav)return;
   const inner=nav.querySelector('.nav-inner')||nav;
+  let specialLink=inner.querySelector('a.nav-star')||inner.querySelector('a.nav-link[href*="view=star"]');
+  if(!specialLink){specialLink=document.createElement('a');specialLink.className='nav-link nav-star';(inner.querySelector('a[href="약점_분석_임시.html"]')||inner.querySelector('a:last-of-type'))?.before(specialLink)}
+  specialLink.classList.add('nav-star');
+  specialLink.href='오답_훈련센터.html?weakness=1';specialLink.textContent='특별훈련 · 반복 약점';specialLink.title='직접 제출 오답이 3회 이상 누적된 문제·유형·개념';
+  if(new URLSearchParams(location.search).has('weakness')){inner.querySelectorAll('.nav-link.active').forEach(x=>{x.classList.remove('active');x.removeAttribute('aria-current')});specialLink.classList.add('active');specialLink.setAttribute('aria-current','page')}
   const timedLink=document.createElement('a');timedLink.className='nav-link';timedLink.href='시간_훈련.html';timedLink.textContent='시간 훈련';
   const timedMode=new URLSearchParams(location.search).get('timed')==='1';
   if(timedMode){inner.querySelectorAll('.active').forEach(x=>{x.classList.remove('active');x.removeAttribute('aria-current')});timedLink.classList.add('active');timedLink.setAttribute('aria-current','page')}
@@ -13,6 +30,7 @@
   const style=document.createElement('style');
   style.textContent=`
     .question .qhead .tag{display:none!important}
+    .star-one,.star-note{display:none!important}
     .nav-links{display:contents}
     .nav-menu-toggle,.nav-current{display:none}
     .nav-link[href*="일반전표_"]:not(.nav-star){--menu-accent:#69b6df;--menu-soft:#e9f4fc;--menu-ink:#225f8e}
