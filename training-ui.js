@@ -20,6 +20,7 @@
   if(!specialLink){specialLink=document.createElement('a');specialLink.className='nav-link nav-star';(inner.querySelector('a[href="약점_분석_임시.html"]')||inner.querySelector('a:last-of-type'))?.before(specialLink)}
   specialLink.classList.add('nav-star');
   specialLink.href='오답_훈련센터.html?weakness=1';specialLink.textContent='특별훈련 · 반복 약점';specialLink.title='직접 제출 오답이 3회 이상 누적된 문제·유형·개념';
+  if(!inner.querySelector('.nav-concepts')){const link=document.createElement('a');link.className='nav-link nav-concepts';link.href='개념_정리.html';link.textContent='개념 정리';specialLink.after(link)}
   if(new URLSearchParams(location.search).has('weakness')){inner.querySelectorAll('.nav-link.active').forEach(x=>{x.classList.remove('active');x.removeAttribute('aria-current')});specialLink.classList.add('active');specialLink.setAttribute('aria-current','page')}
   const timedLink=document.createElement('a');timedLink.className='nav-link';timedLink.href='시간_훈련.html';timedLink.textContent='시간 훈련';
   const timedMode=new URLSearchParams(location.search).get('timed')==='1';

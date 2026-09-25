@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "revision": 78,
-  "updatedAt": "2026-09-24T22:40:11+09:00",
+  "revision": 79,
+  "updatedAt": "2026-09-25T12:26:48+09:00",
   "files": [
     "오답_훈련센터.html",
     "일반전표_기본연습_24문제.html",
@@ -33,7 +33,13 @@
     "timed-training.js",
     "timed-training.css",
     "timed-analysis.js",
-    "약점_분석_임시.html"
+    "약점_분석_임시.html",
+    "개념_정리.html",
+    "concept-notes-data.js",
+    "concept-notes.js",
+    "concept-markup.js",
+    "concept-notes.css",
+    "output/pdf/vat-concepts.pdf"
   ],
-  "note": "추가회 응용문제 3개 등록"
+  "note": "부가세 개념 정리: 공식 근거·확인 질문·밑줄·형광펜·굵게·개인 메모·PDF/MD/TXT"
 }

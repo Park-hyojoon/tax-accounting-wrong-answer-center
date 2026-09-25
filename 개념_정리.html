@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>개념 정리 · 부가가치세</title>
+  <link rel="stylesheet" href="concept-notes.css?v=2">
+</head>
+<body>
+  <nav class="top-nav" aria-label="훈련센터 메뉴"><div class="nav-inner">
+    <a class="nav-link" href="오답_훈련센터.html">오늘의 오답훈련</a>
+    <a class="nav-link" href="이론_오답응용_5문제.html">이론 오답</a>
+    <a class="nav-link" href="일반전표_기본연습_24문제.html">일반전표 입력</a>
+    <a class="nav-link" href="매입매출전표_오답연습_3문제.html?view=all">매입매출전표 입력</a>
+    <a class="nav-link nav-star" href="오답_훈련센터.html?weakness=1">특별훈련 · 반복 약점</a>
+    <a class="nav-link nav-concepts active" href="개념_정리.html" aria-current="page">개념 정리</a>
+    <a class="nav-link" href="약점_분석_임시.html">약점 분석(임시)</a>
+  </div></nav>
+  <main>
+    <header class="intro">
+      <p class="eyebrow">개념 정리 / 전산회계 1급</p>
+      <h1>부가가치세, 헷갈리는 기준부터</h1>
+      <p class="lead">같아 보이는 말을 구별하고, 조건이 달라졌을 때 답이 어떻게 바뀌는지 연습합니다.</p>
+      <p class="meta">법령 확인 2026.09.25 · 이론시험의 기본 원칙 중심 · 과거 기출과 현행 기준 구분</p>
+      <div class="download-tools" aria-label="학습자료 내려받기">
+        <a class="button primary" href="output/pdf/vat-concepts.pdf" download="부가가치세_개념정리.pdf">기본 교재 PDF</a>
+        <button type="button" id="downloadMd">내 표시·메모 포함 MD</button>
+        <button type="button" id="downloadTxt">내 메모 포함 TXT</button>
+        <button type="button" id="printNotes">내 표시·메모 인쇄 / PDF</button>
+      </div>
+      <details class="backup-tools"><summary>표시·메모 저장 / 다른 기기로 옮기기</summary>
+        <p>밑줄·형광펜·굵게 표시와 메모는 이 기기의 브라우저에 자동 저장됩니다. 훈련센터의 학습기록 동기화에는 포함되지 않습니다. 다른 기기에서는 아래 백업 파일을 불러오세요. 파일로 연 화면과 온라인 화면의 저장공간도 서로 다릅니다. TXT는 서식 없이 글자만 저장합니다. MD의 표시 서식은 HTML 표시를 지원하는 뷰어에서 보입니다.</p>
+        <button type="button" id="backupNotes">표시·메모 백업 받기</button>
+        <label class="button">표시·메모 백업 불러오기<input type="file" id="importNotes" accept="application/json,.json" hidden></label>
+        <p id="saveStatus" role="status" aria-live="polite">메모를 쓰면 자동 저장됩니다.</p>
+      </details>
+    </header>
+    <section class="reading-guide" aria-label="공부하는 순서">
+      <h2>질문의 칸부터 고르세요</h2>
+      <p id="readingIntro"></p>
+      <details><summary>하루 10~12분, 3일 복습 순서</summary><ol id="studyPlan"></ol></details>
+      <p class="muted">확인 질문은 개념 복습용입니다. 훈련센터의 오답 횟수·통과 기록에는 반영되지 않습니다.</p>
+    </section>
+    <div id="markToolbar" class="mark-toolbar" role="toolbar" aria-label="본문에 표시하기">
+      <span class="mark-help">글자를 선택하고 표시하세요 <small>모바일: 길게 눌러 선택</small></span>
+      <button type="button" data-mark="underline" class="mark-underline">밑줄</button>
+      <button type="button" data-mark="highlight" class="marker-button">형광펜</button>
+      <button type="button" data-mark="bold"><strong>굵게</strong></button>
+      <button type="button" data-mark="clear">선택 표시 지우기</button>
+      <button type="button" id="undoMark" disabled>되돌리기</button>
+      <span id="markStatus" class="mark-status" role="status" aria-live="polite">본문과 표의 글자를 선택할 수 있습니다.</span>
+    </div>
+    <div class="study-layout">
+      <aside class="toc"><h2>차례</h2><nav id="contents" aria-label="개념 정리 차례"></nav><a href="#top" class="back-top">맨 위로 ↑</a></aside>
+      <div id="chapters"></div>
+    </div>
+    <footer>현행법 기본 원칙을 확인해 정리한 학습자료입니다. 실제 시험은 해당 회차의 적용 세법과 문제 조건을 따릅니다.</footer>
+  </main>
+  <noscript>개념 정리 화면을 사용하려면 자바스크립트를 허용해 주세요. <a href="output/pdf/vat-concepts.pdf">PDF 교재 열기</a></noscript>
+  <script src="concept-notes-data.js?v=1"></script>
+  <script src="concept-markup.js?v=1"></script>
+  <script src="concept-notes.js?v=1"></script>
+  <script src="training-ui.js?v=9"></script>
+</body>
+</html>
