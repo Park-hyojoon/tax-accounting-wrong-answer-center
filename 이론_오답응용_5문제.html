@@ -155,7 +155,7 @@
   </main>
 
   <script src="github-learning-sync.js?v=19"></script>
-  <script src="season-ui.js?v=39"></script>
+  <script src="season-ui.js?v=40"></script>
 <script src="training-ui.js?v=9"></script>
   <script>
     const problems=loadTrainingProblems();
@@ -208,7 +208,8 @@
     const sessionPassed=new Set();
     function renderCard(card){
       const id=card.dataset.id,p=getProblem(id),checked=state.checked[id],attempts=state.attempts[id]||0,result=$('.result',card);
-      card.hidden=!TrainingSeason.matches(p)||state.deleted?.[id]?true:starView?!(Boolean(state.starred?.[id])||p.variantOf!=null||variantSourceIds.has(id)):typeView?(p.variantOf!=null||(p.type||'').trim()!==typeView):Boolean(!weaknessRefs.has(id)&&((state.passed[id]&&!sessionPassed.has(id))||state.archived[id]||(todayView&&card.dataset.addedDate!==localDate())));
+      const completed=TrainingSeason.isCompleted('theory',id,state)&&!sessionPassed.has(id);
+      card.hidden=!TrainingSeason.matches(p)||state.deleted?.[id]?true:weaknessRefs.size?(!weaknessRefs.has(id)||completed):starView?!(Boolean(state.starred?.[id])||p.variantOf!=null||variantSourceIds.has(id)):typeView?(p.variantOf!=null||(p.type||'').trim()!==typeView):Boolean(completed||state.archived[id]||(todayView&&card.dataset.addedDate!==localDate()));
       $('.star-one',card).setAttribute('aria-pressed',String(Boolean(state.starred?.[id])));$('.star-note',card).hidden=!state.starred?.[id];
       card.classList.toggle('correct',checked===true);card.classList.toggle('wrong',checked===false);
       result.className='result'+(checked===true?' ok':checked===false?' no':'');

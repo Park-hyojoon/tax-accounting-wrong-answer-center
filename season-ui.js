@@ -3,6 +3,18 @@
   const style=document.createElement('link');style.rel='stylesheet';style.href='season.css?v=20';document.head.append(style);
   const params=new URLSearchParams(location.search);
   const escape=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  function isCompleted(subject,id,state={}){
+    state=state||{};
+    if(subject==='theory'){
+      if(state.deleted?.[id])return true;
+      if(state.trainingCenterRestored?.[id])return false;
+      return Boolean(state.passed?.[id]||state.checked?.[id]===true||(state.history?.[id]||[]).some(x=>x.correct===true&&!x.cancelledAt));
+    }
+    const card=state.cards?.[id]||{};
+    if(card.deleted)return true;
+    if(card.trainingCenterRestored)return false;
+    return Boolean(card.passed||card.correct===true||(card.history||[]).some(x=>x.correct===true&&!x.cancelledAt));
+  }
   function matches(p){return (!params.get('exam')||String(p.examRound)===params.get('exam'))&&(!params.get('tag')||(p.tags||[]).includes(params.get('tag')))}
   function select(label,values,key){
     const el=document.createElement('label');const name=document.createElement('span');name.className='season-filter-name';name.textContent=label;el.append(name);const field=document.createElement('select');field.setAttribute('aria-label',label);
@@ -64,8 +76,7 @@
   function currentTrainingSelect(problems,adapter){
     const label=document.createElement('label');label.className='current-training-filter';const name=document.createElement('span');name.className='season-filter-name';name.textContent='현재 훈련 필요 TOP 10';label.append(name);
     const field=document.createElement('select');field.className='current-training-select';field.setAttribute('aria-label','현재 훈련 필요 TOP 10');
-    const passed=(problem,index)=>{if(adapter.theory){const id=problem.id,state=adapter.state;if(state.trainingCenterRestored?.[id])return false;return Boolean(state.passed?.[id]||state.checked?.[id]===true||(state.history?.[id]||[]).some(x=>x.correct===true&&!x.cancelledAt))}const card=adapter.state.cards?.[index]||{};if(card.trainingCenterRestored)return false;return Boolean(card.passed||card.correct===true||(card.history||[]).some(x=>x.correct===true&&!x.cancelledAt))};
-    const tags=new Map();problems.forEach((problem,index)=>{if(problem.variantOf!=null||problem.sourceQuestionNo===''||passed(problem,index))return;[...new Set(problem.tags?.length?problem.tags:[problem.type])].filter(Boolean).forEach(tag=>{if(!tags.has(tag))tags.set(tag,[]);tags.get(tag).push(problem)})});
+    const tags=new Map();problems.forEach((problem,index)=>{if(problem.variantOf!=null||problem.sourceQuestionNo===''||isCompleted(adapter.theory?'theory':'practical',adapter.theory?problem.id:index,adapter.state))return;[...new Set(problem.tags?.length?problem.tags:[problem.type])].filter(Boolean).forEach(tag=>{if(!tags.has(tag))tags.set(tag,[]);tags.get(tag).push(problem)})});
     const ranked=[...tags].sort((a,b)=>b[1].length-a[1].length||a[0].localeCompare(b[0],'ko')).slice(0,10);field.add(new Option(ranked.length?'학습 유형 선택':'현재 훈련할 미통과 문제가 없습니다.',''));ranked.forEach(([tag,rows],index)=>field.add(new Option(`${index+1}. ${tag} · ${rows.length}문제`,tag)));field.disabled=!ranked.length;
     field.onchange=()=>{if(!field.value)return;const url=new URL(location.href);url.searchParams.set('tag',field.value);url.searchParams.set('fresh','1');url.searchParams.delete('exam');location.href=url.href};label.append(field);return label;
   }
@@ -97,12 +108,12 @@
     const get=(id,k)=>theory?a.state[k]?.[id]:a.state.cards?.[id]?.[k];
     const put=(id,k,v)=>{const target=theory?(a.state[k]??={}):(a.state.cards[id]??={});target[theory?id:k]=v};
     function visibility(card){
-      const id=key(card),p=theory?problems.find(p=>p.id===id):problems[Number(id)],passed=!!get(id,'passed'),star=!!get(id,'starred');
+      const id=key(card),p=theory?problems.find(p=>p.id===id):problems[Number(id)],passed=isCompleted(theory?'theory':'practical',id,a.state),star=!!get(id,'starred');
       const search=document.querySelector('#typeFilter')?.value||params.get('type')||'';
       const match=matches(p)&&(!search||p.type.includes(search))&&(params.get('view')!=='today'||p.addedDate===new Date(Date.now()-new Date().getTimezoneOffset()*60000).toISOString().slice(0,10));
       const special=params.get('view')==='star',hasVariant=problems.some(x=>x.variantOf===(theory?id:Number(id)));
       const weakIds=new Set((params.get('weakrefs')||'').split(',').filter(Boolean));
-      card.hidden=!!get(id,'deleted')||(weakIds.size?!weakIds.has(String(id)):(!match||(special&&!star&&p.variantOf==null&&!hasVariant)||(passed&&!passedThisVisit.has(String(id)))));
+      card.hidden=!!get(id,'deleted')||!match||(weakIds.size?!weakIds.has(String(id)):(special&&!star&&p.variantOf==null&&!hasVariant))||(passed&&!passedThisVisit.has(String(id)));
       card.dataset.typeFilterBaseHidden=String(card.hidden);
       if(special){
         const item=card.closest('details.star-item');if(item)item.hidden=card.hidden;
@@ -172,17 +183,7 @@
     const subjectOrder=['theory','practical','voucher'],tags=new Map(),subjectTags=new Map(subjectOrder.map(subject=>[subject,new Map()])),seen=new Set();
     const learningState={theory:readState('exam-20260914-theory'),practical:readState('exam-20260914-practical'),voucher:readState('exam-20260914-voucher')};
     function readState(key){try{return JSON.parse(localStorage.getItem(key)||'{}')}catch(_){return {}}}
-    function isPassed(entry){
-      const state=learningState[entry.subject]||{};
-      if(entry.subject==='theory'){
-        if(state.trainingCenterRestored?.[entry.id])return false;
-        const history=state.history?.[entry.id]||[];
-        return Boolean(state.passed?.[entry.id]||state.checked?.[entry.id]===true||history.some(x=>x.correct===true&&!x.cancelledAt));
-      }
-      const card=state.cards?.[entry.id]||{};
-      if(card.trainingCenterRestored)return false;
-      return Boolean(card.passed||card.correct===true||(card.history||[]).some(x=>x.correct===true&&!x.cancelledAt));
-    }
+    const isPassed=entry=>isCompleted(entry.subject,entry.id,learningState[entry.subject]);
     entries.filter(e=>!e.variant&&e.variantOf==null&&e.questionNo!=='').forEach(e=>{
       const id=e.subject+':'+e.id;if(seen.has(id))return;seen.add(id);
       [...new Set(e.tags?.length?e.tags:[e.type])].filter(Boolean).forEach(tag=>{
@@ -227,5 +228,5 @@
       document.querySelector('main')?.prepend(panel);
     }
   }
-  window.TrainingSeason={matches,install,catalog};
+  window.TrainingSeason={matches,install,catalog,isCompleted};
 })();
