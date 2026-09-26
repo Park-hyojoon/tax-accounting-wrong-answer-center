@@ -11,7 +11,7 @@
   'use strict';
   return {
     schemaVersion: 1,
-    revision: 36,
+    revision: 37,
     recordedOn: '2026-09-14',
     coverageNote:'2026-09-14 새 학습 이후 사용자가 직접 제출한 기출 오답만 집계합니다.',
     topics: [
@@ -157,7 +157,8 @@
   {id:'fifo-equivalent',label:'선입선출법 가공비 완성품환산량'},
   {id:'checking-overdraft-payable',label:'당좌수표 발행과 당좌차월'},
   {id:'passenger-car-repair-input-vat-nondeductible',label:'비영업용 승용차 수리비와 매입세액 불공제'},
-  {id:'topic-000f0a7ef7a2',label:'부가가치세 납부 전표의 계정 수정'}
+  {id:'topic-000f0a7ef7a2',label:'부가가치세 납부 전표의 계정 수정'},
+  {id:'topic-ef798a708a96',label:'손익계산서 작성기준'}
 ],
     entries: [
   {id:'exam121-theory-reliability-20260914',source:'user-submitted',evidenceStatus:'confirmed',topicId:'reliability-qualitative-characteristics',title:'회계정보의 질적 특성 판단',originalCue:'다음 중 회계정보의 질적 특성 중 신뢰성과 관련이 없는 것은?\n\n① 표현의 충실성\n② 적시성\n③ 검증가능성\n④ 중립성',learnerReason:null,reportedAt:'2026-09-14',registeredDate:'2026-09-14',examRound:121,questionNo:'이론-회계정보 질적 특성',practiceRefs:[{source:'theory',id:'exam121-reliability-variant',type:'회계정보의 신뢰성 구성요소'}],provenance:'기출 원본 오답/121회 기출 문제 이론 실무 오답 데이터.md'},
@@ -307,7 +308,9 @@
   {id:'unassigned-practical-passenger-car-repair-20260924',source:'user-submitted',evidenceStatus:'confirmed',topicId:'passenger-car-repair-input-vat-nondeductible',title:'영업부 승용차 수리비 카드 결제 수정',originalCue:'7월 05일 영업부에서 사용하는 개별소비세 과세대상 승용차(2,000cc)를 대하정비공장에서 수리하고 국민카드로 결제한 770,000원(부가가치세 포함)을 매입세액 공제가능한 거래로 판단하여 매입매출전표에 입력하였다. (3점)',learnerReason:null,reportedAt:'2026-09-24',registeredDate:'2026-09-24',examRound:null,questionNo:'문항 번호 미제공',practiceRefs:[{source:'practical',id:52,type:'비영업용 승용차 수리비와 매입세액 불공제'}],provenance:'기출 원본 오답/회차 미지정 오답 데이터.md'},
   {id:'unassigned-employment-insurance-welfare-20260925',source:'user-submitted',evidenceStatus:'confirmed',topicId:'employment-insurance-payment-withholding',title:'생산부 고용보험료 계좌이체',originalCue:'11월 10일 생산부서의 7월분 고용보험료 500,000원을 보통예금에서 이체하여 납부하였다. 납부한 고용보험료 중 300,000원은 회사부담분이며, 회사부담분 고용보험료는 복리후생비로 처리한다. (3점)',learnerReason:null,reportedAt:'2026-09-25',registeredDate:'2026-09-25',examRound:null,questionNo:'문항 번호 미제공',practiceRefs:[{source:'practical',id:53,type:'고용보험료 납부와 예수금'}],provenance:'기출 원본 오답/회차 미지정 오답 데이터.md'},
   {id:'unassigned-business-gift-vat-nondeductible-20260925',source:'user-submitted',evidenceStatus:'confirmed',topicId:'entertainment-gift-vat-nondeductible',title:'영업부 거래처 선물세트 구입',originalCue:'12월 22일 영업부 거래처 선물용으로 ㈜해피에서 과자선물세트를 110,000원(부가세 포함)에 구입하여 선물하고 전자세금계산서를 수취하였으며 법인 보통예금에서 이체하였다. (3점)',learnerReason:null,reportedAt:'2026-09-25',registeredDate:'2026-09-25',examRound:null,questionNo:'문항 번호 미제공',practiceRefs:[{source:'voucher',id:43,type:'거래처 접대용 선물 매입세액 불공제'}],provenance:'기출 원본 오답/회차 미지정 오답 데이터.md'},
-  {id:'unassigned-vat-payment-account-correction-20260925',source:'user-submitted',evidenceStatus:'confirmed',topicId:'topic-000f0a7ef7a2',title:'확정신고 부가가치세 납부 전표 수정',originalCue:'07월 25일 세금과공과(판)로 회계처리한 금액은 2025년 제1기 확정신고기간에 대한 부가가치세를 보통예금에서 출금하여 납부한 거래인 것으로 밝혀졌다. 단, 회사는 6월 30일에 부가가치세와 관련한 회계처리를 적법하게 수행하였다. (3점)',learnerReason:null,reportedAt:'2026-09-25',registeredDate:'2026-09-25',examRound:null,questionNo:'문항 번호 미제공',practiceRefs:[{source:'practical',id:54,type:'부가가치세 납부 전표의 계정 수정'}],provenance:'기출 원본 오답/회차 미지정 오답 데이터.md'}
+  {id:'unassigned-vat-payment-account-correction-20260925',source:'user-submitted',evidenceStatus:'confirmed',topicId:'topic-000f0a7ef7a2',title:'확정신고 부가가치세 납부 전표 수정',originalCue:'07월 25일 세금과공과(판)로 회계처리한 금액은 2025년 제1기 확정신고기간에 대한 부가가치세를 보통예금에서 출금하여 납부한 거래인 것으로 밝혀졌다. 단, 회사는 6월 30일에 부가가치세와 관련한 회계처리를 적법하게 수행하였다. (3점)',learnerReason:null,reportedAt:'2026-09-25',registeredDate:'2026-09-25',examRound:null,questionNo:'문항 번호 미제공',practiceRefs:[{source:'practical',id:54,type:'부가가치세 납부 전표의 계정 수정'}],provenance:'기출 원본 오답/회차 미지정 오답 데이터.md'},
+  {id:'unassigned-trading-securities-disposal-20260926',source:'user-submitted',evidenceStatus:'confirmed',topicId:'trading-securities-disposal-gain',title:'단기매매증권 주식 전량 처분',originalCue:'7월 26일 단기 시세차익을 목적으로 당해 연도에 취득하였던 ㈜서울의 주식 3,000주(1주당 액면가 5,000원, 1주당 취득가 10,000원)를 전부 35,000,000원에 처분하고 대금은 보통예금 계좌로 입금받았다. (3점)',learnerReason:null,reportedAt:'2026-09-26',registeredDate:'2026-09-26',examRound:null,questionNo:'문항 번호 미제공',practiceRefs:[{source:'practical',id:56,type:'단기매매증권 처분'}],provenance:'기출 원본 오답/회차 미지정 오답 데이터.md'},
+  {id:'unassigned-income-statement-principles-20260926',source:'user-submitted',evidenceStatus:'confirmed',topicId:'topic-ef798a708a96',title:'손익계산서 작성기준 구별',originalCue:'다음 중 손익계산서의 작성기준에 대한 설명으로 옳지 않은 것은?\n① 총액주의：수익과 비용은 총액으로 기재함을 원칙으로 한다.\n② 발생주의：비용에 대한 현금이 지출되었을 때 비용으로 인식하여야 한다.\n③ 수익, 비용 대응의 원칙：비용은 그와 관련된 수익에 대응하여 인식하여야 한다.\n④ 실현주의：수익은 실현된 기간에 인식하여야 한다.',learnerReason:null,reportedAt:'2026-09-26',registeredDate:'2026-09-26',examRound:null,questionNo:'문항 번호 미제공',practiceRefs:[{source:'theory',id:'practice-20260926-income-statement-principles',type:'손익계산서 작성기준'}],provenance:'기출 원본 오답/회차 미지정 오답 데이터.md'}
 ],
     signals: [],
     notes: ['회차별 직접 제출 원문은 PC의 기출 원본 오답 폴더에 MD로 보관합니다.']

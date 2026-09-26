@@ -1,6 +1,6 @@
 {
   "targetSeconds": 120,
-  "examTargetSeconds": 2858,
+  "examTargetSeconds": 3600,
   "hotkeys": {
     "problem_toggle": "Ctrl+Space",
     "problem_reset": "Ctrl+Alt+R",
