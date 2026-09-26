@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "revision": 91,
-  "updatedAt": "2026-09-26T16:28:28+09:00",
+  "revision": 92,
+  "updatedAt": "2026-09-26T21:44:38+09:00",
   "files": [
     "오답_훈련센터.html",
     "일반전표_기본연습_24문제.html",
@@ -37,5 +37,5 @@
     "concept-notes.css",
     "output/pdf/vat-concepts.pdf"
   ],
-  "note": "매입매출전표 추가 입력줄을 유형별로 표시하고 과세·면세 금액 계산을 재검증"
+  "note": "외화장기차입금 상환 문제의 날짜별 환율 정보를 표로 분리"
 }
