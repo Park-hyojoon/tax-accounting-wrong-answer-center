@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "revision": 92,
-  "updatedAt": "2026-09-26T21:44:38+09:00",
+  "revision": 93,
+  "updatedAt": "2026-09-26T22:18:49+09:00",
   "files": [
     "오답_훈련센터.html",
     "일반전표_기본연습_24문제.html",
@@ -37,5 +37,5 @@
     "concept-notes.css",
     "output/pdf/vat-concepts.pdf"
   ],
-  "note": "외화장기차입금 상환 문제의 날짜별 환율 정보를 표로 분리"
+  "note": "정기예금 만기 해지 문제의 선납세금 77,000원을 차변으로 정정"
 }

@@ -15,6 +15,17 @@ const assert=require('assert/strict');
     const text=await table.innerText();
     for(const value of ['차입일','직전 결산일','상환일','1,150원/$','1,180원/$','1,240원/$'])assert.ok(text.includes(value),value);
     assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),true);
-    console.log('PASS: foreign loan exchange-rate source table renders on mobile');
+    const deposit=await page.evaluate(()=>{
+      const problem=problems.find(item=>item.id==='exam-103-practical-20');
+      return {
+        prepaidTax:problem.answers.find(row=>row.account==='선납세금'),
+        debit:problem.answers.filter(row=>row.side==='D').reduce((sum,row)=>sum+Number(row.amount),0),
+        credit:problem.answers.filter(row=>row.side==='C').reduce((sum,row)=>sum+Number(row.amount),0)
+      };
+    });
+    assert.equal(deposit.prepaidTax.side,'D');
+    assert.equal(deposit.prepaidTax.amount,77000);
+    assert.equal(deposit.debit,deposit.credit);
+    console.log('PASS: practical source table and prepaid-tax debit answer are correct');
   }finally{await browser.close()}
 })().catch(error=>{console.error(error);process.exit(1)});
