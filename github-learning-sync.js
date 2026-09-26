@@ -20,6 +20,7 @@
   const SYNC_MESSAGE_KEY='tax-accounting-sync-message';
   const CACHE_BUST_KEY='tax-accounting-cache-bust';
   const LAST_SYNC_KEY='tax-accounting-last-sync';
+  const UI_SETTINGS_KEY=`${SEASON}-ui-settings`;
 
   // 학습 화면별 localStorage 키. 훈련센터 홈과 학습상태 동기화가 함께 사용한다.
   const SOURCES=Object.freeze({
@@ -310,6 +311,17 @@
     merged.cards=cards;merged.startedAt=a.startedAt&&b.startedAt?(Date.parse(a.startedAt)<=Date.parse(b.startedAt)?a.startedAt:b.startedAt):(a.startedAt||b.startedAt);
     merged.updatedAt=new Date().toISOString();return normalizeState(sourceName,merged);
   }
+  function normalizeUiSettings(value){
+    const source=value&&typeof value==='object'?value:{},seen=new Set(),menuOrder=[];
+    (Array.isArray(source.menuOrder)?source.menuOrder:[]).forEach(id=>{id=String(id||'').trim();if(id&&!seen.has(id)&&menuOrder.length<20){seen.add(id);menuOrder.push(id)}});
+    return {menuOrder,updatedAt:source.updatedAt||''};
+  }
+  function readUiSettings(){try{return normalizeUiSettings(JSON.parse(localStorage.getItem(UI_SETTINGS_KEY)||'{}'))}catch(_){return normalizeUiSettings({})}}
+  function mergeUiSettings(incoming){
+    const local=readUiSettings(),remote=normalizeUiSettings(incoming),remoteNewer=Date.parse(remote.updatedAt||0)>Date.parse(local.updatedAt||0),merged=remoteNewer?remote:local;
+    if(remoteNewer&&JSON.stringify(remote)!==JSON.stringify(local)){localStorage.setItem(UI_SETTINGS_KEY,JSON.stringify(merged));global.dispatchEvent(new CustomEvent('training-ui-settings',{detail:merged}));return true}
+    return false;
+  }
   // 문제 목록(유형·제목)과 유형별 집계를 함께 담아, 기록 파일만 봐도 어떤 문제를 얼마나 틀렸는지 알 수 있게 한다.
   function catalogInfo(fallback){
     try{if(typeof global.TrainingCatalog==='function'){const info=global.TrainingCatalog();if(info&&info.catalog)return info}}catch(error){}
@@ -318,7 +330,7 @@
   function backupPayload(fallback){
     const states={};Object.entries(SOURCES).forEach(([name,source])=>{states[name]=readState(source.key)});
     if(fallback&&fallback.season!==SEASON)fallback=null;
-    const payload={format:'tax-accounting-training-center-backup',version:1,season:SEASON,exportedAt:new Date().toISOString(),states};
+    const payload={format:'tax-accounting-training-center-backup',version:1,season:SEASON,exportedAt:new Date().toISOString(),states,uiSettings:readUiSettings()};
     const info=catalogInfo(fallback);if(info){payload.catalog=info.catalog;payload.typeSummary=info.typeSummary||[];payload.catalogAt=info.catalogAt||new Date().toISOString()}
     // 홈은 원장 snapshot을 만들고, 경량 분야 화면은 원격 fallback 사본을 그대로 보존한다.
     if(global.TrainingMistakeMemory)payload.sourceMistakes=global.TrainingMistakeMemory.snapshot(fallback?.sourceMistakes);
@@ -394,7 +406,7 @@
         if(helper){const read=await helperPost('/api/learning/read');remoteJson=read.state||null;remoteStates=remoteJson?.states||null;base=read.base||''}
         else{const remote=await getSyncState();remoteJson=remote?.json||null;remoteStates=remoteJson?.states||null;base=remote?.sha||null}
         if(remoteJson&&remoteJson.season!==SEASON)throw new Error('다른 학습 시즌의 기록이므로 합치지 않았습니다. PC 도우미를 다시 시작해 주세요.');
-        changedLocal=mergeStatesIntoLocal(remoteStates);
+        changedLocal=mergeStatesIntoLocal(remoteStates);if(mergeUiSettings(remoteJson?.uiSettings))changedLocal++;
         const payload=buildSyncPayload(remoteJson);
         try{
           if(helper)await helperPost('/api/learning/write',{state:payload,base});
@@ -489,6 +501,7 @@
     getDeviceId,getDeviceName,setDeviceName,isMobileDevice,
     detectHelper,helperPost,
     normalizeState,readState,writeState,mergeState,backupPayload,mergeStatesIntoLocal,buildSyncPayload,
+    UI_SETTINGS_KEY,readUiSettings,mergeUiSettings,
     reviewSince:REVIEW_SINCE,recentReview,isCompleted,
     syncEverything,installSyncBar,showToast,hideToast,consumeSyncMessage,lastSyncLabel
   };

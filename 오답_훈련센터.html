@@ -296,10 +296,10 @@
     <p class="footer">오답 훈련센터 · 「동기화」 또는 「오늘 학습기록 저장」을 누른 경우에만 GitHub로 기록을 보냅니다.</p>
   </main>
 
-  <script src="github-learning-sync.js?v=20"></script>
+  <script src="github-learning-sync.js?v=21"></script>
   <script src="season-catalog.js?v=31"></script>
   <script src="season-ui.js?v=41"></script>
-<script src="training-ui.js?v=10"></script>
+<script src="training-ui.js?v=11"></script>
   <script>
     const SOURCES={
       practical:{label:'일반전표',file:'일반전표_기본연습_24문제.html',key:'exam-20260914-practical'},
@@ -528,6 +528,7 @@
         if(payload?.season!==TrainingGitHub.SEASON)throw new Error('이전 학습 기록은 새 학습에 불러올 수 없습니다.');
         if(payload?.format!=='tax-accounting-training-center-backup'||payload?.version!==1||!payload.states)throw new Error('지원하지 않는 파일입니다.');
         TrainingGitHub.mergeStatesIntoLocal(payload.states);
+        TrainingGitHub.mergeUiSettings(payload.uiSettings);
         renderAll('다른 기기의 학습상태를 현재 기록과 합쳤습니다.');status.textContent='불러오기가 완료되었습니다. 기존 PC 기록과 전달받은 기록을 함께 보존했습니다.';
       }catch(error){status.textContent=`불러오지 못했습니다. ${error.message}`}
     }
