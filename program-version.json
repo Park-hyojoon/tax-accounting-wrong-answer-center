@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "revision": 84,
-  "updatedAt": "2026-09-26T12:39:20+09:00",
+  "revision": 85,
+  "updatedAt": "2026-09-26T12:48:05+09:00",
   "files": [
     "오답_훈련센터.html",
     "일반전표_기본연습_24문제.html",
@@ -41,5 +41,5 @@
     "concept-notes.css",
     "output/pdf/vat-concepts.pdf"
   ],
-  "note": "매입매출전표: 부가세 포함금액 자동 분리, 분개 숫자키, 유형별 추가 입력란 적용"
+  "note": "효율화: 일반 화면의 타이머 지연 로드, 유휴 계산·중복 갱신·불필요 버튼 제거"
 }

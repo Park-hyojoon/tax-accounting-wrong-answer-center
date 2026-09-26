@@ -53,7 +53,7 @@
       panel.querySelector('.timer-dial strong').textContent=(remaining<0?'+':'')+clock(Math.abs(remaining));
       
       panel.style.setProperty('--timer-fill',Math.max(0,Math.min(100,remaining/target*100))+'%');panel.classList.toggle('overtime',remaining<0);
-      const on=p?.phase==='running';panel.querySelector('.timer-pause').disabled=!on||!!p.pausedAt;panel.querySelector('.timer-resume').disabled=!on||!p.pausedAt;panel.querySelector('.timer-config').disabled=on;place();
+      const on=p?.phase==='running';panel.querySelector('.timer-pause').disabled=!on||!!p.pausedAt;panel.querySelector('.timer-resume').disabled=!on||!p.pausedAt;panel.querySelector('.timer-config').disabled=on;
     }
     function lockCard(card,value){if(card)card.querySelectorAll('.entry-wrap,.kclep-shell').forEach(x=>x.inert=value)}
     function lock(value){lockCard(current,value)}
@@ -109,7 +109,7 @@
     for(const field of [exam,type,status])field.addEventListener('change',()=>{if(pending()?.phase==='running')stop();list()});
     top.addEventListener('change',()=>{if(pending()?.phase==='running')stop();exam.value='';type.value='';status.value='active';list()});
     select.onchange=()=>show(cards.find(c=>c.dataset.index===select.value));
-    panel.querySelector('.timer-dial').onclick=()=>pending()?.phase==='running'?stop():start();panel.querySelector('.timer-pause').onclick=pause;panel.querySelector('.timer-resume').onclick=resume;panel.querySelector('.timer-retry').onclick=reset;panel.querySelector('.jump-top').onclick=()=>window.scrollTo({top:0,behavior:'instant'});panel.querySelector('.jump-bottom').onclick=()=>window.scrollTo({top:document.documentElement.scrollHeight,behavior:'instant'});window.addEventListener('resize',place);
+    panel.querySelector('.timer-dial').onclick=()=>pending()?.phase==='running'?stop():start();panel.querySelector('.timer-pause').onclick=pause;panel.querySelector('.timer-resume').onclick=resume;panel.querySelector('.timer-retry').onclick=reset;panel.querySelector('.jump-top').onclick=()=>window.scrollTo({top:0,behavior:'instant'});panel.querySelector('.jump-bottom').onclick=()=>window.scrollTo({top:document.documentElement.scrollHeight,behavior:'instant'});window.addEventListener('resize',place);requestAnimationFrame(place);
     const loadSettings=s=>{minutes.value=String(Math.floor(s.targetSeconds/60)).padStart(2,'0');seconds.value=String(s.targetSeconds%60).padStart(2,'0');dialog.querySelector('.shortcut-start').value=s.start;dialog.querySelector('.shortcut-stop').value=s.stop};
     panel.querySelector('.timer-config').onclick=()=>{loadSettings(settings);dialog.querySelector('.timer-error').textContent='';dialog.showModal()};
     dialog.querySelector('.timer-close').onclick=()=>dialog.close();
@@ -121,7 +121,7 @@
     document.addEventListener('visibilitychange',draw);
     const running=cards.find(c=>state(c).timedPending?.phase==='running'&&!state(c).deleted);
     list(params.get('problem')||running?.dataset.index||sessionStorage.getItem('exam-20260914-timed-last-'+a.subject));
-    setInterval(draw,200);
+    setInterval(()=>{const p=pending();if(!document.hidden&&p?.phase==='running'&&!p.pausedAt)draw()},250);
     global.TrainingTimed.active={start,stop,pause,resume,reset,get current(){return current},get pending(){return pending()}};
   }
   function practicalShell(card){

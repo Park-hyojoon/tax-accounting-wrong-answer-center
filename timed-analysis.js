@@ -1,6 +1,12 @@
 (function(){
   'use strict';
-  const T=window.TrainingTimed;if(!T)return;T.style();
+  const T={
+    files:{practical:'일반전표_기본연습_24문제.html',voucher:'매입매출전표_오답연습_3문제.html'},
+    read:key=>{try{return JSON.parse(localStorage.getItem(key)||'{}')}catch(_){return {}}},
+    clock:ms=>{const s=Math.max(0,Math.ceil(ms/1000));return `${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`},
+    esc:s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))
+  };
+  if(!document.getElementById('timedStyle')){const link=document.createElement('link');link.id='timedStyle';link.rel='stylesheet';link.href='timed-training.css?v=20';document.head.append(link)}
   const host=document.createElement('section');host.className='panel timed-analysis';host.id='timedAnalysis';
   host.innerHTML='<h2>시간 훈련 · 속도와 정확도</h2><p class="description">채점한 시간 훈련만 집계합니다. 곡선은 풀이 순서별 소요시간이며 점에 마우스를 올리거나 눌러 결과를 확인할 수 있습니다. 미채점·취소 기록은 제외합니다.</p><label>분야 <select class="timed-subject"><option value="all">전체</option><option value="practical">일반전표</option><option value="voucher">매입매출전표</option></select></label><label>유형 <select class="timed-type"><option value="">전체</option></select></label><label><input type="checkbox" class="timed-assisted"> 해설 참고 풀이 포함</label><p class="timed-summary"></p><div class="timed-chart-scroll timed-trend"></div><p class="timed-point-info" role="status"></p><p class="description">파란색: 소요시간 곡선 · 초록 점: 정답 · 주황 점: 오답 · 회색 점선: 각 풀이의 목표시간</p><div class="timed-chart-scroll timed-types"></div>';
   document.querySelector('main').append(host);

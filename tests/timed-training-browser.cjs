@@ -61,6 +61,7 @@ const root=path.resolve(__dirname,'..'),url=(file,query='')=>pathToFileURL(path.
   const merged=await page.evaluate(()=>{const payload=TrainingGitHub.backupPayload(),a=payload.states.practical,b=structuredClone(a),pk=Object.keys(b.cards).find(key=>b.cards[key].history?.length),vk=Object.keys(payload.states.voucher.cards).find(key=>payload.states.voucher.cards[key].history?.length),event=b.cards[pk].history[0];event.cancelledAt=new Date().toISOString();event.correct=null;const result=TrainingGitHub.mergeState('practical',a,b),again=TrainingGitHub.mergeState('practical',result,a);return {before:a.cards[pk].history.length,after:again.cards[pk].history.length,cancelled:again.cards[pk].history[0].cancelledAt,timing:again.cards[pk].history[0].timing,source:again.cards[pk].history[0].source,voucher:payload.states.voucher.cards[vk].history[0].timing}});
   assert.equal(merged.before,merged.after);assert.ok(merged.cancelled);assert.ok(merged.timing);assert.ok(merged.voucher);assert.equal(merged.source,'timed');
   await page.goto(url('약점_분석_임시.html'));await page.waitForSelector('#timedAnalysis svg');
+  assert.equal(await page.evaluate(()=>performance.getEntriesByType('resource').some(entry=>entry.name.includes('timed-training.js'))),false,'analysis should not load full timer runtime');
   assert.equal(await page.locator('#timedAnalysis .chart-point').count(),4);
   assert.ok((await page.locator('.timed-summary').textContent()).includes('정답 2회 / 오답 2회'));
   await page.locator('.timed-subject').selectOption('voucher');assert.equal(await page.locator('#timedAnalysis .chart-point').count(),1);
@@ -99,7 +100,7 @@ const root=path.resolve(__dirname,'..'),url=(file,query='')=>pathToFileURL(path.
   assert.equal(await page.evaluate(()=>[...document.querySelector('.time-question').options].some(option=>problems[option.value]?.timeTraining===false)),false);
   await page.goto(url('매입매출전표_오답연습_3문제.html','?timed=1&exam=all&status=all'));await page.waitForFunction(()=>window.TrainingTimed?.active?.current);
   assert.equal(await page.evaluate(()=>[...document.querySelector('.time-question').options].some(option=>problems[option.value]?.timeTraining===false)),false);
-  await page.goto(url('일반전표_기본연습_24문제.html'));assert.equal(await page.locator('.timer-panel').count(),0);assert.equal(await page.locator('.timed-kclep').count(),0);
+  await page.goto(url('일반전표_기본연습_24문제.html'));assert.equal(await page.locator('.timer-panel').count(),0);assert.equal(await page.locator('.timed-kclep').count(),0);assert.equal(await page.evaluate(()=>performance.getEntriesByType('resource').some(entry=>entry.name.includes('timed-training.js'))),false,'normal training should not load timer runtime');
   assert.deepEqual(errors,[]);console.log('PASS: shortcuts, balance Enter, real grading, duplicate prevention, retry history, reload/overtime, both subjects, analysis, responsive layout, normal-mode isolation');
  }finally{await browser.close()}
 })().catch(e=>{console.error(e);process.exitCode=1});

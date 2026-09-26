@@ -550,7 +550,6 @@
   })();
 </script>
 <script>TrainingSeason.install(problems,{state:studyState,save:saveState,refresh:updateProgress});</script>
-<script src="timed-training.js?v=42"></script>
-<script>TrainingTimed.install(problems,{subject:'practical',state:studyState,save:saveState,grade,clear:clearCard});</script>
+<script>(function(){if(new URLSearchParams(location.search).get('timed')!=='1')return;const script=document.createElement('script');script.src='timed-training.js?v=43';script.onload=()=>TrainingTimed.install(problems,{subject:'practical',state:studyState,save:saveState,grade,clear:clearCard});document.head.append(script)})()</script>
 </body>
 </html>

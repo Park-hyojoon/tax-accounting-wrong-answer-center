@@ -91,13 +91,12 @@
     .today-summary-caret::before{content:'▸'}.today-accordion[open] .today-summary-caret::before{content:'▾'}
     .today-accordion[open]>summary{margin-bottom:18px}
     .filter-bar{display:flex;flex-wrap:wrap;gap:9px;margin:0 0 18px}
-    .filter-button,.refresh-button,.sort-select{
+    .filter-button,.sort-select{
       border:2px solid #bcd8eb;border-radius:12px;padding:8px 14px;background:#fff;color:#30536d;font-weight:800
     }
-    .filter-button:hover,.refresh-button:hover,.filter-button:focus-visible,.refresh-button:focus-visible,.sort-select:focus-visible{background:#edf8ff;border-color:#5d9ed2;outline:none}
+    .filter-button:hover,.filter-button:focus-visible,.sort-select:focus-visible{background:#edf8ff;border-color:#5d9ed2;outline:none}
     .filter-button.active{color:#fff;background:var(--blue);border-color:var(--blue)}
     .round-filter-label,.sort-label{display:flex;align-items:center;gap:7px;color:#30536d;font-weight:900}.sort-label{margin-left:auto}.sort-select{min-height:43px;padding-right:34px}
-    .refresh-button{margin-left:0}
     .summary-strip{display:grid;grid-template-columns:repeat(6,minmax(120px,1fr));gap:12px;margin-bottom:24px}
     .stat-card{padding:16px;border:1px solid #d8e6f0;border-radius:17px;background:#fff;box-shadow:0 7px 18px rgba(31,79,119,.06)}
     .stat-card:nth-child(1){background:#ebf7ff}.stat-card:nth-child(2){background:#e9fbf2}.stat-card:nth-child(3){background:#fff7d6}.stat-card:nth-child(4){background:#fff0ee}.stat-card:nth-child(5){background:#f1ecff}.stat-card:nth-child(6){background:#e8fafa}
@@ -182,7 +181,7 @@
       body{font-size:16px}.hero{padding-top:27px}.section{padding:19px 16px;border-radius:18px}
       .section-heading{display:block}.today-accordion>summary{align-items:flex-start}.today-summary-side{flex-direction:column;align-items:flex-end}.today-chip{display:inline-block}.summary-strip{grid-template-columns:repeat(2,1fr)}
       .problem-item{grid-template-columns:1fr}.problem-actions{justify-content:flex-start}.open-link,.restore-button{flex:1 1 auto}
-      .sort-label{width:100%;margin-left:0;align-items:flex-start;flex-direction:column}.sort-select{width:100%}.refresh-button{margin-left:0}.nav-inner{padding-inline:12px}.nav-link{padding:7px 12px}.backup-grid,.github-fields{grid-template-columns:1fr}.backup-button{width:100%}.github-actions .backup-button{flex:1 1 100%}
+      .sort-label{width:100%;margin-left:0;align-items:flex-start;flex-direction:column}.sort-select{width:100%}.nav-inner{padding-inline:12px}.nav-link{padding:7px 12px}.backup-grid,.github-fields{grid-template-columns:1fr}.backup-button{width:100%}.github-actions .backup-button{flex:1 1 100%}
     }
     @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
   </style>
@@ -245,7 +244,6 @@
                 <option value="recentAttempt">최근에 푼 순</option>
               </select>
             </label>
-            <button class="refresh-button" id="refreshData" type="button">기록 새로고침</button>
           </div>
           <div id="trainingList" class="problem-list"></div>
           <p class="training-note">분야별 응용문제를 푼 뒤 돌아오면 학습기록이 반영됩니다.</p>
@@ -654,6 +652,12 @@
       buildRecords();renderExamRoundOptions();renderTraining();renderStats();
       $('#liveStatus').textContent=message;
     }
+    let renderTimer=0,pendingRenderMessage='';
+    function scheduleRenderAll(message=''){
+      pendingRenderMessage=message||pendingRenderMessage;
+      clearTimeout(renderTimer);
+      renderTimer=setTimeout(()=>{const next=pendingRenderMessage;pendingRenderMessage='';renderAll(next)},50);
+    }
 
 
     $('#todayLabel').textContent=formatDate(localDateKey());
@@ -662,7 +666,6 @@
       $$('.filter-button').forEach(item=>{const active=item===button;item.classList.toggle('active',active);item.setAttribute('aria-pressed',String(active))});
       renderTraining();$('#liveStatus').textContent=currentFilter==='today'?'오늘 등록 문제만 표시합니다.':'등록일과 관계없이 전체 미통과 문제를 표시합니다.';
     }));
-    $('#refreshData').addEventListener('click',()=>renderAll('최신 학습기록을 불러왔습니다.'));
     $('#examRoundFilter').addEventListener('change',event=>{currentExamRound=event.target.value;renderTraining();$('#liveStatus').textContent=currentExamRound?`${currentExamRound}회 기출 문제만 표시합니다.`:'모든 기출 회차를 표시합니다.'});
     $('#exportBackup').addEventListener('click',downloadBackup);
     $('#importBackup').addEventListener('change',event=>{const file=event.target.files?.[0];if(file)importBackupFile(file);event.target.value=''});
@@ -676,9 +679,9 @@
     });
     refreshGitHubStatus();
     $('#sortOrder').addEventListener('change',event=>{currentSort=event.target.value;renderTraining();$('#liveStatus').textContent=`${event.target.options[event.target.selectedIndex].text}으로 정렬했습니다.`});
-    window.addEventListener('storage',event=>{if(Object.values(SOURCES).some(source=>source.key===event.key))renderAll('다른 학습 화면에서 바뀐 기록을 반영했습니다.')});
-    window.addEventListener('focus',()=>renderAll());
-    document.addEventListener('visibilitychange',()=>{if(!document.hidden)renderAll()});
+    window.addEventListener('storage',event=>{if(Object.values(SOURCES).some(source=>source.key===event.key))scheduleRenderAll('다른 학습 화면에서 바뀐 기록을 반영했습니다.')});
+    window.addEventListener('focus',()=>scheduleRenderAll());
+    document.addEventListener('visibilitychange',()=>{if(!document.hidden)scheduleRenderAll()});
     renderAll();
   </script>
 <script>TrainingSeason.catalog(META,SOURCES);</script>
