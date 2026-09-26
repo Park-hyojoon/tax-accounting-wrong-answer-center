@@ -8,7 +8,7 @@ const root=path.resolve(__dirname,'..');
    const context=await browser.newContext({viewport:{width,height:950}}),page=await context.newPage(),errors=[];
    page.on('pageerror',e=>errors.push(e.message));
    const home=pathToFileURL(path.join(root,'오답_훈련센터.html')).href;
-   await page.goto(home+'?weakness=1');
+   await page.goto(home+'?weakness=1&weaknessSource=submitted');
    assert.ok(await page.locator('.weak-card').count());
    const before=await page.locator('.weak-grid').innerText();
    await page.evaluate(()=>localStorage.setItem('exam-20260914-theory',JSON.stringify({history:{fake:[{correct:false},{correct:false},{correct:false}]},wrongCount:999,starred:{fake:true}})));
@@ -33,7 +33,7 @@ const root=path.resolve(__dirname,'..');
    const saved=await page.evaluate(()=>JSON.parse(localStorage.getItem('exam-20260914-theory')));
    assert.ok(saved.passed[gradedId]);assert.equal(saved.history[gradedId].length,1);
    await page.reload();assert.equal(await page.locator('.question:visible').count(),ids.length-2,'graded theory problem hidden on next visit');
-   await page.goto(home+'?weakness=1');
+   await page.goto(home+'?weakness=1&weaknessSource=submitted');
    const theoryLinks=await page.locator('.weak-card a[href*="weakrefs"]').evaluateAll(links=>links.map(a=>new URL(a.href).searchParams.get('weakrefs').split(',')));
    assert.ok(theoryLinks.every(refs=>!refs.includes(ids[0])&&!refs.includes(gradedId)),'completed theory problems removed from every repeated-weakness group');
    assert.equal(await page.locator('.star-one:visible').count(),0);
@@ -45,7 +45,7 @@ const root=path.resolve(__dirname,'..');
     if(width===390){await page.locator('.nav-menu-toggle').click();assert.equal(await special.isVisible(),true,`${file}: mobile weakness menu link`)}
    }
    for(const [subject,label] of [['practical','일반전표'],['voucher','매입매출전표']]){
-    await page.goto(home+'?weakness=1');
+    await page.goto(home+'?weakness=1&weaknessSource=submitted');
     const target=await page.locator('.weak-card>a').filter({hasText:label}).first().getAttribute('href');
     const refs=new URL(target).searchParams.get('weakrefs').split(',');
     await page.goto(target);await page.waitForURL(u=>!u.searchParams.has('fresh'));
@@ -54,7 +54,7 @@ const root=path.resolve(__dirname,'..');
     await page.locator('.question:visible .notebook-pass').first().click();
     assert.equal(await page.locator('.question:visible').count(),refs.length,subject+' shows just-passed question for review');
     await page.reload();assert.equal(await page.locator('.question:visible').count(),refs.length-1,subject+' hides self-passed question on revisit');
-    await page.goto(home+'?weakness=1');
+    await page.goto(home+'?weakness=1&weaknessSource=submitted');
     const links=await page.locator('.weak-card>a').filter({hasText:label}).evaluateAll(links=>links.map(a=>new URL(a.href).searchParams.get('weakrefs').split(',')));
     assert.ok(links.every(ids=>!ids.includes(selectedId)),subject+' self-passed problem excluded from weakness links');
    }

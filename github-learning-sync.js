@@ -196,7 +196,34 @@
     }catch(error){return {}}
   }
   function writeState(key,value){try{localStorage.setItem(key,JSON.stringify(value));return true}catch(error){return false}}
-  function correctInHistory(history){return Array.isArray(history)&&history.some(item=>item&&item.correct===true)}
+  // Fixed Korea-time rollout date: historical test failures must not enter this queue.
+  const REVIEW_SINCE='2026-09-26';
+  const REVIEW_START=Date.parse(REVIEW_SINCE+'T00:00:00+09:00');
+  function reviewFailures(history){return (Array.isArray(history)?history:[]).filter(h=>h?.correct===false&&!h.cancelledAt&&eventTime(h.at)>=REVIEW_START)}
+  function validPassTime(value,history){return value&&!(history||[]).some(h=>h.cancelledAt&&h.at===value)?value:''}
+  function progressCard(subject,id,state={}){
+    if(subject!=='theory')return state?.cards?.[id]||{};
+    const card={correct:state?.checked?.[id]};
+    for(const key of ['history','deleted','passed','passedAt','selfPassed','selfPassedAt','trainingCenterRestored','restoredAt'])card[key]=state?.[key]?.[id];
+    return card;
+  }
+  function recentReviewCard(card={}){
+    if(card.deleted)return null;
+    const failures=reviewFailures(card.history);if(!failures.length)return null;
+    const lastAt=latestEventIso(failures.map(h=>h.at)),history=card.history||[];
+    const passAt=latestEventIso(validPassTime(card.passedAt,history),card.selfPassed?validPassTime(card.selfPassedAt,history):'',history.filter(h=>h.correct===true&&!h.cancelledAt).map(h=>h.at));
+    const restoreAt=card.trainingCenterRestored?eventTime(card.restoredAt):0;
+    if(eventTime(passAt)>eventTime(lastAt)&&eventTime(passAt)>=restoreAt)return null;
+    return {count:failures.length,lastAt};
+  }
+  function recentReview(subject,id,state){return recentReviewCard(progressCard(subject,id,state))}
+  function isCompleted(subject,id,state){
+    const card=progressCard(subject,id,state);
+    if(card.deleted)return true;
+    if(recentReviewCard(card)||card.trainingCenterRestored)return false;
+    return Boolean(card.passed||card.correct===true||correctInHistory(card.history));
+  }
+  function correctInHistory(history){return Array.isArray(history)&&history.some(item=>item&&item.correct===true&&!item.cancelledAt)}
   function number(value){const n=Number(value);return Number.isFinite(n)?n:0}
   function uniqueHistory(first,second){
     const seen=new Map();
@@ -211,10 +238,10 @@
     let best='',bestTime=0;values.flat().forEach(value=>{const time=eventTime(value);if(time>bestTime){best=value;bestTime=time}});return best;
   }
   function resolveTrainingFlags(a,b,history,aUpdated,bUpdated){
-    const correctTimes=history.filter(item=>item?.correct===true).map(item=>item.at);
-    const passedAt=latestEventIso(a.passedAt,b.passedAt,correctTimes);
+    const correctTimes=history.filter(item=>item?.correct===true&&!item.cancelledAt).map(item=>item.at);
+    const passedAt=latestEventIso(validPassTime(a.passedAt,history),validPassTime(b.passedAt,history),correctTimes);
     const archivedAt=latestEventIso(a.archivedAt,b.archivedAt);
-    const restoredAt=latestEventIso(a.trainingCenterRestored?a.restoredAt:'',b.trainingCenterRestored?b.restoredAt:'');
+    const restoredAt=latestEventIso(a.trainingCenterRestored?a.restoredAt:'',b.trainingCenterRestored?b.restoredAt:'',reviewFailures(history).map(h=>h.at));
     let passedTime=eventTime(passedAt),archivedTime=eventTime(archivedAt),restoredTime=eventTime(restoredAt);
     if(!passedTime){if(a.passed||a.correct===true)passedTime=eventTime(aUpdated)||1;if(b.passed||b.correct===true)passedTime=Math.max(passedTime,eventTime(bUpdated)||1)}
     if(!archivedTime){if(a.archived)archivedTime=eventTime(aUpdated)||1;if(b.archived)archivedTime=Math.max(archivedTime,eventTime(bUpdated)||1)}
@@ -462,6 +489,7 @@
     getDeviceId,getDeviceName,setDeviceName,isMobileDevice,
     detectHelper,helperPost,
     normalizeState,readState,writeState,mergeState,backupPayload,mergeStatesIntoLocal,buildSyncPayload,
+    reviewSince:REVIEW_SINCE,recentReview,isCompleted,
     syncEverything,installSyncBar,showToast,hideToast,consumeSyncMessage,lastSyncLabel
   };
 })(window);

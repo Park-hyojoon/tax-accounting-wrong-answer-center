@@ -197,9 +197,9 @@
     <p class="footer">학습용 자료 · 전표 입력 순서는 달라도 계정과목, 금액, 차·대변이 맞으면 정답으로 처리됩니다.</p>
   </main>
 
-  <script src="github-learning-sync.js?v=19"></script>
-  <script src="season-ui.js?v=40"></script>
-<script src="training-ui.js?v=9"></script>
+  <script src="github-learning-sync.js?v=20"></script>
+  <script src="season-ui.js?v=41"></script>
+<script src="training-ui.js?v=10"></script>
   <script src="account-search.js?v=4"></script>
   <script>
     const problems = loadTrainingProblems();
@@ -363,7 +363,7 @@
       card.dataset.graded='true';card.dataset.correct=String(ok);card.classList.toggle('correct',ok);card.classList.toggle('wrong',!ok);
       const result=el('.result',card);result.className='result '+(ok?'ok':'no');
       result.textContent=ok?'정답입니다! 통과 처리되어 다음 방문부터 숨겨집니다.':`다시 확인해보세요. (${matched}/${best.set.length}개 분개 일치)`;
-      const s=cardState(card.dataset.index);s.rows=snapshotRows(card);s.graded=true;s.correct=ok;s.matched=matched;s.attempts=(s.attempts||0)+1;if(ok){s.passed=true;s.passedAt=nowIso();delete s.trainingCenterRestored;delete s.selfPassed;delete s.selfPassedAt}else s.wrongCount=(s.wrongCount||0)+1;s.history=s.history||[];s.history.push({at:nowIso(),correct:ok,matched,rows:snapshotRows(card)});saveState();renderAttempt(card);
+      const s=cardState(card.dataset.index);s.rows=snapshotRows(card);s.graded=true;s.correct=ok;s.matched=matched;s.attempts=(s.attempts||0)+1;if(ok){s.passed=true;s.passedAt=nowIso();delete s.trainingCenterRestored;delete s.selfPassed;delete s.selfPassedAt}else{s.wrongCount=(s.wrongCount||0)+1;s.passed=false;s.trainingCenterRestored=true;s.restoredAt=nowIso();delete s.selfPassed;delete s.selfPassedAt}s.history=s.history||[];s.history.push({at:nowIso(),correct:ok,matched,rows:snapshotRows(card)});saveState();renderAttempt(card);
       updateProgress();if(scroll)card.scrollIntoView({behavior:'smooth',block:'center'});return ok;
     }
 
@@ -550,7 +550,7 @@
   })();
 </script>
 <script>TrainingSeason.install(problems,{state:studyState,save:saveState,refresh:updateProgress});</script>
-<script src="timed-training.js?v=41"></script>
+<script src="timed-training.js?v=42"></script>
 <script>TrainingTimed.install(problems,{subject:'practical',state:studyState,save:saveState,grade,clear:clearCard});</script>
 </body>
 </html>

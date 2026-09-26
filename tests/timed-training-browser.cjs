@@ -80,6 +80,7 @@ const root=path.resolve(__dirname,'..'),url=(file,query='')=>pathToFileURL(path.
   assert.equal(await page.evaluate(()=>normText('㈜초코')===normText('(주)초코')),true);
   await page.evaluate(()=>{const exam=document.querySelector('.time-exam');exam.value='';exam.dispatchEvent(new Event('change',{bubbles:true}));const status=document.querySelector('.time-status');status.value='all';status.dispatchEvent(new Event('change',{bubbles:true}));const index=problems.findIndex(p=>p.id==='exam-103-practical-18'),question=document.querySelector('.time-question');question.value=String(index);question.dispatchEvent(new Event('change',{bubbles:true}))});
   await page.keyboard.press('Control+Alt+KeyS');
+  const entryToggle=page.locator('.question:visible .entry-toggle');if(await entryToggle.count()&&await entryToggle.getAttribute('open')===null)await entryToggle.locator('summary').first().click();
   const partner=page.locator('.question:visible select.partner:not(:disabled)').first();await partner.click();
   assert.equal(await page.locator('#accountSearchTitle').textContent(),'거래처 빠른 찾기');
   await page.locator('.account-search-input').pressSequentially('qh');

@@ -68,7 +68,7 @@
     function resetCard(card){delete state(card).timedPending;lockCard(card,false);a.clear(card);card.querySelectorAll('details').forEach(x=>x.open=false);const b=card.querySelector('.check-one');b.disabled=false;b.textContent='채점하기';lockCard(card,false);card.dispatchEvent(new Event('input',{bubbles:true}))}
     function redo(){if(paper){visible.forEach(resetCard);a.save();show(visible[0]);window.scrollTo({top:0,behavior:'smooth'})}else if(current){resetCard(current);a.save()}draw()}
     function reset(){if(!current||!pending())return;delete state(current).timedPending;a.save();draw()}
-    function passed(s){return !s.trainingCenterRestored&&(s.passed||s.correct===true||(s.history||[]).some(h=>h.correct===true&&!h.cancelledAt))}
+    function passed(s){return window.TrainingGitHub.isCompleted('practical',0,{cards:{0:s}})}
     function populateTop(prefer=top.value||params.get('top')||''){
       const tags=new Map();problems.forEach((problem,index)=>{const card=cards[index],s=card?state(card):{};if(problem.timeTraining===false||problem.variantOf!=null||problem.sourceQuestionNo===''||passed(s))return;[...new Set(problem.tags?.length?problem.tags:[problem.type])].filter(Boolean).forEach(tag=>{if(!tags.has(tag))tags.set(tag,[]);tags.get(tag).push(problem)})});
       const ranked=[...tags].sort((x,y)=>y[1].length-x[1].length||x[0].localeCompare(y[0],'ko')).slice(0,10);top.replaceChildren(new Option(ranked.length?'학습 유형 선택':'현재 훈련할 미통과 문제가 없습니다.',''));ranked.forEach(([tag,items],index)=>top.add(new Option(`${index+1}. ${tag} · ${items.length}문제`,tag)));top.disabled=!ranked.length;top.value=[...top.options].some(option=>option.value===prefer)?prefer:'';

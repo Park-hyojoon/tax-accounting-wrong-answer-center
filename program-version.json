@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "revision": 82,
-  "updatedAt": "2026-09-26T10:13:53+09:00",
+  "revision": 83,
+  "updatedAt": "2026-09-26T12:24:14+09:00",
   "files": [
     "오답_훈련센터.html",
     "일반전표_기본연습_24문제.html",
@@ -41,5 +41,5 @@
     "concept-notes.css",
     "output/pdf/vat-concepts.pdf"
   ],
-  "note": "추가회 응용문제 2개 등록"
+  "note": "특별훈련: 9월 26일 이후 훈련 중 오답 자동 수집, 직접 제출 3회 이상 반복 약점과 분리"
 }
