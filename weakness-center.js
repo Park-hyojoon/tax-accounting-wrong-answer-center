@@ -60,7 +60,7 @@
     recent.sort((a,b)=>Date.parse(b.lastAt)-Date.parse(a.lastAt)||refKey(a).localeCompare(refKey(b)));
     const groups=data.groups.map(group=>({...group,refs:group.refs.filter(ref=>!progress.isCompleted(ref.subject,ref.id,states[ref.subject]))})).filter(group=>group.refs.length);
     sources.querySelector('[data-source=recent]').textContent='훈련 중 오답 · '+recent.length+'문제';
-    sources.querySelector('[data-source=submitted]').textContent='직접 제출 3회 이상 · '+groups.length+'묶음';
+    sources.querySelector('[data-source=submitted]').textContent='직접 제출 반복 · '+groups.length+'묶음';
     sources.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.source===source)));
     bar.replaceChildren();batch.replaceChildren();grid.replaceChildren();
     if(source==='recent'){
@@ -85,14 +85,14 @@
       }
       return;
     }
-    intro.textContent='직접 제출한 오답 '+data.total+'건에서 같은 문제·유사 유형·큰 개념이 3회 이상 확인된 묶음입니다. 훈련 중 채점 횟수와 별도로 집계하며, 각 묶음에서는 미통과 문제만 보여줍니다.';
-    for(const [value,label] of [['same','같은 문제 3회 이상'],['type','유사 유형 3회 이상'],['concept','큰 개념 3회 이상']])filter(label+' · '+groups.filter(g=>g.kind===value).length,value,kind,()=>{kind=value;render()});
+    intro.textContent='직접 제출한 오답 '+data.total+'건에서 다시 제출된 같은 문제 또는 3회 이상 확인된 유사 유형·큰 개념을 모았습니다. 훈련 중 채점 횟수와 별도로 집계하며, 각 묶음에서는 미통과 문제만 보여줍니다.';
+    for(const [value,label] of [['same','다시 제출한 같은 문제'],['type','유사 유형 3회 이상'],['concept','큰 개념 3회 이상']])filter(label+' · '+groups.filter(g=>g.kind===value).length,value,kind,()=>{kind=value;render()});
     const active=groups.filter(group=>group.kind===kind);
-    if(!active.length)empty(data.groups.some(group=>group.kind===kind)?'이 분류에 남은 미통과 문제가 없습니다.':'직접 제출 기록에서 3회 이상 확인된 묶음이 아직 없습니다.');
+    if(!active.length)empty(data.groups.some(group=>group.kind===kind)?'이 분류에 남은 미통과 문제가 없습니다.':'이 분류에 해당하는 반복 제출 기록이 아직 없습니다.');
     for(const group of active){
       const card=document.createElement('article');card.className='weak-card';
       const title=document.createElement('h3');title.textContent=group.label;card.append(title);
-      const count=document.createElement('p');count.textContent='직접 제출 '+group.count+'건 · 남은 문제 '+group.refs.length+'개 · 최근 '+group.last;card.append(count);
+      const count=document.createElement('p');count.textContent=(group.resubmitted?'같은 문제 재제출 ':'직접 제출 ')+group.count+'건 · 남은 문제 '+group.refs.length+'개 · 최근 '+group.last;card.append(count);
       for(const subject of Object.keys(files)){const refs=group.refs.filter(ref=>ref.subject===subject);if(refs.length)card.append(link(refs,subjects[subject]+' 다시 풀기 ('+refs.length+')'))}
       const detail=document.createElement('details'),summary=document.createElement('summary');summary.textContent='포함된 문제 보기';detail.append(summary);
       group.refs.forEach(ref=>{const item=document.createElement('div');item.append(link([ref],ref.title));detail.append(item)});card.append(detail);grid.append(card);

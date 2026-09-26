@@ -57,17 +57,18 @@ def build(root):
         keys=[('same',root_id,label),('type',similar or e['topic'] or label,similar or label)]
         keys += [('concept',name,name) for name,pattern in CONCEPT_RULES if re.search(pattern,text)]
         for kind,key,label in keys:
-            g=groups.setdefault((kind,key),dict(kind=kind,label=label,events=set(),refs={},last=''))
+            g=groups.setdefault((kind,key),dict(kind=kind,label=label,events=set(),refs={},last='',resubmitted=False))
             g['events'].add(e['id']);g['last']=max(g['last'],e['date'] or '')
+            if kind=='same' and e['parent']:g['resubmitted']=True
             for p in e['refs']:g['refs'][(p['subject'],str(p['id']))]=dict(subject=p['subject'],id=p['id'],title=p['title'])
     output=[]
     for (kind,key),g in groups.items():
-        if len(g['events'])<3:continue
-        output.append(dict(id=kind+'-'+hashlib.sha256(key.encode()).hexdigest()[:12],kind=kind,label=g['label'],count=len(g['events']),last=g['last'],refs=list(g['refs'].values())))
+        if len(g['events'])<3 and not (kind=='same' and g['resubmitted']):continue
+        output.append(dict(id=kind+'-'+hashlib.sha256(key.encode()).hexdigest()[:12],kind=kind,label=g['label'],count=len(g['events']),last=g['last'],resubmitted=g['resubmitted'],refs=list(g['refs'].values())))
     output.sort(key=lambda g:(-g['count'],g['label']))
     data=dict(threshold=3,total=len(events),groups=output)
     (root/'weakness-data.js').write_text('window.TrainingWeaknessData='+json.dumps(data,ensure_ascii=False,separators=(',',':'))+';\n',encoding='utf-8')
-    print(f'반복 약점 집계: 직접 제출 {len(events)}건, 3회 이상 묶음 {len(output)}개')
+    print(f'반복 약점 집계: 직접 제출 {len(events)}건, 재제출 또는 3회 이상 묶음 {len(output)}개')
     return data
 
 if __name__=='__main__':build(Path(__file__).resolve().parent)
