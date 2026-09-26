@@ -15,19 +15,27 @@ const url=name=>pathToFileURL(path.join(root,name)).href;
     await page.locator('.nav-settings-button').click();
     assert.equal(await page.locator('.menu-order-item').count(),8);
     assert.equal(await page.locator('.menu-order-item').first().innerText().then(text=>text.includes('오늘의 오답훈련')),true);
-    await page.locator('.menu-order-item').first().locator('[data-move="down"]').click();
+    await page.locator('.menu-order-item').first().dragTo(page.locator('.menu-order-item').nth(2));
+    assert.equal(await page.locator('.menu-order-item').nth(1).innerText().then(text=>text.includes('오늘의 오답훈련')),true);
+    await page.locator('.menu-order-item').filter({hasText:'개념 정리'}).locator('.menu-delete').click();
+    assert.equal(await page.locator('.menu-waiting').filter({hasText:'개념 정리'}).count(),1);
     await page.locator('.menu-save').click();
     assert.equal(await page.locator('.nav-links .nav-link').first().getAttribute('data-menu-id'),'theory');
+    assert.equal(await page.locator('.nav-links .nav-link:not([hidden])').count(),7);
     const saved=await page.evaluate(()=>TrainingGitHub.readUiSettings());
-    assert.equal(saved.menuOrder[0],'theory');assert.ok(saved.updatedAt);
+    assert.equal(saved.menuOrder[0],'theory');assert.deepEqual(saved.hiddenMenuIds,['concepts']);assert.ok(saved.updatedAt);
     assert.deepEqual(await page.evaluate(()=>TrainingGitHub.backupPayload().uiSettings.menuOrder),saved.menuOrder);
 
     await page.goto(url('이론_오답응용_5문제.html'));
     assert.equal(await page.locator('.nav-links .nav-link').first().getAttribute('data-menu-id'),'theory');
-    const newer={menuOrder:['timed','home','theory','practical','voucher','special','concepts','analysis'],updatedAt:'2099-01-01T00:00:00.000Z'};
+    assert.equal(await page.locator('.nav-links [data-menu-id="concepts"]').getAttribute('hidden'),'');
+    await page.locator('.nav-settings-button').click();await page.locator('.menu-waiting').filter({hasText:'개념 정리'}).locator('.menu-restore').click();await page.locator('.menu-save').click();
+    assert.equal(await page.locator('.nav-links [data-menu-id="concepts"]:not([hidden])').count(),1);
+    const newer={menuOrder:['timed','home','theory','practical','voucher','special','concepts'],hiddenMenuIds:['analysis'],updatedAt:'2099-01-01T00:00:00.000Z'};
     assert.equal(await page.evaluate(value=>TrainingGitHub.mergeUiSettings(value),newer),true);
     await page.reload();
     assert.equal(await page.locator('.nav-links .nav-link').first().getAttribute('data-menu-id'),'timed');
+    assert.equal(await page.locator('.nav-links [data-menu-id="analysis"]').getAttribute('hidden'),'');
 
     const mobile=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true}),mobilePage=await mobile.newPage();
     await mobilePage.goto(url('오답_훈련센터.html'));await mobilePage.locator('.nav-settings-button').click();
@@ -35,6 +43,6 @@ const url=name=>pathToFileURL(path.join(root,name)).href;
     assert.equal(await mobilePage.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),true);
     assert.deepEqual(errors,[]);
     await mobile.close();
-    console.log('PASS: menu reorder, persistence, backup/sync merge, mobile dialog');
+    console.log('PASS: drag reorder, delete/restore, persistence, backup/sync merge, mobile dialog');
   }finally{await browser.close()}
 })().catch(error=>{console.error(error);process.exit(1)});

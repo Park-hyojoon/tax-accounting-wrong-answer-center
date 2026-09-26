@@ -312,9 +312,10 @@
     merged.updatedAt=new Date().toISOString();return normalizeState(sourceName,merged);
   }
   function normalizeUiSettings(value){
-    const source=value&&typeof value==='object'?value:{},seen=new Set(),menuOrder=[];
+    const source=value&&typeof value==='object'?value:{},seen=new Set(),menuOrder=[],hiddenSeen=new Set(),hiddenMenuIds=[];
     (Array.isArray(source.menuOrder)?source.menuOrder:[]).forEach(id=>{id=String(id||'').trim();if(id&&!seen.has(id)&&menuOrder.length<20){seen.add(id);menuOrder.push(id)}});
-    return {menuOrder,updatedAt:source.updatedAt||''};
+    (Array.isArray(source.hiddenMenuIds)?source.hiddenMenuIds:[]).forEach(id=>{id=String(id||'').trim();if(id&&!hiddenSeen.has(id)&&hiddenMenuIds.length<20){hiddenSeen.add(id);hiddenMenuIds.push(id)}});
+    return {menuOrder,hiddenMenuIds,updatedAt:source.updatedAt||''};
   }
   function readUiSettings(){try{return normalizeUiSettings(JSON.parse(localStorage.getItem(UI_SETTINGS_KEY)||'{}'))}catch(_){return normalizeUiSettings({})}}
   function mergeUiSettings(incoming){

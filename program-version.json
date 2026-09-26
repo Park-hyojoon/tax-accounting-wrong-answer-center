@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "revision": 86,
-  "updatedAt": "2026-09-26T12:56:53+09:00",
+  "revision": 87,
+  "updatedAt": "2026-09-26T13:53:03+09:00",
   "files": [
     "오답_훈련센터.html",
     "일반전표_기본연습_24문제.html",
@@ -41,5 +41,5 @@
     "concept-notes.css",
     "output/pdf/vat-concepts.pdf"
   ],
-  "note": "메뉴 설정: 사용자 순서 변경, 전체 화면 적용 및 PC·모바일 동기화"
+  "note": "메뉴 편집: 드래그 순서 변경, 메뉴 대기·복원 및 기기 간 동기화"
 }
