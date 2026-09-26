@@ -25,18 +25,30 @@ const root=path.resolve(__dirname,'..');
     assert.equal(await card.locator('.service-fee').isDisabled(),true);
     assert.equal(await card.locator('.zero-rate').isDisabled(),true);
     assert.equal(await card.locator('.deduct-reason').isEnabled(),true);
+    assert.equal(await card.locator('[data-extra="card"]').first().isHidden(),true);
+    assert.equal(await card.locator('[data-extra="deduct"]').first().isVisible(),true);
 
     await card.locator('.voucher-type').selectOption('57.카과');
     assert.equal(await card.locator('.card-company').isEnabled(),true);
     assert.equal(await card.locator('.service-fee').isEnabled(),true);
     assert.equal(await card.locator('.zero-rate').isDisabled(),true);
     assert.equal(await card.locator('.deduct-reason').isDisabled(),true);
+    assert.equal(await card.locator('[data-extra="card"]').first().isVisible(),true);
+    assert.equal(await card.locator('[data-extra="deduct"]').first().isHidden(),true);
 
     await card.locator('.voucher-type').selectOption('52.영세');
     assert.equal(await card.locator('.card-company').isDisabled(),true);
     assert.equal(await card.locator('.service-fee').isDisabled(),true);
     assert.equal(await card.locator('.zero-rate').isEnabled(),true);
     assert.equal(await card.locator('.deduct-reason').isDisabled(),true);
+    assert.equal(await card.locator('[data-extra="zero"]').first().isVisible(),true);
+
+    await card.locator('.trade-mode').selectOption('sales');
+    await card.locator('.voucher-type').selectOption('22.현과');
+    await card.locator('.supply').fill('880000');
+    await card.locator('.supply').press('Enter');
+    assert.equal(await card.locator('.supply').inputValue(),'800,000');
+    assert.equal(await card.locator('.vat').inputValue(),'80,000');
 
     await card.locator('.journal').focus();
     await card.locator('.journal').press('3');
@@ -46,6 +58,11 @@ const root=path.resolve(__dirname,'..');
     const exemptCard=page.locator('.question').filter({hasText:'영업부 차량 운용리스료 카드 결제'}).first();
     await exemptCard.locator('.voucher-type').selectOption('53.면세');
     assert.equal(await exemptCard.locator('.card-company').isDisabled(),true,'53.면세는 윗단 카드사 입력 대상이 아님');
+    assert.equal(await exemptCard.locator('.kclep-subfields').isHidden(),true,'53.면세에는 추가 입력줄이 없어야 함');
+    await exemptCard.locator('.supply').fill('1450000');
+    await exemptCard.locator('.supply').press('Enter');
+    assert.equal(await exemptCard.locator('.supply').inputValue(),'1,450,000','53.면세 공급가액은 /1.1 하지 않음');
+    assert.equal(await exemptCard.locator('.vat').inputValue(),'','53.면세 부가세는 입력하지 않음');
     assert.deepEqual(errors,[]);
     console.log('PASS: VAT split, journal number keys, type-driven extra fields');
   }finally{

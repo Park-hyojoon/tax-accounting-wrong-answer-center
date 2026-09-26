@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "revision": 90,
-  "updatedAt": "2026-09-26T15:35:14+09:00",
+  "revision": 91,
+  "updatedAt": "2026-09-26T16:28:28+09:00",
   "files": [
     "오답_훈련센터.html",
     "일반전표_기본연습_24문제.html",
@@ -29,10 +29,6 @@
     "data/practical.js",
     "data/theory.js",
     "data/voucher.js",
-    "시간_훈련.html",
-    "timed-training.js",
-    "timed-training.css",
-    "timed-analysis.js",
     "약점_분석_임시.html",
     "개념_정리.html",
     "concept-notes-data.js",
@@ -41,5 +37,5 @@
     "concept-notes.css",
     "output/pdf/vat-concepts.pdf"
   ],
-  "note": "첨부 이미지 기반 제조간접비·상품손익 표를 문제 화면에 재현"
+  "note": "매입매출전표 추가 입력줄을 유형별로 표시하고 과세·면세 금액 계산을 재검증"
 }

@@ -22,13 +22,9 @@
   specialLink.href='오답_훈련센터.html?weakness=1';specialLink.textContent='특별훈련 · 반복 약점';specialLink.title='9월 26일 이후 훈련 중 오답 · 직접 제출 3회 이상 반복 약점';
   if(!inner.querySelector('.nav-concepts')){const link=document.createElement('a');link.className='nav-link nav-concepts';link.href='개념_정리.html';link.textContent='개념 정리';specialLink.after(link)}
   if(new URLSearchParams(location.search).has('weakness')){inner.querySelectorAll('.nav-link.active').forEach(x=>{x.classList.remove('active');x.removeAttribute('aria-current')});specialLink.classList.add('active');specialLink.setAttribute('aria-current','page')}
-  const timedLink=document.createElement('a');timedLink.className='nav-link';timedLink.href='시간_훈련.html';timedLink.textContent='시간 훈련';
-  const timedMode=new URLSearchParams(location.search).get('timed')==='1';
-  if(timedMode){inner.querySelectorAll('.active').forEach(x=>{x.classList.remove('active');x.removeAttribute('aria-current')});timedLink.classList.add('active');timedLink.setAttribute('aria-current','page')}
-  (inner.querySelector('a[href="약점_분석_임시.html"]')||inner.querySelector('a:last-of-type'))?.after(timedLink);
   const MENU_KEY=window.TrainingGitHub?.UI_SETTINGS_KEY||'exam-20260914-ui-settings';
-  const MENU_DEFAULT=['home','theory','practical','voucher','special','concepts','analysis','timed'];
-  function menuId(link){const href=link.getAttribute('href')||'';if(link.classList.contains('nav-star')||href.includes('weakness=1'))return'special';if(link.classList.contains('nav-concepts')||href.includes('개념_정리'))return'concepts';if(href.includes('이론_'))return'theory';if(href.includes('매입매출전표_'))return'voucher';if(href.includes('일반전표_'))return'practical';if(href.includes('약점_분석_'))return'analysis';if(href.includes('시간_훈련'))return'timed';if(href.includes('오답_훈련센터'))return'home';return''}
+  const MENU_DEFAULT=['home','theory','practical','voucher','special','concepts','analysis'];
+  function menuId(link){const href=link.getAttribute('href')||'';if(link.classList.contains('nav-star')||href.includes('weakness=1'))return'special';if(link.classList.contains('nav-concepts')||href.includes('개념_정리'))return'concepts';if(href.includes('이론_'))return'theory';if(href.includes('매입매출전표_'))return'voucher';if(href.includes('일반전표_'))return'practical';if(href.includes('약점_분석_'))return'analysis';if(href.includes('오답_훈련센터'))return'home';return''}
   function readMenuSettings(){try{const value=JSON.parse(localStorage.getItem(MENU_KEY)||'{}');return {menuOrder:Array.isArray(value.menuOrder)?value.menuOrder:[],hiddenMenuIds:Array.isArray(value.hiddenMenuIds)?value.hiddenMenuIds:[]}}catch(_){return {menuOrder:[],hiddenMenuIds:[]}}}
   function completeOrder(order,available){const allowed=new Set(available),seen=new Set(),result=[];[...(Array.isArray(order)?order:[]),...MENU_DEFAULT,...available].forEach(id=>{if(allowed.has(id)&&!seen.has(id)){seen.add(id);result.push(id)}});return result}
   let links=[...inner.querySelectorAll('a.nav-link')];if(!links.length)return;
