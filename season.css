@@ -60,6 +60,10 @@ main{max-width:1560px!important}
 .question .prompt{font-size:17px!important;font-weight:700!important;line-height:1.85!important;background:#f6f7f8!important;border-left:3px solid #b1b8c2!important;padding:12px 14px!important;border-radius:5px!important;margin:10px 0!important}
 .question .data-box table{border-collapse:separate!important;border-spacing:0!important;width:auto!important;max-width:100%!important}
 .question .data-box th,.question .data-box td{height:auto!important;padding:6px 12px!important;line-height:1.55!important;text-align:left!important;vertical-align:middle!important;white-space:nowrap}
+.question .data-box{overflow-x:auto!important}
+.question .data-box .source-table{border-collapse:collapse!important;width:100%!important;min-width:680px!important;background:#fff!important}
+.question .data-box .source-table th,.question .data-box .source-table td{border:1px solid #626b75!important;text-align:center!important;white-space:normal!important}
+.question .data-box .source-table th{background:#e5e7eb!important;font-weight:800!important}
 .season-origin{font-size:12px!important;margin:5px 0 10px!important}
 .question-layout{display:block!important}.answer-workspace{width:100%!important;max-width:100%!important;overflow:visible!important}
 .kclep-shell{zoom:1!important;font-size:13px!important;margin-top:12px!important;max-width:100%}

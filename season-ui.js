@@ -1,6 +1,6 @@
 (function(){
   'use strict';
-  const style=document.createElement('link');style.rel='stylesheet';style.href='season.css?v=20';document.head.append(style);
+  const style=document.createElement('link');style.rel='stylesheet';style.href='season.css?v=21';document.head.append(style);
   const params=new URLSearchParams(location.search);
   const escape=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   function isCompleted(subject,id,state={}){
