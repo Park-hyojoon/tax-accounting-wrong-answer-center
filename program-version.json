@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "revision": 80,
-  "updatedAt": "2026-09-25T12:56:30+09:00",
+  "revision": 81,
+  "updatedAt": "2026-09-25T21:37:19+09:00",
   "files": [
     "오답_훈련센터.html",
     "일반전표_기본연습_24문제.html",
@@ -41,5 +41,5 @@
     "concept-notes.css",
     "output/pdf/vat-concepts.pdf"
   ],
-  "note": "특별훈련 반복약점: 정답·직접 통과 문제는 재방문 목록에서 제외하고 현재 채점 화면만 유지"
+  "note": "추가회 응용문제 4개 등록"
 }
