@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <title>AI 작업 규칙 점검 · 오답 학습센터</title>
+  <style>
+    :root{--ink:#17324d;--muted:#60758a;--line:#d6e3ed;--blue:#1877d2;--safe:#14734b;--safe-bg:#e8f8ef;--keep:#305d86;--keep-bg:#edf6ff;--warn:#a24c00;--warn-bg:#fff2dc;--paper:#fff}
+    *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:linear-gradient(180deg,#eaf7ff,#f7f9fc 380px);color:var(--ink);font-family:"Malgun Gothic","맑은 고딕",system-ui,sans-serif;font-size:17px;line-height:1.65}
+    button,input{font:inherit}.hero{padding:28px 20px;background:linear-gradient(135deg,#126dbd,#22a28f);color:#fff}.hero-inner,main{max-width:1120px;margin:auto}.hero a{color:#fff;font-weight:800}.eyebrow{margin:0 0 4px;color:#dafaff;font-weight:900}.hero h1{margin:0;font-size:clamp(1.7rem,4vw,2.5rem);line-height:1.25}.hero p{max-width:800px;margin:10px 0 0}
+    main{padding:24px 18px 70px}.summary{display:grid;grid-template-columns:repeat(4,1fr);gap:11px;margin-bottom:18px}.summary article{padding:16px;border:1px solid var(--line);border-radius:16px;background:#fff;box-shadow:0 7px 20px rgba(31,79,119,.07)}.summary strong{display:block;font-size:1.65rem;line-height:1.2}.summary span{color:var(--muted);font-weight:800}
+    .guide,.toolbar,.group{border:1px solid var(--line);border-radius:18px;background:var(--paper);box-shadow:0 8px 24px rgba(31,79,119,.07)}.guide{margin-bottom:18px;padding:18px}.guide h2{margin:0 0 7px;font-size:1.18rem}.guide p{margin:5px 0;color:var(--muted)}
+    .legend{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}.badge{display:inline-flex;align-items:center;padding:3px 9px;border-radius:999px;font-size:.8rem;font-weight:900;white-space:nowrap}.badge.protect{color:var(--safe);background:var(--safe-bg)}.badge.keep{color:var(--keep);background:var(--keep-bg)}.badge.review{color:var(--warn);background:var(--warn-bg)}
+    .toolbar{position:sticky;top:0;z-index:5;display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px;padding:12px}.toolbar button{padding:8px 12px;border:2px solid #bfd8e9;border-radius:11px;background:#fff;color:#31546d;font-weight:900;cursor:pointer}.toolbar button.active{border-color:var(--blue);background:var(--blue);color:#fff}.toolbar input{flex:1 1 260px;min-height:45px;padding:8px 12px;border:2px solid #bfd8e9;border-radius:11px}
+    .group{margin-bottom:16px;overflow:hidden}.group h2{margin:0;padding:16px 18px;background:#f0f8ff;border-bottom:1px solid var(--line);font-size:1.2rem}.rules{list-style:none;margin:0;padding:0}.rule{display:grid;grid-template-columns:52px minmax(0,1fr) auto;gap:12px;align-items:start;padding:15px 18px;border-bottom:1px solid #e5edf3}.rule:last-child{border-bottom:0}.rule.review{background:linear-gradient(90deg,#fff8ec,#fff)}.number{color:#8091a0;font-weight:900}.rule-title{display:block;font-weight:900;line-height:1.45}.rule-note{display:block;margin-top:4px;color:var(--muted);font-size:.9rem}.rule.review .rule-note{color:#81460d}.empty{display:none;padding:28px;text-align:center;color:var(--muted);font-weight:800}.footer{text-align:center;color:var(--muted);font-size:.9rem;margin-top:28px}
+    @media(max-width:700px){body{font-size:16px}.summary{grid-template-columns:repeat(2,1fr)}.rule{grid-template-columns:38px 1fr}.rule .badge{grid-column:2;justify-self:start}.toolbar{top:0}.hero{padding-top:20px}}
+  </style>
+</head>
+<body>
+  <header class="hero"><div class="hero-inner">
+    <p class="eyebrow">전산회계 1급 · 오답 학습센터</p>
+    <h1>AI 작업 규칙 점검</h1>
+    <p>사용자가 정한 규칙을 한곳에서 보고, AI의 정확성과 개인정보를 지키는 규칙과 작업을 불필요하게 느리게 만들 수 있는 규칙을 구분합니다.</p>
+    <p><a href="오답_훈련센터.html">← 학습센터 홈으로</a></p>
+  </div></header>
+  <main>
+    <section class="summary" aria-label="규칙 요약">
+      <article><strong id="totalCount">0</strong><span>전체 규칙</span></article>
+      <article><strong id="protectCount">0</strong><span>핵심 보호</span></article>
+      <article><strong id="keepCount">0</strong><span>유효</span></article>
+      <article><strong id="reviewCount">0</strong><span>정리 필요</span></article>
+    </section>
+    <section class="guide">
+      <h2>표시를 읽는 법</h2>
+      <p><strong>정리 필요</strong>는 삭제 대상이라는 뜻이 아닙니다. 현재 AI 지침에서는 빼고 ‘과거 변경 기록’이나 ‘프로그램 기능 설명’으로 옮기면 더 빠르고 안정적으로 일할 수 있다는 뜻입니다.</p>
+      <div class="legend"><span class="badge protect">핵심 보호</span><span class="badge keep">유효</span><span class="badge review">⚠ 정리 필요</span></div>
+    </section>
+    <div class="toolbar" aria-label="규칙 찾기">
+      <button class="active" data-filter="all" type="button">전체</button>
+      <button data-filter="protect" type="button">핵심 보호</button>
+      <button data-filter="keep" type="button">유효</button>
+      <button data-filter="review" type="button">⚠ 정리 필요</button>
+      <input id="search" type="search" placeholder="예: 동기화, 원문, 타이머" aria-label="규칙 검색">
+    </div>
+    <div id="ruleGroups"></div>
+    <div class="empty" id="empty">조건에 맞는 규칙이 없습니다.</div>
+    <p class="footer">점검 기준일: 2026-09-26 · 출처: 현재 프로젝트 지침, 학습센터 인수인계, 시간 훈련 인수인계</p>
+  </main>
+  <script>
+    const groups=[
+      ['학습 범위와 기본 원칙',[
+        ['keep','2026-09-14에 시작한 새 학습 시즌만 운영한다.','이전 문제와 학습 상태는 백업에만 보존하고 새 통계와 합치지 않는다.'],
+        ['keep','훈련 분야는 이론·일반전표·매입매출전표 세 가지로 제한한다.','결산과 장부 조회는 KcLep에서 훈련한다.'],
+        ['protect','사용자가 자주 틀리는 원문을 주면 숫자·날짜·거래처를 조금 바꾼 대표 응용문제를 만든다.','사용자가 수량을 지정하면 그 수량을 우선한다.'],
+        ['protect','각 응용문제 바로 아래에서 답을 확인할 수 있어야 한다.','기존 접힌 정답·채점 기능을 유지한다.'],
+        ['keep','제목에는 중립적인 거래 사실만 쓰고 풀이 전 정답을 노출하지 않는다.','정답 계정, 전표 유형 번호, 과세 결론을 제목에서 숨긴다.'],
+        ['review','“사용자는 비개발자 수험생”이라는 설명을 여러 문서에서 반복한다.','한 번만 남겨도 충분한 배경 정보라 중복 지시가 판단 비용을 늘린다.']
+      ]],
+      ['빠른 문제 등록 절차',[
+        ['keep','등록 시작 시 training-tool info를 한 번만 확인한다.','성공한 확인을 반복하지 않는다.'],
+        ['keep','해당 분야의 작은 sample만 확인한다.','최초 형식 확인이 필요할 때만 contract를 본다.'],
+        ['keep','중복이나 재오답 확인이 필요할 때만 mistakes를 조회한다.','일상 등록 때 큰 원장 전체를 읽지 않는다.'],
+        ['keep','하루분은 하나의 spec에 originals와 items를 묶어 add를 한 번 실행한다.','등록 도구가 원문·문제·메타·버전을 함께 처리한다.'],
+        ['keep','내장 check가 통과하면 일상 등록 검사를 끝낸다.','브라우저·구조 검사를 매번 반복하지 않는다.'],
+        ['protect','문제를 등록하기 전에 정답의 계정·차대·금액 산술을 확인한다.','답을 확정할 자료가 부족하거나 모순되면 근거를 먼저 확인한다.'],
+        ['keep','일상 등록에서는 큰 HTML·원장·인수인계 전체·웹을 읽지 않는다.','관련된 작은 자료만 읽는다.'],
+        ['keep','새 문제는 각 분야 데이터의 맨 뒤에 추가한다.','기존 숫자 인덱스와 시즌 저장 키를 바꾸지 않는다.'],
+        ['review','“spec은 스크래치 폴더에서 Python으로 만든다”는 특정 구현 방법을 강제한다.','JSON이 유효하다는 결과만 요구하고 생성 수단은 도구에 맡기는 편이 안정적이다.'],
+        ['review','PowerShell 함수 이름 R·Rp, BOM 같은 과거 환경 주의가 활성 규칙에 남아 있다.','문제가 재현될 때 참고할 기술 메모로 옮기는 편이 낫다.']
+      ]],
+      ['원문과 증빙 보존',[
+        ['protect','회차별 기출 원본 오답 Markdown을 반드시 보존한다.','같은 회차 자료는 같은 파일에 덧붙인다.'],
+        ['protect','실제 회차·문항 번호·사용자가 보낸 원문·답안·표·설명을 그대로 기록한다.','제공되지 않은 정보는 추정하지 않는다.'],
+        ['protect','실수 이유를 모르면 null 또는 미제공으로 남긴다.','AI가 학습자의 이유를 만들어내지 않는다.'],
+        ['protect','거래일을 자료 전달일로 사용하지 않는다.','회차와 문항 번호가 없으면 임의로 만들지 않는다.'],
+        ['protect','중요한 표가 이미지에만 있으면 읽어서 원문 자료에 기록한다.','필요한 원본 이미지는 개인 폴더에 두고 상대 링크를 남긴다.'],
+        ['protect','풀이에 필요한 표·계산서·영수증은 공개 문제에도 같은 구조와 핵심 값으로 재현한다.','한 줄 문장으로 평탄화하지 않는다.'],
+        ['protect','개인 원문·증빙·백업을 공개 프로그램 저장소에 올리지 않는다.','공개 집계에는 원문 없이 참조 정보만 둔다.'],
+        ['keep','원문 Markdown을 분석 정본으로 삼고 접수 JS는 도구용 요약으로만 쓴다.','공개 학습 화면은 접수 원장을 직접 불러오지 않는다.'],
+        ['review','“이미지 숫자가 계산과 다르면 계산이 맞는 값을 쓴다”는 문구가 원문 보존 원칙과 충돌할 수 있다.','원문 값과 정정 값을 각각 표시하도록 하나의 명확한 우선순위 규칙으로 합쳐야 한다.']
+      ]],
+      ['중복 제출과 반복 약점',[
+        ['protect','단순 재전송이나 증빙 보완은 새로운 실패로 세지 않는다.','직접 제출 오답 건수를 부풀리지 않는다.'],
+        ['keep','2026-09-26 이후 이미 등록된 문제를 문제 등록용으로 다시 제출하면 재오답으로 기록한다.','새 id를 만들고 recurrenceOf로 기존 접수와 연결한다.'],
+        ['keep','같은 문제 재제출은 2회째부터 특별훈련에 표시한다.','유사 유형과 큰 개념은 직접 제출 3회 이상부터 표시한다.'],
+        ['protect','AI 생성 문제 수와 훈련 중 wrongCount를 직접 제출 건수에 합산하지 않는다.','서로 다른 학습 신호를 분리한다.'],
+        ['keep','원문이 통과되거나 화면에서 삭제되어도 접수 원문과 원장은 남긴다.','학습 이력 보존을 우선한다.'],
+        ['review','인수인계에는 직접 제출 반복 기준이 3회라고 적힌 과거 문장과 같은 문제 2회 기준이 함께 있다.','현재 기준인 같은 문제 2회·유사 유형 3회만 활성 규칙으로 남겨야 한다.'],
+        ['review','수동 ★ 기능을 유지한다는 과거 문장과 수동 ★를 종료했다는 현재 문장이 함께 있다.','종료된 방식은 변경 기록으로 이동해야 AI가 다시 구현하지 않는다.']
+      ]],
+      ['문제 데이터와 채점',[
+        ['keep','문제는 분야별 data 파일에 두고 기존 HTML 화면과 채점기를 재사용한다.','META·원장·회차 목록·버전은 등록 도구가 생성한다.'],
+        ['keep','대표 응용문제는 기본 목록에 노출한다.','추가 응용문제만 variantOf로 연결해 별도 취급한다.'],
+        ['keep','통과한 문제는 기본 목록에서 숨기되 문제와 학습 이력은 보존한다.','학습 상태에서 다시 열 수 있어야 한다.'],
+        ['protect','매도가능증권 계정코드는 178만 정답으로 인정한다.','이론 선택지와 전표 채점 모두 이름뿐 아니라 코드도 맞아야 한다.'],
+        ['keep','일반전표는 분개 행 순서와 관계없이 채점한다.','계정·차대·금액·필수 부가정보가 모두 맞아야 한다.'],
+        ['keep','거래처의 ㈜와 (주)는 같은 표기로 판단한다.','검색과 채점의 기존 호환을 유지한다.'],
+        ['keep','매입매출전표의 날짜·유형·공급가액·세액·공급처·전자·분개·행을 독립 채점한다.','필요한 문제에는 카드사·영세율·불공제 사유도 채점한다.'],
+        ['keep','유형 14·17·22·57·61은 공급대가를 분리한다.','11·51·54는 기본 10%를 계산한다.'],
+        ['keep','voucher.grossInput이 있는 문제는 포함금액 입력을 지원한다.','현금·외상·카드·혼합의 자동 상대계정 규칙을 유지한다.'],
+        ['keep','새 매입매출 품목의 기본 필드는 item을 사용한다.','기존 데이터 계약을 유지한다.'],
+        ['review','입력 높이 24px·29px·32px·36px 같은 세부 수치가 최상위 지침에 있다.','사용자 경험 목표만 활성 규칙에 두고 픽셀 값은 CSS 또는 디자인 기록으로 옮긴다.'],
+        ['review','특정 색상 코드 세 개와 1100px·760px 같은 구현 값이 AI 작업 규칙에 섞여 있다.','기능 규칙이 아니라 화면 사양 문서에서 관리하는 편이 낫다.']
+      ]],
+      ['학습 이력과 특별훈련',[
+        ['keep','2026-09-26 00:00 이후 채점 오답과 노트 오답을 훈련 중 오답에 자동 수집한다.','이론·일반전표·매입매출전표·시간 훈련에 같은 기준을 적용한다.'],
+        ['keep','이후 정답이나 직접 통과가 있으면 특별훈련에서 제외한다.','다시 오답이면 다시 포함한다.'],
+        ['protect','취소·삭제·기준일 이전 기록은 현재 오답 횟수에서 제외한다.','날짜 없는 wrongCount만으로 특별훈련에 넣지 않는다.'],
+        ['keep','노트 학습 이력은 source:notebook으로 자동 채점과 구별한다.','시간 훈련 이력은 source:timed와 timing 정보를 사용한다.'],
+        ['protect','되돌린 기록은 id와 cancelledAt을 남긴다.','동기화 때 취소 기록이 다시 살아나지 않게 한다.'],
+        ['keep','영구 삭제는 더보기 안에 두고 명시적인 경우에만 묘비를 만든다.','통과를 삭제로 바꾸지 않는다.'],
+        ['review','알림이 5초 또는 2.5초 뒤 닫힌다는 세부 구현이 핵심 AI 지침에 있다.','동작 기록으로 옮겨도 사용자 의도는 보존된다.'],
+        ['review','특정 테스트 파일 이름과 과거 통과·실패 결과가 활성 규칙에 길게 남아 있다.','현재 검증 명령만 남기고 실행 이력은 변경 기록으로 옮긴다.']
+      ]],
+      ['동기화와 배포',[
+        ['protect','새 시즌 localStorage 키와 원격 경로만 사용한다.','이전 시즌 JSON 가져오기와 원격 병합을 거부한다.'],
+        ['protect','PC와 모바일은 같은 시즌의 고유 이력을 덮어쓰지 않고 합친다.','강제 덮어쓰기를 하지 않는다.'],
+        ['protect','토큰을 파일·로그·백업에 남기지 않는다.','모바일 토큰은 사용자 기기에만 저장한다.'],
+        ['keep','학습기록 전송은 사용자가 동기화 또는 오늘 기록 저장을 눌렀을 때만 한다.','AI가 자동 전송을 추가하지 않는다.'],
+        ['keep','새 문제 등록과 검사 후 공개 프로그램 변경을 GitHub main에 일반 push한다.','강제 push는 하지 않는다.'],
+        ['protect','원격에 다른 변경이 있으면 먼저 안전하게 확인하고 충돌 시 중단한다.','사용자의 다른 변경을 덮어쓰지 않는다.'],
+        ['keep','공통 JS를 수정하면 bump로 실제 화면의 로딩 버전을 맞춘다.','캐시 때문에 오래된 기능이 남지 않게 한다.'],
+        ['review','README의 학습상태 원격 경로가 구시즌 경로로 적혀 있고 현재 지침은 시즌별 경로를 요구한다.','사용자 안내를 현재 exam-20260914 경로로 바로잡아야 한다.'],
+        ['review','인수인계의 “AI 변경 게시도 동기화 버튼으로 실행”은 현재의 등록 후 즉시 배포 규칙과 충돌한다.','현재 규칙인 등록 검사 후 일반 push를 하나의 기준으로 남겨야 한다.'],
+        ['review','과거 커밋 번호와 당시 push 차단 사유가 활성 인수인계에 남아 있다.','완료된 사건은 변경 기록으로 이동해야 현재 배포를 잘못 막지 않는다.']
+      ]],
+      ['화면과 성능',[
+        ['keep','UI나 구조는 사용자가 명시적으로 요청했을 때만 바꾼다.','문제 등록 요청으로 화면 개편까지 확대하지 않는다.'],
+        ['keep','현재 화면에서 쓰지 않는 스크립트와 분석 데이터는 불러오지 않는다.','홈 전용 자료는 홈에서만 읽는다.'],
+        ['keep','시간 훈련 기능은 timed=1일 때만 불러온다.','일반 학습 화면을 가볍게 유지한다.'],
+        ['keep','정지·일시정지·백그라운드에서는 반복 화면 계산을 멈춘다.','같은 이벤트의 저장과 렌더링은 한 번으로 합친다.'],
+        ['keep','실익 없는 중복 수동 버튼은 제거한다.','문제·기록·백업·동기화·채점 기능은 보존한다.'],
+        ['keep','외부 UI 라이브러리·폰트·빌드 단계·AI 호출을 추가하지 않는다.','공유 JS와 CSS로 공통 기능을 유지한다.'],
+        ['review','“차분한 녹색 홈과 보라·하늘·주황 강조색” 같은 취향이 다른 문서의 실제 파란 홈 설명과 어긋난다.','현재 디자인 자체를 정본으로 삼고 색 설명은 제거하는 편이 안전하다.'],
+        ['review','이미 구현이 끝난 메뉴 순서·모바일 배치·TOP 목록의 상세 변경 이력이 규칙처럼 누적되어 있다.','현재 기능 설명과 과거 변경 기록을 분리해야 한다.']
+      ]],
+      ['시간 훈련',[
+        ['protect','타이머 버튼은 시간 측정만 담당한다.','문제 이동·스크롤·입력 잠금·문제 초기화와 연결하지 않는다.'],
+        ['keep','시계 안에는 시간 숫자만 표시한다.','안내 문구나 문제 수를 넣지 않는다.'],
+        ['keep','확인 창과 불필요한 “시간 훈련·N문제·다음 문제” 표시는 만들지 않는다.','화면을 단순하게 유지한다.'],
+        ['keep','시계 클릭은 시작·정지만 수행하고 자동 이동·자동 시작·자동 스크롤을 하지 않는다.','일시정지는 시간만 멈추며 입력은 잠그지 않는다.'],
+        ['keep','타이머 초기화는 측정만 버리고 문제와 입력값은 유지한다.','문제 초기화는 문제 영역에서 별도로 수행한다.'],
+        ['keep','시간 훈련도 기존 문제 데이터와 채점기를 재사용한다.','채점·통과·동기화 이력을 깨지 않는다.'],
+        ['keep','사용자가 시간 훈련 제외를 명시한 문제만 timeTraining:false로 둔다.','일반 학습에는 남긴다.'],
+        ['review','“최신 회차 자동 선택, 38px 높이, 빨간 링” 같은 현재 UI 묘사가 사용자 원칙과 같은 강도로 적혀 있다.','바꿔도 되는 현 상태와 절대 지킬 원칙을 분리해야 한다.'],
+        ['review','등록 완료 문제 수와 회차 목록이 오래된 고정 숫자로 남아 있다.','training-tool info가 계산하는 현재값만 사용하고 문서의 수동 현황은 제거해야 한다.']
+      ]],
+      ['검증과 완료 보고',[
+        ['keep','일상 문제 등록은 add의 내장 검사와 최종 check 한 번으로 끝낸다.','구조 변경 검사를 일상 절차에 끌어오지 않는다.'],
+        ['keep','공통 기능이나 구조를 바꾼 경우에만 관련 전용 검증을 실행한다.','변경 위험에 비례해 검사한다.'],
+        ['protect','실행 환경이 없으면 검사를 실행했다고 말하지 않는다.','확인한 범위와 미확인 범위를 구분한다.'],
+        ['keep','완료 보고는 변경 내용·검사 결과·동기화 안내를 짧게 전달한다.','비개발자 수험생이 다음 행동을 바로 알 수 있게 한다.'],
+        ['review','여러 날짜별 섹션에 동일한 검증 원칙이 반복된다.','“등록 검사”와 “구조 변경 검사” 두 규칙으로 합치면 충분하다.']
+      ]]
+    ];
+    const labels={protect:'핵심 보호',keep:'유효',review:'⚠ 정리 필요'};
+    const host=document.getElementById('ruleGroups');let seq=0;
+    groups.forEach(([title,rules])=>{const section=document.createElement('section');section.className='group';const heading=document.createElement('h2');heading.textContent=title;section.append(heading);const list=document.createElement('ol');list.className='rules';rules.forEach(([status,text,note])=>{seq++;const item=document.createElement('li');item.className=`rule ${status}`;item.dataset.status=status;item.dataset.search=`${title} ${text} ${note}`.toLowerCase();item.innerHTML=`<span class="number">${seq}</span><span><span class="rule-title"></span><span class="rule-note"></span></span><span class="badge ${status}">${labels[status]}</span>`;item.querySelector('.rule-title').textContent=text;item.querySelector('.rule-note').textContent=note;list.append(item)});section.append(list);host.append(section)});
+    const items=[...document.querySelectorAll('.rule')];document.getElementById('totalCount').textContent=items.length;['protect','keep','review'].forEach(status=>document.getElementById(status+'Count').textContent=items.filter(x=>x.dataset.status===status).length);
+    let filter='all';const search=document.getElementById('search');function render(){const term=search.value.trim().toLowerCase();let visible=0;items.forEach(item=>{const show=(filter==='all'||item.dataset.status===filter)&&(!term||item.dataset.search.includes(term));item.hidden=!show;if(show)visible++});document.querySelectorAll('.group').forEach(group=>group.hidden=![...group.querySelectorAll('.rule')].some(x=>!x.hidden));document.getElementById('empty').style.display=visible?'none':'block'}
+    document.querySelectorAll('.toolbar button').forEach(button=>button.addEventListener('click',()=>{filter=button.dataset.filter;document.querySelectorAll('.toolbar button').forEach(x=>x.classList.toggle('active',x===button));render()}));search.addEventListener('input',render);
+  </script>
+</body>
+</html>
