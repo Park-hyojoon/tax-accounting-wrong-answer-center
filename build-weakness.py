@@ -66,7 +66,18 @@ def build(root):
         if len(g['events'])<3 and not (kind=='same' and g['resubmitted']):continue
         output.append(dict(id=kind+'-'+hashlib.sha256(key.encode()).hexdigest()[:12],kind=kind,label=g['label'],count=len(g['events']),last=g['last'],resubmitted=g['resubmitted'],refs=list(g['refs'].values())))
     output.sort(key=lambda g:(-g['count'],g['label']))
-    data=dict(threshold=3,total=len(events),groups=output)
+    all_refs={}
+    for event in events:
+        for problem in event['refs']:
+            key=(problem['subject'],str(problem['id']))
+            all_refs[key]=dict(
+                subject=problem['subject'],
+                id=problem['id'],
+                title=problem['title'],
+                type=problem['type'],
+                examRound=problem.get('examRound') or 0,
+            )
+    data=dict(threshold=3,total=len(events),groups=output,all=list(all_refs.values()))
     (root/'weakness-data.js').write_text('window.TrainingWeaknessData='+json.dumps(data,ensure_ascii=False,separators=(',',':'))+';\n',encoding='utf-8')
     print(f'반복 약점 집계: 직접 제출 {len(events)}건, 재제출 또는 3회 이상 묶음 {len(output)}개')
     return data

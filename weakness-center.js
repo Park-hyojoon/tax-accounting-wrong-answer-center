@@ -11,7 +11,7 @@
   const refKey=ref=>ref.subject+':'+ref.id;
   const repeated=new Set(data.groups.flatMap(group=>group.refs.map(refKey)));
   const formatDate=new Intl.DateTimeFormat('ko-KR',{timeZone:'Asia/Seoul',month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'});
-  let source=params.get('weaknessSource')==='submitted'?'submitted':'recent',kind='type',subjectFilter='all';
+  let source=['submitted','all'].includes(params.get('weaknessSource'))?params.get('weaknessSource'):'recent',kind='type',subjectFilter='all';
 
   main.replaceChildren();
   const style=document.createElement('style');
@@ -44,6 +44,7 @@
   function link(refs,label){
     const a=document.createElement('a'),url=new URL(files[refs[0].subject],location.href);
     url.searchParams.set('view','all');url.searchParams.set('fresh','1');url.searchParams.set('weakrefs',refs.map(r=>r.id).join(','));url.searchParams.set('weaknessSource',source);
+    if(source==='all')url.searchParams.set('reviewAll','1');
     a.href=url.href;a.textContent=label;return a;
   }
   function filter(label,value,selected,action){
@@ -59,10 +60,34 @@
     }
     recent.sort((a,b)=>Date.parse(b.lastAt)-Date.parse(a.lastAt)||refKey(a).localeCompare(refKey(b)));
     const groups=data.groups.map(group=>({...group,refs:group.refs.filter(ref=>!progress.isCompleted(ref.subject,ref.id,states[ref.subject]))})).filter(group=>group.refs.length);
+    const allSubmitted=(data.all||[]).filter(ref=>files[ref.subject]);
     sources.querySelector('[data-source=recent]').textContent='훈련 중 오답 · '+recent.length+'문제';
     sources.querySelector('[data-source=submitted]').textContent='직접 제출 반복 · '+groups.length+'묶음';
+    sources.querySelector('[data-source=all]').textContent='모든 기출문제 오답 복습 · '+allSubmitted.length+'문제';
     sources.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.source===source)));
     bar.replaceChildren();batch.replaceChildren();grid.replaceChildren();
+    if(source==='all'){
+      intro.textContent='직접 제출한 모든 기출 오답을 통과 여부와 관계없이 다시 볼 수 있습니다. 회차는 섞어서 보여주며, 이론·일반전표·매입매출전표로 나누어 이어 풀 수 있습니다.';
+      for(const [subject,label] of [['all','전체'],...Object.entries(subjects)]){
+        const count=allSubmitted.filter(ref=>subject==='all'||ref.subject===subject).length;
+        filter(label+' · '+count,subject,subjectFilter,()=>{subjectFilter=subject;render()});
+      }
+      const visible=allSubmitted.filter(ref=>subjectFilter==='all'||ref.subject===subjectFilter);
+      for(const subject of Object.keys(files)){
+        const refs=visible.filter(ref=>ref.subject===subject);
+        if(refs.length)batch.append(link(refs,subjects[subject]+' '+refs.length+'문제 이어 풀기'));
+      }
+      if(!visible.length)empty('등록된 기출 오답이 없습니다.');
+      for(const ref of visible){
+        const card=document.createElement('article');card.className='weak-card weak-all-card';card.dataset.subject=ref.subject;card.dataset.id=String(ref.id);
+        const badge=document.createElement('span');badge.className='weak-badge';badge.textContent=subjects[ref.subject];card.append(badge);
+        if(progress.isCompleted(ref.subject,ref.id,states[ref.subject])){const done=document.createElement('span');done.className='weak-badge';done.textContent='통과 기록 있음';card.append(done)}
+        const title=document.createElement('h3');title.textContent=ref.title;card.append(title);
+        const detail=document.createElement('p');detail.textContent=ref.type+(ref.examRound?' · '+ref.examRound+'회':'');card.append(detail);
+        card.append(link([ref],'복습하기'));grid.append(card);
+      }
+      return;
+    }
     if(source==='recent'){
       intro.textContent=progress.reviewSince.replaceAll('-','.')+'부터 채점에서 틀렸거나 ‘틀렸어요 · 다시 연습’으로 표시한 문제입니다. 정답·통과하면 다음 방문부터 빠지고, 다시 틀리면 돌아옵니다. 날짜가 남아 있는 학습기록을 기준으로 모읍니다.';
       for(const [subject,label] of [['all','전체'],...Object.entries(subjects)]){
@@ -98,7 +123,7 @@
       group.refs.forEach(ref=>{const item=document.createElement('div');item.append(link([ref],ref.title));detail.append(item)});card.append(detail);grid.append(card);
     }
   }
-  for(const value of ['recent','submitted']){
+  for(const value of ['recent','submitted','all']){
     const button=document.createElement('button');button.type='button';button.dataset.source=value;
     button.onclick=()=>{source=value;const url=new URL(location.href);url.searchParams.set('weaknessSource',source);history.replaceState(null,'',url.href);render()};sources.append(button);
   }

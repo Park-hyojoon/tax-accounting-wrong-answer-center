@@ -17,9 +17,10 @@
     const weakIds=new Set((params.get('weakrefs')||'').split(',').filter(Boolean));
     if(weakIds.size&&adapter){
       document.body.classList.add('weakness-practice');
-      const recent=params.get('weaknessSource')==='recent';
-      const target=document.createElement('p');target.textContent=recent?'훈련 중 오답 다시 풀기':'직접 제출 반복 약점 다시 풀기';
-      const back=document.createElement('a');back.href='오답_훈련센터.html?weakness=1&weaknessSource='+(recent?'recent':'submitted');back.textContent=' 약점 목록으로';target.append(back);document.querySelector('main')?.prepend(target);
+      const weaknessSource=params.get('weaknessSource');
+      const labels={recent:'훈련 중 오답 다시 풀기',submitted:'직접 제출 반복 약점 다시 풀기',all:'모든 기출문제 오답 복습'};
+      const target=document.createElement('p');target.textContent=labels[weaknessSource]||labels.submitted;
+      const back=document.createElement('a');back.href='오답_훈련센터.html?weakness=1&weaknessSource='+(weaknessSource||'submitted');back.textContent=' 약점 목록으로';target.append(back);document.querySelector('main')?.prepend(target);
     }
     if(params.get('timed')==='1'&&!adapter?.theory){
       document.body.classList.add('study-page');
@@ -105,7 +106,8 @@
       const match=matches(p)&&(!search||p.type.includes(search))&&(params.get('view')!=='today'||p.addedDate===new Date(Date.now()-new Date().getTimezoneOffset()*60000).toISOString().slice(0,10));
       const special=params.get('view')==='star',hasVariant=problems.some(x=>x.variantOf===(theory?id:Number(id)));
       const weakIds=new Set((params.get('weakrefs')||'').split(',').filter(Boolean));
-      card.hidden=!!get(id,'deleted')||!match||(weakIds.size?!weakIds.has(String(id)):(special&&!star&&p.variantOf==null&&!hasVariant))||(passed&&!passedThisVisit.has(String(id)));
+      const reviewAll=params.get('reviewAll')==='1';
+      card.hidden=!!get(id,'deleted')||!match||(weakIds.size?!weakIds.has(String(id)):(special&&!star&&p.variantOf==null&&!hasVariant))||(passed&&!reviewAll&&!passedThisVisit.has(String(id)));
       card.dataset.typeFilterBaseHidden=String(card.hidden);
       if(special){
         const item=card.closest('details.star-item');if(item)item.hidden=card.hidden;
