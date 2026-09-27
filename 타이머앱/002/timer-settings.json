@@ -1,8 +1,8 @@
 {
   "targetSeconds": 120,
-  "examTargetSeconds": 3600,
+  "examTargetSeconds": 2760,
   "accentColor": "#99cc3f",
-  "problemColor": "#99cc3f",
+  "problemColor": "#ffffff",
   "hotkeys": {
     "problem_toggle": "Ctrl+Space",
     "problem_reset": "Ctrl+Alt+R",
