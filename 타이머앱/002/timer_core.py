@@ -7,6 +7,7 @@ import queue
 import threading
 import time
 import tkinter as tk
+from tkinter import colorchooser
 from windows_taskbar import configure_tk_window, set_process_identity
 
 
@@ -63,7 +64,12 @@ def load_settings():
             saved = {}
     except (OSError, ValueError):
         saved = {}
-    result = {'targetSeconds': 60, 'examTargetSeconds': 3600, 'hotkeys': DEFAULT_KEYS.copy()}
+    result = {
+        'targetSeconds': 60,
+        'examTargetSeconds': 3600,
+        'accentColor': '#99cc3f',
+        'hotkeys': DEFAULT_KEYS.copy(),
+    }
     for name in ('targetSeconds', 'examTargetSeconds'):
         try:
             result[name] = max(1, int(saved.get(name, result[name])))
@@ -78,6 +84,10 @@ def load_settings():
                     result['hotkeys'][action] = combo
                 except ValueError:
                     pass
+    accent = saved.get('accentColor')
+    if (isinstance(accent, str) and len(accent) == 7 and accent.startswith('#')
+            and all(character in '0123456789abcdefABCDEF' for character in accent[1:])):
+        result['accentColor'] = accent.lower()
     # Both start/pause rows represent one shared shortcut, including old settings files.
     result['hotkeys']['exam_toggle'] = result['hotkeys']['problem_toggle']
     return result
@@ -314,13 +324,14 @@ class Timer:
         # Suspend global shortcuts while capturing keys, including the shortcuts being changed.
         self.change_hotkeys(None)
         dialog = tk.Toplevel(self.root, bg=PALE)
-        dialog.title('단축키 설정')
+        dialog.title('타이머 설정')
         dialog.attributes('-topmost', True)
         dialog.resizable(False, False)
         dialog.grab_set()
         draft = self.data['hotkeys'].copy()
+        draft_color = [self.data.get('accentColor', '#99cc3f')]
         buttons, waiting = {}, [None]
-        tk.Label(dialog, text='항목을 누른 뒤 새 단축키를 누르세요.', bg=PALE, fg=INK,
+        tk.Label(dialog, text='단축키와 타이머 색상을 설정하세요.', bg=PALE, fg=INK,
                  font=('맑은 고딕', 10)).pack(padx=15, pady=(14, 8))
         for action, label in LABELS.items():
             row = tk.Frame(dialog, bg=PALE)
@@ -338,6 +349,32 @@ class Timer:
                                relief='solid', bd=1, font=('맑은 고딕', 9), cursor='hand2')
             button.pack(side='left')
             buttons[action] = button
+        color_row = tk.Frame(dialog, bg=PALE)
+        color_row.pack(fill='x', padx=15, pady=(9, 3))
+        tk.Label(color_row, text='타이머 색상', width=22, anchor='w', bg=PALE, fg=INK,
+                 font=('맑은 고딕', 9)).pack(side='left')
+
+        def color_text_color(value):
+            red, green, blue = (int(value[index:index + 2], 16) for index in (1, 3, 5))
+            return '#080a09' if red * 299 + green * 587 + blue * 114 > 145000 else '#ffffff'
+
+        def choose_color():
+            chosen = colorchooser.askcolor(color=draft_color[0], parent=dialog,
+                                            title='타이머 색상 선택')[1]
+            if chosen:
+                draft_color[0] = chosen.lower()
+                color_button.config(text=draft_color[0], bg=draft_color[0],
+                                    activebackground=draft_color[0],
+                                    fg=color_text_color(draft_color[0]),
+                                    activeforeground=color_text_color(draft_color[0]))
+
+        color_button = tk.Button(color_row, text=draft_color[0], command=choose_color, width=20,
+                                 bg=draft_color[0], activebackground=draft_color[0],
+                                 fg=color_text_color(draft_color[0]),
+                                 activeforeground=color_text_color(draft_color[0]),
+                                 relief='solid', bd=1, font=('맑은 고딕', 9, 'bold'),
+                                 cursor='hand2')
+        color_button.pack(side='left')
         error = tk.Label(dialog, text='', bg=PALE, fg=DARK_RED, font=('맑은 고딕', 9))
         error.pack(pady=(4, 0))
 
@@ -394,9 +431,13 @@ class Timer:
                 error.config(text='시작·중단을 제외한 단축키는 서로 달라야 합니다')
                 return
             self.data['hotkeys'] = draft.copy()
+            color_changed = self.data.get('accentColor') != draft_color[0]
+            self.data['accentColor'] = draft_color[0]
             save_settings(self.data)
             self.change_hotkeys(draft.copy())
             dialog.destroy()
+            if color_changed and hasattr(self, 'apply_accent_color'):
+                self.apply_accent_color(draft_color[0])
 
         tk.Button(dialog, text='저장', command=done, bg=WHITE, fg=BLUE, font=('맑은 고딕', 10, 'bold'),
                   relief='solid', bd=1, cursor='hand2').pack(pady=(8, 16), ipadx=20, ipady=3)

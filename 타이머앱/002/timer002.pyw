@@ -1,4 +1,4 @@
-"""Yellow stopwatch edition; timing and shortcuts are shared with the preserved core."""
+"""Stopwatch edition; the upper dial is exam time and the lower display is problem time."""
 import ctypes
 import os
 from pathlib import Path
@@ -13,7 +13,7 @@ from window_position import keep_visible
 HERE = Path(__file__).resolve().parent
 ICON = str(HERE / 'timer002.ico')
 core.PALE, core.INK, core.BLUE = '#eef1f0', '#080a09', '#41483e'
-core.RED, core.TRACK = '#ffdc00', '#dce1dd'
+core.RED, core.TRACK = '#99cc3f', '#dce1dd'
 
 
 class Stopwatch(core.Timer):
@@ -27,6 +27,7 @@ class Stopwatch(core.Timer):
         self.key_thread_id = None
         self.frames = OrderedDict()
         self.current_frame = None
+        self.accent = self.data.get('accentColor', '#99cc3f')
         root.title('타이머 002')
         root.configure(bg=core.PALE)
         root.iconbitmap(default=ICON)
@@ -36,11 +37,18 @@ class Stopwatch(core.Timer):
                                 highlightthickness=0, cursor='hand2', takefocus=True)
         self.canvas.pack()
         self.art_id = self.canvas.create_image(0, 0, anchor='nw')
-        self.text_id = self.canvas.create_text(120, 257, fill='#ffdc00',
-                                               font=('Segoe UI', -34, 'bold'))
+        self.exam_label_id = self.canvas.create_text(120, 161, text='시험 시간', fill=core.INK,
+                                                     font=('맑은 고딕', -17, 'bold'))
+        self.exam_target_id = self.canvas.create_text(120, 187, fill=core.INK,
+                                                      font=('맑은 고딕', -18, 'bold'))
+        self.problem_label_id = self.canvas.create_text(48, 258, text='문제\n시간', fill=self.accent,
+                                                        justify='center',
+                                                        font=('맑은 고딕', -15, 'bold'))
+        self.text_id = self.canvas.create_text(148, 258, fill=self.accent,
+                                               font=('Segoe UI', -31, 'bold'))
         self.canvas.bind('<Button-1>', self.clicked)
         self.canvas.bind('<Button-3>', lambda _e: self.shortcut_dialog())
-        self.canvas.bind('<Return>', lambda _e: self.time_dialog('problem'))
+        self.canvas.bind('<Return>', lambda _e: self.time_dialog('exam'))
         self.canvas.bind('<Motion>', self.hover)
         self.canvas.bind('<Leave>', lambda _e: root.title('타이머 002'))
         self.status = tk.Label(root, bg=core.PALE, fg='#b22b2b', wraplength=220,
@@ -67,15 +75,15 @@ class Stopwatch(core.Timer):
         if 165 <= x <= 205 and 19 <= y <= 55:
             return 'settings'
         if 27 <= x <= 213 and 232 <= y <= 285:
-            return 'exam'
-        if (x-120)**2 + (y-127)**2 <= 94**2:
             return 'problem'
+        if (x-120)**2 + (y-127)**2 <= 94**2:
+            return 'exam'
         return None
 
     def clicked(self, event):
         zone = self.zone(event.x, event.y)
         if zone == 'reset':
-            self.problem.reset()
+            self.exam.reset()
         elif zone == 'settings':
             self.shortcut_dialog()
         elif zone in ('exam', 'problem'):
@@ -83,14 +91,15 @@ class Stopwatch(core.Timer):
 
     def hover(self, event):
         zone = self.zone(event.x, event.y)
-        labels = {'reset':'문제 타이머 초기화', 'settings':'단축키 설정',
-                  'exam':'시험 시간 설정', 'problem':'문제 시간 ' + self.problem.text() + ' · 눌러 설정'}
+        labels = {'reset':'시험 타이머 초기화', 'settings':'단축키·색상 설정',
+                  'problem':'문제 시간 ' + self.problem.text() + ' · 눌러 설정',
+                  'exam':'시험 시간 ' + self.exam.text() + ' · 눌러 설정'}
         self.root.title(labels.get(zone, '타이머 002'))
         self.canvas.config(cursor='hand2' if zone else 'arrow')
 
     def draw(self):
-        left = self.problem.target - self.problem.elapsed()
-        frame = 'overdue' if left < 0 else f'{round(max(0, min(1, left/self.problem.target))*180):03}'
+        left = self.exam.target - self.exam.elapsed()
+        frame = 'overdue' if left < 0 else f'{round(max(0, min(1, left/self.exam.target))*180):03}'
         if frame != self.current_frame:
             if frame not in self.frames:
                 self.frames[frame] = tk.PhotoImage(file=str(HERE / 'frames' / (frame + '.png')))
@@ -99,10 +108,41 @@ class Stopwatch(core.Timer):
             self.current_frame = frame
             while len(self.frames) > 16:
                 self.frames.popitem(last=False)
-        text = self.exam.text().replace(':', ' : ')
+        target_minutes = self.exam.target // 60
+        target_text = f'{target_minutes}분' if self.exam.target % 60 == 0 else self.exam.text()
+        self.canvas.itemconfigure(self.exam_target_id, text=target_text)
+        text = self.problem.text().replace(':', ' : ')
+        self.canvas.itemconfigure(self.problem_label_id, fill=self.accent)
         self.canvas.itemconfigure(self.text_id, text=text,
-                                  fill='#ff9a69' if self.exam.elapsed() > self.exam.target else '#ffdc00',
-                                  font=('Segoe UI', -34 if len(text) <= 8 else -27, 'bold'))
+                                  fill='#f26b46' if self.problem.elapsed() > self.problem.target else self.accent,
+                                  font=('Segoe UI', -31 if len(text) <= 8 else -25, 'bold'))
+
+    def apply_accent_color(self, color):
+        old_color = self.accent
+        self.status.config(text='새 색상을 적용하는 중입니다…')
+        self.status.pack(padx=8, pady=(0, 8))
+        self.root.update_idletasks()
+        try:
+            from build_artwork import build_assets
+            build_assets(color)
+        except (ImportError, OSError, ValueError) as error:
+            self.data['accentColor'] = old_color
+            core.save_settings(self.data)
+            self.status.config(text='색상을 적용하지 못했습니다: ' + str(error))
+            return
+        self.accent = color
+        core.RED = color
+        self.frames.clear()
+        self.current_frame = None
+        self.canvas.itemconfigure(self.problem_label_id, fill=color)
+        self.canvas.itemconfigure(self.text_id, fill=color)
+        try:
+            self.root.iconbitmap(default=ICON)
+            configure_tk_window(self.root, __file__, ICON)
+        except OSError:
+            pass
+        self.status.config(text='')
+        self.status.pack_forget()
 
 
 if __name__ == '__main__':

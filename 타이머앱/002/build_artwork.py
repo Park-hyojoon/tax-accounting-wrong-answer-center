@@ -1,14 +1,15 @@
 """Build antialiased clock frames once. Running the timer only needs standard Python/Tk."""
 from pathlib import Path
 import math
+import sys
 from PIL import Image, ImageDraw, ImageFilter, ImageFont
 
 HERE = Path(__file__).resolve().parent
 SIZE, SCALE = (240, 292), 4
-BG, BLACK, YELLOW = '#eef1f0', '#080a09', '#ffdc00'
+BG, BLACK, DEFAULT_ACCENT = '#eef1f0', '#080a09', '#99cc3f'
 
 
-def artwork(fraction=1, overdue=False):
+def artwork(fraction=1, overdue=False, accent=DEFAULT_ACCENT):
     size = tuple(x * SCALE for x in SIZE)
     im = Image.new('RGBA', size, BG)
     shadow = Image.new('RGBA', size)
@@ -30,7 +31,7 @@ def artwork(fraction=1, overdue=False):
     pen.ellipse(box((26, 33, 214, 221)), fill=BLACK)
     pen.ellipse(box((36, 43, 204, 211)), fill='#ffffff')
     dial = box((47, 54, 193, 200))
-    color = '#f26b46' if overdue else YELLOW
+    color = '#f26b46' if overdue else accent
     if fraction >= 1:
         pen.ellipse(dial, fill=color)
     elif fraction > 0:
@@ -49,18 +50,31 @@ def artwork(fraction=1, overdue=False):
     return im.resize(SIZE, Image.Resampling.LANCZOS)
 
 
-if __name__ == '__main__':
+def build_assets(accent=DEFAULT_ACCENT):
     folder = HERE / 'frames'
     folder.mkdir(exist_ok=True)
     for step in range(181):
-        artwork(step / 180).save(folder / f'{step:03}.png')
-    artwork(1, True).save(folder / 'overdue.png')
-    preview = artwork()
-    font = ImageFont.truetype('C:/Windows/Fonts/seguisb.ttf', 34)
-    ImageDraw.Draw(preview).text((120,257), '60 : 00', font=font, anchor='mm', fill=YELLOW)
+        artwork(step / 180, accent=accent).save(folder / f'{step:03}.png')
+    artwork(1, True, accent=accent).save(folder / 'overdue.png')
+    preview = artwork(accent=accent)
+    clock_font = ImageFont.truetype('C:/Windows/Fonts/malgunbd.ttf', 18)
+    label_font = ImageFont.truetype('C:/Windows/Fonts/malgunbd.ttf', 15)
+    time_font = ImageFont.truetype('C:/Windows/Fonts/seguisb.ttf', 31)
+    preview_pen = ImageDraw.Draw(preview)
+    preview_pen.text((120, 161), '시험 시간', font=clock_font, anchor='mm', fill=BLACK)
+    preview_pen.text((120, 187), '60분', font=clock_font, anchor='mm', fill=BLACK)
+    preview_pen.multiline_text((48, 258), '문제\n시간', font=label_font, anchor='mm',
+                               align='center', spacing=-2, fill=accent)
+    preview_pen.text((148, 258), '2 : 00', font=time_font, anchor='mm', fill=accent)
     preview.save(HERE / 'preview.png')
-    icon = artwork().crop((21, 0, 219, 226))
+    icon = artwork(accent=accent).crop((21, 0, 219, 226))
     square = Image.new('RGBA', (240,240), BG)
     square.alpha_composite(icon, ((240-icon.width)//2, (240-icon.height)//2))
     square.save(HERE / 'timer002.ico', sizes=[(s,s) for s in (16,24,32,48,64,128,256)])
-    print('182 clock frames, icon and preview created.')
+    return folder
+
+
+if __name__ == '__main__':
+    color = sys.argv[1] if len(sys.argv) > 1 else DEFAULT_ACCENT
+    build_assets(color)
+    print(f'182 clock frames, icon and preview created in {color}.')
