@@ -12,6 +12,7 @@ from window_position import keep_visible
 
 HERE = Path(__file__).resolve().parent
 ICON = str(HERE / 'timer002.ico')
+DIAL_SECONDS = 60 * 60
 core.PALE, core.INK, core.BLUE = '#eef1f0', '#080a09', '#41483e'
 core.RED, core.TRACK = '#99cc3f', '#dce1dd'
 
@@ -91,9 +92,13 @@ class Stopwatch(core.Timer):
         self.root.title(labels.get(zone, 'Timer 002'))
         self.canvas.config(cursor='hand2' if zone else 'arrow')
 
+    @staticmethod
+    def dial_fraction(seconds_left):
+        return max(0, min(1, seconds_left / DIAL_SECONDS))
+
     def draw(self):
         left = self.exam.target - self.exam.elapsed()
-        frame = 'overdue' if left < 0 else f'{round(max(0, min(1, left/self.exam.target))*180):03}'
+        frame = 'overdue' if left < 0 else f'{round(self.dial_fraction(left)*180):03}'
         if frame != self.current_frame:
             if frame not in self.frames:
                 self.frames[frame] = tk.PhotoImage(file=str(HERE / 'frames' / (frame + '.png')))
