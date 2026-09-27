@@ -28,7 +28,8 @@ class Stopwatch(core.Timer):
         self.frames = OrderedDict()
         self.current_frame = None
         self.accent = self.data.get('accentColor', '#99cc3f')
-        root.title('타이머 002')
+        self.problem_accent = self.data.get('problemColor', '#99cc3f')
+        root.title('Timer 002')
         root.configure(bg=core.PALE)
         root.iconbitmap(default=ICON)
         root.attributes('-topmost', True)
@@ -37,20 +38,13 @@ class Stopwatch(core.Timer):
                                 highlightthickness=0, cursor='hand2', takefocus=True)
         self.canvas.pack()
         self.art_id = self.canvas.create_image(0, 0, anchor='nw')
-        self.exam_label_id = self.canvas.create_text(120, 161, text='시험 시간', fill=core.INK,
-                                                     font=('맑은 고딕', -17, 'bold'))
-        self.exam_target_id = self.canvas.create_text(120, 187, fill=core.INK,
-                                                      font=('맑은 고딕', -18, 'bold'))
-        self.problem_label_id = self.canvas.create_text(48, 258, text='문제\n시간', fill=self.accent,
-                                                        justify='center',
-                                                        font=('맑은 고딕', -15, 'bold'))
-        self.text_id = self.canvas.create_text(148, 258, fill=self.accent,
-                                               font=('Segoe UI', -31, 'bold'))
+        self.text_id = self.canvas.create_text(120, 258, fill=self.problem_accent,
+                                               font=('Segoe UI', -34, 'bold'))
         self.canvas.bind('<Button-1>', self.clicked)
         self.canvas.bind('<Button-3>', lambda _e: self.shortcut_dialog())
         self.canvas.bind('<Return>', lambda _e: self.time_dialog('exam'))
         self.canvas.bind('<Motion>', self.hover)
-        self.canvas.bind('<Leave>', lambda _e: root.title('타이머 002'))
+        self.canvas.bind('<Leave>', lambda _e: root.title('Timer 002'))
         self.status = tk.Label(root, bg=core.PALE, fg='#b22b2b', wraplength=220,
                                font=('맑은 고딕', -11))
         threading.Thread(target=self.hotkey_loop, daemon=True).start()
@@ -91,10 +85,10 @@ class Stopwatch(core.Timer):
 
     def hover(self, event):
         zone = self.zone(event.x, event.y)
-        labels = {'reset':'시험 타이머 초기화', 'settings':'단축키·색상 설정',
-                  'problem':'문제 시간 ' + self.problem.text() + ' · 눌러 설정',
-                  'exam':'시험 시간 ' + self.exam.text() + ' · 눌러 설정'}
-        self.root.title(labels.get(zone, '타이머 002'))
+        labels = {'reset':'Reset exam', 'settings':'Settings',
+                  'problem':'Problem ' + self.problem.text(),
+                  'exam':'Exam ' + self.exam.text()}
+        self.root.title(labels.get(zone, 'Timer 002'))
         self.canvas.config(cursor='hand2' if zone else 'arrow')
 
     def draw(self):
@@ -108,41 +102,40 @@ class Stopwatch(core.Timer):
             self.current_frame = frame
             while len(self.frames) > 16:
                 self.frames.popitem(last=False)
-        target_minutes = self.exam.target // 60
-        target_text = f'{target_minutes}분' if self.exam.target % 60 == 0 else self.exam.text()
-        self.canvas.itemconfigure(self.exam_target_id, text=target_text)
         text = self.problem.text().replace(':', ' : ')
-        self.canvas.itemconfigure(self.problem_label_id, fill=self.accent)
         self.canvas.itemconfigure(self.text_id, text=text,
-                                  fill='#f26b46' if self.problem.elapsed() > self.problem.target else self.accent,
-                                  font=('Segoe UI', -31 if len(text) <= 8 else -25, 'bold'))
+                                  fill='#f26b46' if self.problem.elapsed() > self.problem.target else self.problem_accent,
+                                  font=('Segoe UI', -34 if len(text) <= 8 else -27, 'bold'))
 
-    def apply_accent_color(self, color):
+    def apply_timer_colors(self, color, problem_color, rebuild_clock):
         old_color = self.accent
-        self.status.config(text='새 색상을 적용하는 중입니다…')
-        self.status.pack(padx=8, pady=(0, 8))
-        self.root.update_idletasks()
-        try:
-            from build_artwork import build_assets
-            build_assets(color)
-        except (ImportError, OSError, ValueError) as error:
-            self.data['accentColor'] = old_color
-            core.save_settings(self.data)
-            self.status.config(text='색상을 적용하지 못했습니다: ' + str(error))
-            return
+        self.problem_accent = problem_color
+        self.canvas.itemconfigure(self.text_id, fill=problem_color)
+        if rebuild_clock:
+            self.status.config(text='새 색상을 적용하는 중입니다…')
+            self.status.pack(padx=8, pady=(0, 8))
+            self.root.update_idletasks()
+            try:
+                from build_artwork import build_assets
+                build_assets(color, problem_color)
+            except (ImportError, OSError, ValueError) as error:
+                self.data['accentColor'] = old_color
+                core.save_settings(self.data)
+                self.status.config(text='색상을 적용하지 못했습니다: ' + str(error))
+                return
         self.accent = color
         core.RED = color
-        self.frames.clear()
-        self.current_frame = None
-        self.canvas.itemconfigure(self.problem_label_id, fill=color)
-        self.canvas.itemconfigure(self.text_id, fill=color)
+        if rebuild_clock:
+            self.frames.clear()
+            self.current_frame = None
         try:
             self.root.iconbitmap(default=ICON)
             configure_tk_window(self.root, __file__, ICON)
         except OSError:
             pass
-        self.status.config(text='')
-        self.status.pack_forget()
+        if rebuild_clock:
+            self.status.config(text='')
+            self.status.pack_forget()
 
 
 if __name__ == '__main__':

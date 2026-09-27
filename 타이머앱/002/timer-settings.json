@@ -2,6 +2,7 @@
   "targetSeconds": 120,
   "examTargetSeconds": 3600,
   "accentColor": "#99cc3f",
+  "problemColor": "#99cc3f",
   "hotkeys": {
     "problem_toggle": "Ctrl+Space",
     "problem_reset": "Ctrl+Alt+R",

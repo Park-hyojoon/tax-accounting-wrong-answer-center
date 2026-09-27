@@ -50,22 +50,17 @@ def artwork(fraction=1, overdue=False, accent=DEFAULT_ACCENT):
     return im.resize(SIZE, Image.Resampling.LANCZOS)
 
 
-def build_assets(accent=DEFAULT_ACCENT):
+def build_assets(accent=DEFAULT_ACCENT, problem_accent=None):
+    problem_accent = problem_accent or accent
     folder = HERE / 'frames'
     folder.mkdir(exist_ok=True)
     for step in range(181):
         artwork(step / 180, accent=accent).save(folder / f'{step:03}.png')
     artwork(1, True, accent=accent).save(folder / 'overdue.png')
     preview = artwork(accent=accent)
-    clock_font = ImageFont.truetype('C:/Windows/Fonts/malgunbd.ttf', 18)
-    label_font = ImageFont.truetype('C:/Windows/Fonts/malgunbd.ttf', 15)
-    time_font = ImageFont.truetype('C:/Windows/Fonts/seguisb.ttf', 31)
+    time_font = ImageFont.truetype('C:/Windows/Fonts/seguisb.ttf', 34)
     preview_pen = ImageDraw.Draw(preview)
-    preview_pen.text((120, 161), '시험 시간', font=clock_font, anchor='mm', fill=BLACK)
-    preview_pen.text((120, 187), '60분', font=clock_font, anchor='mm', fill=BLACK)
-    preview_pen.multiline_text((48, 258), '문제\n시간', font=label_font, anchor='mm',
-                               align='center', spacing=-2, fill=accent)
-    preview_pen.text((148, 258), '2 : 00', font=time_font, anchor='mm', fill=accent)
+    preview_pen.text((120, 258), '2 : 00', font=time_font, anchor='mm', fill=problem_accent)
     preview.save(HERE / 'preview.png')
     icon = artwork(accent=accent).crop((21, 0, 219, 226))
     square = Image.new('RGBA', (240,240), BG)
@@ -76,5 +71,6 @@ def build_assets(accent=DEFAULT_ACCENT):
 
 if __name__ == '__main__':
     color = sys.argv[1] if len(sys.argv) > 1 else DEFAULT_ACCENT
-    build_assets(color)
+    problem_color = sys.argv[2] if len(sys.argv) > 2 else color
+    build_assets(color, problem_color)
     print(f'182 clock frames, icon and preview created in {color}.')

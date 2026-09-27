@@ -68,6 +68,7 @@ def load_settings():
         'targetSeconds': 60,
         'examTargetSeconds': 3600,
         'accentColor': '#99cc3f',
+        'problemColor': '#99cc3f',
         'hotkeys': DEFAULT_KEYS.copy(),
     }
     for name in ('targetSeconds', 'examTargetSeconds'):
@@ -88,6 +89,13 @@ def load_settings():
     if (isinstance(accent, str) and len(accent) == 7 and accent.startswith('#')
             and all(character in '0123456789abcdefABCDEF' for character in accent[1:])):
         result['accentColor'] = accent.lower()
+    problem_accent = saved.get('problemColor')
+    if (isinstance(problem_accent, str) and len(problem_accent) == 7
+            and problem_accent.startswith('#')
+            and all(character in '0123456789abcdefABCDEF' for character in problem_accent[1:])):
+        result['problemColor'] = problem_accent.lower()
+    elif 'accentColor' in saved:
+        result['problemColor'] = result['accentColor']
     # Both start/pause rows represent one shared shortcut, including old settings files.
     result['hotkeys']['exam_toggle'] = result['hotkeys']['problem_toggle']
     return result
@@ -329,7 +337,10 @@ class Timer:
         dialog.resizable(False, False)
         dialog.grab_set()
         draft = self.data['hotkeys'].copy()
-        draft_color = [self.data.get('accentColor', '#99cc3f')]
+        draft_colors = {
+            'accentColor': self.data.get('accentColor', '#99cc3f'),
+            'problemColor': self.data.get('problemColor', '#99cc3f'),
+        }
         buttons, waiting = {}, [None]
         tk.Label(dialog, text='단축키와 타이머 색상을 설정하세요.', bg=PALE, fg=INK,
                  font=('맑은 고딕', 10)).pack(padx=15, pady=(14, 8))
@@ -349,32 +360,38 @@ class Timer:
                                relief='solid', bd=1, font=('맑은 고딕', 9), cursor='hand2')
             button.pack(side='left')
             buttons[action] = button
-        color_row = tk.Frame(dialog, bg=PALE)
-        color_row.pack(fill='x', padx=15, pady=(9, 3))
-        tk.Label(color_row, text='타이머 색상', width=22, anchor='w', bg=PALE, fg=INK,
-                 font=('맑은 고딕', 9)).pack(side='left')
-
         def color_text_color(value):
             red, green, blue = (int(value[index:index + 2], 16) for index in (1, 3, 5))
             return '#080a09' if red * 299 + green * 587 + blue * 114 > 145000 else '#ffffff'
 
-        def choose_color():
-            chosen = colorchooser.askcolor(color=draft_color[0], parent=dialog,
-                                            title='타이머 색상 선택')[1]
-            if chosen:
-                draft_color[0] = chosen.lower()
-                color_button.config(text=draft_color[0], bg=draft_color[0],
-                                    activebackground=draft_color[0],
-                                    fg=color_text_color(draft_color[0]),
-                                    activeforeground=color_text_color(draft_color[0]))
+        color_buttons = {}
 
-        color_button = tk.Button(color_row, text=draft_color[0], command=choose_color, width=20,
-                                 bg=draft_color[0], activebackground=draft_color[0],
-                                 fg=color_text_color(draft_color[0]),
-                                 activeforeground=color_text_color(draft_color[0]),
-                                 relief='solid', bd=1, font=('맑은 고딕', 9, 'bold'),
-                                 cursor='hand2')
-        color_button.pack(side='left')
+        def choose_color(setting):
+            chosen = colorchooser.askcolor(color=draft_colors[setting], parent=dialog,
+                                            title='색상 선택')[1]
+            if chosen:
+                draft_colors[setting] = chosen.lower()
+                button = color_buttons[setting]
+                button.config(text=chosen.lower(), bg=chosen, activebackground=chosen,
+                              fg=color_text_color(chosen),
+                              activeforeground=color_text_color(chosen))
+
+        for setting, label in (('accentColor', '위 시계 색상'),
+                               ('problemColor', '아래 숫자 색상')):
+            color_row = tk.Frame(dialog, bg=PALE)
+            color_row.pack(fill='x', padx=15, pady=(9 if setting == 'accentColor' else 3, 3))
+            tk.Label(color_row, text=label, width=22, anchor='w', bg=PALE, fg=INK,
+                     font=('맑은 고딕', 9)).pack(side='left')
+            value = draft_colors[setting]
+            color_button = tk.Button(color_row, text=value,
+                                     command=lambda selected=setting: choose_color(selected),
+                                     width=20, bg=value, activebackground=value,
+                                     fg=color_text_color(value),
+                                     activeforeground=color_text_color(value),
+                                     relief='solid', bd=1, font=('맑은 고딕', 9, 'bold'),
+                                     cursor='hand2')
+            color_button.pack(side='left')
+            color_buttons[setting] = color_button
         error = tk.Label(dialog, text='', bg=PALE, fg=DARK_RED, font=('맑은 고딕', 9))
         error.pack(pady=(4, 0))
 
@@ -431,13 +448,15 @@ class Timer:
                 error.config(text='시작·중단을 제외한 단축키는 서로 달라야 합니다')
                 return
             self.data['hotkeys'] = draft.copy()
-            color_changed = self.data.get('accentColor') != draft_color[0]
-            self.data['accentColor'] = draft_color[0]
+            clock_color_changed = self.data.get('accentColor') != draft_colors['accentColor']
+            self.data.update(draft_colors)
             save_settings(self.data)
             self.change_hotkeys(draft.copy())
             dialog.destroy()
-            if color_changed and hasattr(self, 'apply_accent_color'):
-                self.apply_accent_color(draft_color[0])
+            if hasattr(self, 'apply_timer_colors'):
+                self.apply_timer_colors(draft_colors['accentColor'],
+                                        draft_colors['problemColor'],
+                                        clock_color_changed)
 
         tk.Button(dialog, text='저장', command=done, bg=WHITE, fg=BLUE, font=('맑은 고딕', 10, 'bold'),
                   relief='solid', bd=1, cursor='hand2').pack(pady=(8, 16), ipadx=20, ipady=3)
