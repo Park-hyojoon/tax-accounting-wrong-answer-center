@@ -32,6 +32,32 @@ CONCEPT_RULES = [
     ('금융자산·채권', r'매도가능|단기매매|외상매출금|받을어음|대여금|대손'),
 ]
 
+# 사용자가 2026-09-27에 별도로 묶어 준 기출 오답만 전용 복습 메뉴에 넣는다.
+# 이전 직접 제출 기록은 반복 약점 집계에는 남지만 이 묶음에 자동 합산하지 않는다.
+ALL_EXAM_REVIEW_INTAKE_IDS = {
+    'unassigned-theory-revenue-measurement-20260927',
+    'unassigned-theory-periodic-cogs-20260927',
+    'unassigned-theory-semivariable-20260927',
+    'unassigned-theory-abnormal-spoilage-20260927',
+    'unassigned-theory-simplified-taxpayer-20260927',
+    'unassigned-theory-financial-elements-20260927',
+    'unassigned-theory-ppe-20260927',
+    'unassigned-theory-bond-issuance-20260927',
+    'unassigned-theory-capital-expenditure-20260927',
+    'unassigned-theory-vat-filing-deadline-20260927',
+    'unassigned-theory-tax-invoice-exemption-20260927',
+    'unassigned-theory-operating-profit-20260927',
+    'unassigned-voucher-direct-export-20260927',
+    'unassigned-practical-card-settlement-20260927',
+    'unassigned-practical-db-retirement-20260927',
+    'unassigned-voucher-truck-repair-20260927',
+    'unassigned-voucher-subcontract-processing-20260927',
+    'unassigned-voucher-donation-20260927',
+    'unassigned-practical-note-discount-20260927',
+    'unassigned-practical-bond-redemption-20260927',
+    'unassigned-practical-interest-prepaid-tax-20260927',
+}
+
 def build(root):
     spec=importlib.util.spec_from_file_location('training_registration',root/'training-tool.py')
     t=importlib.util.module_from_spec(spec);spec.loader.exec_module(t);t.ROOT=root
@@ -68,6 +94,8 @@ def build(root):
     output.sort(key=lambda g:(-g['count'],g['label']))
     all_refs={}
     for event in events:
+        if event['id'] not in ALL_EXAM_REVIEW_INTAKE_IDS:
+            continue
         for problem in event['refs']:
             key=(problem['subject'],str(problem['id']))
             all_refs[key]=dict(

@@ -67,7 +67,7 @@
     sources.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.source===source)));
     bar.replaceChildren();batch.replaceChildren();grid.replaceChildren();
     if(source==='all'){
-      intro.textContent='직접 제출한 모든 기출 오답을 통과 여부와 관계없이 다시 볼 수 있습니다. 회차는 섞어서 보여주며, 이론·일반전표·매입매출전표로 나누어 이어 풀 수 있습니다.';
+      intro.textContent='이번에 이론과 실무로 나누어 전달한 기출 오답만 모았습니다. 통과 여부와 관계없이 이론·일반전표·매입매출전표로 나누어 다시 풀 수 있습니다.';
       for(const [subject,label] of [['all','전체'],...Object.entries(subjects)]){
         const count=allSubmitted.filter(ref=>subject==='all'||ref.subject===subject).length;
         filter(label+' · '+count,subject,subjectFilter,()=>{subjectFilter=subject;render()});

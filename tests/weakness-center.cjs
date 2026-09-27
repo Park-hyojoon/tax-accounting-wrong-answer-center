@@ -13,7 +13,7 @@ const root=path.resolve(__dirname,'..');
    assert.equal(await allButton.count(),1,'all submitted review menu');
    await allButton.click();
    assert.ok((await allButton.innerText()).startsWith('모든 기출문제 오답 복습 · '));
-   assert.ok(await page.locator('.weak-all-card').count()>=21,'all submitted questions are listed');
+   assert.equal(await page.locator('.weak-all-card').count(),21,'only the requested exam review set is listed');
    assert.equal(await page.locator('.weak-all-card[data-id="review-20260927-revenue-measurement"] h3').count(),1,'new standalone source question');
    const allReviewLink=page.locator('.weak-batch a').first();
    assert.equal(new URL(await allReviewLink.getAttribute('href')).searchParams.get('reviewAll'),'1');
