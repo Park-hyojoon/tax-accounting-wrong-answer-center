@@ -11,7 +11,7 @@
   const refKey=ref=>ref.subject+':'+ref.id;
   const repeated=new Set(data.groups.flatMap(group=>group.refs.map(refKey)));
   const formatDate=new Intl.DateTimeFormat('ko-KR',{timeZone:'Asia/Seoul',month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'});
-  let source=['submitted','all'].includes(params.get('weaknessSource'))?params.get('weaknessSource'):'recent',kind='type',subjectFilter='all';
+  let source=['submitted','all'].includes(params.get('weaknessSource'))?params.get('weaknessSource'):'recent',kind='type',subjectFilter='all',showPassed=params.get('showPassed')==='1';
 
   main.replaceChildren();
   const style=document.createElement('style');
@@ -53,7 +53,7 @@
   function link(refs,label){
     const a=document.createElement('a'),url=new URL(files[refs[0].subject],location.href);
     url.searchParams.set('view','all');url.searchParams.set('fresh','1');url.searchParams.set('weakrefs',refs.map(r=>r.id).join(','));url.searchParams.set('weaknessSource',source);
-    if(source==='all')url.searchParams.set('reviewAll','1');
+    if(source==='all'&&showPassed){url.searchParams.set('reviewAll','1');url.searchParams.set('showPassed','1')}
     a.href=url.href;a.textContent=label;return a;
   }
   function filter(label,value,selected,action){
@@ -145,24 +145,28 @@
     }
     recent.sort((a,b)=>Date.parse(b.lastAt)-Date.parse(a.lastAt)||refKey(a).localeCompare(refKey(b)));
     const groups=data.groups.map(group=>({...group,refs:group.refs.filter(ref=>!progress.isCompleted(ref.subject,ref.id,states[ref.subject]))})).filter(group=>group.refs.length);
-    const allSubmitted=(data.all||[]).filter(ref=>files[ref.subject]);
+    const allSubmitted=(data.all||[]).filter(ref=>files[ref.subject]&&!(ref.subject==='theory'?states.theory.deleted?.[ref.id]:states[ref.subject].cards?.[ref.id]?.deleted));
+    const remaining=allSubmitted.filter(ref=>!progress.isCompleted(ref.subject,ref.id,states[ref.subject]));
+    const reviewRefs=showPassed?allSubmitted:remaining;
     sources.querySelector('[data-source=recent]').textContent='훈련 중 오답 · '+recent.length+'문제';
     sources.querySelector('[data-source=submitted]').textContent='직접 제출 반복 · '+groups.length+'묶음';
-    sources.querySelector('[data-source=all]').textContent='모든 기출문제 오답 복습 · '+allSubmitted.length+'문제';
+    sources.querySelector('[data-source=all]').textContent='모든 기출문제 오답 복습 · '+reviewRefs.length+'문제';
     sources.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.source===source)));
     bar.replaceChildren();batch.replaceChildren();grid.replaceChildren();
     if(source==='all'){
-      intro.textContent='이 메뉴에 넣도록 전달한 기출 오답만 모았습니다. 통과 여부와 관계없이 이론·일반전표·매입매출전표로 나누어 다시 풀 수 있습니다.';
+      intro.textContent='이 메뉴에 넣도록 전달한 기출 오답만 모았습니다. 정답·통과한 문제는 기본 목록에서 잠시 숨기며, 문제와 학습기록은 보관합니다.';
       for(const [subject,label] of [['all','전체'],...Object.entries(subjects)]){
-        const count=allSubmitted.filter(ref=>subject==='all'||ref.subject===subject).length;
+        const count=reviewRefs.filter(ref=>subject==='all'||ref.subject===subject).length;
         filter(label+' · '+count,subject,subjectFilter,()=>{subjectFilter=subject;render()});
       }
-      const visible=allSubmitted.filter(ref=>subjectFilter==='all'||ref.subject===subjectFilter);
+      const toggle=document.createElement('button');toggle.type='button';toggle.className='weak-show-passed';toggle.textContent=(showPassed?'통과 문제 숨기기':'통과 문제 보기')+' · '+(allSubmitted.length-remaining.length);toggle.setAttribute('aria-pressed',String(showPassed));
+      toggle.onclick=()=>{showPassed=!showPassed;const url=new URL(location.href);showPassed?url.searchParams.set('showPassed','1'):url.searchParams.delete('showPassed');history.replaceState(null,'',url.href);render()};bar.append(toggle);
+      const visible=reviewRefs.filter(ref=>subjectFilter==='all'||ref.subject===subjectFilter);
       for(const subject of Object.keys(files)){
         const refs=visible.filter(ref=>ref.subject===subject);
         if(refs.length)batch.append(link(refs,subjects[subject]+' '+refs.length+'문제 이어 풀기'));
       }
-      if(!visible.length)empty('등록된 기출 오답이 없습니다.');
+      if(!visible.length)empty(allSubmitted.length?'이 분류에 남은 미통과 문제가 없습니다. 통과 문제 보기로 보관된 문제를 다시 볼 수 있습니다.':'등록된 기출 오답이 없습니다.');
       for(const ref of visible){
         const card=document.createElement('article');card.className='weak-card weak-all-card';card.dataset.subject=ref.subject;card.dataset.id=String(ref.id);
         const badge=document.createElement('span');badge.className='weak-badge';badge.textContent=subjects[ref.subject];card.append(badge);
@@ -174,7 +178,7 @@
       return;
     }
     if(source==='recent'){
-      intro.textContent=progress.reviewSince.replaceAll('-','.')+'부터 채점에서 틀렸거나 ‘틀렸어요 · 다시 연습’으로 표시한 문제입니다. 정답·통과하면 다음 방문부터 빠지고, 다시 틀리면 돌아옵니다. 날짜가 남아 있는 학습기록을 기준으로 모읍니다.';
+      intro.textContent=progress.reviewSince.replaceAll('-','.')+'부터 채점에서 틀렸거나 ‘틀렸어요 · 다시 연습’으로 표시한 문제입니다. 정답·통과하면 목록에서 빠지고, 다시 틀리면 돌아옵니다. 날짜가 남아 있는 학습기록을 기준으로 모읍니다.';
       for(const [subject,label] of [['all','전체'],...Object.entries(subjects)]){
         const count=recent.filter(ref=>subject==='all'||ref.subject===subject).length;
         filter(label+' · '+count,subject,subjectFilter,()=>{subjectFilter=subject;render()});

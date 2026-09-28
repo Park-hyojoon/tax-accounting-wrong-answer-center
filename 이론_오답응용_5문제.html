@@ -155,7 +155,7 @@
   </main>
 
   <script src="github-learning-sync.js?v=22"></script>
-  <script src="season-ui.js?v=43"></script>
+  <script src="season-ui.js?v=44"></script>
 <script src="training-ui.js?v=13"></script>
   <script>
     const problems=loadTrainingProblems();
@@ -203,17 +203,18 @@
     const typeView=(new URLSearchParams(location.search).get('type')||'').trim();
     const starView=new URLSearchParams(location.search).get('view')==='star';
     const weaknessRefs=new Set((new URLSearchParams(location.search).get('weakrefs')||'').split(',').filter(Boolean));
+    const passedReviewQuery=new URLSearchParams(location.search),explicitPassReview=passedReviewQuery.get('reviewAll')==='1'&&passedReviewQuery.get('showPassed')==='1';
     // 응용문제의 원문제도 ★ 상태와 관계없이 같은 묶음에 표시한다. 이론은 id 문자열로 원문제를 가리킨다.
     const variantSourceIds=new Set(problems.filter(p=>p.variantOf!=null).map(p=>p.variantOf));
     const sessionPassed=new Set();
     function renderCard(card){
       const id=card.dataset.id,p=getProblem(id),checked=state.checked[id],attempts=state.attempts[id]||0,result=$('.result',card);
-      const completed=TrainingSeason.isCompleted('theory',id,state)&&!sessionPassed.has(id)&&card.dataset.passedThisVisit!=='true';
+      const completed=TrainingSeason.isCompleted('theory',id,state)&&!explicitPassReview&&!sessionPassed.has(id)&&card.dataset.passedThisVisit!=='true';
       card.hidden=!TrainingSeason.matches(p)||state.deleted?.[id]?true:weaknessRefs.size?(!weaknessRefs.has(id)||completed):starView?!(Boolean(state.starred?.[id])||p.variantOf!=null||variantSourceIds.has(id)):typeView?(p.variantOf!=null||(p.type||'').trim()!==typeView):Boolean(completed||state.archived[id]||(todayView&&card.dataset.addedDate!==localDate()));
       $('.star-one',card).setAttribute('aria-pressed',String(Boolean(state.starred?.[id])));$('.star-note',card).hidden=!state.starred?.[id];
       card.classList.toggle('correct',checked===true);card.classList.toggle('wrong',checked===false);
       result.className='result'+(checked===true?' ok':checked===false?' no':'');
-      result.textContent=checked===true?'정답입니다! 통과 처리되어 다음 방문부터 숨겨집니다.':checked===false?`오답입니다. 다시 풀거나 정답·해설을 확인해보세요.`:state.answers[id]!==undefined?'선택 내용이 자동 저장되었습니다.':'';
+      result.textContent=checked===true?'정답입니다! 통과로 기록되었습니다.':checked===false?`오답입니다. 다시 풀거나 정답·해설을 확인해보세요.`:state.answers[id]!==undefined?'선택 내용이 자동 저장되었습니다.':'';
       $('.attempt',card).textContent=`채점 ${attempts}회 · 틀림 ${wrongCount(id)}회`;
     }
     $$('.question').forEach(card=>{

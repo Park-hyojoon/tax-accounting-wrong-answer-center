@@ -106,8 +106,9 @@
       const match=matches(p)&&(!search||p.type.includes(search))&&(params.get('view')!=='today'||p.addedDate===new Date(Date.now()-new Date().getTimezoneOffset()*60000).toISOString().slice(0,10));
       const special=params.get('view')==='star',hasVariant=problems.some(x=>x.variantOf===(theory?id:Number(id)));
       const weakIds=new Set((params.get('weakrefs')||'').split(',').filter(Boolean));
-      const reviewAll=params.get('reviewAll')==='1';
-      card.hidden=!!get(id,'deleted')||!match||(weakIds.size?!weakIds.has(String(id)):(special&&!star&&p.variantOf==null&&!hasVariant))||(passed&&!reviewAll&&!passedThisVisit.has(String(id)));
+      const reviewAll=params.get('reviewAll')==='1'&&params.get('showPassed')==='1';
+      // 특별훈련에서는 정답·직접 통과 즉시 숨긴다. 일반 연습은 기존 해설 확인 동작을 유지한다.
+      card.hidden=!!get(id,'deleted')||!match||(weakIds.size?!weakIds.has(String(id)):(special&&!star&&p.variantOf==null&&!hasVariant))||(passed&&!reviewAll&&(weakIds.size||!passedThisVisit.has(String(id))));
       card.dataset.typeFilterBaseHidden=String(card.hidden);
       if(special){
         const item=card.closest('details.star-item');if(item)item.hidden=card.hidden;

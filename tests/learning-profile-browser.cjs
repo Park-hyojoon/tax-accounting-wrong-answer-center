@@ -57,7 +57,7 @@ const home=pathToFileURL(path.join(__dirname,'..','오답_훈련센터.html')).h
       const tip=await page.locator('.weak-profile-tip').innerText();
       assert.match(tip,/유형·무형자산 \(잠정\) → 재고자산·매출원가 → 금융·부채·자본 → 원가회계/);
       assert.equal(await page.locator('.weak-profile svg polygon').count(),5,'six observed axes have a filled profile');
-      assert.equal(await page.locator('.weak-all-card').count(),originalCards,'review set unchanged');
+      assert.equal(await page.evaluate(()=>TrainingWeaknessData.all.length),originalCards,'registered review set unchanged; completed cards may be hidden');
       assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),true,'mobile layout fits');
       const snapshot=await page.evaluate(()=>['theory','practical','voucher'].map(s=>localStorage.getItem('exam-20260914-'+s)));
       await page.locator('[data-source=submitted]').click();

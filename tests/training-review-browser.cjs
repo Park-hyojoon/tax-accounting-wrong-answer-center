@@ -33,16 +33,17 @@ const home=url('오답_훈련센터.html')+'?weakness=1';
     if(subject==='theory')assert.equal(await queue().locator('.repeat').count(),1,'overlap is labelled');
     const retry=await queue().locator('a').getAttribute('href');
     await page.goto(retry);await page.waitForURL(u=>!u.searchParams.has('fresh'));
-    await card.locator('.notebook-pass').click();assert.equal(await card.isVisible(),true,'leave the answer visible this visit');
+    await card.locator('.notebook-pass').click();assert.equal(await card.isVisible(),false,'hide newly passed weakness question immediately');
     await page.locator('.notebook-toast button').click();
     await page.goto(home);assert.equal(await queue().count(),1,'undo pass restores review');
     await page.goto(retry);await page.waitForURL(u=>!u.searchParams.has('fresh'));
     await card.locator('.notebook-pass').click();
+    await page.goto(retry+'&reviewAll=1&showPassed=1');await page.waitForURL(u=>!u.searchParams.has('fresh'));
     if(subject==='theory'){
      const answer=await page.evaluate(id=>problems.find(p=>p.id===id).answer,ref.id);
      await card.locator('input[value="'+((answer+1)%4)+'"]').check();
     }
-    // The question remains available while reviewing; another graded error reopens it.
+    // Explicit archived review permits a retry; a new graded error reopens the queue.
     await card.locator('.check-one').click();
     await page.goto(home);assert.equal(await queue().count(),1,subject+' wrong after pass reopens review');
     await page.goto(retry);await page.waitForURL(u=>!u.searchParams.has('fresh'));
@@ -59,17 +60,12 @@ const home=url('오답_훈련센터.html')+'?weakness=1';
    const fresh=page.locator('.question:visible').first(),freshId=await fresh.getAttribute('data-id');
    await fresh.locator('.notebook-wrong').click();await page.locator('.notebook-toast button').click();
    await page.goto(home);assert.equal(await page.locator('.weak-recent-card[data-id="'+freshId+'"]').count(),0);
-   // Actual timed grading shares the same review queue.
-   await page.goto(url(files.practical)+'?timed=1');await page.waitForFunction(()=>window.TrainingTimed?.active?.current);
-   const timedId=await page.evaluate(()=>TrainingTimed.active.current.dataset.index);
-   await page.locator('.question:visible .check-one').click();
-   assert.equal(await page.evaluate(id=>studyState.cards[id].history.at(-1).source,timedId),'timed');
-   await page.goto(home);assert.equal(await page.locator('.weak-recent-card[data-subject=practical][data-id="'+timedId+'"]').count(),1);
+   // The current center operates theory/general/voucher practice, not the retired timed module.
    await page.locator('[data-source=submitted]').click();assert.ok(await page.locator('.weak-card').count()>0);
    await page.reload();assert.equal(await page.locator('[data-source=submitted]').getAttribute('aria-pressed'),'true');
    assert.equal(await page.evaluate(()=>JSON.stringify(TrainingWeaknessData)),evidence);
    assert.deepEqual(errors,[]);await context.close();
   }
-  console.log('PASS: PC/mobile first-error queue, separate direct evidence, pass/undo/reopen, timed grading');
+  console.log('PASS: PC/mobile first-error queue, separate direct evidence, immediate pass hiding, undo and explicit archived retry');
  }finally{await browser.close()}
 })().catch(e=>{console.error(e);process.exitCode=1});
