@@ -37,6 +37,9 @@
   const list=overlay.querySelector('.account-search-list');
   let source=null,items=[],shown=[],active=0,kind='account',koRaw='',koBase='',koreanMode=true;
   const normalized=value=>String(value||'').normalize('NFKC').toLocaleLowerCase('ko-KR').replace(/[\s()·._-]+/g,'');
+  // 모바일에서는 브라우저의 기본 선택창을 사용해 검색창 자동 초점과
+  // 가상 키보드로 인한 화면 이동을 피한다. PC의 빠른 검색은 유지한다.
+  const nativePicker=()=>window.matchMedia('(max-width:600px), (pointer:coarse)').matches;
   // 브라우저는 운영체제 입력기를 강제로 한글로 바꿀 수 없다. 대신 영문 자판으로
   // 입력된 두벌식 키를 검색창 안에서 즉시 한글로 조합한다.
   const C_MAP={r:'ㄱ',R:'ㄲ',s:'ㄴ',e:'ㄷ',E:'ㄸ',f:'ㄹ',a:'ㅁ',q:'ㅂ',Q:'ㅃ',t:'ㅅ',T:'ㅆ',d:'ㅇ',w:'ㅈ',W:'ㅉ',c:'ㅊ',z:'ㅋ',x:'ㅌ',v:'ㅍ',g:'ㅎ'};
@@ -129,13 +132,13 @@
 
   document.addEventListener('pointerdown',event=>{
     const select=event.target.closest?.('select.account,select.partner');
-    if(!select||select.disabled)return;
+    if(!select||select.disabled||nativePicker()||event.pointerType==='touch')return;
     event.preventDefault();
     openPicker(select);
   });
   document.addEventListener('keydown',event=>{
     const select=event.target.closest?.('select.account,select.partner');
-    if(!select||select.disabled||event.ctrlKey||event.altKey||event.metaKey)return;
+    if(!select||select.disabled||nativePicker()||event.ctrlKey||event.altKey||event.metaKey)return;
     if(event.key==='Enter'||event.key===' '||event.key==='ArrowDown'){
       event.preventDefault();
       openPicker(select);
