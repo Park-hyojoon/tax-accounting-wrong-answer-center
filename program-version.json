@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "revision": 97,
-  "updatedAt": "2026-09-28T22:13:19+09:00",
+  "revision": 98,
+  "updatedAt": "2026-09-28T22:36:53+09:00",
   "files": [
     "오답_훈련센터.html",
     "일반전표_기본연습_24문제.html",
@@ -10,6 +10,7 @@
     "github-learning-sync.js",
     "training-ui.js",
     "account-search.js",
+    "question-markup.js",
     "mistake-intake-data.js",
     "mistake-memory.js",
     "training-tool.py",
@@ -37,5 +38,5 @@
     "concept-notes.css",
     "output/pdf/vat-concepts.pdf"
   ],
-  "note": "특별훈련 첫 화면에 학습 영역 육각형 그래프와 참고 보완 순서 추가"
+  "note": "매입매출전표 문제에 오른쪽 클릭 글자색·형광펜·밑줄 표시 추가"
 }
