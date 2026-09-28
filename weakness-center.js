@@ -28,11 +28,20 @@
     '.weak-card details{margin-top:8px;font-size:14px}.weak-card summary{cursor:pointer}',
     '.weak-badge{display:inline-block;padding:4px 8px;margin:0 6px 4px 0;border-radius:5px;background:#eef2f6;color:#475569;font-size:13px}',
     '.weak-badge.repeat{background:#fff1d6;color:#865000}',
-    '.weak-empty{grid-column:1/-1;padding:20px;background:white;border:1px solid #d5d9df;border-radius:8px;line-height:1.7}'
+    '.weak-empty{grid-column:1/-1;padding:20px;background:white;border:1px solid #d5d9df;border-radius:8px;line-height:1.7}',
+    '.weak-profile{margin:20px 0;padding:20px;border:1px solid #d5d9df;border-radius:10px;background:white}',
+    '.weak-profile h3{margin:0 0 8px;font-size:20px}.weak-profile p{line-height:1.7;margin:8px 0}',
+    '.weak-profile-body{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:20px;align-items:center}',
+    '.weak-profile svg{display:block;width:100%;max-width:460px;margin:auto;height:auto}',
+    '.weak-profile-list{list-style:none;padding:0;margin:0}.weak-profile-list li{display:grid;grid-template-columns:1fr auto;gap:6px 12px;padding:12px 0;border-bottom:1px solid #e5e7eb}',
+    '.weak-profile-meta{grid-column:1/-1;color:#5b6470}.weak-profile-list [data-status=weak] strong{color:#a33b26}.weak-profile-list [data-status=strong] strong{color:#26754b}',
+    '.weak-profile-note{color:#5b6470}.weak-profile-tip{padding:12px 14px;background:#f1f5f9;border-radius:7px;overflow-wrap:anywhere}',
+    '@media(max-width:760px){.weak-profile{padding:14px}.weak-profile-body{grid-template-columns:1fr;gap:4px}}'
   ].join('');
   document.head.append(style);
   const heading=document.createElement('h2');heading.textContent='특별훈련 · 반복 약점';main.append(heading);
   const sources=document.createElement('div');sources.className='weak-toolbar weak-sources';sources.setAttribute('aria-label','약점 기록 구분');main.append(sources);
+  const profile=document.createElement('section');profile.className='weak-profile';profile.setAttribute('aria-labelledby','weakProfileTitle');main.append(profile);
   const intro=document.createElement('p');intro.className='weak-description';main.append(intro);
   const bar=document.createElement('div');bar.className='weak-toolbar';bar.setAttribute('aria-label','문제 분류');main.append(bar);
   const batch=document.createElement('div');batch.className='weak-batch';main.append(batch);
@@ -51,8 +60,84 @@
     const b=document.createElement('button');b.type='button';b.textContent=label;b.dataset.kind=value;b.setAttribute('aria-pressed',String(value===selected));b.onclick=action;bar.append(b);
   }
   function empty(message){const p=document.createElement('p');p.className='weak-empty';p.textContent=message;grid.append(p)}
+  const axes=[
+    {label:'회계 기초·수익/비용',lines:['회계 기초','수익·비용']},
+    {label:'재고자산·매출원가',lines:['재고자산','매출원가']},
+    {label:'유형·무형자산',lines:['유형·무형','자산']},
+    {label:'금융·부채·자본',lines:['금융·부채','자본']},
+    {label:'원가회계',lines:['원가회계','배부·공손']},
+    {label:'부가세·매입매출전표',lines:['부가세','매입매출전표']}
+  ];
+  function axisOf(ref){
+    const text=[ref.type,...(ref.tags||[])].join(' ');
+    if(ref.subject==='voucher'||/부가가치세|부가세|간이과세|세금계산서/.test(text))return 5;
+    if(/재고자산|상품재고|매출원가|순실현가능|이동평균|재고감모/.test(text))return 1;
+    if(/원가회계|제조간접|직접노무|종합원가|개별원가|공손|원가행태|준변동|준고정|완성품환산/.test(text))return 4;
+    if(/유형자산|무형자산|감가상각|개발비|자본적지출|수익적지출|건설중인/.test(text))return 2;
+    if(/유가증권|매도가능|단기매매|사채|차입|채권|어음|외화|외환|자본금|주식|증자|이익잉여|충당부채|퇴직연금|대손|정기예금|선납세금/.test(text))return 3;
+    return 0;
+  }
+  function learningProfile(states){
+    const result=axes.map(axis=>({...axis,total:0,correct:0,wrong:0,score:null})),seen=new Set();
+    for(const ref of catalog){
+      if(!files[ref.subject]||seen.has(refKey(ref)))continue;seen.add(refKey(ref));
+      const state=states[ref.subject]||{};
+      const card=ref.subject==='theory'?{deleted:state.deleted?.[ref.id],history:state.history?.[ref.id]}:state.cards?.[ref.id];
+      if(!card||card.deleted)continue;
+      let latest=null,time=-Infinity;
+      for(const event of Array.isArray(card.history)?card.history:[]){
+        const at=Date.parse(event?.at);
+        if(event?.cancelledAt||event?.source==='notebook'||typeof event?.correct!=='boolean'||!Number.isFinite(at))continue;
+        if(at>=time){latest=event;time=at}
+      }
+      if(!latest)continue;
+      const axis=result[axisOf(ref)];axis.total++;if(latest.correct)axis.correct++;else axis.wrong++;
+    }
+    result.forEach(axis=>{if(axis.total)axis.score=Math.round(axis.correct/axis.total*100)});
+    return result;
+  }
+  function renderProfile(states){
+    const scores=learningProfile(states),total=scores.reduce((sum,axis)=>sum+axis.total,0);
+    profile.replaceChildren();
+    const title=document.createElement('h3');title.id='weakProfileTitle';title.textContent='나의 강점·취약점';profile.append(title);
+    const description=document.createElement('p');description.textContent='현재 시즌의 이론·일반전표·매입매출전표를 6개 학습 영역으로 묶었습니다. 바깥쪽에 가까울수록 최근 정답률이 높습니다.';profile.append(description);
+    const body=document.createElement('div');body.className='weak-profile-body';profile.append(body);
+    const ns='http://www.w3.org/2000/svg',svg=document.createElementNS(ns,'svg');svg.setAttribute('viewBox','0 0 460 380');svg.setAttribute('role','img');svg.setAttribute('aria-labelledby','weakRadarTitle weakRadarDescription');
+    const node=(tag,attributes,text)=>{const el=document.createElementNS(ns,tag);Object.entries(attributes||{}).forEach(([key,value])=>el.setAttribute(key,value));if(text!==undefined)el.textContent=text;svg.append(el);return el};
+    node('title',{id:'weakRadarTitle'},'학습 영역별 최근 정답률 육각형 그래프');
+    node('desc',{id:'weakRadarDescription'},scores.map(axis=>axis.label+': '+(axis.score===null?'채점 기록 없음':axis.score+'%, '+axis.total+'문제')).join('. '));
+    const point=(i,radius)=>{const angle=-Math.PI/2+i*Math.PI/3;return [230+Math.cos(angle)*radius,190+Math.sin(angle)*radius]};
+    for(const level of [.25,.5,.75,1])node('polygon',{points:scores.map((_,i)=>point(i,106*level).join(',')).join(' '),fill:'none',stroke:'#d6dee7','stroke-width':1});
+    scores.forEach((axis,i)=>{
+      const [x,y]=point(i,106);node('line',{x1:230,y1:190,x2:x,y2:y,stroke:axis.total?'#b7c6d5':'#d6dee7','stroke-dasharray':axis.total?'none':'4 4'});
+      const [lx,ly]=point(i,148);axis.lines.forEach((line,j)=>node('text',{x:lx,y:ly+(j-0.5)*17,'text-anchor':'middle',fill:'#334155','font-size':14},line));
+    });
+    node('text',{x:238,y:88,fill:'#64748b','font-size':12},'100%');
+    node('text',{x:238,y:139,fill:'#64748b','font-size':12},'50%');
+    if(scores.every(axis=>axis.score!==null))node('polygon',{points:scores.map((axis,i)=>point(i,106*axis.score/100).join(',')).join(' '),fill:'#3283bd', 'fill-opacity':.18,stroke:'#3283bd','stroke-width':2.5});
+    else scores.forEach((axis,i)=>{const next=scores[(i+1)%6];if(axis.score!==null&&next.score!==null){const [x1,y1]=point(i,106*axis.score/100),[x2,y2]=point((i+1)%6,106*next.score/100);node('line',{x1,y1,x2,y2,stroke:'#3283bd','stroke-width':2.5})}});
+    scores.forEach((axis,i)=>{if(axis.score===null)return;const [cx,cy]=point(i,106*axis.score/100);const dot=node('circle',{cx,cy,r:5,fill:axis.total<3?'#64748b':axis.score<60?'#b64630':axis.score>=80?'#26754b':'#3283bd'});const hint=document.createElementNS(ns,'title');hint.textContent=axis.label+' '+axis.score+'%';dot.append(hint)});
+    if(!total)node('text',{x:230,y:196,'text-anchor':'middle',fill:'#64748b','font-size':14},'아직 채점 기록이 없습니다');
+    body.append(svg);
+    const list=document.createElement('ul');list.className='weak-profile-list';body.append(list);
+    scores.forEach((axis,i)=>{
+      const status=!axis.total?'unseen':axis.total<3?'few':axis.score<60?'weak':axis.score>=80?'strong':'practice';
+      const statusLabel={unseen:'미평가',few:'기록 적음 · 잠정',weak:'복습 우선',strong:'최근 안정적',practice:'연습 중'}[status];
+      const row=document.createElement('li');row.dataset.axis=String(i);row.dataset.status=status;
+      const label=document.createElement('span');label.textContent=axis.label;
+      const rate=document.createElement('strong');rate.className='weak-profile-rate';rate.textContent=axis.score===null?'기록 없음':axis.score+'%';
+      const meta=document.createElement('span');meta.className='weak-profile-meta';meta.textContent=axis.total?'최근 정답 '+axis.correct+' / 채점 '+axis.total+'문제 · '+statusLabel:'아직 실제 채점 기록이 없습니다 · '+statusLabel;
+      row.append(label,rate,meta);list.append(row);
+    });
+    const priority=scores.filter(axis=>axis.wrong).sort((a,b)=>a.correct/a.total-b.correct/b.total||b.wrong-a.wrong);
+    const tip=document.createElement('p');tip.className='weak-profile-tip';
+    tip.textContent=priority.length?'참고 보완 순서: '+priority.map(axis=>axis.label+(axis.total<3?' (잠정)':'')).join(' → ')+'. 최근 정답률이 낮은 순서이며, 학습 순서를 강제하지 않습니다.':total?'최근 채점 결과에는 남은 오답이 없습니다. 미평가 영역은 아직 강점으로 판단하지 않습니다.':'참고 보완 순서는 채점 기록이 쌓이면 표시됩니다.';
+    profile.append(tip);
+    const note=document.createElement('p');note.className='weak-profile-note';note.textContent='문항별 마지막 실제 채점 1건만 반영합니다. 직접 제출 횟수·자가 통과·노트 표시·취소·삭제 기록은 점수에서 제외합니다. 채점 3문제 미만은 잠정이며, 60% 미만은 복습 우선, 80% 이상은 최근 안정적으로 표시합니다. 등록된 오답 연습 기준이지 시험 전체 실력 점수는 아닙니다. 기록 없는 축에는 점을 그리지 않습니다.';profile.append(note);
+  }
   function render(){
     const states=readStates(),seen=new Set(),recent=[];
+    renderProfile(states);
     for(const ref of catalog){
       if(!files[ref.subject]||seen.has(refKey(ref)))continue;seen.add(refKey(ref));
       const review=progress.recentReview(ref.subject,ref.id,states[ref.subject]);

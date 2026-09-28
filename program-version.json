@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "revision": 96,
-  "updatedAt": "2026-09-28T21:58:24+09:00",
+  "revision": 97,
+  "updatedAt": "2026-09-28T22:13:19+09:00",
   "files": [
     "오답_훈련센터.html",
     "일반전표_기본연습_24문제.html",
@@ -37,5 +37,5 @@
     "concept-notes.css",
     "output/pdf/vat-concepts.pdf"
   ],
-  "note": "모바일 계정과목·거래처 선택에 브라우저 기본 선택창 사용"
+  "note": "특별훈련 첫 화면에 학습 영역 육각형 그래프와 참고 보완 순서 추가"
 }
