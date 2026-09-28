@@ -32,7 +32,7 @@ CONCEPT_RULES = [
     ('금융자산·채권', r'매도가능|단기매매|외상매출금|받을어음|대여금|대손'),
 ]
 
-# 사용자가 2026-09-27에 별도로 묶어 준 기출 오답만 전용 복습 메뉴에 넣는다.
+# 사용자가 이 메뉴에 넣도록 지정한 기출 오답만 전용 복습 메뉴에 넣는다.
 # 이전 직접 제출 기록은 반복 약점 집계에는 남지만 이 묶음에 자동 합산하지 않는다.
 ALL_EXAM_REVIEW_INTAKE_IDS = {
     'unassigned-theory-revenue-measurement-20260927',
@@ -56,6 +56,26 @@ ALL_EXAM_REVIEW_INTAKE_IDS = {
     'unassigned-practical-note-discount-20260927',
     'unassigned-practical-bond-redemption-20260927',
     'unassigned-practical-interest-prepaid-tax-20260927',
+    'unassigned-practical-machine-check-20260928',
+    'unassigned-voucher-product-gift-20260928',
+    'unassigned-theory-cost-concepts-20260928',
+    'unassigned-theory-input-vat-20260928',
+    'unassigned-voucher-books-20260928',
+    'unassigned-theory-accounting-assumptions-20260928',
+    'unassigned-theory-manufacturing-cost-20260928',
+    'unassigned-practical-customs-payment-20260928',
+    'unassigned-voucher-card-product-sale-20260928',
+    'unassigned-voucher-land-sale-20260928',
+    'unassigned-voucher-material-note-credit-20260928',
+    'unassigned-voucher-private-hotel-20260928',
+    'unassigned-practical-loan-interest-20260928',
+    'unassigned-practical-share-issue-20260928',
+    'unassigned-voucher-scrap-sale-20260928',
+    'unassigned-theory-ppe-disposal-20260928',
+    'unassigned-theory-allowance-20260928',
+    'unassigned-theory-revenue-timing-20260928',
+    'unassigned-theory-inventory-20260928',
+    'unassigned-theory-invoice-transmission-20260928',
 }
 
 def build(root):

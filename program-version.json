@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "revision": 94,
-  "updatedAt": "2026-09-27T22:59:28+09:00",
+  "revision": 95,
+  "updatedAt": "2026-09-28T21:51:56+09:00",
   "files": [
     "오답_훈련센터.html",
     "일반전표_기본연습_24문제.html",
@@ -37,5 +37,5 @@
     "concept-notes.css",
     "output/pdf/vat-concepts.pdf"
   ],
-  "note": "추가회 응용문제 21개 등록"
+  "note": "추가회 응용문제 20개 등록"
 }
