@@ -17,13 +17,13 @@
   const style=document.createElement('style');
   style.textContent=`
     .question [data-question-mark-block]{user-select:text;-webkit-user-select:text}
-    .question-mark-popup{position:fixed;z-index:10020;box-sizing:border-box;width:340px;max-width:calc(100vw - 16px);padding:10px;border:1px solid #bac6d3;border-radius:12px;background:white;box-shadow:0 8px 28px #10243a33;color:#24384c;font:14px/1.5 system-ui,sans-serif}
+    .question-mark-popup{position:fixed;z-index:10020;box-sizing:border-box;width:max-content;max-width:calc(100vw - 16px);padding:0;border:0;background:transparent;color:#24384c;font:14px/1.5 system-ui,sans-serif}
     .question-mark-popup[hidden]{display:none}.question-mark-actions{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
     .question-mark-popup button{display:inline-flex;align-items:center;justify-content:center;min-width:36px;min-height:36px;padding:5px 8px;border:1px solid #d1dbe5;border-radius:7px;background:white;color:#24384c;font:inherit;white-space:nowrap;cursor:pointer}
     .question-mark-popup button:hover,.question-mark-popup button:focus-visible{background:#eef5fc;outline:2px solid #427da9;outline-offset:1px}
     .question-mark-popup button:disabled{opacity:.45;cursor:default}.question-mark-swatch{display:block;width:18px;height:18px;border-radius:4px}
-    .question-mark-footer{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:8px}.question-mark-footer button{flex:none;min-height:28px;padding:2px 8px}.question-mark-status{min-width:0;margin:0;line-height:1.5}
-    .qm-blue{color:#0076a8!important}.qm-red{color:#c62828!important}.qm-green{color:#16723a!important}.qm-highlight{background:#fff200!important;box-decoration-break:clone;-webkit-box-decoration-break:clone}.qm-underline{text-decoration-line:underline;text-decoration-thickness:.12em;text-underline-offset:.18em}
+    .question-mark-status{max-width:300px;margin:6px 0 0;padding:8px;border:1px solid #d1dbe5;border-radius:7px;background:white;line-height:1.5}.question-mark-status[hidden]{display:none}
+    .qm-blue{color:#02b4ff!important}.qm-red{color:#c62828!important}.qm-green{color:#22b14c!important}.qm-highlight{background:#fff200!important;box-decoration-break:clone;-webkit-box-decoration-break:clone}.qm-underline{text-decoration-line:underline;text-decoration-thickness:.12em;text-underline-offset:.18em}
     .question-mark-hint{color:#52677d;font-size:14px;line-height:1.6}
     @media(pointer:coarse){.question-mark-hint{display:none}}@media print{.question-mark-popup,.question-mark-hint{display:none!important}}
   `;
@@ -32,14 +32,14 @@
   const popup=document.createElement('div');popup.className='question-mark-popup';popup.hidden=true;
   popup.setAttribute('role','toolbar');popup.setAttribute('aria-label','선택한 문제 글자 표시');
   popup.innerHTML=`<div class="question-mark-actions">
-    <button type="button" data-question-mark="blue" aria-label="파란 글자색" title="파란 글자색"><span class="question-mark-swatch" style="background:#0076a8"></span></button>
+    <button type="button" data-question-mark="blue" aria-label="파란 글자색" title="파란 글자색"><span class="question-mark-swatch" style="background:#02b4ff"></span></button>
     <button type="button" data-question-mark="red" aria-label="빨간 글자색" title="빨간 글자색"><span class="question-mark-swatch" style="background:#c62828"></span></button>
-    <button type="button" data-question-mark="green" aria-label="초록 글자색" title="초록 글자색"><span class="question-mark-swatch" style="background:#16723a"></span></button>
+    <button type="button" data-question-mark="green" aria-label="초록 글자색" title="초록 글자색"><span class="question-mark-swatch" style="background:#22b14c"></span></button>
     <button type="button" data-question-mark="highlight" aria-label="노란 형광펜" title="노란 형광펜"><span style="background:#fff200;color:#24384c;padding:0 3px">가</span></button>
     <button type="button" data-question-mark="underline" aria-label="밑줄" title="밑줄"><span style="text-decoration:underline">가</span></button>
     <button type="button" data-question-mark="clear" aria-label="선택한 글자의 표시 지우기" title="선택한 글자의 표시 지우기">지움</button>
     <button type="button" class="question-mark-undo" aria-label="직전 표시 되돌리기" title="직전 표시 되돌리기" disabled>↶</button>
-  </div><div class="question-mark-footer"><p class="question-mark-status" role="status" aria-live="polite"></p><button type="button" class="question-mark-close" aria-label="글자 표시 팝업 닫기">닫기</button></div>`;
+  </div><p class="question-mark-status" role="status" aria-live="polite" hidden></p>`;
   document.body.append(popup);
   const status=popup.querySelector('.question-mark-status'),undoButton=popup.querySelector('.question-mark-undo');
   let marks={},pending=[],readable=true;
@@ -81,7 +81,7 @@
   }
   function hide(){popup.hidden=true;pending=[]}
   function place(x,y){const rect=popup.getBoundingClientRect();popup.style.left=Math.max(8,Math.min(x,innerWidth-rect.width-8))+'px';popup.style.top=Math.max(8,Math.min(y,innerHeight-rect.height-8))+'px'}
-  function report(message){status.textContent=message;if(!popup.hidden)place(parseFloat(popup.style.left)||8,parseFloat(popup.style.top)||8)}
+  function report(message){status.textContent=message;status.hidden=!message;if(!popup.hidden)place(parseFloat(popup.style.left)||8,parseFloat(popup.style.top)||8)}
   function save(next){
     if(!readable){report('기존 표시를 읽지 못해 저장을 중지했습니다.');return false}
     try{if(!valid(next))throw Error('format');localStorage.setItem(KEY,JSON.stringify(next));marks=next;return true}catch(_){report('저장하지 못했습니다. 기존 표시는 그대로 유지됩니다.');return false}
@@ -101,7 +101,7 @@
     }
     if(!save(next))return;
     undo.push(before);if(undo.length>30)undo.shift();undoButton.disabled=false;
-    before.forEach((_,id)=>renderBlock(id));getSelection()?.removeAllRanges();report('저장됨 · 다른 표시도 추가 가능');
+    before.forEach((_,id)=>renderBlock(id));getSelection()?.removeAllRanges();report('');
   }
   document.addEventListener('contextmenu',event=>{
     // 휴대폰의 길게 누르기/복사 메뉴와 전표 입력칸의 기본 메뉴는 유지한다.
@@ -110,20 +110,19 @@
     if(!found.length||!target||!found.some(item=>item.id===target.dataset.questionMarkBlock)){hide();return}
     event.preventDefault();pending=found;popup.hidden=false;
     popup.querySelectorAll('[data-question-mark]').forEach(button=>{button.disabled=!readable});
-    status.textContent=readable?'선택한 글자에 적용 · 이 브라우저에 저장':'기존 표시를 읽지 못해 저장을 중지했습니다.';
+    report(readable?'':'기존 표시를 읽지 못해 저장을 중지했습니다.');
     const rect=getSelection().getRangeAt(0).getBoundingClientRect();place(event.clientX||rect.left,event.clientY||rect.bottom);
     if(!event.clientX&&!event.clientY)popup.querySelector('button:not(:disabled)')?.focus({preventScroll:true});
   });
   popup.addEventListener('pointerdown',event=>{if(event.target.closest('button'))event.preventDefault()});
   popup.querySelectorAll('[data-question-mark]').forEach(button=>button.addEventListener('click',()=>apply(button.dataset.questionMark)));
-  popup.querySelector('.question-mark-close').addEventListener('click',hide);
   undoButton.addEventListener('click',()=>{
     if(!undo.length)return;const before=undo[undo.length-1],next={...marks};
     before.forEach((entry,id)=>{if(entry===undefined)delete next[id];else next[id]=copy(entry)});
     if(!save(next))return;undo.pop();before.forEach((_,id)=>renderBlock(id));undoButton.disabled=!undo.length;getSelection()?.removeAllRanges();pending=[];
-    popup.querySelectorAll('[data-question-mark]').forEach(button=>{button.disabled=true});report('직전 표시를 되돌렸습니다.');
+    popup.querySelectorAll('[data-question-mark]').forEach(button=>{button.disabled=true});report('');
   });
-  document.addEventListener('pointerdown',event=>{if(!popup.hidden&&!popup.contains(event.target)&&event.button!==2)hide()});
+  document.addEventListener('pointerdown',event=>{if(!popup.hidden&&!popup.contains(event.target))hide()});
   document.addEventListener('keydown',event=>{if(event.key==='Escape'&&!popup.hidden){event.preventDefault();hide()}});
   window.addEventListener('scroll',event=>{if(!popup.contains(event.target))hide()},true);
   window.addEventListener('resize',hide);

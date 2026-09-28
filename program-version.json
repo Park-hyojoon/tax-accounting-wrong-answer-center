@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "revision": 99,
-  "updatedAt": "2026-09-28T22:53:32+09:00",
+  "revision": 100,
+  "updatedAt": "2026-09-29T06:36:38+09:00",
   "files": [
     "오답_훈련센터.html",
     "일반전표_기본연습_24문제.html",
@@ -38,5 +38,5 @@
     "concept-notes.css",
     "output/pdf/vat-concepts.pdf"
   ],
-  "note": "특별훈련 정답·통과 문제 즉시 숨김과 통과 문제 보기 추가"
+  "note": "글자 표시 팝업 간소화 및 파란색·초록색 변경"
 }

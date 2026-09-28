@@ -44,9 +44,14 @@ async function styleAt(root,at){return root.evaluate((element,at)=>{
     await page.mouse.click((from.x+to.x)/2,from.y,{button:'right'});assert.equal(await popup.isVisible(),true);
     await page.keyboard.press('Escape');
     await open(page,root,0,20);await mark(page,'highlight');await mark(page,'red');await mark(page,'underline');
+    assert.equal(await page.locator('.question-mark-close').count(),0);
+    assert.equal(await page.locator('.question-mark-status').isHidden(),true,'buttons only during normal use');
+    assert.equal(await page.locator('[data-question-mark="blue"] .question-mark-swatch').evaluate(el=>getComputedStyle(el).backgroundColor),'rgb(2, 180, 255)');
+    assert.equal(await page.locator('[data-question-mark="green"] .question-mark-swatch').evaluate(el=>getComputedStyle(el).backgroundColor),'rgb(34, 177, 76)');
     assert.match(await styleAt(root,2),/qm-highlight/);assert.match(await styleAt(root,2),/qm-red/);assert.match(await styleAt(root,2),/qm-underline/);
     await page.screenshot({path:'C:/Users/MyPC/.codex/visualizations/2026/09/01/01a05c39-c06e-7750-82bd-c9d952df7f8e/question-mark-popup.png'});
     await page.keyboard.press('Escape');assert.equal(await popup.isHidden(),true);
+    await open(page,root,0,20);await page.locator('.qhead').first().click();assert.equal(await popup.isHidden(),true,'outside click closes popup');
     await open(page,root,5,10);await mark(page,'blue');
     assert.match(await styleAt(root,6),/qm-blue/);assert.doesNotMatch(await styleAt(root,6),/qm-red/);
     assert.match(await styleAt(root,2),/qm-red/,'color replacement preserves outside range');
