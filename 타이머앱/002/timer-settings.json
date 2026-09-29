@@ -1,6 +1,6 @@
 {
-  "targetSeconds": 120,
-  "examTargetSeconds": 2760,
+  "targetSeconds": 3600,
+  "examTargetSeconds": 3600,
   "accentColor": "#99cc3f",
   "problemColor": "#ffffff",
   "hotkeys": {
