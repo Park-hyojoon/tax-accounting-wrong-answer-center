@@ -11,7 +11,7 @@
   'use strict';
   return {
     schemaVersion: 1,
-    revision: 41,
+    revision: 42,
     recordedOn: '2026-09-14',
     coverageNote:'2026-09-14 새 학습 이후 사용자가 직접 제출한 기출 오답만 집계합니다.',
     topics: [
@@ -388,7 +388,8 @@
   {id:'unassigned-theory-allowance-20260928',source:'user-submitted',evidenceStatus:'confirmed',topicId:'allowance',title:'대손충당금의 성격과 설정대상 판단',originalCue:'대손충당금의 성격과 설정대상 판단',learnerReason:null,reportedAt:'2026-09-28',registeredDate:'2026-09-28',examRound:null,questionNo:'문항 번호 미제공',practiceRefs:[{source:'theory',id:'review-20260928-allowance',type:'대손충당금의 성격과 설정대상'}],provenance:'기출 원본 오답/회차 미지정 오답 데이터.md'},
   {id:'unassigned-theory-revenue-timing-20260928',source:'user-submitted',evidenceStatus:'confirmed',topicId:'revenue-timing',title:'판매방식별 수익 인식시점 판단',originalCue:'판매방식별 수익 인식시점 판단',learnerReason:null,reportedAt:'2026-09-28',registeredDate:'2026-09-28',examRound:null,questionNo:'7',practiceRefs:[{source:'theory',id:'review-20260928-revenue-timing',type:'위탁·할부·배당금 수익 인식시점'}],provenance:'기출 원본 오답/회차 미지정 오답 데이터.md'},
   {id:'unassigned-theory-inventory-20260928',source:'user-submitted',evidenceStatus:'confirmed',topicId:'inventory',title:'재고자산의 취득원가 판단',originalCue:'재고자산의 취득원가 판단',learnerReason:null,reportedAt:'2026-09-28',registeredDate:'2026-09-28',examRound:null,questionNo:'8',practiceRefs:[{source:'theory',id:'review-20260928-inventory',type:'재고자산 취득원가와 관세'}],provenance:'기출 원본 오답/회차 미지정 오답 데이터.md'},
-  {id:'unassigned-theory-invoice-transmission-20260928',source:'user-submitted',evidenceStatus:'confirmed',topicId:'invoice-transmission',title:'전자세금계산서 발급명세 전송일 판단',originalCue:'전자세금계산서 발급명세 전송일 판단',learnerReason:null,reportedAt:'2026-09-28',registeredDate:'2026-09-28',examRound:null,questionNo:'문항 번호 미제공',practiceRefs:[{source:'theory',id:'review-20260928-invoice-transmission',type:'전자세금계산서 발급명세 전송기한'}],provenance:'기출 원본 오답/회차 미지정 오답 데이터.md'}
+  {id:'unassigned-theory-invoice-transmission-20260928',source:'user-submitted',evidenceStatus:'confirmed',topicId:'invoice-transmission',title:'전자세금계산서 발급명세 전송일 판단',originalCue:'전자세금계산서 발급명세 전송일 판단',learnerReason:null,reportedAt:'2026-09-28',registeredDate:'2026-09-28',examRound:null,questionNo:'문항 번호 미제공',practiceRefs:[{source:'theory',id:'review-20260928-invoice-transmission',type:'전자세금계산서 발급명세 전송기한'}],provenance:'기출 원본 오답/회차 미지정 오답 데이터.md'},
+  {id:'unassigned-voucher-machine-sale-note-20260929',source:'user-submitted',evidenceStatus:'confirmed',topicId:'machine-disposal-loss-receivable',title:'기계장치 매각과 약속어음 수령 1 (응용)',originalCue:'[3] 10월 07일 기계장치(취득원가 70,000,000원, 감가상각누계액 60,000,000원)를 ㈜천안중고에 11,000,000원(부가가치세 포함)에 매각하고 전자세금계산서를 발급하였다. 대금은 전액 ㈜천안중고가 발행한 약속어음으로 받았다. (3점) <<< (이 문제는 5번 이상 틀리고 있으므로 응용문제를 2개 더 추가해서 만들고 오답 훈련센터에 올려주세요.)',learnerReason:'현재 이 문제를 총 다섯 번 풀었지만 다섯 번 모두 틀리고 있습니다 연습이 시급해 보입니다.',reportedAt:'2026-09-29',registeredDate:'2026-09-29',examRound:null,questionNo:'[3]',practiceRefs:[{source:'voucher',id:59,type:'유형자산 매각과 미수금'}],provenance:'기출 원본 오답/회차 미지정 오답 데이터.md'}
 ],
     signals: [],
     notes: ['회차별 직접 제출 원문은 PC의 기출 원본 오답 폴더에 MD로 보관합니다.']
