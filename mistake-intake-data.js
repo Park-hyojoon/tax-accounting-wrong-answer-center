@@ -11,7 +11,7 @@
   'use strict';
   return {
     schemaVersion: 1,
-    revision: 44,
+    revision: 45,
     recordedOn: '2026-09-14',
     coverageNote:'2026-09-14 새 학습 이후 사용자가 직접 제출한 기출 오답만 집계합니다.',
     topics: [
@@ -224,7 +224,8 @@
   {id:'paper-20260930-practical-4-1',label:'거래처 접대비로 확인된 카드 사용 전표 수정'},
   {id:'paper-20260930-practical-4-2',label:'이자 원천징수 세액 누락 수정'},
   {id:'paper-20260930-practical-5-1',label:'선지급 임차료의 결산 정리'},
-  {id:'paper-20260930-practical-5-2',label:'영업권 정액법 직접상각'}
+  {id:'paper-20260930-practical-5-2',label:'영업권 정액법 직접상각'},
+  {id:'vat-tax-base-inclusions',label:'부가가치세 과세표준 포함 여부'}
 ],
     entries: [
   {id:'exam121-theory-reliability-20260914',source:'user-submitted',evidenceStatus:'confirmed',topicId:'reliability-qualitative-characteristics',title:'회계정보의 질적 특성 판단',originalCue:'다음 중 회계정보의 질적 특성 중 신뢰성과 관련이 없는 것은?\n\n① 표현의 충실성\n② 적시성\n③ 검증가능성\n④ 중립성',learnerReason:null,reportedAt:'2026-09-14',registeredDate:'2026-09-14',examRound:121,questionNo:'이론-회계정보 질적 특성',practiceRefs:[{source:'theory',id:'exam121-reliability-variant',type:'회계정보의 신뢰성 구성요소'}],provenance:'기출 원본 오답/121회 기출 문제 이론 실무 오답 데이터.md'},
@@ -460,7 +461,10 @@
   {id:'paper-20260930-practical-4-1',source:'user-submitted',evidenceStatus:'confirmed',topicId:'paper-20260930-practical-4-1',title:'카드 식사비 사용 목적 확인',originalCue:'[1] 8월 31일 영업부서 직원이 우리식당에서 식사하고 법인명의 하나카드로 결제한 550,000원 (부가가치세포함)을 직원 회식비로 판단하여 매입매출전표에 입력하였다. 그러나 해당 비용은 거래처와의 업무추진비로 사용한 것이 확인되었다. (3점)',learnerReason:null,reportedAt:'2026-09-30',registeredDate:'2026-09-30',examRound:null,questionNo:'4-[1]',practiceRefs:[{source:'practical',id:74,type:'거래처 접대비로 확인된 카드 사용 전표 수정'}],provenance:'기출 원본 오답/회차 미지정 오답 데이터.md'},
   {id:'paper-20260930-practical-4-2',source:'user-submitted',evidenceStatus:'confirmed',topicId:'paper-20260930-practical-4-2',title:'예금이자 입금액 확인',originalCue:'[2] 9월 30일 보통예금 이자 1,500,000원을 은행에서 수령하여 법인 통장에 입금하였다. 담당자는 전액 이자수익으로 회계처리 하였으나 수령한 금액은 이자소득세 300,000원을 공제한 후의 금액임을 뒤늦게 알게 되었다. (3점)',learnerReason:null,reportedAt:'2026-09-30',registeredDate:'2026-09-30',examRound:null,questionNo:'4-[2]',practiceRefs:[{source:'practical',id:75,type:'이자 원천징수 세액 누락 수정'}],provenance:'기출 원본 오답/회차 미지정 오답 데이터.md'},
   {id:'paper-20260930-practical-5-1',source:'user-submitted',evidenceStatus:'confirmed',topicId:'paper-20260930-practical-5-1',title:'사무실 임차료 기간배분',originalCue:'[1] 영업부 사무실의 임차기간은 2025.10.01.∼2026.09.30.이며, 임차개시일에 임차료 4,800,000원을 전액 현금으로 지급하고 즉시 당기 비용으로 처리하였다. 결산정리분개를 하시오. 단, 월할계산할 것. (3점)',learnerReason:null,reportedAt:'2026-09-30',registeredDate:'2026-09-30',examRound:null,questionNo:'5-[1]',practiceRefs:[{source:'practical',id:76,type:'선지급 임차료의 결산 정리'}],provenance:'기출 원본 오답/회차 미지정 오답 데이터.md'},
-  {id:'paper-20260930-practical-5-2',source:'user-submitted',evidenceStatus:'confirmed',topicId:'paper-20260930-practical-5-2',title:'취득한 영업권의 기간상각',originalCue:'[2] 당사가 당해연도 10월 1일에 업무 중 취득한 영업권 120,000,000원에 대해 무형자산상각비(판관비)를 계상하시오. 영업권은 무형자산이고 내용연수 5년, 정액법을 적용하기로 한다. 단, 직접상각하여 월할계산할 것. (3점)',learnerReason:null,reportedAt:'2026-09-30',registeredDate:'2026-09-30',examRound:null,questionNo:'5-[2]',practiceRefs:[{source:'practical',id:77,type:'영업권 정액법 직접상각'}],provenance:'기출 원본 오답/회차 미지정 오답 데이터.md'}
+  {id:'paper-20260930-practical-5-2',source:'user-submitted',evidenceStatus:'confirmed',topicId:'paper-20260930-practical-5-2',title:'취득한 영업권의 기간상각',originalCue:'[2] 당사가 당해연도 10월 1일에 업무 중 취득한 영업권 120,000,000원에 대해 무형자산상각비(판관비)를 계상하시오. 영업권은 무형자산이고 내용연수 5년, 정액법을 적용하기로 한다. 단, 직접상각하여 월할계산할 것. (3점)',learnerReason:null,reportedAt:'2026-09-30',registeredDate:'2026-09-30',examRound:null,questionNo:'5-[2]',practiceRefs:[{source:'practical',id:77,type:'영업권 정액법 직접상각'}],provenance:'기출 원본 오답/회차 미지정 오답 데이터.md'},
+  {id:'intake-20260930-vat-tax-base',source:'user-submitted',evidenceStatus:'confirmed',topicId:'vat-tax-base-inclusions',title:'거래대가의 과세표준 포함 여부',originalCue:'다음 중 부가가치세법상 과세표준에 포함되는 항목은?\n\n① 매출에누리와 환입액, 매출할인\n② 반환조건부 용기대금·포장비용\n③ 재화의 공급과 직접 관련되지 않은 국고보조금\n④ 할부판매의 이자 상당액',learnerReason:null,reportedAt:'2026-09-30',registeredDate:'2026-09-30',examRound:null,questionNo:'문항 번호 미제공',practiceRefs:[{source:'theory',id:'practice-20260930-vat-tax-base',type:'부가가치세 과세표준 포함 여부'}],provenance:'기출 원본 오답/회차 미지정 오답 데이터.md'},
+  {id:'intake-20260930-income-statement-offset',source:'user-submitted',evidenceStatus:'confirmed',topicId:'topic-ef798a708a96',title:'손익계산서의 수익과 비용 보고',originalCue:'8. 다음 중 손익계산서에 대한 설명으로 옳지 않은 것은?\n\n① 일정 기간 동안 기업의 경영성과에 대한 정보를 제공하는 재무보고서이다.\n② 발생주의에 따라 수익과 비용을 인식한다.\n③ 비용은 관련된 수익이 실현된 시점에 수익에 대응하여 인식한다.\n④ 수익과 비용은 항상 총액으로 보고해야 하며, 상계 표시는 허용하지 않는다.',learnerReason:null,reportedAt:'2026-09-30',registeredDate:'2026-09-30',examRound:null,questionNo:'8',practiceRefs:[{source:'theory',id:'practice-20260930-income-statement-offset',type:'손익계산서 작성기준'}],provenance:'기출 원본 오답/회차 미지정 오답 데이터.md'},
+  {id:'intake-20260930-depreciation-start-repeat',source:'user-submitted',evidenceStatus:'confirmed',topicId:'ppe-depreciation-start-available-for-use',title:'유형자산의 감가상각 원칙',originalCue:'다음 중 유형자산의 감가상각에 대한 설명으로 적절하지 않은 것은?\n\n① 유형자산의 감가상각은 자산을 취득한 시점부터 시작한다.\n② 유형자산의 내용연수는 자산으로부터 기대되는 효용에 따라 결정된다.\n③ 유형자산의 감가상각방법은 자산의 경제적효익이 소멸되는 형태를 반영한 합리적인 방법이어야 한다.\n④ 유형자산의 감가상각방법에는 정액법, 체감잔액법, 연수합계법, 생산량비례법 등이 있다.',learnerReason:null,reportedAt:'2026-09-30',registeredDate:'2026-09-30',examRound:null,questionNo:'문항 번호 미제공',practiceRefs:[{source:'theory',id:'practice-20260930-depreciation-start-repeat',type:'유형자산 감가상각 개시시점'}],provenance:'기출 원본 오답/회차 미지정 오답 데이터.md',recurrenceOf:'exam125-theory-depreciation-start-20260918',recurrenceEvidence:'동일한 원문을 문제 등록용으로 다시 제출함. 훈련 중 오답 횟수는 추정하지 않음.'}
 ],
     signals: [],
     notes: ['회차별 직접 제출 원문은 PC의 기출 원본 오답 폴더에 MD로 보관합니다.']
