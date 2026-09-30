@@ -4,6 +4,8 @@ const url=pathToFileURL(path.join(__dirname,'..','매입매출전표_오답연�
 const key='exam-20260914-voucher-marks-v1';
 const practicalUrl=pathToFileURL(path.join(__dirname,'..','일반전표_기본연습_24문제.html')).href+'?view=all';
 const practicalKey='exam-20260914-practical-marks-v1';
+const theoryUrl=pathToFileURL(path.join(__dirname,'..','이론_오답응용_5문제.html')).href+'?view=all';
+const theoryKey='exam-20260914-theory-marks-v1';
 
 async function select(root,start,end){
   await root.scrollIntoViewIfNeeded();
@@ -131,6 +133,33 @@ async function styleAt(root,at){return root.evaluate((element,at)=>{
     assert.equal(await practicalPage.locator('.question-mark-popup').isHidden(),true);
     assert.deepEqual(practicalErrors,[]);
     await practical.close();
-    console.log('PASS: sales and general voucher right-click markup, bold/color/underline, persistence and isolated grades/storage');
+
+    const theory=await browser.newContext({viewport:{width:1440,height:1000}});
+    await theory.route('https://**/*',route=>route.abort());
+    const theoryPage=await theory.newPage(),theoryErrors=[];
+    theoryPage.on('pageerror',error=>theoryErrors.push(error.message));
+    await theoryPage.goto(theoryUrl);
+    const theoryPrompt=theoryPage.locator('.question .qhead h3').first();
+    const theoryData=theoryPage.locator('.question .data-box').filter({has:theoryPage.locator('table')}).first();
+    const theoryChoice=theoryPage.locator('.question .choices .choice > span:last-child').first();
+    const theoryProblems=await theoryPage.evaluate(()=>JSON.stringify(problems));
+    const theoryState=await theoryPage.evaluate(()=>localStorage.getItem('exam-20260914-theory'));
+    for(const [block,kind] of [[theoryPrompt,'blue'],[theoryData,'green'],[theoryChoice,'red']]){
+      const before=await block.textContent(),start=before.search(/\S/);
+      assert.ok(start>=0);
+      await open(theoryPage,block,start,start+Math.min(5,before.length-start));
+      await mark(theoryPage,kind);
+      assert.match(await styleAt(block,start),new RegExp('qm-'+kind));
+      assert.equal(await block.textContent(),before,'theory source text remains unchanged');
+    }
+    assert.equal(await theoryPage.evaluate(()=>JSON.stringify(problems)),theoryProblems);
+    assert.equal(await theoryPage.evaluate(()=>localStorage.getItem('exam-20260914-theory')),theoryState);
+    assert.ok(await theoryPage.evaluate(key=>localStorage.getItem(key),theoryKey));
+    await theoryPage.reload();
+    assert.match(await styleAt(theoryPrompt,0),/qm-blue/,'theory marks persist across reload');
+    assert.equal(await theoryData.locator('table').count()>0,true,'theory source table remains structured');
+    assert.deepEqual(theoryErrors,[]);
+    await theory.close();
+    console.log('PASS: sales/general voucher/theory markup, source and history preservation, storage isolation and persistence');
   }finally{await browser.close()}
 })().catch(error=>{console.error(error);process.exitCode=1});

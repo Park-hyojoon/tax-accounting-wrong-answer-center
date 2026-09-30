@@ -1,16 +1,19 @@
 (function(){
   'use strict';
   const questions=document.querySelector('#questions');if(!questions)return;
-  const subject=document.currentScript?.dataset.questionMarkSubject==='practical'?'practical':'voucher';
+  const requestedSubject=document.currentScript?.dataset.questionMarkSubject;
+  const subject=['practical','theory'].includes(requestedSubject)?requestedSubject:'voucher';
   const KEY=`exam-20260914-${subject}-marks-v1`;
-  const blockIdPattern=new RegExp(`^${subject}:\\d+:(prompt|exhibit):\\d+$`);
+  const blockIdPattern=subject==='theory'?/^theory:[^:]+:(prompt|data|choice):\d+$/:new RegExp(`^${subject}:\\d+:(prompt|exhibit):\\d+$`);
   const kinds=['blue','red','green','highlight','bold','underline'],colors=kinds.slice(0,3);
   const blocks=new Map(),undo=[];
   const copy=value=>value===undefined?undefined:JSON.parse(JSON.stringify(value));
   questions.querySelectorAll('.question').forEach(card=>{
-    for(const type of ['prompt','exhibit'])card.querySelectorAll('.'+type).forEach((root,index)=>{
-      if(root.parentElement.closest('[data-question-mark-block]'))return;
-      const id=subject+':'+card.dataset.index+':'+type+':'+index;
+    const targets=subject==='theory'?[['prompt','.qhead h3'],['data','.data-box'],['choice','.choices .choice > span:last-child']]:[['prompt','.prompt'],['exhibit','.exhibit']];
+    for(const [type,selector] of targets)card.querySelectorAll(selector).forEach((root,index)=>{
+      if(root.parentElement?.closest('[data-question-mark-block]'))return;
+      const cardId=subject==='theory'?encodeURIComponent(card.dataset.id):card.dataset.index;
+      const id=subject+':'+cardId+':'+type+':'+index;
       root.dataset.questionMarkBlock=id;
       blocks.set(id,{root,text:root.textContent,template:root.cloneNode(true)});
     });
