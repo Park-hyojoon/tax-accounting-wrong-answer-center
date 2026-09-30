@@ -2,6 +2,8 @@ const {chromium}=require('C:/Users/MyPC/.cache/codex-runtimes/codex-primary-runt
 const {pathToFileURL}=require('url'),path=require('path'),assert=require('assert/strict');
 const url=pathToFileURL(path.join(__dirname,'..','매입매출전표_오답연습_3문제.html')).href+'?view=all';
 const key='exam-20260914-voucher-marks-v1';
+const practicalUrl=pathToFileURL(path.join(__dirname,'..','일반전표_기본연습_24문제.html')).href+'?view=all';
+const practicalKey='exam-20260914-practical-marks-v1';
 
 async function select(root,start,end){
   await root.scrollIntoViewIfNeeded();
@@ -43,12 +45,12 @@ async function styleAt(root,at){return root.evaluate((element,at)=>{
     assert.ok(await page.evaluate(()=>getSelection().toString().length>5),'real mouse drag selects problem text');
     await page.mouse.click((from.x+to.x)/2,from.y,{button:'right'});assert.equal(await popup.isVisible(),true);
     await page.keyboard.press('Escape');
-    await open(page,root,0,20);await mark(page,'highlight');await mark(page,'red');await mark(page,'underline');
+    await open(page,root,0,20);await mark(page,'highlight');await mark(page,'red');await mark(page,'bold');await mark(page,'underline');
     assert.equal(await page.locator('.question-mark-close').count(),0);
     assert.equal(await page.locator('.question-mark-status').isHidden(),true,'buttons only during normal use');
     assert.equal(await page.locator('[data-question-mark="blue"] .question-mark-swatch').evaluate(el=>getComputedStyle(el).backgroundColor),'rgb(2, 180, 255)');
     assert.equal(await page.locator('[data-question-mark="green"] .question-mark-swatch').evaluate(el=>getComputedStyle(el).backgroundColor),'rgb(34, 177, 76)');
-    assert.match(await styleAt(root,2),/qm-highlight/);assert.match(await styleAt(root,2),/qm-red/);assert.match(await styleAt(root,2),/qm-underline/);
+    assert.match(await styleAt(root,2),/qm-highlight/);assert.match(await styleAt(root,2),/qm-red/);assert.match(await styleAt(root,2),/qm-bold/);assert.match(await styleAt(root,2),/qm-underline/);
     await page.screenshot({path:'C:/Users/MyPC/.codex/visualizations/2026/09/01/01a05c39-c06e-7750-82bd-c9d952df7f8e/question-mark-popup.png'});
     await page.keyboard.press('Escape');assert.equal(await popup.isHidden(),true);
     await open(page,root,0,20);await page.locator('.qhead').first().click();assert.equal(await popup.isHidden(),true,'outside click closes popup');
@@ -105,6 +107,30 @@ async function styleAt(root,at){return root.evaluate((element,at)=>{
     assert.equal(await phone.locator('.question-mark-popup').isHidden(),true);
     assert.equal(await phone.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),true);
     await mobile.close();
-    console.log('PASS: right-click popup, combined styles, partial clear/color replacement/undo, persistence, table/source/history preservation, native menus and save failure');
+
+    const practical=await browser.newContext({viewport:{width:1440,height:1000}});
+    await practical.route('https://**/*',route=>route.abort());
+    const practicalPage=await practical.newPage(),practicalErrors=[];
+    practicalPage.on('pageerror',error=>practicalErrors.push(error.message));
+    await practicalPage.goto(practicalUrl);
+    const practicalRoot=practicalPage.locator('.question .prompt').first();
+    const practicalOriginal=await practicalRoot.textContent();
+    const practicalProblems=await practicalPage.evaluate(()=>JSON.stringify(problems));
+    const practicalState=await practicalPage.evaluate(()=>localStorage.getItem('exam-20260914-practical'));
+    assert.ok(await practicalPage.locator('[data-question-mark-block^="practical:"]').count(),'general voucher questions have editable blocks');
+    await open(practicalPage,practicalRoot,0,12);
+    await mark(practicalPage,'blue');await mark(practicalPage,'bold');await mark(practicalPage,'underline');
+    for(const name of ['blue','bold','underline'])assert.match(await styleAt(practicalRoot,2),new RegExp('qm-'+name));
+    assert.equal(await practicalRoot.textContent(),practicalOriginal);
+    assert.equal(await practicalPage.evaluate(()=>JSON.stringify(problems)),practicalProblems);
+    assert.equal(await practicalPage.evaluate(()=>localStorage.getItem('exam-20260914-practical')),practicalState);
+    assert.ok(await practicalPage.evaluate(key=>localStorage.getItem(key),practicalKey));
+    assert.equal(await practicalPage.evaluate(key=>localStorage.getItem(key),key),null,'general voucher marks do not use sales voucher storage');
+    await practicalPage.reload();assert.match(await styleAt(practicalRoot,2),/qm-bold/,'general voucher marks persist across reload');
+    await open(practicalPage,practicalRoot,0,12);await practicalPage.keyboard.press('Escape');
+    assert.equal(await practicalPage.locator('.question-mark-popup').isHidden(),true);
+    assert.deepEqual(practicalErrors,[]);
+    await practical.close();
+    console.log('PASS: sales and general voucher right-click markup, bold/color/underline, persistence and isolated grades/storage');
   }finally{await browser.close()}
 })().catch(error=>{console.error(error);process.exitCode=1});

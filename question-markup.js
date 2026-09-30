@@ -1,14 +1,16 @@
 (function(){
   'use strict';
   const questions=document.querySelector('#questions');if(!questions)return;
-  const KEY='exam-20260914-voucher-marks-v1';
-  const kinds=['blue','red','green','highlight','underline'],colors=kinds.slice(0,3);
+  const subject=document.currentScript?.dataset.questionMarkSubject==='practical'?'practical':'voucher';
+  const KEY=`exam-20260914-${subject}-marks-v1`;
+  const blockIdPattern=new RegExp(`^${subject}:\\d+:(prompt|exhibit):\\d+$`);
+  const kinds=['blue','red','green','highlight','bold','underline'],colors=kinds.slice(0,3);
   const blocks=new Map(),undo=[];
   const copy=value=>value===undefined?undefined:JSON.parse(JSON.stringify(value));
   questions.querySelectorAll('.question').forEach(card=>{
     for(const type of ['prompt','exhibit'])card.querySelectorAll('.'+type).forEach((root,index)=>{
       if(root.parentElement.closest('[data-question-mark-block]'))return;
-      const id='voucher:'+card.dataset.index+':'+type+':'+index;
+      const id=subject+':'+card.dataset.index+':'+type+':'+index;
       root.dataset.questionMarkBlock=id;
       blocks.set(id,{root,text:root.textContent,template:root.cloneNode(true)});
     });
@@ -23,12 +25,12 @@
     .question-mark-popup button:hover,.question-mark-popup button:focus-visible{background:#eef5fc;outline:2px solid #427da9;outline-offset:1px}
     .question-mark-popup button:disabled{opacity:.45;cursor:default}.question-mark-swatch{display:block;width:18px;height:18px;border-radius:4px}
     .question-mark-status{max-width:300px;margin:6px 0 0;padding:8px;border:1px solid #d1dbe5;border-radius:7px;background:white;line-height:1.5}.question-mark-status[hidden]{display:none}
-    .qm-blue{color:#02b4ff!important}.qm-red{color:#c62828!important}.qm-green{color:#22b14c!important}.qm-highlight{background:#fff200!important;box-decoration-break:clone;-webkit-box-decoration-break:clone}.qm-underline{text-decoration-line:underline;text-decoration-thickness:.12em;text-underline-offset:.18em}
+    .qm-blue{color:#02b4ff!important}.qm-red{color:#c62828!important}.qm-green{color:#22b14c!important}.qm-highlight{background:#fff200!important;box-decoration-break:clone;-webkit-box-decoration-break:clone}.qm-bold{font-weight:700!important}.qm-underline{text-decoration-line:underline;text-decoration-thickness:.12em;text-underline-offset:.18em}
     .question-mark-hint{color:#52677d;font-size:14px;line-height:1.6}
     @media(pointer:coarse){.question-mark-hint{display:none}}@media print{.question-mark-popup,.question-mark-hint{display:none!important}}
   `;
   document.head.append(style);
-  const hint=document.createElement('p');hint.className='question-mark-hint';hint.textContent='문제의 글자를 드래그 → 오른쪽 클릭: 글자색·형광펜·밑줄 (이 브라우저에 저장)';questions.before(hint);
+  const hint=document.createElement('p');hint.className='question-mark-hint';hint.textContent='문제의 글자를 드래그 → 오른쪽 클릭: 글자색·형광펜·굵게·밑줄 (이 브라우저에 저장)';questions.before(hint);
   const popup=document.createElement('div');popup.className='question-mark-popup';popup.hidden=true;
   popup.setAttribute('role','toolbar');popup.setAttribute('aria-label','선택한 문제 글자 표시');
   popup.innerHTML=`<div class="question-mark-actions">
@@ -36,6 +38,7 @@
     <button type="button" data-question-mark="red" aria-label="빨간 글자색" title="빨간 글자색"><span class="question-mark-swatch" style="background:#c62828"></span></button>
     <button type="button" data-question-mark="green" aria-label="초록 글자색" title="초록 글자색"><span class="question-mark-swatch" style="background:#22b14c"></span></button>
     <button type="button" data-question-mark="highlight" aria-label="노란 형광펜" title="노란 형광펜"><span style="background:#fff200;color:#24384c;padding:0 3px">가</span></button>
+    <button type="button" data-question-mark="bold" aria-label="굵은 글씨" title="굵은 글씨"><strong>가</strong></button>
     <button type="button" data-question-mark="underline" aria-label="밑줄" title="밑줄"><span style="text-decoration:underline">가</span></button>
     <button type="button" data-question-mark="clear" aria-label="선택한 글자의 표시 지우기" title="선택한 글자의 표시 지우기">지움</button>
     <button type="button" class="question-mark-undo" aria-label="직전 표시 되돌리기" title="직전 표시 되돌리기" disabled>↶</button>
@@ -43,7 +46,7 @@
   document.body.append(popup);
   const status=popup.querySelector('.question-mark-status'),undoButton=popup.querySelector('.question-mark-undo');
   let marks={},pending=[],readable=true;
-  function valid(value){return value&&typeof value==='object'&&!Array.isArray(value)&&Object.keys(value).length<=2000&&Object.entries(value).every(([id,entry])=>/^voucher:\d+:(prompt|exhibit):\d+$/.test(id)&&entry&&typeof entry.text==='string'&&entry.text.length<=100000&&Array.isArray(entry.spans)&&entry.spans.length<=3000&&entry.spans.every(span=>span&&kinds.includes(span.kind)&&Number.isInteger(span.start)&&Number.isInteger(span.end)&&span.start>=0&&span.end>span.start&&span.end<=entry.text.length))}
+  function valid(value){return value&&typeof value==='object'&&!Array.isArray(value)&&Object.keys(value).length<=2000&&Object.entries(value).every(([id,entry])=>blockIdPattern.test(id)&&entry&&typeof entry.text==='string'&&entry.text.length<=100000&&Array.isArray(entry.spans)&&entry.spans.length<=3000&&entry.spans.every(span=>span&&kinds.includes(span.kind)&&Number.isInteger(span.start)&&Number.isInteger(span.end)&&span.start>=0&&span.end>span.start&&span.end<=entry.text.length))}
   function load(){try{const raw=localStorage.getItem(KEY),value=raw?JSON.parse(raw):{};if(!valid(value))throw Error('format');marks=value;readable=true}catch(_){readable=false}}
   function spansFor(id){const block=blocks.get(id),entry=marks[id];return entry?.text===block.text?entry.spans:[]}
   function renderBlock(id){
