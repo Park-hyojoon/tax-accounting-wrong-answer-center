@@ -41,10 +41,10 @@
   document.head.append(style);
   const heading=document.createElement('h2');heading.textContent='특별훈련 · 반복 약점';main.append(heading);
   const sources=document.createElement('div');sources.className='weak-toolbar weak-sources';sources.setAttribute('aria-label','약점 기록 구분');main.append(sources);
-  const profile=document.createElement('section');profile.className='weak-profile';profile.setAttribute('aria-labelledby','weakProfileTitle');main.append(profile);
   const intro=document.createElement('p');intro.className='weak-description';main.append(intro);
   const bar=document.createElement('div');bar.className='weak-toolbar';bar.setAttribute('aria-label','문제 분류');main.append(bar);
   const batch=document.createElement('div');batch.className='weak-batch';main.append(batch);
+  const profile=document.createElement('section');profile.className='weak-profile';profile.setAttribute('aria-labelledby','weakProfileTitle');main.append(profile);
   const grid=document.createElement('div');grid.className='weak-grid';main.append(grid);
 
   function readStates(){return Object.fromEntries(Object.keys(files).map(subject=>{
