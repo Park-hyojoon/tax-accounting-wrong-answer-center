@@ -232,7 +232,7 @@ function answerLine(a){return `<div class="answer-line"><strong>${a.side==='D'?'
   $$('.question').forEach(setupJournalKeys);
   function setupMoney(x){x.addEventListener('keydown',e=>{if(e.key==='+'||e.code==='NumpadAdd'){e.preventDefault();const negative=/^\s*-/.test(x.value),d=x.value.replace(/\D/g,'');x.value=(negative?'-':'')+(d?d+'000':'000').replace(/\B(?=(\d{3})+(?!\d))/g,',');x.dispatchEvent(new Event('input',{bubbles:true}))}});x.addEventListener('input',()=>{const negative=/^\s*-/.test(x.value),digits=x.value.replace(/\D/g,''),formatted=digits.replace(/\B(?=(\d{3})+(?!\d))/g,',');x.value=negative?(digits?'-'+formatted:'-'):formatted})}$$('.debit-amount,.credit-amount,.supply,.vat,.unit-price,.service-fee').forEach(setupMoney);
   function setupSummaryAuto(x){x.addEventListener('input',()=>{if(x.value.trim()==='8')x.value='8(타계정으로 대체)'})}$$('.entry-summary').forEach(setupSummaryAuto);
-  function formatNumber(n){return Number(n).toLocaleString('ko-KR')}
+  function formatNumber(n){return num(n).toLocaleString('ko-KR')}
   function setupAutoVat(card){
     const supply=$('.supply',card),vat=$('.vat',card);
     supply.addEventListener('keydown',e=>{
@@ -331,8 +331,20 @@ function answerLine(a){return `<div class="answer-line"><strong>${a.side==='D'?'
   function resetCurrent(card,quiet=false){if(!quiet&&!confirm('이 문제에 현재 입력한 답안만 초기화할까요? 채점 횟수·오답 횟수·답변 이력은 그대로 유지됩니다.'))return;const p=problems[card.dataset.index],s=cs(card.dataset.index);if($('.delete-before',card))$('.delete-before',card).checked=false;$('.trade-mode',card).value='purchase';setTypeMode(card,'purchase',false);syncPartsFromDate(card,'');$('.item-name',card).value=p.item||ITEM_LABELS[p.id]||'';$('.quantity',card).value='';$('.unit-price',card).value='';$('.supply',card).value='';$('.vat',card).value='';$('.supplier',card).value='';$('.electronic',card).value='';$('.journal',card).value='';syncAdditionalFields(card);clearJournalRows(card);applyJournalForm(card);syncPartner(card);totals(card);s.voucher=voucher(card);s.rows=rows(card);s.graded=false;delete s.correct;card.classList.remove('correct','wrong');delete card.dataset.graded;delete card.dataset.correct;$('.result',card).className='result';$('.result',card).textContent='현재 답안을 처음 상태로 되돌렸습니다.';$('.field-feedback',card).className='field-feedback kclep-feedback';$('.field-feedback',card).textContent='현재 답안을 처음 상태로 되돌렸습니다. 기존 채점 이력은 유지됩니다.';$('.attempt',card).textContent=`채점 ${s.attempts||0}회 · 틀림 ${s.wrongCount||0}회`;save();progress();$('.voucher-type',card).focus()}
   function archive(card){if(!confirm('이 문제를 영구 삭제할까요?\n목록·통계에서 완전히 사라지고 복구할 수 없습니다.'))return;state.cards[card.dataset.index]={deleted:true,deletedAt:nowIso()};save();card.hidden=true;progress()}
   const restoreWithoutSpecialTraining=restore;
+  const reloadVisit=performance.getEntriesByType('navigation')[0]?.type==='reload';
+  const draftSessionKey='exam-20260914-voucher-draft-session';
+  let draftSession;
+  try{draftSession=reloadVisit&&sessionStorage.getItem(draftSessionKey)||String(Date.now())+'-'+Math.random();sessionStorage.setItem(draftSessionKey,draftSession)}catch(_){draftSession=String(Date.now())+'-'+Math.random()}
+  function rememberDraft(card){cs(card.dataset.index).draftSession=draftSession}
+  const changedWithoutDraft=changed;
+  changed=function(card){rememberDraft(card);changedWithoutDraft(card)};
+  const autoJournalWithoutDraft=syncAutoJournal;
+  syncAutoJournal=function(card){rememberDraft(card);autoJournalWithoutDraft(card)};
   restore=function(card){
     const index=Number(card.dataset.index),s=cs(index),p=problems[index]||{},keepAfterPass=Boolean(s.starred||p.variantOf!=null||variantSourceIndices.has(index)),passed=s.passed,archived=s.archived;
+    const previous=(s.history||[]).filter(h=>!h.cancelledAt).at(-1);
+    if(previous){const details=document.createElement('details'),summary=document.createElement('summary'),body=document.createElement('pre');summary.textContent='이전 제출 답안 보기';body.style.whiteSpace='pre-wrap';const v=previous.voucher||{};body.textContent=[v.date||'',`유형: ${v.type||'—'} · 공급가액: ${v.supply||'—'} · 부가세: ${v.vat||'—'}`,`공급처: ${v.supplier||'—'} · 전자: ${v.electronic||'—'} · 분개: ${v.journal||'—'}`,...(previous.rows||[]).filter(r=>r.account).map(r=>`${r.side==='D'?'차변':'대변'} ${r.account}${r.division?'('+r.division+')':''} ${r.amount||0}원`)].join('\n');details.append(summary,body);$('.question-brief',card).append(details)}
+    if(!(reloadVisit&&s.draftSession===draftSession&&!s.graded)){s.voucher={};s.rows=[];s.graded=false;delete s.correct;delete s.draftSession}
     if(keepAfterPass){s.passed=false;s.archived=false}
     restoreWithoutSpecialTraining(card);
     if(keepAfterPass){s.passed=passed;s.archived=archived;save()}
@@ -406,7 +418,7 @@ function answerLine(a){return `<div class="answer-line"><strong>${a.side==='D'?'
   })();
 </script>
 <script>TrainingSeason.install(problems,{state,save,refresh:progress});</script>
-<script src="question-markup.js?v=4"></script>
+<script src="question-markup.js?v=5"></script>
 </body>
 </html>
 

@@ -4,6 +4,14 @@
   const requestedSubject=document.currentScript?.dataset.questionMarkSubject;
   const subject=['practical','theory'].includes(requestedSubject)?requestedSubject:'voucher';
   const KEY=`exam-20260914-${subject}-marks-v1`;
+  try{
+    const clearedKey='exam-20260914-marks-cleared-20261001';
+    if(!localStorage.getItem(clearedKey)){
+      for(const name of ['voucher','practical','theory'])localStorage.removeItem(`exam-20260914-${name}-marks-v1`);
+      localStorage.setItem(clearedKey,'1');
+    }
+    if(performance.getEntriesByType('navigation')[0]?.type!=='reload')localStorage.removeItem(KEY);
+  }catch(_){}
   const blockIdPattern=subject==='theory'?/^theory:[^:]+:(prompt|data|choice):\d+$/:new RegExp(`^${subject}:\\d+:(prompt|exhibit):\\d+$`);
   const kinds=['blue','red','green','highlight','bold','underline'],colors=kinds.slice(0,3);
   const blocks=new Map(),undo=[];

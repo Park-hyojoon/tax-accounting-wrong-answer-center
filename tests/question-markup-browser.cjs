@@ -8,7 +8,7 @@ const theoryUrl=pathToFileURL(path.join(__dirname,'..','이론_오답응용_5문
 const theoryKey='exam-20260914-theory-marks-v1';
 
 async function select(root,start,end){
-  await root.scrollIntoViewIfNeeded();
+  await root.evaluate(element=>element.scrollIntoView({behavior:'instant',block:'center'}));
   return root.evaluate((element,{start,end})=>{
     const walker=document.createTreeWalker(element,NodeFilter.SHOW_TEXT),nodes=[];
     while(walker.nextNode())if(walker.currentNode.data.length)nodes.push(walker.currentNode);
@@ -147,7 +147,9 @@ async function styleAt(root,at){return root.evaluate((element,at)=>{
     for(const [block,kind] of [[theoryPrompt,'blue'],[theoryData,'green'],[theoryChoice,'red']]){
       const before=await block.textContent(),start=before.search(/\S/);
       assert.ok(start>=0);
-      await open(theoryPage,block,start,start+Math.min(5,before.length-start));
+      await select(block,start,start+Math.min(5,before.length-start));
+      await block.evaluate(element=>element.dispatchEvent(new MouseEvent('contextmenu',{bubbles:true,cancelable:true,clientX:30,clientY:100})));
+      assert.equal(await theoryPage.locator('.question-mark-popup').isVisible(),true);
       await mark(theoryPage,kind);
       assert.match(await styleAt(block,start),new RegExp('qm-'+kind));
       assert.equal(await block.textContent(),before,'theory source text remains unchanged');
