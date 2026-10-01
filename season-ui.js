@@ -6,6 +6,70 @@
   function isCompleted(subject,id,state={}){
     return window.TrainingGitHub.isCompleted(subject,id,state);
   }
+  // Read only dated, uncancelled events; cumulative counters never create a weakness.
+  function priority(subject,id,state={},options={}){
+    const card=subject==='theory'?Object.fromEntries(['history','deleted','archived','passedAt','selfPassed','selfPassedAt','trainingCenterRestored'].map(key=>[key,state[key]?.[id]])):state.cards?.[id]||{};
+    const now=options.now??Date.now(),cutoff=Date.parse(window.TrainingGitHub.reviewSince+'T00:00:00+09:00'),seen=new Map();
+    for(const event of Array.isArray(card.history)?card.history:[]){const key=event?.id||JSON.stringify(event);if(!seen.has(key)||event?.cancelledAt)seen.set(key,event)}
+    const events=[...seen.values()].filter(event=>event&&!event.cancelledAt&&typeof event.correct==='boolean'&&Number.isFinite(Date.parse(event.at))&&Date.parse(event.at)>=cutoff&&Date.parse(event.at)<=now).sort((a,b)=>Date.parse(a.at)-Date.parse(b.at));
+    const passTime=value=>{const time=Date.parse(value);return Number.isFinite(time)&&time<=now&&!([...seen.values()].some(event=>event?.cancelledAt&&event.at===value))?time:0};
+    const lastPass=Math.max(0,...events.filter(event=>event.correct).map(event=>Date.parse(event.at)),passTime(card.passedAt),card.selfPassed?passTime(card.selfPassedAt):0);
+    const current=events.filter(event=>!event.correct&&Date.parse(event.at)>lastPass),actual=current.filter(event=>event.source!=='notebook');
+    const recent=events.filter(event=>event.source!=='notebook').slice(-5),recentWrong=recent.filter(event=>!event.correct).length;
+    const active=!card.deleted&&!card.archived&&!isCompleted(subject,id,state),lastAt=current.length?Date.parse(current.at(-1).at):0;
+    const actualLast=actual.length?Date.parse(actual.at(-1).at):0,fresh=actualLast>=now-14*86400000;
+    const band=!active?-1:actual.length>=2?(fresh?6:4):actual.length?(fresh?5:3):current.length?2:(card.trainingCenterRestored||options.recurrent)?1:0;
+    const result={subject,id,active,band,wrongStreak:actual.length,noteWrong:current.length-actual.length,recentWrong,recentAttempts:recent.length,lastAt,rate:recent.length?(recentWrong+1)/(recent.length+2):0,recurrent:Boolean(options.recurrent)};
+    result.reason=actual.length?`연속 오답 ${actual.length}회 · 최근 ${recent.length}회 중 ${recentWrong}회 오답`:current.length?'노트에서 다시 연습으로 표시':band===1?(options.recurrent?'기출 원문 재제출 · 재풀이 확인 필요':'다시 학습할 문제'):recent.length?'현재 남은 오답 없음':'아직 실제 채점 전';
+    return result;
+  }
+  function comparePriority(a,b){return b.band-a.band||Math.min(b.wrongStreak,5)-Math.min(a.wrongStreak,5)||b.rate-a.rate||b.recentWrong-a.recentWrong||b.lastAt-a.lastAt}
+  function rankTags(entries,states){
+    const tags=new Map(),seen=new Set();
+    for(const entry of entries){
+      const key=entry.subject+':'+entry.id;if(seen.has(key))continue;seen.add(key);
+      const need=priority(entry.subject,entry.id,states[entry.subject]||{},{recurrent:entry.recurrenceOf});if(!need.active||need.band<=0)continue;
+      for(const tag of [...new Set(entry.tags?.length?entry.tags:[entry.type])].filter(Boolean)){if(!tags.has(tag))tags.set(tag,[]);tags.get(tag).push({...entry,priority:need})}
+    }
+    return [...tags].map(([tag,rows])=>{rows.sort((a,b)=>comparePriority(a.priority,b.priority)||String(a.id).localeCompare(String(b.id)));return {tag,rows,best:rows[0].priority}}).sort((a,b)=>comparePriority(a.best,b.best)||a.tag.localeCompare(b.tag,'ko')).slice(0,10);
+  }
+  function subjectOf(adapter){return adapter.subject||(adapter.theory?'theory':'practical')}
+  function practiceRefs(problems,adapter){return problems.map((problem,index)=>({...problem,subject:subjectOf(adapter),id:adapter.theory?problem.id:index}))}
+  function priorityUrl(file,refs,tag){const url=new URL(file,location.href);url.searchParams.set('view','all');url.searchParams.set('fresh','1');url.searchParams.set('sort','priority');url.searchParams.set('weakrefs',refs.map(ref=>ref.id).join(','));url.searchParams.set('weaknessSource','recent');if(tag)url.searchParams.set('tag',tag);return url.href}
+  function sortQuestions(problems,adapter){
+    const field=document.querySelector('#sortOrder'),box=document.querySelector('#questions');if(!field||!box)return;
+    const subject=subjectOf(adapter),cards=[...box.querySelectorAll('.question')],order=new Map(cards.map((card,index)=>[card,index]));
+    if([...field.options].some(option=>option.value===params.get('sort')))field.value=params.get('sort');
+    function refresh(){
+      const mode=field.value,list=cards.map(card=>{
+        const id=adapter.theory?card.dataset.id:Number(card.dataset.index),problem=adapter.theory?problems.find(p=>p.id===id):problems[id],need=priority(subject,id,adapter.state,{recurrent:problem?.recurrenceOf});
+        const history=(adapter.theory?adapter.state.history?.[id]:adapter.state.cards?.[id]?.history)||[],valid=history.filter(event=>event&&!event.cancelledAt&&typeof event.correct==='boolean'&&Number.isFinite(Date.parse(event.at)));
+        return {card,id,need,index:order.get(card),added:card.dataset.addedDate||'',attempts:valid.length,wrong:valid.filter(event=>!event.correct).length,last:Math.max(0,...valid.map(event=>Date.parse(event.at)))};
+      });
+      list.sort((a,b)=>{
+        if(mode==='priority'||mode==='repeatWrong')return comparePriority(a.need,b.need)||a.index-b.index;
+        if(mode==='wrong')return b.wrong-a.wrong||a.index-b.index;
+        if(mode==='unattempted')return Number(a.attempts>0)-Number(b.attempts>0)||a.index-b.index;
+        if(mode==='recentAttempt')return b.last-a.last||a.index-b.index;
+        if(mode==='recentRegistered')return b.added.localeCompare(a.added)||b.index-a.index;
+        return a.index-b.index;
+      });
+      const groups=new Map();
+      for(const item of list){
+        const repeated=item.need.active&&(item.need.wrongStreak>=2||item.need.noteWrong>=2||item.need.recurrent);
+        item.card.classList.toggle('repeat-filter-hidden',mode==='repeatWrong'&&!repeated);
+        let note=item.card.querySelector('.priority-note');if(!note){note=document.createElement('p');note.className='priority-note';note.style.cssText='font-size:14px;color:#52677d;margin:6px 0 12px';item.card.querySelector('.qhead')?.after(note)}
+        note.textContent=item.need.reason;note.hidden=item.need.band<=0;
+        const wrapper=item.card.closest('details.star-item');
+        if(wrapper){const group=wrapper.parentElement;group.append(wrapper);if(!groups.has(group))groups.set(group,item)}else box.append(item.card);
+      }
+      for(const group of groups.keys())group.parentElement.append(group);
+      document.querySelector('.current-training-filter')?.refreshCurrentTraining?.();adapter.refresh();
+    }
+    field.addEventListener('change',refresh);
+    document.addEventListener('click',event=>{if(event.target.closest('.check-one,.notebook-pass,.notebook-wrong,.notebook-restore,.notebook-toast button'))setTimeout(refresh,0)},true);
+    refresh();
+  }
   function matches(p){return (!params.get('exam')||String(p.examRound)===params.get('exam'))&&(!params.get('tag')||(p.tags||[]).includes(params.get('tag')))}
   function select(label,values,key){
     const el=document.createElement('label');const name=document.createElement('span');name.className='season-filter-name';name.textContent=label;el.append(name);const field=document.createElement('select');field.setAttribute('aria-label',label);
@@ -62,16 +126,18 @@
       const brief=card.querySelector('.question-brief'),workspace=card.querySelector('.answer-workspace');
       if(brief&&workspace){while(brief.firstChild)workspace.append(brief.firstChild);brief.remove()}
     });
-    if(adapter)notebook(problems,adapter,bar);
+    if(adapter){notebook(problems,adapter,bar);sortQuestions(problems,adapter)}
     if(host)mobileFilters(host,bar);
     if(!problems.length){const box=document.createElement('section');box.className='season-welcome';box.innerHTML='<span class="season-kicker">NEW CHAPTER</span><h2>다음 기출 오답부터<br>차근차근 쌓아가세요.</h2><p>회차와 틀린 문제를 보내주시면 원문은 회차별 MD로 보관하고,<br>숫자와 조건을 바꾼 응용문제를 이곳에 등록합니다.</p><a href="오답_훈련센터.html">학습 홈으로</a>';host?.after(box)}
   }
   function currentTrainingSelect(problems,adapter){
     const label=document.createElement('label');label.className='current-training-filter';const name=document.createElement('span');name.className='season-filter-name';name.textContent='현재 훈련 필요 TOP 10';label.append(name);
     const field=document.createElement('select');field.className='current-training-select';field.setAttribute('aria-label','현재 훈련 필요 TOP 10');
-    const tags=new Map();problems.forEach((problem,index)=>{if(problem.variantOf!=null||problem.sourceQuestionNo===''||isCompleted(adapter.theory?'theory':'practical',adapter.theory?problem.id:index,adapter.state))return;[...new Set(problem.tags?.length?problem.tags:[problem.type])].filter(Boolean).forEach(tag=>{if(!tags.has(tag))tags.set(tag,[]);tags.get(tag).push(problem)})});
-    const ranked=[...tags].sort((a,b)=>b[1].length-a[1].length||a[0].localeCompare(b[0],'ko')).slice(0,10);field.add(new Option(ranked.length?'학습 유형 선택':'현재 훈련할 미통과 문제가 없습니다.',''));ranked.forEach(([tag,rows],index)=>field.add(new Option(`${index+1}. ${tag} · ${rows.length}문제`,tag)));field.disabled=!ranked.length;
-    field.onchange=()=>{if(!field.value)return;const url=new URL(location.href);url.searchParams.set('tag',field.value);url.searchParams.set('fresh','1');url.searchParams.delete('exam');location.href=url.href};label.append(field);return label;
+    let ranked=[];
+    label.refreshCurrentTraining=()=>{ranked=rankTags(practiceRefs(problems,adapter),{[subjectOf(adapter)]:adapter.state});field.replaceChildren(new Option(ranked.length?'취약 유형 선택 · 바로 풀기':'현재 확인된 취약 유형이 없습니다.',''));ranked.forEach(({tag,rows,best},index)=>field.add(new Option(`${index+1}. ${tag} · ${rows.length}문제 · ${best.reason}`,tag)));field.disabled=!ranked.length};
+    field.onchange=()=>{const selected=ranked.find(group=>group.tag===field.value);if(selected)location.href=priorityUrl(location.pathname,selected.rows,selected.tag)};
+    label.title='최근 14일의 반복 오답을 먼저 보고, 연속 오답·최근 5회 결과로 정렬합니다. 채점 전 문제 수는 취약점 순위에 반영하지 않습니다.';
+    label.append(field);label.refreshCurrentTraining();return label;
   }
   function mobileFilters(host,bar){
     const media=matchMedia('(max-width:760px)'),anchor=document.createComment('filter toolbar');host.before(anchor);
@@ -101,7 +167,7 @@
     const get=(id,k)=>theory?a.state[k]?.[id]:a.state.cards?.[id]?.[k];
     const put=(id,k,v)=>{const target=theory?(a.state[k]??={}):(a.state.cards[id]??={});target[theory?id:k]=v};
     function visibility(card){
-      const id=key(card),p=theory?problems.find(p=>p.id===id):problems[Number(id)],passed=isCompleted(theory?'theory':'practical',id,a.state),star=!!get(id,'starred');
+      const id=key(card),p=theory?problems.find(p=>p.id===id):problems[Number(id)],passed=isCompleted(subjectOf(a),id,a.state),star=!!get(id,'starred');
       const search=document.querySelector('#typeFilter')?.value||params.get('type')||'';
       const match=matches(p)&&(!search||p.type.includes(search))&&(params.get('view')!=='today'||p.addedDate===new Date(Date.now()-new Date().getTimezoneOffset()*60000).toISOString().slice(0,10));
       const special=params.get('view')==='star',hasVariant=problems.some(x=>x.variantOf===(theory?id:Number(id)));
@@ -203,9 +269,9 @@
       });section.append(list);
       const currentHeading=document.createElement('h5');currentHeading.className='season-tag-heading season-current-heading';currentHeading.innerHTML='현재 훈련 필요 <small>TOP 10</small>';section.append(currentHeading);
       const currentList=document.createElement('div');currentList.className='season-tag-list season-current-list';
-      const activeTags=[...subjectTags.get(subject)].map(([tag,rows])=>[tag,rows.filter(row=>!isPassed(row))]).filter(([,rows])=>rows.length).sort((a,b)=>b[1].length-a[1].length||a[0].localeCompare(b[0],'ko')).slice(0,10);
-      activeTags.forEach(([tag,rows],index)=>{const a=document.createElement('a');a.className='season-tag season-current-tag';a.textContent=tag+' · '+rows.length;a.title=`${sources[subject].label} 현재 미통과 ${rows.length}문제 풀기`;a.href=sources[subject].file+'?tag='+encodeURIComponent(tag)+'&fresh=1';a.style.backgroundColor=activeColors[index];a.style.color=index<6?'#fff':'#5B2A0A';a.dataset.rank=String(index+1);currentList.append(a)});
-      if(!activeTags.length){const done=document.createElement('span');done.className='season-current-empty';done.textContent='현재 훈련할 미통과 문제가 없습니다.';currentList.append(done)}
+      const activeTags=rankTags(entries.filter(entry=>entry.subject===subject),learningState);
+      activeTags.forEach(({tag,rows,best},index)=>{const a=document.createElement('a');a.className='season-tag season-current-tag';a.textContent=tag+' · '+rows.length+'문제 · '+best.reason;a.title=`${sources[subject].label} · ${best.reason}`;a.href=priorityUrl(sources[subject].file,rows,tag);a.style.backgroundColor=activeColors[index];a.style.color=index<6?'#fff':'#5B2A0A';a.dataset.rank=String(index+1);currentList.append(a)});
+      if(!activeTags.length){const done=document.createElement('span');done.className='season-current-empty';done.textContent='현재 확인된 취약 유형이 없습니다. 채점 전 문제는 정렬에서 찾아볼 수 있습니다.';currentList.append(done)}
       section.append(currentList);groups.append(section);
     });host.append(groups);
     if(host.dataset.tagsOnly){
@@ -226,5 +292,5 @@
       document.querySelector('main')?.prepend(panel);
     }
   }
-  window.TrainingSeason={matches,install,catalog,isCompleted};
+  window.TrainingSeason={matches,install,catalog,isCompleted,priority,comparePriority,rankTags,priorityUrl};
 })();

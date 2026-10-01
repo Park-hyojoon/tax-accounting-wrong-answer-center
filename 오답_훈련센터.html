@@ -236,7 +236,8 @@
             </label>
             <label class="sort-label" for="sortOrder">정렬
               <select class="sort-select" id="sortOrder">
-                <option value="recentRegistered" selected>최근 등록 순</option>
+                <option value="priority" selected>취약 우선 · 추천</option>
+                <option value="recentRegistered">최근 등록 순</option>
                 <option value="registered">등록 순서</option>
                 <option value="wrong">오답 많은 순</option>
                 <option value="repeatWrong">반복해서 틀린 문제</option>
@@ -308,7 +309,7 @@
 
   <script src="github-learning-sync.js?v=22"></script>
   <script src="season-catalog.js?v=41"></script>
-  <script src="season-ui.js?v=44"></script>
+  <script src="season-ui.js?v=45"></script>
 <script src="training-ui.js?v=13"></script>
   <script>
     const SOURCES={
@@ -594,7 +595,7 @@
     const $$=(selector,root=document)=>[...root.querySelectorAll(selector)];
     let storageAvailable=true;
     let currentFilter='today';
-    let currentSort='recentRegistered';
+    let currentSort='priority';
     let currentExamRound='';
     let records=[];
     function localDateKey(date=new Date()){
@@ -690,12 +691,13 @@
           selfPassed=Boolean(saved.selfPassed);
           deleted=Boolean(saved.deleted);
         }
-        const lastAttempt=history.reduce((latest,item)=>{const time=Date.parse(item?.at||'');return Number.isFinite(time)&&time>latest?time:latest},0);
+        const lastAttempt=history.reduce((latest,item)=>{const time=Date.parse(item?.at||'');return !item?.cancelledAt&&Number.isFinite(time)&&time>latest?time:latest},0);
         const directIntake=directRefs.has(`${meta.source}:${meta.source==='closing'?meta.index:meta.id}`);
         const aiOnly=(meta.source==='practical'||meta.source==='voucher')&&!directIntake;
         const examRound=EXAM_ROUNDS.get(`${meta.source}:${meta.id}`);
-        const recurrent=RECURRENT_REFS.has(`${meta.source}:${meta.id}`);
-        return {...meta,examRound,recurrent,variant:Boolean(meta.variant||aiOnly),directIntake,metaOrder,category:source.label,file:source.file,key:source.key,history,attempts,wrong,passed,archived,selfPassed,deleted,lastAttempt};
+        const priority=TrainingSeason.priority(meta.source,meta.id,root,{recurrent:RECURRENT_REFS.has(`${meta.source}:${meta.id}`)}),recurrent=priority.active&&(priority.wrongStreak>=2||priority.noteWrong>=2||priority.recurrent);
+        passed=TrainingSeason.isCompleted(meta.source,meta.id,root);
+        return {...meta,examRound,recurrent,priority,variant:Boolean(meta.variant||aiOnly),directIntake,metaOrder,category:source.label,file:source.file,key:source.key,history,attempts,wrong,passed,archived,selfPassed,deleted,lastAttempt};
       });
       records=records.filter(record=>!record.deleted);
       $('#storageNotice').hidden=storageAvailable;
@@ -707,14 +709,16 @@
       if(record.recurrent)stateBadges.push('<span class="state-badge wrong">반복 오답</span>');
       if(record.archived)stateBadges.push('<span class="state-badge hide">숨김</span>');
       else if(record.passed)stateBadges.push(record.selfPassed?'<span class="state-badge self">스스로 인정</span>':'<span class="state-badge pass">✓ 통과</span>');
+      const targetQuery=query||new URLSearchParams({view:view||'all',weakrefs:String(record.id),fresh:'1',sort:'priority',weaknessSource:'recent'}).toString();
       return `<article class="problem-item" data-source="${record.source}">
         <div class="problem-main">
           ${plain?'':`<div class="problem-topline"><span class="category-badge">${record.category}</span><span class="type-badge">${record.type}</span>${stateBadges.join('')}</div>`}
           <h3 class="problem-title">${record.title}</h3>
           <p class="problem-meta">등록 ${record.registered} · 채점 ${record.attempts}회 · 틀림 ${record.wrong}회</p>
+          ${record.priority.band>0?`<p class="problem-meta">${record.priority.reason}</p>`:''}
         </div>
         <div class="problem-actions">
-          <a class="open-link" href="${record.file}${query?`?${query}`:view?`?view=${view}`:''}">응용문제 풀기</a>
+          <a class="open-link" href="${record.file}?${targetQuery}">응용문제 풀기</a>
           ${restore?`<button class="restore-button" type="button" data-restore="${record.source}:${record.id}">훈련 목록으로 복원</button>`:''}
         </div>
       </article>`;
@@ -723,10 +727,10 @@
     function visibleUnpassed(){return records.filter(record=>!record.passed&&!record.archived)}
     function registrationCompare(a,b){return a.registered.localeCompare(b.registered)||number(a.registeredOrder)-number(b.registeredOrder)||a.metaOrder-b.metaOrder}
     function sortTraining(list){return [...list].sort((a,b)=>{
+      if(currentSort==='priority'||currentSort==='repeatWrong')return TrainingSeason.comparePriority(a.priority,b.priority)||registrationCompare(a,b);
       if(currentSort==='wrong')return b.wrong-a.wrong||b.attempts-a.attempts||registrationCompare(a,b);
       if(currentSort==='unattempted')return Number(a.attempts>0)-Number(b.attempts>0)||registrationCompare(a,b);
       if(currentSort==='recentAttempt')return b.lastAttempt-a.lastAttempt||registrationCompare(a,b);
-      if(currentSort==='repeatWrong')return Number(b.recurrent)-Number(a.recurrent)||b.registered.localeCompare(a.registered)||registrationCompare(a,b);
       if(currentSort==='recentRegistered')return b.registered.localeCompare(a.registered)||number(b.registeredOrder)-number(a.registeredOrder)||b.metaOrder-a.metaOrder;
       return registrationCompare(a,b)
     })}
@@ -797,6 +801,6 @@
   </script>
 <script>TrainingSeason.catalog(META,SOURCES);</script>
 <script src="weakness-data.js?v=19"></script>
-<script src="weakness-center.js?v=11"></script>
+<script src="weakness-center.js?v=12"></script>
 </body>
 </html>

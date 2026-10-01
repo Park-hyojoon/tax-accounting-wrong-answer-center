@@ -116,7 +116,8 @@
   <div class="toolbar">
     <label class="sort-label" for="sortOrder">정렬
       <select class="sort-select" id="sortOrder">
-        <option value="recentRegistered" selected>최근 등록 순</option>
+        <option value="priority" selected>취약 우선 · 추천</option>
+        <option value="recentRegistered">최근 등록 순</option>
         <option value="registered">등록 순서</option>
         <option value="wrong">오답 많은 순</option>
         <option value="repeatWrong">반복해서 틀린 문제</option>
@@ -139,7 +140,7 @@
   <p class="footer">유형·세액·분개 조건을 모두 충족해야 통과합니다. 입력 내용은 이 브라우저에 자동 저장됩니다.</p>
 </main>
 <script src="github-learning-sync.js?v=22"></script>
-  <script src="season-ui.js?v=44"></script>
+  <script src="season-ui.js?v=45"></script>
 <script src="training-ui.js?v=13"></script>
 <script src="account-search.js?v=5"></script>
 <script>
@@ -363,19 +364,7 @@ function answerLine(a){return `<div class="answer-line"><strong>${a.side==='D'?'
   }
   $$('.question').forEach(card=>{restore(card);syncAdditionalFields(card);$$('.entry-row',card).forEach(r=>{$('.side',r).addEventListener('change',()=>{syncRowSide(r,true);autoBalanceRow(card,r)});$('.account',r).addEventListener('change',()=>{syncAccountDivision(r);autoBalanceRow(card,r)});$$('.debit-amount,.credit-amount',r).forEach(x=>x.addEventListener('focus',()=>autoBalanceRow(card,r,{select:true})))});$('.trade-mode',card).addEventListener('change',e=>setTypeMode(card,e.target.value,false));$('.supplier',card).addEventListener('change',()=>syncPartner(card));$$('.date-month,.date-day',card).forEach(x=>{x.addEventListener('input',()=>syncDateFromParts(card));x.addEventListener('change',()=>syncDateFromParts(card))});$$('input,select',card).forEach(x=>{x.addEventListener('input',()=>changed(card));x.addEventListener('change',()=>changed(card))});connectAutoJournal(card);$('.trade-mode',card).addEventListener('change',()=>syncAutoJournal(card));$('.check-one',card).addEventListener('click',()=>grade(card));$('.archive-one',card).addEventListener('click',()=>archive(card));$('.reset-one',card).addEventListener('click',()=>resetCurrent(card))});
   $$('.question').forEach(card=>$('.star-one',card).addEventListener('click',()=>toggleStar(card)));
-  const questionOrder=$$('.question');
-  function sortKeys(card){const index=Number(card.dataset.index),s=cs(index),history=s.history||[],last=history.length?Date.parse(history[history.length-1].at)||0:0;return{card,index,recurrent:Boolean(problems[index]?.recurrenceOf),wrong:s.wrongCount||0,attempts:s.attempts||0,last,added:card.dataset.addedDate||''}}
-  function applySort(){const mode=$('#sortOrder').value,list=questionOrder.map(sortKeys);list.sort((a,b)=>{
-    if(mode==='repeatWrong')return Number(b.recurrent)-Number(a.recurrent)||b.added.localeCompare(a.added)||b.index-a.index;
-    if(mode==='wrong')return b.wrong-a.wrong||b.attempts-a.attempts||a.index-b.index;
-    if(mode==='unattempted')return Number(a.attempts>0)-Number(b.attempts>0)||a.index-b.index;
-    if(mode==='recentAttempt')return b.last-a.last||a.index-b.index;
-    if(mode==='recentRegistered')return b.added.localeCompare(a.added)||b.index-a.index;
-    return a.index-b.index});
-    const box=$('#questions');list.forEach(x=>{x.card.classList.toggle('repeat-filter-hidden',mode==='repeatWrong'&&!x.recurrent);box.appendChild(x.card)});progress()}
-  $('#sortOrder').addEventListener('change',applySort);
-  applySort();
-  function progress(){const cards=$$('.question').filter(c=>!c.hidden),graded=cards.filter(c=>c.dataset.graded==='true').length,correct=cards.filter(c=>c.dataset.correct==='true').length,wrong=Object.values(state.cards).reduce((n,s)=>n+(s.wrongCount||0),0);$('#progressText').textContent=`채점 ${graded} / ${cards.length} · 정답 ${correct} · 누적 오답 ${wrong}`;$('#progressFill').style.width=(cards.length?graded/cards.length*100:0)+'%';let empty=$('#emptyQuestions');if(!cards.length&&!empty){empty=document.createElement('div');empty.id='emptyQuestions';empty.className='notice';empty.innerHTML=starView?'아직 ★ 표시한 매입매출전표 문제가 없습니다. <a href="매입매출전표_오답연습_3문제.html?view=all">전체 문제에서 별표하기</a>':todayView?'오늘 등록된 미통과 문제가 없습니다. <a href="매입매출전표_오답연습_3문제.html?view=all">기존 매입매출전표 문제 전체 보기</a>':'현재 표시할 미통과 문제가 없습니다. 통과한 문제는 학습 상태에서 다시 볼 수 있습니다.';$('#questions').after(empty)}else if(cards.length&&empty)empty.remove()}
+  function progress(){const cards=$$('.question').filter(c=>!c.hidden&&!c.classList.contains('repeat-filter-hidden')),graded=cards.filter(c=>c.dataset.graded==='true').length,correct=cards.filter(c=>c.dataset.correct==='true').length,wrong=Object.values(state.cards).reduce((n,s)=>n+(s.wrongCount||0),0);$('#progressText').textContent=`채점 ${graded} / ${cards.length} · 정답 ${correct} · 누적 오답 ${wrong}`;$('#progressFill').style.width=(cards.length?graded/cards.length*100:0)+'%';let empty=$('#emptyQuestions');if(!cards.length&&!empty){empty=document.createElement('div');empty.id='emptyQuestions';empty.className='notice';empty.innerHTML=starView?'아직 ★ 표시한 매입매출전표 문제가 없습니다. <a href="매입매출전표_오답연습_3문제.html?view=all">전체 문제에서 별표하기</a>':todayView?'오늘 등록된 미통과 문제가 없습니다. <a href="매입매출전표_오답연습_3문제.html?view=all">기존 매입매출전표 문제 전체 보기</a>':'현재 표시할 미통과 문제가 없습니다. 통과한 문제는 학습 상태에서 다시 볼 수 있습니다.';$('#questions').after(empty)}else if(cards.length&&empty)empty.remove()}
   function setupSpecialTrainingView(){
     if(!starView)return;
     document.title='★ 특별 훈련 · 매입매출전표';
@@ -417,7 +406,7 @@ function answerLine(a){return `<div class="answer-line"><strong>${a.side==='D'?'
     TrainingGitHub.installSyncBar({onNeedToken:({mobile})=>{if(mobile)TrainingGitHub.showToast('처음 한 번만 오답 훈련센터 홈 아래쪽에서 GitHub 토큰을 연결한 뒤 다시 눌러주세요.',8000)}});
   })();
 </script>
-<script>TrainingSeason.install(problems,{state,save,refresh:progress});</script>
+<script>TrainingSeason.install(problems,{subject:'voucher',state,save,refresh:progress});</script>
 <script src="question-markup.js?v=5"></script>
 </body>
 </html>

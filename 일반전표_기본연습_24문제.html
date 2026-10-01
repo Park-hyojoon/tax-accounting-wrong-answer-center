@@ -155,7 +155,8 @@
     <div class="toolbar">
       <label class="sort-label" for="sortOrder">정렬
         <select class="sort-select" id="sortOrder">
-          <option value="recentRegistered" selected>최근 등록 순</option>
+          <option value="priority" selected>취약 우선 · 추천</option>
+          <option value="recentRegistered">최근 등록 순</option>
           <option value="registered">등록 순서</option>
           <option value="wrong">오답 많은 순</option>
           <option value="repeatWrong">반복해서 틀린 문제</option>
@@ -198,7 +199,7 @@
   </main>
 
   <script src="github-learning-sync.js?v=22"></script>
-  <script src="season-ui.js?v=44"></script>
+  <script src="season-ui.js?v=45"></script>
 <script src="training-ui.js?v=13"></script>
   <script src="account-search.js?v=5"></script>
   <script>
@@ -391,17 +392,6 @@
 
     const questionOrder=els('.question');
     questionOrder.forEach(card=>{card.dataset.typeFilterBaseHidden=String(card.hidden)});
-    function sortKeys(card){const index=Number(card.dataset.index),s=cardState(index),history=s.history||[],last=history.length?Date.parse(history[history.length-1].at)||0:0;return{card,index,recurrent:Boolean(problems[index]?.recurrenceOf),wrong:s.wrongCount||0,attempts:s.attempts||0,last,added:card.dataset.addedDate||''}}
-    function applySort(){if(starView)return;const mode=el('#sortOrder').value,list=questionOrder.map(sortKeys);list.sort((a,b)=>{
-      if(mode==='repeatWrong')return Number(b.recurrent)-Number(a.recurrent)||b.added.localeCompare(a.added)||b.index-a.index;
-      if(mode==='wrong')return b.wrong-a.wrong||b.attempts-a.attempts||a.index-b.index;
-      if(mode==='unattempted')return Number(a.attempts>0)-Number(b.attempts>0)||a.index-b.index;
-      if(mode==='recentAttempt')return b.last-a.last||a.index-b.index;
-      if(mode==='recentRegistered')return b.added.localeCompare(a.added)||b.index-a.index;
-      return a.index-b.index});
-      const box=el('#questions');list.forEach(x=>{x.card.classList.toggle('repeat-filter-hidden',mode==='repeatWrong'&&!x.recurrent);box.appendChild(x.card)});updateProgress()}
-    el('#sortOrder').addEventListener('change',applySort);
-    applySort();
 
     function updateProgress(){
       const cards=els('.question').filter(c=>!c.hidden&&!c.classList.contains('repeat-filter-hidden')),graded=cards.filter(c=>c.dataset.graded==='true').length,correct=cards.filter(c=>c.dataset.correct==='true').length;
@@ -549,7 +539,7 @@
     TrainingGitHub.installSyncBar({onNeedToken:({mobile})=>{if(mobile)TrainingGitHub.showToast('처음 한 번만 오답 훈련센터 홈 아래쪽에서 GitHub 토큰을 연결한 뒤 다시 눌러주세요.',8000)}});
   })();
 </script>
-<script>TrainingSeason.install(problems,{state:studyState,save:saveState,refresh:updateProgress});</script>
+<script>TrainingSeason.install(problems,{subject:'practical',state:studyState,save:saveState,refresh:updateProgress});</script>
 <script src="question-markup.js?v=5" data-question-mark-subject="practical"></script>
 </body>
 </html>

@@ -121,7 +121,8 @@
     <div class="dashboard">
       <label class="sort-label" for="sortOrder">정렬
         <select class="sort-select" id="sortOrder">
-          <option value="recentRegistered" selected>최근 등록 순</option>
+          <option value="priority" selected>취약 우선 · 추천</option>
+          <option value="recentRegistered">최근 등록 순</option>
           <option value="registered">등록 순서</option>
           <option value="wrong">오답 많은 순</option>
           <option value="repeatWrong">반복해서 틀린 문제</option>
@@ -155,7 +156,7 @@
   </main>
 
   <script src="github-learning-sync.js?v=22"></script>
-  <script src="season-ui.js?v=44"></script>
+  <script src="season-ui.js?v=45"></script>
 <script src="training-ui.js?v=13"></script>
   <script>
     const problems=loadTrainingProblems();
@@ -247,18 +248,6 @@
       let empty=$('#emptyState');if(!empty){empty=document.createElement('p');empty.id='emptyState';empty.className='notice';$('#questions').before(empty)}empty.hidden=visible.length>0;empty.textContent='현재 선택한 범위에 훈련할 문제가 없습니다.';
     }
     updateDashboard();
-    const questionOrder=$$('.question').map((card,index)=>({card,index}));
-    function sortKeys(entry){const id=entry.card.dataset.id,history=state.history[id]||[],last=history.length?Date.parse(history[history.length-1].at)||0:0;return{...entry,recurrent:Boolean(getProblem(id)?.recurrenceOf),wrong:wrongCount(id),attempts:state.attempts[id]||0,last,added:entry.card.dataset.addedDate||''}}
-    function applySort(){if(starView)return;const mode=$('#sortOrder').value,list=questionOrder.map(sortKeys);list.sort((a,b)=>{
-      if(mode==='repeatWrong')return Number(b.recurrent)-Number(a.recurrent)||b.added.localeCompare(a.added)||b.index-a.index;
-      if(mode==='wrong')return b.wrong-a.wrong||b.attempts-a.attempts||a.index-b.index;
-      if(mode==='unattempted')return Number(a.attempts>0)-Number(b.attempts>0)||a.index-b.index;
-      if(mode==='recentAttempt')return b.last-a.last||a.index-b.index;
-      if(mode==='recentRegistered')return b.added.localeCompare(a.added)||b.index-a.index;
-      return a.index-b.index});
-      const box=$('#questions');list.forEach(x=>{x.card.classList.toggle('repeat-filter-hidden',mode==='repeatWrong'&&!x.recurrent);box.appendChild(x.card)});updateDashboard()}
-    $('#sortOrder').addEventListener('change',applySort);
-    applySort();
     $('#fileName').addEventListener('input',e=>{state.fileName=e.target.value;persist()});
     $('#koAuto').addEventListener('change',e=>{state.koAuto=e.target.checked;persist();resetKoreanBuffers()});
     $('#copyPath').addEventListener('click',async()=>{

@@ -11,20 +11,20 @@
   const refKey=ref=>ref.subject+':'+ref.id;
   const repeated=new Set(data.groups.flatMap(group=>group.refs.map(refKey)));
   const formatDate=new Intl.DateTimeFormat('ko-KR',{timeZone:'Asia/Seoul',month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'});
-  let source=['submitted','all'].includes(params.get('weaknessSource'))?params.get('weaknessSource'):'recent',kind='type',subjectFilter='all',showPassed=params.get('showPassed')==='1';
+  let source=['submitted','all'].includes(params.get('weaknessSource'))?params.get('weaknessSource'):'recent',kind='type',subjectFilter='all',showPassed=params.get('showPassed')==='1',sortOrder='priority';
 
   main.replaceChildren();
   const style=document.createElement('style');
   style.textContent=[
     '.weak-toolbar,.weak-batch{display:flex;flex-wrap:wrap;gap:8px;margin:16px 0}',
-    '.weak-toolbar button{padding:10px 14px;border:1px solid #cdd2d9;border-radius:7px;background:white;color:#374151;font:inherit;cursor:pointer}',
+    '.weak-toolbar button,.weak-toolbar select{padding:10px 14px;border:1px solid #cdd2d9;border-radius:7px;background:white;color:#374151;font:inherit;cursor:pointer;max-width:100%}',
     '.weak-toolbar button[aria-pressed=true]{background:#4b5563;color:white}',
     '.weak-sources button{font-weight:700}.weak-description{line-height:1.7;color:#4b5563}',
-    '.weak-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr));gap:12px}',
+    '.weak-grid,.weak-priority-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr));gap:12px}',
     '.weak-card{padding:16px;border:1px solid #d5d9df;border-radius:8px;background:white;min-width:0}',
     '.weak-card h3{margin:8px 0;font-size:18px;overflow-wrap:anywhere}',
     '.weak-card p{font-size:14px;color:#5b6470;line-height:1.6}',
-    '.weak-card a,.weak-batch a{display:inline-block;padding:8px 10px;margin:4px;border:1px solid #cdd2d9;border-radius:5px;color:#334155;text-decoration:none;overflow-wrap:anywhere}',
+    '.weak-card a,.weak-batch a,.weak-priority>a{display:inline-block;padding:8px 10px;margin:4px;border:1px solid #cdd2d9;border-radius:5px;color:#334155;text-decoration:none;overflow-wrap:anywhere}',
     '.weak-card details{margin-top:8px;font-size:14px}.weak-card summary{cursor:pointer}',
     '.weak-badge{display:inline-block;padding:4px 8px;margin:0 6px 4px 0;border-radius:5px;background:#eef2f6;color:#475569;font-size:13px}',
     '.weak-badge.repeat{background:#fff1d6;color:#865000}',
@@ -44,6 +44,7 @@
   const intro=document.createElement('p');intro.className='weak-description';main.append(intro);
   const bar=document.createElement('div');bar.className='weak-toolbar';bar.setAttribute('aria-label','문제 분류');main.append(bar);
   const batch=document.createElement('div');batch.className='weak-batch';main.append(batch);
+  const priorityBox=document.createElement('section');priorityBox.className='weak-profile weak-priority';main.append(priorityBox);
   const profile=document.createElement('section');profile.className='weak-profile';profile.setAttribute('aria-labelledby','weakProfileTitle');main.append(profile);
   const grid=document.createElement('div');grid.className='weak-grid';main.append(grid);
 
@@ -52,7 +53,7 @@
   }))}
   function link(refs,label){
     const a=document.createElement('a'),url=new URL(files[refs[0].subject],location.href);
-    url.searchParams.set('view','all');url.searchParams.set('fresh','1');url.searchParams.set('weakrefs',refs.map(r=>r.id).join(','));url.searchParams.set('weaknessSource',source);
+    url.searchParams.set('view','all');url.searchParams.set('fresh','1');url.searchParams.set('sort','priority');url.searchParams.set('weakrefs',refs.map(r=>r.id).join(','));url.searchParams.set('weaknessSource',source);
     if(source==='all'&&showPassed){url.searchParams.set('reviewAll','1');url.searchParams.set('showPassed','1')}
     a.href=url.href;a.textContent=label;return a;
   }
@@ -137,22 +138,35 @@
   }
   function render(){
     const states=readStates(),seen=new Set(),recent=[];
+    const needs=new Map(catalog.map(ref=>[refKey(ref),TrainingSeason.priority(ref.subject,ref.id,states[ref.subject],{recurrent:ref.recurrenceOf})]));
+    const need=ref=>needs.get(refKey(ref))||TrainingSeason.priority(ref.subject,ref.id,states[ref.subject]);
+    const sortRefs=refs=>[...refs].sort((a,b)=>sortOrder==='recent'?(need(b).lastAt-need(a).lastAt||refKey(a).localeCompare(refKey(b))):TrainingSeason.comparePriority(need(a),need(b))||refKey(a).localeCompare(refKey(b)));
+    priorityBox.replaceChildren();
+    const priorityTitle=document.createElement('h3');priorityTitle.textContent='바로 풀 취약 문제 TOP 10';priorityBox.append(priorityTitle);
+    const priorityNote=document.createElement('p');priorityNote.textContent='최근 14일의 반복 오답 → 최근 단발 오답 → 이전 오답 → 다시 학습 순입니다. 연속 오답과 최근 5회 결과를 함께 봅니다.';priorityBox.append(priorityNote);
+    const topScope=new Set((source==='all'?(data.all||[]):source==='submitted'?data.groups.flatMap(group=>group.refs):catalog.filter(ref=>files[ref.subject]&&progress.recentReview(ref.subject,ref.id,states[ref.subject]))).map(refKey));
+    const top=[...new Map(catalog.map(ref=>[refKey(ref),ref])).values()].filter(ref=>topScope.has(refKey(ref))&&files[ref.subject]&&(subjectFilter==='all'||ref.subject===subjectFilter)&&need(ref).active&&need(ref).band>0).sort((a,b)=>TrainingSeason.comparePriority(need(a),need(b))||refKey(a).localeCompare(refKey(b))).slice(0,10);
+    const topGrid=document.createElement('div');topGrid.className='weak-priority-grid';priorityBox.append(topGrid);
+    top.forEach((ref,index)=>{const card=document.createElement('article');card.className='weak-card weak-priority-card';card.dataset.subject=ref.subject;card.dataset.id=String(ref.id);const title=document.createElement('h3');title.textContent=(index+1)+'. '+ref.title;const detail=document.createElement('p');detail.textContent=subjects[ref.subject]+' · '+need(ref).reason;card.append(title,detail,link([ref],'이 문제 풀기'));topGrid.append(card)});
+    if(!top.length){const empty=document.createElement('p');empty.textContent='현재 확인된 취약 문제가 없습니다. 아직 풀지 않은 문제는 목록에서 확인하세요.';topGrid.append(empty)}
     renderProfile(states);
     for(const ref of catalog){
       if(!files[ref.subject]||seen.has(refKey(ref)))continue;seen.add(refKey(ref));
       const review=progress.recentReview(ref.subject,ref.id,states[ref.subject]);
-      if(review)recent.push({...ref,...review});
+      if(review&&need(ref).active)recent.push({...ref,...review});
     }
-    recent.sort((a,b)=>Date.parse(b.lastAt)-Date.parse(a.lastAt)||refKey(a).localeCompare(refKey(b)));
-    const groups=data.groups.map(group=>({...group,refs:group.refs.filter(ref=>!progress.isCompleted(ref.subject,ref.id,states[ref.subject]))})).filter(group=>group.refs.length);
+    recent.splice(0,recent.length,...sortRefs(recent));
+    const groups=data.groups.map(group=>({...group,refs:sortRefs(group.refs.filter(ref=>need(ref).active))})).filter(group=>group.refs.length).sort((a,b)=>(sortOrder==='recent'?need(b.refs[0]).lastAt-need(a.refs[0]).lastAt:TrainingSeason.comparePriority(need(a.refs[0]),need(b.refs[0])))||b.count-a.count);
     const allSubmitted=(data.all||[]).filter(ref=>files[ref.subject]&&!(ref.subject==='theory'?states.theory.deleted?.[ref.id]:states[ref.subject].cards?.[ref.id]?.deleted));
     const remaining=allSubmitted.filter(ref=>!progress.isCompleted(ref.subject,ref.id,states[ref.subject]));
-    const reviewRefs=showPassed?allSubmitted:remaining;
+    const reviewRefs=sortRefs(showPassed?allSubmitted:remaining);
     sources.querySelector('[data-source=recent]').textContent='훈련 중 오답 · '+recent.length+'문제';
     sources.querySelector('[data-source=submitted]').textContent='직접 제출 반복 · '+groups.length+'묶음';
     sources.querySelector('[data-source=all]').textContent='모든 기출문제 오답 복습 · '+reviewRefs.length+'문제';
     sources.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.source===source)));
     bar.replaceChildren();batch.replaceChildren();grid.replaceChildren();
+    const sortLabel=document.createElement('label');sortLabel.textContent='정렬 ';const sort=document.createElement('select');sort.className='weak-sort';sort.setAttribute('aria-label','약점 문제 정렬');sort.add(new Option('취약 우선 · 추천','priority'));sort.add(new Option('최근 오답 순','recent'));sort.value=sortOrder;sort.onchange=()=>{sortOrder=sort.value;render()};sortLabel.append(sort);bar.append(sortLabel);
+    for(const subject of ['voucher','practical','theory']){const refs=top.filter(ref=>ref.subject===subject);if(refs.length)priorityBox.append(link(refs,subjects[subject]+' 취약 '+refs.length+'문제 이어 풀기'))}
     if(source==='all'){
       intro.textContent='이 메뉴에 넣도록 전달한 기출 오답만 모았습니다. 정답·통과한 문제는 기본 목록에서 잠시 숨기며, 문제와 학습기록은 보관합니다.';
       for(const [subject,label] of [['all','전체'],...Object.entries(subjects)]){
@@ -172,7 +186,7 @@
         const badge=document.createElement('span');badge.className='weak-badge';badge.textContent=subjects[ref.subject];card.append(badge);
         if(progress.isCompleted(ref.subject,ref.id,states[ref.subject])){const done=document.createElement('span');done.className='weak-badge';done.textContent='통과 기록 있음';card.append(done)}
         const title=document.createElement('h3');title.textContent=ref.title;card.append(title);
-        const detail=document.createElement('p');detail.textContent=ref.type+(ref.examRound?' · '+ref.examRound+'회':'');card.append(detail);
+        const detail=document.createElement('p');detail.textContent=ref.type+(ref.examRound?' · '+ref.examRound+'회':'')+(need(ref).band>0?' · '+need(ref).reason:'');card.append(detail);
         card.append(link([ref],'복습하기'));grid.append(card);
       }
       return;
@@ -194,7 +208,7 @@
         const badge=document.createElement('span');badge.className='weak-badge';badge.textContent=subjects[ref.subject];card.append(badge);
         if(repeated.has(refKey(ref))){const repeat=document.createElement('span');repeat.className='weak-badge repeat';repeat.textContent='반복 약점에도 포함';card.append(repeat)}
         const title=document.createElement('h3');title.textContent=ref.title;card.append(title);
-        const detail=document.createElement('p');detail.textContent='시작일 이후 오답 '+ref.count+'회 · 최근 '+formatDate.format(new Date(ref.lastAt));card.append(detail);
+        const detail=document.createElement('p');detail.textContent=need(ref).reason+' · 최근 '+formatDate.format(new Date(ref.lastAt));card.append(detail);
         card.append(link([ref],'다시 풀기'));grid.append(card);
       }
       return;
