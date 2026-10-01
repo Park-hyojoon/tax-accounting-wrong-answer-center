@@ -90,7 +90,7 @@ def build(root):
         for subject,ident in re.findall(r"source\s*:\s*'(theory|practical|voucher)'\s*,\s*id\s*:\s*('[^']+'|\d+)",raw):
             p=lookup.get((subject,ident.strip("'")))
             if p:refs.append(p)
-        if refs:events.append(dict(id=t.field(raw,'id'),parent=t.field(raw,'recurrenceOf'),topic=t.field(raw,'topicId'),date=t.field(raw,'reportedAt'),refs=refs))
+        if refs:events.append(dict(id=t.field(raw,'id'),parent=t.field(raw,'recurrenceOf'),topic=t.field(raw,'topicId'),date=t.field(raw,'reportedAt'),refs=refs,reviewMenu=bool(re.search(r'\breviewMenu\s*:\s*true\b',raw))))
     byid={e['id']:e for e in events};groups={}
     for e in events:
         root_id=e['id'];seen=set()
@@ -114,7 +114,7 @@ def build(root):
     output.sort(key=lambda g:(-g['count'],g['label']))
     all_refs={}
     for event in events:
-        if event['id'] not in ALL_EXAM_REVIEW_INTAKE_IDS:
+        if not event['reviewMenu'] and event['id'] not in ALL_EXAM_REVIEW_INTAKE_IDS:
             continue
         for problem in event['refs']:
             key=(problem['subject'],str(problem['id']))

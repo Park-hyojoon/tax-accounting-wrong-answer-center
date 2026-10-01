@@ -681,7 +681,7 @@ def apply_add(spec_path):
 CONTRACT = '''# 새 기출 오답 등록 (spec 하나로 일괄 처리)
 {
   "examRound": 121,
-  "reportedAt": "YYYY-MM-DD",
+  "reportedAt": "YYYY-MM-DD", "reviewMenu": true,
   "originals": [{"id":"고유-접수-id", "subject":"theory|practical|voucher",
     "questionNo":"2", "originalText":"사용자가 보낸 원문 전체(표 포함)",
     "originalAnswer":"사용자가 보낸 답안 전체", "learnerReason":null,
@@ -691,6 +691,7 @@ CONTRACT = '''# 새 기출 오답 등록 (spec 하나로 일괄 처리)
 }
 원본당 대표 응용문제 1개. meta와 mistakes는 자동 생성하므로 작성하지 않는다.
 문제 객체에는 type, title, prompt, addedDate 및 해당 분야 필수 답안 필드를 넣는다.
+사용자가 모든 기출문제 오답 복습 메뉴를 지정하면 reviewMenu:true를 넣는다. 지정하지 않은 접수를 자동 합산하지 않는다.
 회차 MD·원장·화면·유형목록·버전을 함께 갱신하며 실패 시 반영하지 않는다.
 기존 사건을 다시 제출할 때만 새 id와 recurrenceOf를 지정한다. 재첨부는 신규 사건이 아니다.
 추가 ★ 응용은 originals 없이 items에 variantOf가 있는 객체를 주고 examRound와 tags를 객체에 명시한다.
@@ -771,6 +772,7 @@ def cmd_add(spec_path):
             topics.append({'id':topic,'label':ptype})
             entry={'id':original['id'],'source':'user-submitted','evidenceStatus':'confirmed','topicId':topic,'title':title,'originalCue':original['originalText'][:320],'learnerReason':original.get('learnerReason'),'reportedAt':date,'registeredDate':date,'examRound':original_round,'questionNo':str(original['questionNo']),'practiceRefs':[{'source':subject,'id':ref_id,'type':ptype}],'provenance':f'기출 원본 오답/{original_round}회 기출 문제 이론 실무 오답 데이터.md'}
             if not original_round: entry['provenance']='기출 원본 오답/회차 미지정 오답 데이터.md'
+            if spec.get('reviewMenu') is True: entry['reviewMenu']=True
             if original.get('recurrenceOf'): entry.update(recurrenceOf=original['recurrenceOf'],recurrenceEvidence=original.get('recurrenceEvidence','사용자가 해당 기출을 다시 틀렸다고 직접 제출'))
             mistakes.append(js(entry)); existing.append({'id':original['id'],'examRound':original_round,'subject':subject,'questionNo':str(original['questionNo']),'reportedAt':date})
     if linked!=set(by_id): raise SystemExit('[오류] 모든 원본에 대표 응용문제 1개를 연결하세요.')
