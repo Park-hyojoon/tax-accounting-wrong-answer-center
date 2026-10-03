@@ -11,7 +11,7 @@
   'use strict';
   return {
     schemaVersion: 1,
-    revision: 47,
+    revision: 48,
     recordedOn: '2026-09-14',
     coverageNote:'2026-09-14 새 학습 이후 사용자가 직접 제출한 기출 오답만 집계합니다.',
     topics: [
@@ -238,7 +238,9 @@
   {id:'staff-prize-taxable-correction',label:'직원 경품 면세매입의 과세매입 수정'},
   {id:'import-invoice-vat-transfer',label:'수입 전자세금계산서와 부가세 납부'},
   {id:'product-sale-partial-cash',label:'과세 제품매출과 현금·외상 대금 구분'},
-  {id:'subcontract-invoice-card-payment',label:'전자세금계산서 임가공비의 카드 결제'}
+  {id:'subcontract-invoice-card-payment',label:'전자세금계산서 임가공비의 카드 결제'},
+  {id:'note-discount-classification',label:'받을어음 할인거래와 지급거절'},
+  {id:'payroll-withholding-health-payment',label:'급여 원천징수액과 건강보험료 납부'}
 ],
     entries: [
   {id:'exam121-theory-reliability-20260914',source:'user-submitted',evidenceStatus:'confirmed',topicId:'reliability-qualitative-characteristics',title:'회계정보의 질적 특성 판단',originalCue:'다음 중 회계정보의 질적 특성 중 신뢰성과 관련이 없는 것은?\n\n① 표현의 충실성\n② 적시성\n③ 검증가능성\n④ 중립성',learnerReason:null,reportedAt:'2026-09-14',registeredDate:'2026-09-14',examRound:121,questionNo:'이론-회계정보 질적 특성',practiceRefs:[{source:'theory',id:'exam121-reliability-variant',type:'회계정보의 신뢰성 구성요소'}],provenance:'기출 원본 오답/121회 기출 문제 이론 실무 오답 데이터.md'},
@@ -490,7 +492,9 @@
   {id:'intake-20261003-staff-prize-taxable-correction',source:'user-submitted',evidenceStatus:'confirmed',topicId:'staff-prize-taxable-correction',title:'직원 워크숍 경품 구입 전표 수정',originalCue:'11월 27일 안길종합상사로부터 본사 영업부 직원 워크숍 행사에서 직원들에게 지급할 경품을 1,100,000원에 현금 구매하고 지출금액 전부를 면세매입(계산서 발급)으로 회계처리 하였으나, 해당 거래는 과세매입(전자세금계산서 발급)으로 확인되었다. (3점)',learnerReason:null,reportedAt:'2026-10-03',registeredDate:'2026-10-03',examRound:null,questionNo:'문항 번호 미제공',practiceRefs:[{source:'voucher',id:72,type:'직원 경품 면세매입의 과세매입 수정'}],provenance:'기출 원본 오답/회차 미지정 오답 데이터.md',reviewMenu:true},
   {id:'intake-20261003-import-vat-transfer',source:'user-submitted',evidenceStatus:'confirmed',topicId:'import-invoice-vat-transfer',title:'기계장치 부속품 수입과 대금 이체',originalCue:'[2] 08월 14일 중국 WEI사로부터 기계장치 부속품을 수입하고 다음과 같이 수입전자세금계산서를 발급받아 즉시 당좌예금계좌에서 이체하였다(단, 부가가치세 관련 회계처리만 할 것). (3점)',learnerReason:null,reportedAt:'2026-10-03',registeredDate:'2026-10-03',examRound:null,questionNo:'[2]',practiceRefs:[{source:'voucher',id:73,type:'수입 전자세금계산서와 부가세 납부'}],provenance:'기출 원본 오답/회차 미지정 오답 데이터.md',reviewMenu:true},
   {id:'intake-20261003-product-sale-partial-cash',source:'user-submitted',evidenceStatus:'confirmed',topicId:'product-sale-partial-cash',title:'제품 판매와 일부 대금 수령',originalCue:'[4] 10월 12일 ㈜동동상사에 제품을 판매하고 아래의 전자세금계산서를 발급하였다. 대금은 현금 1,500,000원을 받고 나머지는 다음 달에 받기로 하였다. (3점)',learnerReason:null,reportedAt:'2026-10-03',registeredDate:'2026-10-03',examRound:null,questionNo:'[4]',practiceRefs:[{source:'voucher',id:74,type:'과세 제품매출과 현금·외상 대금 구분'}],provenance:'기출 원본 오답/회차 미지정 오답 데이터.md',reviewMenu:true},
-  {id:'intake-20261003-subcontract-invoice-card-payment',source:'user-submitted',evidenceStatus:'confirmed',topicId:'subcontract-invoice-card-payment',title:'생산부 임가공 용역과 대금 결제',originalCue:'[6] 12월 18일 생산부에서 임가공 전문업체에 용역을 의뢰하여 제품을 납품받고 다음과 같이 전자세금계산서를 발급받았다. 임가공비는 전액 우리카드로 결제하였다(단, 외주가공비 계정으로 입력할 것). (3점)',learnerReason:null,reportedAt:'2026-10-03',registeredDate:'2026-10-03',examRound:null,questionNo:'[6]',practiceRefs:[{source:'voucher',id:75,type:'전자세금계산서 임가공비의 카드 결제'}],provenance:'기출 원본 오답/회차 미지정 오답 데이터.md',reviewMenu:true}
+  {id:'intake-20261003-subcontract-invoice-card-payment',source:'user-submitted',evidenceStatus:'confirmed',topicId:'subcontract-invoice-card-payment',title:'생산부 임가공 용역과 대금 결제',originalCue:'[6] 12월 18일 생산부에서 임가공 전문업체에 용역을 의뢰하여 제품을 납품받고 다음과 같이 전자세금계산서를 발급받았다. 임가공비는 전액 우리카드로 결제하였다(단, 외주가공비 계정으로 입력할 것). (3점)',learnerReason:null,reportedAt:'2026-10-03',registeredDate:'2026-10-03',examRound:null,questionNo:'[6]',practiceRefs:[{source:'voucher',id:75,type:'전자세금계산서 임가공비의 카드 결제'}],provenance:'기출 원본 오답/회차 미지정 오답 데이터.md',reviewMenu:true},
+  {id:'intake-20261003-note-discount-classification',source:'user-submitted',evidenceStatus:'confirmed',topicId:'note-discount-classification',title:'보유 어음의 할인과 지급거절',originalCue:'제품매출 후 매출처로부터 어음을 받아 보관 중이다. 옳은 설명은?\n① 지급 거절된 부도어음은 부도어음과 수표로 처리한다.\n② 만기일 이전에 어음을 할인하여, 매각거래에 해당하면 그 할인료는 이자비용으로 인식한다.\n③ 만기일 이전에 어음을 할인하여, 차입거래에 해당하면 그 할인료는 매출채권처분손실로 인식한다.\n④ 이자비용인 할인료는 당기비용으로, 매출채권처분손실인 할인료는 기타포괄손익누계액으로 처리한다.',learnerReason:'이 문제는 상황을 바꿔서 만들어주세요. 사용자가 외우고 있을 수 있어요.',reportedAt:'2026-10-03',registeredDate:'2026-10-03',examRound:null,questionNo:'문항 번호 미제공',practiceRefs:[{source:'theory',id:'practice-20261003-note-discount-classification',type:'받을어음 할인거래와 지급거절'}],provenance:'기출 원본 오답/회차 미지정 오답 데이터.md',reviewMenu:true},
+  {id:'intake-20261003-payroll-withholding-health-payment',source:'user-submitted',evidenceStatus:'confirmed',topicId:'payroll-withholding-health-payment',title:'급여 관련 세금과 건강보험료 이체',originalCue:'08월 10일 영업부 직원의 급여에 대한 근로소득세 450,000원, 지방소득세 45,000원, 건강보험료 400,000원(직원 부담분 200,000원, 회사 부담분 200,000원)을 보통예금 통장에서 이체하였다. 회사부담분 건강보험료는 복리후생비로 처리한다(단, 하나의 전표로 입력할 것). (3점)',learnerReason:null,reportedAt:'2026-10-03',registeredDate:'2026-10-03',examRound:null,questionNo:'문항 번호 미제공',practiceRefs:[{source:'practical',id:81,type:'급여 원천징수액과 건강보험료 납부'}],provenance:'기출 원본 오답/회차 미지정 오답 데이터.md',reviewMenu:true}
 ],
     signals: [],
     notes: ['회차별 직접 제출 원문은 PC의 기출 원본 오답 폴더에 MD로 보관합니다.']
