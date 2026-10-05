@@ -4,32 +4,45 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>출제위원 테스트 · 오답 훈련센터</title>
-  <link rel="stylesheet" href="examiner.css?v=2">
+  <link rel="stylesheet" href="examiner.css?v=3">
   <script defer src="engine.js?v=2"></script>
-  <script defer src="app.js?v=2"></script>
+  <script defer src="app.js?v=3"></script>
 </head>
 <body>
   <a class="skip" href="#main">본문으로 바로가기</a>
-  <header><a class="back" href="../오답_훈련센터.html">← 오답 훈련센터</a><span class="badge">출제위원 테스트</span></header>
+  <nav class="examiner-top-nav" aria-label="훈련센터 메뉴"><a href="../오답_훈련센터.html">오늘의 오답훈련</a><a href="../이론_오답응용_5문제.html">이론 오답</a><a href="../일반전표_기본연습_24문제.html">일반전표 입력</a><a href="../매입매출전표_오답연습_3문제.html?view=all">매입매출전표 입력</a><a class="active" href="index.html" aria-current="page">출제위원 테스트</a></nav>
   <main id="main">
     <section class="intro">
       <h1>배운 내용, 낯선 질문</h1>
-      <p class="lead">“이런 방식으로도 물어보네?”<br>기출 수준으로 6문제씩 연습하세요.</p>
+      <p class="lead">“이런 방식으로도 물어보네?”<br>이론과 전표 입력을 연습하세요.</p>
       <p>출제 조건은 준비해 두었습니다. 따로 설정하지 않아도 됩니다.</p>
       <div class="main-actions"><button id="start-mode" class="primary" type="button">문제 풀기</button><button id="request-help" type="button" aria-expanded="false" aria-controls="request-guide">새 문제 부탁하기</button></div>
-      <p id="ready-note" class="hint">문제 풀기는 준비된 문제를 엽니다. 새 출제는 이 센터를 만든 AI 채팅에서 요청합니다.</p>
+      <p id="ready-note" class="hint">문제 풀기는 등록된 문제를 엽니다. 새로운 문제는 이 센터를 만든 AI 채팅에 부탁하세요.</p>
       <div id="request-guide" class="request-guide" hidden>
         <h2>지금 대화하던 채팅에 보내 주세요</h2>
         <p>이 센터를 만들어 달라고 했던 <b>바로 그 AI 채팅</b>에 아래 한 문장을 보내면 됩니다.</p>
-        <label class="stack">보낼 문장<textarea id="quick-request" rows="2" readonly>출제위원 문제 6개 만들어서 테스트에 추가해 주세요.</textarea></label>
+        <label class="stack">보낼 문장<textarea id="quick-request" rows="2" readonly>출제위원 새 문제 6개를 이론·일반전표·매입매출에서 2개씩 만들어 테스트에 추가해 주세요.</textarea></label>
         <button id="copy-quick-request" class="primary" type="button">이 문장 복사</button><p id="copy-status" class="hint" role="status"></p>
         <p>AI가 조건에 맞춰 출제·검토하고 센터에 추가합니다. 완료 안내를 받으면 이 화면을 새로고침하고 <b>문제 풀기</b>를 누르세요.</p>
         <p class="hint">이 버튼이 채팅으로 자동 전송하지는 않습니다. 문장만 보내 주세요. 긴 요청문이나 결과 파일을 옮길 필요는 없습니다.</p>
       </div>
     </section>
     <p id="status" class="status" role="status" aria-live="polite"></p>
+    <section id="subject-picker" class="panel" hidden aria-labelledby="subject-title">
+      <h2 id="subject-title" tabindex="-1">어떤 문제를 풀까요?</h2>
+      <p>여기에는 이미 준비된 문제가 열립니다. 새 출제가 필요할 때만 위의 ‘새 문제 부탁하기’를 사용하세요.</p>
+      <div class="subject-actions">
+        <button type="button" data-subject="theory">이론 문제</button>
+        <button type="button" data-subject="practical">일반전표 입력</button>
+        <button type="button" data-subject="voucher">매입매출전표 입력</button>
+      </div>
+    </section>
     <section id="practice" class="panel" hidden aria-labelledby="practice-title">
       <h2 id="practice-title" tabindex="-1">문제 풀기</h2><p id="trial-summary" class="hint"></p><div id="questions"></div>
+    </section>
+    <section id="journal-practice" class="panel" hidden aria-labelledby="journal-title">
+      <h2 id="journal-title" tabindex="-1">전표 입력 문제</h2>
+      <p id="journal-intro" class="hint"></p><div id="journal-questions"></div>
     </section>
     <details id="advanced" class="panel advanced">
       <summary>이전 문제·설정·분석 보기 <span class="hint">필요할 때만</span></summary>
@@ -44,9 +57,9 @@
           <button id="open-trial" type="button">선택한 문제 풀기</button>
         </details>
         <details id="analysis-panel">
-          <summary>기출 분석과 출제 기준</summary>
+          <summary>이론 기출 분석과 출제 기준</summary>
           <p>기본 출제는 <b>질문 방향 바꾸기 2문항 · 비슷한 개념 구분하기 2문항 · 세부개념이나 예외 활용하기 2문항</b>입니다. 기출 수준의 지식·문장·계산량으로 구성합니다.</p>
-          <p id="analysis-summary"></p><p class="hint">분석한 5회분에서 보이지 않은 개념을 최근 수년간 미출제됐다고 단정하지 않습니다. 후보 목록은 확장할 수 있으며, 기출 빈도가 시험범위를 제한하지 않습니다.</p>
+          <p id="analysis-summary"></p><p class="hint">제공하신 후기 요약은 123~126회를 대체로 평이하게, 127회 이론을 상대적으로 까다롭게 평가합니다. 이는 통계가 아닌 참고 의견입니다. 난도는 실제 기출의 풀이량과 처리 기준을 우선해 점검합니다. 분석한 5회분에서 보이지 않은 개념을 최근 수년간 미출제됐다고 단정하지 않습니다.</p>
           <div class="controls"><label>관찰 빈도<select id="frequency-filter"><option value="all">전체</option><option value="frequent">자주 관찰 · 3회차 이상</option><option value="occasional">가끔 관찰 · 1~2회차</option><option value="unseen">표본 내 미관찰</option></select></label><label>개념 검색<input id="concept-search" type="search" placeholder="예: 면세, 재고" maxlength="100"></label></div>
           <p class="scroll-hint">분석표는 좌우로 밀어 나머지 열을 볼 수 있습니다.</p>
           <div class="table-wrap" tabindex="0" aria-label="개념별 관찰 빈도 · 좌우 스크롤"><table><caption>개념별 관찰 빈도 · 이론 75문항</caption><thead><tr><th>분야 / 세부개념</th><th>문항 수 / 관찰 회차</th><th>판단 포인트와 함정</th></tr></thead><tbody id="concept-rows"></tbody></table></div>
@@ -54,7 +67,7 @@
         </details>
         <details id="transfer-panel">
           <summary>다른 AI에 요청하거나 문제 파일 가져오기</summary>
-          <p class="hint">평소에는 필요 없습니다. 이 작업 폴더를 모르는 다른 AI를 사용할 때만 긴 요청문을 복사하고 결과를 가져오세요.</p>
+          <p class="hint">평소에는 필요 없습니다. 이 작업 폴더를 모르는 다른 AI를 사용할 때만 이론용 상세 요청문을 복사하고 결과를 가져오세요.</p>
           <div class="controls"><button id="make-request" type="button">상세 요청 만들기</button><button id="copy-request" type="button" disabled>상세 요청 복사</button><button id="download-request" type="button" disabled>요청 파일 저장</button></div>
           <label class="stack">다른 AI에 보낼 상세 요청<textarea id="request-text" rows="5" readonly></textarea></label><p id="request-size" class="hint"></p>
           <details id="import-panel"><summary>문제 파일 가져오기</summary><p class="hint">형식 검사는 정답을 인증하지 않습니다. 검토한 문제를 가져올 때 사용하세요.</p><label class="stack">문제 파일<input id="question-file" type="file" accept=".json,application/json"></label><label class="stack">또는 결과 붙여넣기<textarea id="import-text" rows="5"></textarea></label><button id="stage-import" type="button">가져올 문제 확인</button><div id="pending"></div></details>

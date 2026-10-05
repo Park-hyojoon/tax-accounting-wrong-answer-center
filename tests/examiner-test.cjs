@@ -44,8 +44,7 @@ test('published packs are valid and distinct from the preserved pilot',()=>{
   const published=JSON.parse(JSON.stringify(context.window.ExaminerLibrary));assert.ok(Array.isArray(published));assert.ok(published.length<=20);const ids=new Set([pilot.id]);
   for(const p of published){E.validatePack(p,analysis);assert.ok(!ids.has(p.id));ids.add(p.id)}
 });
-test('home links only; other core pages never load test data or engine',()=>{
-  const home=fs.readFileSync(path.join(root,'오답_훈련센터.html'),'utf8');assert.match(home,/href="examiner-test\/index.html"/);assert.doesNotMatch(home,/<script[^>]+examiner-test/);
-  for(const f of ['이론_오답응용_5문제.html','일반전표_기본연습_24문제.html','매입매출전표_오답연습_3문제.html'])assert.ok(!fs.readFileSync(path.join(root,f),'utf8').includes('examiner-test'));
-  const html=fs.readFileSync(path.join(root,'examiner-test/index.html'),'utf8');assert.ok(!html.includes('src="analysis.js')&&!html.includes('src="questions.js'));assert.equal(E.KEY,'exam-20260914-examiner-test-v1');
+test('all main pages link from top navigation without loading examiner data',()=>{
+  for(const f of ['오답_훈련센터.html','이론_오답응용_5문제.html','일반전표_기본연습_24문제.html','매입매출전표_오답연습_3문제.html','개념_정리.html','약점_분석_임시.html']){const html=fs.readFileSync(path.join(root,f),'utf8');assert.match(html,/href="examiner-test\/index.html"/);assert.doesNotMatch(html,/<script[^>]+examiner-test/)}
+  const html=fs.readFileSync(path.join(root,'examiner-test/index.html'),'utf8');assert.ok(!html.includes('src="analysis.js')&&!html.includes('src="questions.js')&&!html.includes('src="journal.js'));assert.equal(E.KEY,'exam-20260914-examiner-test-v1');
 });

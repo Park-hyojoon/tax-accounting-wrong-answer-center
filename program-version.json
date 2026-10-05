@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "revision": 117,
-  "updatedAt": "2026-10-05T13:09:12+09:00",
+  "revision": 118,
+  "updatedAt": "2026-10-05T14:14:17+09:00",
   "files": [
     "오답_훈련센터.html",
     "일반전표_기본연습_24문제.html",
@@ -43,7 +43,9 @@
     "examiner-test/app.js",
     "examiner-test/analysis.js",
     "examiner-test/questions.js",
-    "examiner-test/library.js"
+    "examiner-test/library.js",
+    "examiner-test/journal.js",
+    "examiner-test/journal-bank.js"
   ],
-  "note": "출제위원 사용 간소화: 한 번에 문제 풀기·채팅 한 문장 출제 요청·새 묶음 바로 연결·간단 의견"
+  "note": "출제위원 상단 메뉴·이론/일반전표/매입매출 선택·전표 4문항·기출 난도 근거 점검"
 }
