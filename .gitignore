@@ -16,3 +16,7 @@ __pycache__/
 intake-index.json
 migrate-season.py
 season-maintenance.py
+
+# 출제위원의 비공개 원문·초기 분석·참고 자료
+examiner-test/private/
+examiner-test/artifacts/

@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>출제위원 테스트 · 오답 훈련센터</title>
+  <link rel="stylesheet" href="examiner.css?v=1">
+  <script defer src="engine.js?v=1"></script>
+  <script defer src="app.js?v=1"></script>
+</head>
+<body>
+  <a class="skip" href="#main">본문으로 바로가기</a>
+  <header><a class="back" href="../오답_훈련센터.html">← 오답 훈련센터</a><span class="badge">작은 실험 · 별도 기록</span></header>
+  <main id="main">
+    <section class="intro">
+      <p class="eyebrow">EXAMINER LAB / 01</p>
+      <h1>출제위원 테스트</h1>
+      <p class="lead">숫자를 더 어렵게 바꾸는 대신,<br>익숙한 개념의 뜻밖의 판단 지점을 찾습니다.</p>
+      <p>기존 오답훈련은 그대로. 이곳의 문제·답변·품질 평가는 기존 통과, 오답 횟수, 특별훈련에 합산되지 않습니다.</p>
+      <div class="scope-grid"><div><b>5회분</b><span>123~127회 이론 75문항 분석</span></div><div><b>6문항</b><span>AI가 출제·검토한 정적 시범본</span></div><div><b>0회</b><span>화면에서의 외부 AI 호출</span></div></div>
+      <button id="start-mode" class="primary" type="button">출제위원 모드 시작</button>
+      <p class="hint">시작할 때만 분석·시범 문제를 읽습니다. 일반 등록 화면에는 연결하지 않습니다.</p>
+    </section>
+    <p id="status" class="status" role="status" aria-live="polite"></p>
+    <div id="mode" hidden>
+      <section class="panel" aria-labelledby="style-title">
+        <p class="eyebrow">01 / 먼저 풀어 보기</p><h2 id="style-title">출제 스타일을 골라 비교해 보세요</h2>
+        <p>선택한 스타일 중 하나 이상이 포함된 <b>기존 시범 문제를 조합</b>합니다. 새 AI 생성이 아니며, 조건에 맞는 문제가 적으면 그 수만 표시합니다.</p>
+        <fieldset id="style-options"><legend>출제 스타일 · 여러 개 선택 가능</legend></fieldset>
+        <p class="warning">‘장기 미출제 후보’는 5회분 이론 표본에서 보이지 않은 세부개념 후보입니다. 최근 수년의 미출제나 사용 교재의 중요도는 확인하지 않았습니다.</p>
+        <div class="controls"><label>문제 묶음<select id="pack-select"></select></label><label>요청 문항 수<select id="count"><option>5</option><option selected>6</option><option>7</option><option>8</option></select></label><button id="open-trial" class="primary" type="button">시범 문제 열기</button></div>
+        <label class="history-picker">이전 테스트 이어 보기<select id="trial-select"><option value="">아직 테스트 전입니다</option></select></label>
+        <p id="trial-summary" class="hint"></p><div id="questions"></div>
+      </section>
+      <section class="panel" aria-labelledby="analysis-title">
+        <p class="eyebrow">02 / 관찰한 것과 후보를 구분</p><h2 id="analysis-title">기출 분석 요약</h2>
+        <p id="analysis-summary"></p><p class="warning">기출 빈도는 시험범위를 제한하지 않습니다. 아래 목록은 분야 안의 확장 가능한 후보이며, 전체 교재의 모든 세부목차를 인증한 목록은 아닙니다. ‘0회’는 <b>표본 내 미관찰</b>이지 중요도가 낮다는 뜻이 아닙니다.</p>
+        <div class="controls"><label>관찰 빈도<select id="frequency-filter"><option value="all">전체</option><option value="frequent">자주 관찰 · 3회차 이상</option><option value="occasional">가끔 관찰 · 1~2회차</option><option value="unseen">표본 내 미관찰</option></select></label><label>개념 검색<input id="concept-search" type="search" placeholder="예: 면세, 재고" maxlength="100"></label></div>
+        <p class="scroll-hint">아래 분석표는 좌우로 밀어 나머지 열을 볼 수 있습니다.</p>
+        <div class="table-wrap" tabindex="0" aria-label="개념별 관찰 빈도 · 좌우 스크롤"><table><caption>개념별 관찰 빈도 · 이론 75문항만 집계</caption><thead><tr><th>분야 / 세부개념</th><th>문항 수 / 관찰 회차</th><th>판단 포인트와 함정</th></tr></thead><tbody id="concept-rows"></tbody></table></div>
+        <details><summary>문장·오답 선택지 패턴과 자료 근거</summary><div id="patterns"></div><ul id="scope-references"></ul></details>
+      </section>
+      <section class="panel" aria-labelledby="request-title">
+        <p class="eyebrow">03 / 실제 AI에게 다시 출제 요청</p><h2 id="request-title">선택 조건으로 AI 출제 요청 만들기</h2>
+        <p>위에서 고른 스타일과 5~8문항 조건으로 압축 요약을 만듭니다. 원문 전체·개인 학습기록·토큰은 포함하지 않습니다. 이 요청을 AI 대화에 보내고, 받은 문제 JSON을 아래에 가져오세요.</p>
+        <div class="controls"><button id="make-request" type="button">AI 출제 요청 만들기</button><button id="copy-request" type="button" disabled>요청 복사</button><button id="download-request" type="button" disabled>요청 파일 저장</button></div>
+        <label class="stack">출제위원 전용 요청<textarea id="request-text" rows="6" readonly placeholder="여기서는 AI를 직접 호출하지 않습니다."></textarea></label><p id="request-size" class="hint"></p>
+        <details><summary>AI 결과 JSON 가져오기 · 검토 후 사용</summary><p>형식 검사는 정답·시험범위를 인증하지 않습니다. 선택지·해설·근거를 직접 확인한 뒤 사용해야 합니다. 기존 시범 묶음과 기록은 보존됩니다.</p><label class="stack">JSON 파일<input id="question-file" type="file" accept=".json,application/json"></label><label class="stack">또는 JSON 붙여넣기<textarea id="import-text" rows="6" placeholder="AI가 반환한 문제 묶음 JSON"></textarea></label><button id="stage-import" type="button">형식 검사 후 검토하기</button><div id="pending"></div></details>
+      </section>
+      <section class="panel" aria-labelledby="backup-title">
+        <h2 id="backup-title">테스트 기록만 따로 보관</h2><p>답변·품질 평가는 이 브라우저에만 저장됩니다. 기존 동기화 버튼으로 전송되지 않습니다. 다른 기기로 옮길 때는 아래 백업을 사용하세요. 복원은 고유 기록을 합치며 같은 ID의 다른 내용이 있으면 중단합니다.</p><div class="controls"><button id="export-state" type="button">테스트 기록 JSON 저장</button><label class="file-button">테스트 기록 합쳐 복원<input id="restore-state" type="file" accept=".json,application/json"></label></div><p>간격 반복·Anki 스케줄은 이번 버전에 구현하지 않았습니다.</p>
+      </section>
+    </div>
+    <footer>출제위원 테스트는 가능성 검증용입니다. AI 자체 검토와 사용자 품질 평가를 구분합니다.</footer>
+  </main>
+</body>
+</html>
