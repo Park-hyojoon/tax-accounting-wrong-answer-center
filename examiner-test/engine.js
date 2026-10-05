@@ -7,6 +7,7 @@
   'use strict';
   const SEASON='exam-20260914',KEY=SEASON+'-examiner-test-v1';
   const STYLES=['정석 출제','기출 변형','장기 미출제 후보','교재 주변부','예외규정','함정형'];
+  const DEFAULT_STYLES=STYLES.filter(s=>s!=='정석 출제');
   const RUBRIC=[
     ['copy','기출을 거의 복사했나요?','높을수록 문제'],
     ['textbook','평범한 교재 연습에 머무르나요?','높을수록 아쉬움'],
@@ -86,6 +87,7 @@
     return [
       '출제위원 테스트 모드. 일반 문제 등록·수정·태그 분류에 이 지침을 사용하지 않는다.',
       '원문 재분석 없이 아래 구조화 요약을 사용하여 '+count+'개의 이론 4지선다 신규 문제를 출제한다. 범위는 전산회계 1급 회계원리·원가회계·부가가치세다.',
+      '목적은 낯설지만 배운 내용으로 풀 수 있는 문제다. 기출을 난이도·문장 길이·계산량의 기준으로 사용한다. '+(count===6?'질문 방향 바꾸기 2문항, 비슷한 개념 구분하기 2문항, 세부개념이나 예외 활용하기 2문항으로 배분한다.':'질문 방향 바꾸기, 비슷한 개념 구분하기, 세부개념이나 예외 활용하기를 가능한 고르게 배분한다.')+' 스타일은 보조 분류다. 모든 스타일을 채우려고 억지 문제를 만들지 않는다. 출제 의도·함정·기출과의 차이·근거는 풀이 전에 힌트로 노출하지 않는다.',
       '기출 빈도는 출제범위를 제한하지 않는다. 세부개념 후보 목록을 탐색하되 선택 개념의 공식 교재/기준/법령 근거를 확인한다. 새로운 개념이 목록에 없으면 근거와 함께 목록 확장부터 제안하고 임의로 기존 ID에 끼워넣지 않는다.',
       '주어진 회차 밖의 빈도, 최근 수년의 장기 미출제, 실제 출제확률을 추정하여 단정하지 않는다. 장기 미출제 후보는 표본 내 미관찰 또는 최근 관찰되지 않은 후보일 뿐이다. 사용자의 교재 중요도도 확인되지 않았다.',
       '숫자·날짜만 바꾸지 말고 조건의 방향, 판단 기준, 예외의 경계, 개념 결합을 바꾼다. 계산을 복잡하게 하는 것은 출제위원다움이 아니다. 억지 사례·고급회계·법인세·소득세 계산을 배제한다.',
@@ -97,5 +99,5 @@
       'JSON 형식 (예시 내용과 example.invalid 주소는 실제 검증 결과로 교체):\n'+JSON.stringify(schema)
     ].join('\n\n');
   }
-  return {SEASON,KEY,STYLES,RUBRIC,validatePack,selectQuestions,empty,validateState,mergeState,buildRequest,clone};
+  return {SEASON,KEY,STYLES,DEFAULT_STYLES,RUBRIC,validatePack,selectQuestions,empty,validateState,mergeState,buildRequest,clone};
 });

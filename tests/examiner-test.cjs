@@ -1,6 +1,6 @@
 const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path'),vm=require('node:vm');
 const root=path.join(__dirname,'..'),E=require('../examiner-test/engine.js');
-const context={window:{}};vm.createContext(context);for(const f of ['analysis.js','questions.js'])vm.runInContext(fs.readFileSync(path.join(root,'examiner-test',f),'utf8'),context);
+const context={window:{}};vm.createContext(context);for(const f of ['analysis.js','questions.js','library.js'])vm.runInContext(fs.readFileSync(path.join(root,'examiner-test',f),'utf8'),context);
 const analysis=JSON.parse(JSON.stringify(context.window.ExaminerAnalysis)),pilot=E.validatePack(JSON.parse(JSON.stringify(context.window.ExaminerPilot)),analysis);
 const copy=o=>JSON.parse(JSON.stringify(o));
 test('five consecutive full theory rounds and frequency are counted from records',()=>{
@@ -38,6 +38,11 @@ test('AI request is summary-only and marks uncertainty, computation and isolated
   const request=E.buildRequest(analysis,['예외규정','장기 미출제 후보'],6);assert.match(request,/단정하지 않는다/);assert.match(request,/계산을 복잡하게/);assert.match(request,/일반 문제 등록/);assert.match(request,/정답.*근거/);assert.match(request,/0회|관찰되지|미관찰/);
   assert.ok(!request.includes('originalText')&&!request.includes('originalAnswer')&&!request.includes('localStorage')&&!request.includes('githubToken'));
   assert.throws(()=>E.buildRequest(analysis,['함정형'],10));assert.throws(()=>E.buildRequest(analysis,[],6));
+  const defaults=E.buildRequest(analysis,E.DEFAULT_STYLES,6);assert.match(defaults,/질문 방향 바꾸기 2문항, 비슷한 개념 구분하기 2문항, 세부개념이나 예외 활용하기 2문항/);assert.match(defaults,/스타일은 보조 분류/);assert.match(defaults,/풀이 전에 힌트로 노출하지/);
+});
+test('published packs are valid and distinct from the preserved pilot',()=>{
+  const published=JSON.parse(JSON.stringify(context.window.ExaminerLibrary));assert.ok(Array.isArray(published));assert.ok(published.length<=20);const ids=new Set([pilot.id]);
+  for(const p of published){E.validatePack(p,analysis);assert.ok(!ids.has(p.id));ids.add(p.id)}
 });
 test('home links only; other core pages never load test data or engine',()=>{
   const home=fs.readFileSync(path.join(root,'오답_훈련센터.html'),'utf8');assert.match(home,/href="examiner-test\/index.html"/);assert.doesNotMatch(home,/<script[^>]+examiner-test/);

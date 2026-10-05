@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "revision": 116,
-  "updatedAt": "2026-10-05T11:51:38+09:00",
+  "revision": 117,
+  "updatedAt": "2026-10-05T13:09:12+09:00",
   "files": [
     "오답_훈련센터.html",
     "일반전표_기본연습_24문제.html",
@@ -42,7 +42,8 @@
     "examiner-test/engine.js",
     "examiner-test/app.js",
     "examiner-test/analysis.js",
-    "examiner-test/questions.js"
+    "examiner-test/questions.js",
+    "examiner-test/library.js"
   ],
-  "note": "독립 출제위원 테스트: 5회분 이론 분석·AI 시범 6문항·수동 출제 요청 및 품질 평가"
+  "note": "출제위원 사용 간소화: 한 번에 문제 풀기·채팅 한 문장 출제 요청·새 묶음 바로 연결·간단 의견"
 }
