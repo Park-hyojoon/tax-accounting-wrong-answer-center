@@ -11,7 +11,7 @@
   const refKey=ref=>ref.subject+':'+ref.id;
   const repeated=new Set(data.groups.flatMap(group=>group.refs.map(refKey)));
   const formatDate=new Intl.DateTimeFormat('ko-KR',{timeZone:'Asia/Seoul',month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'});
-  let source=['submitted','all'].includes(params.get('weaknessSource'))?params.get('weaknessSource'):'recent',kind='type',subjectFilter='all',showPassed=params.get('showPassed')==='1',sortOrder='priority';
+  let source=['submitted','all'].includes(params.get('weaknessSource'))?params.get('weaknessSource'):'recent',kind='type',subjectFilter='all',showPassed=params.get('showPassed')!=='0',sortOrder='priority';
 
   main.replaceChildren();
   const style=document.createElement('style');
@@ -54,7 +54,7 @@
   function link(refs,label){
     const a=document.createElement('a'),url=new URL(files[refs[0].subject],location.href);
     url.searchParams.set('view','all');url.searchParams.set('fresh','1');url.searchParams.set('sort','priority');url.searchParams.set('weakrefs',refs.map(r=>r.id).join(','));url.searchParams.set('weaknessSource',source);
-    if(source==='all'&&showPassed){url.searchParams.set('reviewAll','1');url.searchParams.set('showPassed','1')}
+    if(source==='all'){url.searchParams.set('reviewAll','1');url.searchParams.set('showPassed',showPassed?'1':'0')}
     a.href=url.href;a.textContent=label;return a;
   }
   function filter(label,value,selected,action){
@@ -168,13 +168,13 @@
     const sortLabel=document.createElement('label');sortLabel.textContent='정렬 ';const sort=document.createElement('select');sort.className='weak-sort';sort.setAttribute('aria-label','약점 문제 정렬');sort.add(new Option('취약 우선 · 추천','priority'));sort.add(new Option('최근 오답 순','recent'));sort.value=sortOrder;sort.onchange=()=>{sortOrder=sort.value;render()};sortLabel.append(sort);bar.append(sortLabel);
     for(const subject of ['voucher','practical','theory']){const refs=top.filter(ref=>ref.subject===subject);if(refs.length)priorityBox.append(link(refs,subjects[subject]+' 취약 '+refs.length+'문제 이어 풀기'))}
     if(source==='all'){
-      intro.textContent='이 메뉴에 넣도록 전달한 기출 오답만 모았습니다. 정답·통과한 문제는 기본 목록에서 잠시 숨기며, 문제와 학습기록은 보관합니다.';
+      intro.textContent='이 메뉴에 넣도록 전달한 기출 오답만 모았습니다. 정답·통과한 문제도 기본 목록에 함께 표시하며, 문제와 학습기록은 보관합니다.';
       for(const [subject,label] of [['all','전체'],...Object.entries(subjects)]){
         const count=reviewRefs.filter(ref=>subject==='all'||ref.subject===subject).length;
         filter(label+' · '+count,subject,subjectFilter,()=>{subjectFilter=subject;render()});
       }
       const toggle=document.createElement('button');toggle.type='button';toggle.className='weak-show-passed';toggle.textContent=(showPassed?'통과 문제 숨기기':'통과 문제 보기')+' · '+(allSubmitted.length-remaining.length);toggle.setAttribute('aria-pressed',String(showPassed));
-      toggle.onclick=()=>{showPassed=!showPassed;const url=new URL(location.href);showPassed?url.searchParams.set('showPassed','1'):url.searchParams.delete('showPassed');history.replaceState(null,'',url.href);render()};bar.append(toggle);
+      toggle.onclick=()=>{showPassed=!showPassed;const url=new URL(location.href);url.searchParams.set('showPassed',showPassed?'1':'0');history.replaceState(null,'',url.href);render()};bar.append(toggle);
       const visible=reviewRefs.filter(ref=>subjectFilter==='all'||ref.subject===subjectFilter);
       for(const subject of Object.keys(files)){
         const refs=visible.filter(ref=>ref.subject===subject);

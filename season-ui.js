@@ -1,6 +1,6 @@
 (function(){
   'use strict';
-  const style=document.createElement('link');style.rel='stylesheet';style.href='season.css?v=21';document.head.append(style);
+  const style=document.createElement('link');style.rel='stylesheet';style.href='season.css?v=22';document.head.append(style);
   const params=new URLSearchParams(location.search);
   const escape=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   function isCompleted(subject,id,state={}){
@@ -172,9 +172,9 @@
       const match=matches(p)&&(!search||p.type.includes(search))&&(params.get('view')!=='today'||p.addedDate===new Date(Date.now()-new Date().getTimezoneOffset()*60000).toISOString().slice(0,10));
       const special=params.get('view')==='star',hasVariant=problems.some(x=>x.variantOf===(theory?id:Number(id)));
       const weakIds=new Set((params.get('weakrefs')||'').split(',').filter(Boolean));
-      const reviewAll=params.get('reviewAll')==='1'&&params.get('showPassed')==='1';
-      // 특별훈련에서는 정답·직접 통과 즉시 숨긴다. 일반 연습은 기존 해설 확인 동작을 유지한다.
-      card.hidden=!!get(id,'deleted')||!match||(weakIds.size?!weakIds.has(String(id)):(special&&!star&&p.variantOf==null&&!hasVariant))||(passed&&!reviewAll&&(weakIds.size||!passedThisVisit.has(String(id))));
+      const showPassed=params.get('showPassed')!=='0';
+      // 통과 기록을 보존하며 기본 목록에서도 복습할 수 있게 표시한다.
+      card.hidden=!!get(id,'deleted')||!match||(weakIds.size?!weakIds.has(String(id)):(special&&!star&&p.variantOf==null&&!hasVariant))||(passed&&!showPassed&&(weakIds.size||!passedThisVisit.has(String(id))));
       card.dataset.typeFilterBaseHidden=String(card.hidden);
       if(special){
         const item=card.closest('details.star-item');if(item)item.hidden=card.hidden;
@@ -262,7 +262,7 @@
       const heading=document.createElement('summary');heading.className='season-tag-heading';heading.innerHTML=`${escape(sources[subject].label)} · 기출 오답 누적 <small>TOP 10</small>`;section.append(heading);
       const list=document.createElement('div');list.className='season-tag-list';
       [...subjectTags.get(subject)].sort((a,b)=>b[1].length-a[1].length||a[0].localeCompare(b[0],'ko')).forEach(([tag,rows],index)=>{
-        const a=document.createElement('a');a.className='season-tag';a.textContent=tag+' · '+rows.length;a.title=`${sources[subject].label} ${rows.length}문제 · 모든 회차 · 미통과 문제 훈련`;
+        const a=document.createElement('a');a.className='season-tag';a.textContent=tag+' · '+rows.length;a.title=`${sources[subject].label} ${rows.length}문제 · 모든 회차 · 통과 문제 포함`;
         a.href=sources[subject].file+'?tag='+encodeURIComponent(tag)+'&fresh=1';
         if(index<10){a.style.backgroundColor=colors[index];a.style.color=index<5?'#fff':'#173042';a.dataset.rank=String(index+1)}
         list.append(a);

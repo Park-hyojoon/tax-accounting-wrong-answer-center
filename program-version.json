@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "revision": 110,
-  "updatedAt": "2026-10-05T09:07:43+09:00",
+  "revision": 111,
+  "updatedAt": "2026-10-05T10:00:01+09:00",
   "files": [
     "오답_훈련센터.html",
     "일반전표_기본연습_24문제.html",
@@ -38,5 +38,5 @@
     "concept-notes.css",
     "output/pdf/vat-concepts.pdf"
   ],
-  "note": "103회 기출 연습 17개 등록"
+  "note": "문제 자료표 반응형 표시 및 통과 문제 기본 복습"
 }

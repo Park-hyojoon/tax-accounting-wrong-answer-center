@@ -228,7 +228,7 @@
         <div class="today-accordion-body">
           <div class="filter-bar" aria-label="오늘의 훈련 범위">
             <button class="filter-button active" type="button" data-filter="today" aria-pressed="true">오늘 등록 문제</button>
-            <button class="filter-button" type="button" data-filter="all" aria-pressed="false">전체 미통과</button>
+            <button class="filter-button" type="button" data-filter="all" aria-pressed="false">전체 문제</button>
             <label class="round-filter-label" for="examRoundFilter">기출 회차
               <select class="sort-select" id="examRoundFilter">
                 <option value="">전체 회차</option>
@@ -309,7 +309,7 @@
 
   <script src="github-learning-sync.js?v=22"></script>
   <script src="season-catalog.js?v=45"></script>
-  <script src="season-ui.js?v=45"></script>
+  <script src="season-ui.js?v=46"></script>
 <script src="training-ui.js?v=13"></script>
   <script>
     const SOURCES={
@@ -763,11 +763,11 @@
     function renderTraining(){
       const today=localDateKey();
       // AI 응용문제(★ 특별 훈련용)는 오늘의 오답훈련에 노출하지 않는다.
-      const list=sortTraining(visibleUnpassed().filter(record=>!record.variant&&(currentSort!=='repeatWrong'||record.recurrent)&&(currentFilter==='all'||record.registered===today)&&(!currentExamRound||String(record.examRound)===currentExamRound)));
+      const list=sortTraining(records.filter(record=>!record.archived&&!record.variant&&(currentSort!=='repeatWrong'||record.recurrent)&&(currentFilter==='all'||record.registered===today)&&(!currentExamRound||String(record.examRound)===currentExamRound)));
       const target=$('#trainingList');
       if(list.length)target.innerHTML=list.map(record=>problemItem(record,{view:currentFilter,plain:true})).join('');
-      else if(currentFilter==='today')target.innerHTML=emptyState(`${currentExamRound?currentExamRound+'회에 ':''}오늘 남아 있는 문제가 없습니다.`,records.some(record=>record.registered===today&&(!currentExamRound||String(record.examRound)===currentExamRound))?'오늘 문제를 모두 맞혔거나 통과했습니다.':'선택한 조건으로 오늘 등록된 문제가 없습니다. ‘전체 미통과’를 누르면 이전 문제를 볼 수 있습니다.');
-      else target.innerHTML=emptyState(`${currentExamRound?currentExamRound+'회에 ':''}아직 통과하지 않은 문제가 없습니다.`,'현재 선택한 범위의 문제를 모두 맞혔거나 삭제했습니다.');
+      else if(currentFilter==='today')target.innerHTML=emptyState(`${currentExamRound?currentExamRound+'회에 ':''}오늘 등록된 문제가 없습니다.`,'선택한 조건으로 오늘 등록된 문제가 없습니다. ‘전체 문제’를 누르면 이전 문제도 볼 수 있습니다.');
+      else target.innerHTML=emptyState(`${currentExamRound?currentExamRound+'회에 ':''}표시할 문제가 없습니다.`,'회차·정렬 조건을 확인해주세요. 삭제한 문제는 표시하지 않습니다.');
     }
     function renderExamRoundOptions(){
       const select=$('#examRoundFilter'),rounds=[...new Set(records.map(record=>Number(record.examRound)).filter(Number.isFinite))].sort((a,b)=>b-a);
@@ -805,7 +805,7 @@
     $$('.filter-button').forEach(button=>button.addEventListener('click',()=>{
       currentFilter=button.dataset.filter;
       $$('.filter-button').forEach(item=>{const active=item===button;item.classList.toggle('active',active);item.setAttribute('aria-pressed',String(active))});
-      renderTraining();$('#liveStatus').textContent=currentFilter==='today'?'오늘 등록 문제만 표시합니다.':'등록일과 관계없이 전체 미통과 문제를 표시합니다.';
+      renderTraining();$('#liveStatus').textContent=currentFilter==='today'?'오늘 등록 문제를 통과 여부와 관계없이 표시합니다.':'등록일과 통과 여부에 관계없이 전체 문제를 표시합니다.';
     }));
     $('#examRoundFilter').addEventListener('change',event=>{currentExamRound=event.target.value;renderTraining();$('#liveStatus').textContent=currentExamRound?`${currentExamRound}회 기출 문제만 표시합니다.`:'모든 기출 회차를 표시합니다.'});
     $('#exportBackup').addEventListener('click',downloadBackup);
@@ -827,6 +827,6 @@
   </script>
 <script>TrainingSeason.catalog(META,SOURCES);</script>
 <script src="weakness-data.js?v=22"></script>
-<script src="weakness-center.js?v=12"></script>
+<script src="weakness-center.js?v=13"></script>
 </body>
 </html>
