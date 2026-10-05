@@ -692,6 +692,7 @@ CONTRACT = '''# 새 기출 오답 등록 (spec 하나로 일괄 처리)
 원본당 대표 응용문제 1개. meta와 mistakes는 자동 생성하므로 작성하지 않는다.
 문제 객체에는 type, title, prompt, addedDate 및 해당 분야 필수 답안 필드를 넣는다.
 사용자가 모든 기출문제 오답 복습 메뉴를 지정하면 reviewMenu:true를 넣는다. 지정하지 않은 접수를 자동 합산하지 않는다.
+오답 신고가 아닌 일일 기출 연습은 registrationKind:"daily-practice"로 지정한다. 원문은 보관하되 직접 오답 원장과 재오답 횟수에는 합산하지 않는다. reviewMenu:true와 recurrenceOf는 함께 지정할 수 없다.
 회차 MD·원장·화면·유형목록·버전을 함께 갱신하며 실패 시 반영하지 않는다.
 기존 사건을 다시 제출할 때만 새 id와 recurrenceOf를 지정한다. 재첨부는 신규 사건이 아니다.
 추가 ★ 응용은 originals 없이 items에 variantOf가 있는 객체를 주고 examRound와 tags를 객체에 명시한다.
@@ -715,6 +716,12 @@ def cmd_add(spec_path):
     spec = json.loads(Path(spec_path).read_text(encoding='utf-8'))
     originals = spec.get('originals', [])
     items = spec.get('items', [])
+    registration_kind = spec.get('registrationKind', 'mistake')
+    if registration_kind not in ('mistake', 'daily-practice'):
+        raise SystemExit('[오류] registrationKind는 mistake 또는 daily-practice입니다.')
+    daily_practice = registration_kind == 'daily-practice'
+    if daily_practice and spec.get('reviewMenu'):
+        raise SystemExit('[오류] 일일 기출 연습은 직접 오답 복습 메뉴에 자동 합산하지 않습니다.')
     existing = json.loads(read('intake-index.json')) if (ROOT/'intake-index.json').exists() else []
     ids = {x['id'] for x in existing}
     round_no = spec.get('examRound')
@@ -733,6 +740,8 @@ def cmd_add(spec_path):
         ids.add(original['id']); by_id[original['id']]=original
         if original.get('recurrenceOf') and original['recurrenceOf'] not in {x['id'] for x in existing}:
             raise SystemExit('[오류] recurrenceOf에 해당하는 기존 사건이 없습니다.')
+        if daily_practice and original.get('recurrenceOf'):
+            raise SystemExit('[오류] 일일 기출 연습은 재오답 사건으로 등록하지 않습니다.')
     linked=set()
     for order,item in enumerate(items,1):
         subject=item['subject']
@@ -774,7 +783,9 @@ def cmd_add(spec_path):
             if not original_round: entry['provenance']='기출 원본 오답/회차 미지정 오답 데이터.md'
             if spec.get('reviewMenu') is True: entry['reviewMenu']=True
             if original.get('recurrenceOf'): entry.update(recurrenceOf=original['recurrenceOf'],recurrenceEvidence=original.get('recurrenceEvidence','사용자가 해당 기출을 다시 틀렸다고 직접 제출'))
-            mistakes.append(js(entry)); existing.append({'id':original['id'],'examRound':original_round,'subject':subject,'questionNo':str(original['questionNo']),'reportedAt':date})
+            if not daily_practice:
+                mistakes.append(js(entry))
+            existing.append({'id':original['id'],'examRound':original_round,'subject':subject,'questionNo':str(original['questionNo']),'reportedAt':date,'registrationKind':registration_kind})
     if linked!=set(by_id): raise SystemExit('[오류] 모든 원본에 대표 응용문제 1개를 연결하세요.')
     if not items: raise SystemExit('[오류] items가 없습니다.')
     parent=ROOT/'또 틀렸다!';parent.mkdir(exist_ok=True)
@@ -783,7 +794,8 @@ def cmd_add(spec_path):
         paths=PAGES+SHARED_SCRIPTS+[VERSION_FILE,'season-catalog.js']+['data/'+s+'.js' for s in SUBJECTS]
         for name in paths:
             target=stage/name;target.parent.mkdir(parents=True,exist_ok=True);shutil.copy2(ROOT/name,target)
-        stage_spec=stage/'batch.json';stage_spec.write_text(json.dumps({'items':normalized,'mistakes':mistakes,'topics':topics,'note':f'{round_no or "추가"}회 응용문제 {len(items)}개 등록'},ensure_ascii=False),encoding='utf-8')
+        registration_label = '기출 연습' if daily_practice else '응용문제'
+        stage_spec=stage/'batch.json';stage_spec.write_text(json.dumps({'items':normalized,'mistakes':mistakes,'topics':topics,'note':f'{round_no or "추가"}회 {registration_label} {len(items)}개 등록'},ensure_ascii=False),encoding='utf-8')
         try:
             ROOT=stage
             result=apply_add(stage_spec)
@@ -798,7 +810,10 @@ def cmd_add(spec_path):
             path=ROOT/name
             content=path.read_text(encoding='utf-8') if path.exists() else f'# {str(md_round)+"회 기출 문제 이론 실무" if md_round else "회차 미지정"} 오답 데이터\n\n사용자가 직접 제출한 원문 기록입니다. AI 응용문제와 훈련 중 채점 횟수를 실제 기출 오답으로 세지 않습니다.\n'
             for original in (x for x in originals if x.get('examRound',round_no)==md_round):
-                content+=f'\n## {date} · {SUBJECTS[original["subject"]]["label"]} · {original["questionNo"]}번\n\n- 접수 ID: {original["id"]}\n- 유형: {original["type"]}\n- 학습자 설명: {original.get("learnerReason") or "미제공 (추정하지 않음)"}\n\n### 직접 제출 원문\n\n{original["originalText"]}\n\n### 직접 제출 답안\n\n{original["originalAnswer"]}\n'
+                content+=f'\n## {date} · {SUBJECTS[original["subject"]]["label"]} · {original["questionNo"]}번\n\n- 접수 ID: {original["id"]}\n- 유형: {original["type"]}\n- 학습자 설명: {original.get("learnerReason") or "미제공 (추정하지 않음)"}\n'
+                if daily_practice:
+                    content+='- 접수 목적: 일일 기출 연습 (직접 오답 신고가 아니며 오답 횟수에 합산하지 않음)\n'
+                content+=f'\n### 직접 제출 원문\n\n{original["originalText"]}\n\n### 직접 제출 답안\n\n{original["originalAnswer"]}\n'
                 if original.get('attachments'): content+='\n### 첨부 자료\n\n'+'\n'.join('- '+str(x) for x in original['attachments'])+'\n'
             updates[name]=content.encode('utf-8')
           updates['intake-index.json']=(json.dumps(existing,ensure_ascii=False,indent=2)+'\n').encode('utf-8')
@@ -814,7 +829,7 @@ def cmd_add(spec_path):
             raise
     import runpy
     builder=ROOT/'build-weakness.py'
-    if builder.exists():
+    if builder.exists() and mistakes:
         runpy.run_path(str(builder))['build'](ROOT)
         bump_version('weakness-data.js')
     print(f'새 학습 등록 완료: {len(items)}문제 / 원본 MD {len(originals)}건. 동기화 버튼으로 전송하세요.')
