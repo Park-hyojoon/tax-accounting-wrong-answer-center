@@ -115,7 +115,7 @@
       </div>
     </div>
   </nav>
-  <script src="data/theory.js?v=28"></script>
+  <script src="data/theory.js?v=29"></script>
   <script>(function(){var nav=document.querySelector('.top-nav');function sync(){document.documentElement.style.setProperty('--nav-h',(nav?nav.offsetHeight:60)+'px')}sync();window.addEventListener('resize',sync)})()</script>
   <main class="wrap">
     <div class="dashboard">
@@ -176,6 +176,8 @@
     }
     function persist(){state.updatedAt=nowIso();localStorage.setItem(STORAGE_KEY,JSON.stringify(state));updateDashboard()}
     function choiceText(p,n){return Number.isInteger(n)?`${circled[n]} ${p.choices[n]}`:'미선택'}
+    function acceptedTheoryAnswers(p){return Array.isArray(p.acceptedAnswers)&&p.acceptedAnswers.length?p.acceptedAnswers:[p.answer]}
+    function theoryAnswerText(p){return acceptedTheoryAnswers(p).map(n=>choiceText(p,n)).join(' 또는 ')}
     function questionHtml(p,i){
       const selected=state.answers[p.id];
       return `<article class="question" data-id="${p.id}" data-added-date="${p.addedDate}">
@@ -184,7 +186,7 @@
         ${p.data?`<div class="data-box">${p.data}</div>`:''}
         <div class="choices">${p.choices.map((c,n)=>`<label class="choice"><input type="radio" name="q-${p.id}" value="${n}" ${Number(selected)===n?'checked':''}><span class="choice-number">${circled[n]}</span><span>${c}</span></label>`).join('')}</div>
         <div class="actions"><button class="btn check-one" type="button">채점하기</button><button class="btn secondary archive-one" type="button">이 문제 영구 삭제</button><button class="btn secondary star-one" type="button" aria-pressed="false" title="이 문제는 특별히 훈련이 필요합니다. AI가 학습기록에서 이 표시를 보면 응용문제 1개를 더 만듭니다.">★ 특별 훈련</button><span class="result" aria-live="polite"></span><span class="attempt"></span></div>
-        <details><summary>정답 · 해설 보기</summary><div class="detail-body"><p><strong>정답: ${circled[p.answer]} ${p.choices[p.answer]}</strong></p><p>${p.explanation}</p><p><strong>핵심:</strong> ${p.key}</p></div></details>
+        <details><summary>정답 · 해설 보기</summary><div class="detail-body"><p><strong>정답: ${theoryAnswerText(p)}</strong></p><p>${p.explanation}</p><p><strong>핵심:</strong> ${p.key}</p></div></details>
       </article>`
     }
     function escapeHtml(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
@@ -230,7 +232,7 @@
     function grade(card){
       const id=card.dataset.id,p=getProblem(id),selected=state.answers[id];
       if(selected===undefined){const r=$('.result',card);r.className='result no';r.textContent='먼저 답을 선택해 주세요.';return false}
-      const correct=Number(selected)===p.answer;
+      const correct=acceptedTheoryAnswers(p).includes(Number(selected));
       state.attempts[id]=(state.attempts[id]||0)+1;
       state.history[id]=state.history[id]||[];
       state.history[id].push({at:nowIso(),choice:Number(selected),correct});
@@ -284,7 +286,7 @@
         lines.push(`## ${i+1}. ${p.type}`,'',`**문제:** ${p.prompt}`,'');
         if(p.data)lines.push('**자료:**','',...p.data.split('\n').map(x=>`- ${x}`),'');
         p.choices.forEach((c,n)=>lines.push(`- ${circled[n]} ${c}`));
-        lines.push('',`- 오늘 마지막 선택: ${choiceText(p,last.choice)}`,`- 정답: ${choiceText(p,p.answer)}`,`- 오늘 마지막 결과: ${last.correct?'정답':'오답'}`,...(state.selfPassed?.[p.id]?[`- 스스로 정답 인정(통과): ${new Date(state.selfPassedAt?.[p.id]||0).toLocaleString('ko-KR')}`]:[]),`- 오늘 채점 횟수: ${history.length}회`,`- 오늘 틀린 횟수: ${history.filter(h=>h.correct===false&&!h.cancelledAt).length}회`,'','**오늘 답변 이력:**');
+        lines.push('',`- 오늘 마지막 선택: ${choiceText(p,last.choice)}`,`- 정답: ${theoryAnswerText(p)}`,`- 오늘 마지막 결과: ${last.correct?'정답':'오답'}`,...(state.selfPassed?.[p.id]?[`- 스스로 정답 인정(통과): ${new Date(state.selfPassedAt?.[p.id]||0).toLocaleString('ko-KR')}`]:[]),`- 오늘 채점 횟수: ${history.length}회`,`- 오늘 틀린 횟수: ${history.filter(h=>h.correct===false&&!h.cancelledAt).length}회`,'','**오늘 답변 이력:**');
         history.forEach((h,n)=>lines.push(`- ${n+1}차 (${fmtDate(h.at)}): ${choiceText(p,h.choice)} → ${h.source==='notebook'?'노트 학습 · 직접 표시 / ':''}${h.correct?'정답':'오답'}`));
         lines.push('',`**핵심 학습 내용:** ${p.key}`,'',`**해설:** ${p.explanation}`,'','---','');
       });

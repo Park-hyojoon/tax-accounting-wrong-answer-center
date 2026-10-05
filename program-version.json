@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "revision": 112,
-  "updatedAt": "2026-10-05T10:39:38+09:00",
+  "revision": 113,
+  "updatedAt": "2026-10-05T10:55:17+09:00",
   "files": [
     "오답_훈련센터.html",
     "일반전표_기본연습_24문제.html",
@@ -38,5 +38,5 @@
     "concept-notes.css",
     "output/pdf/vat-concepts.pdf"
   ],
-  "note": "104회 기출 연습 17개 등록"
+  "note": "126회 기출 연습 29개 및 127회 오류 수정 2개 등록"
 }
