@@ -1,8 +1,13 @@
 (function(){
   'use strict';
+  // 하위 폴더 화면(examiner-test 등)에서도 같은 메뉴를 쓰도록 이 스크립트 위치를 기준 경로로 삼는다.
+  const BASE=(document.currentScript?.getAttribute('src')||'').replace(/training-ui\.js.*$/,'');
   if(new URLSearchParams(location.search).get('view')==='star'){
     location.replace('오답_훈련센터.html?weakness=1');return;
   }
+  // 디자인 테마(design/theme.css)를 항상 <head> 맨 끝에 둔다. 다른 스크립트가 나중에 넣은 스타일보다 우선하게 한다.
+  const theme=document.querySelector('link[href*="design/theme.css"]');
+  if(theme){const keepLast=()=>{if(document.head.lastElementChild!==theme)document.head.append(theme)};keepLast();new MutationObserver(keepLast).observe(document.head,{childList:true})}
   // 수동 별표 기능을 종료한다. 기존 학습·통과·채점 기록은 보존한다.
   ['theory','practical','voucher'].forEach(subject=>{
     const key='exam-20260914-'+subject;
@@ -19,8 +24,8 @@
   let specialLink=inner.querySelector('a.nav-star')||inner.querySelector('a.nav-link[href*="view=star"]');
   if(!specialLink){specialLink=document.createElement('a');specialLink.className='nav-link nav-star';(inner.querySelector('a[href="약점_분석_임시.html"]')||inner.querySelector('a:last-of-type'))?.before(specialLink)}
   specialLink.classList.add('nav-star');
-  specialLink.href='오답_훈련센터.html?weakness=1';specialLink.textContent='특별훈련 · 반복 약점';specialLink.title='9월 26일 이후 훈련 중 오답 · 직접 제출 3회 이상 반복 약점';
-  if(!inner.querySelector('.nav-concepts')){const link=document.createElement('a');link.className='nav-link nav-concepts';link.href='개념_정리.html';link.textContent='개념 정리';specialLink.after(link)}
+  specialLink.href=BASE+'오답_훈련센터.html?weakness=1';specialLink.textContent='특별훈련 · 반복 약점';specialLink.title='9월 26일 이후 훈련 중 오답 · 직접 제출 3회 이상 반복 약점';
+  if(!inner.querySelector('.nav-concepts')){const link=document.createElement('a');link.className='nav-link nav-concepts';link.href=BASE+'개념_정리.html';link.textContent='개념 정리';specialLink.after(link)}
   if(new URLSearchParams(location.search).has('weakness')){inner.querySelectorAll('.nav-link.active').forEach(x=>{x.classList.remove('active');x.removeAttribute('aria-current')});specialLink.classList.add('active');specialLink.setAttribute('aria-current','page')}
   const MENU_KEY=window.TrainingGitHub?.UI_SETTINGS_KEY||'exam-20260914-ui-settings';
   const MENU_DEFAULT=['home','theory','practical','voucher','examiner','special','concepts','analysis'];
@@ -85,6 +90,13 @@
   inner.insertBefore(toggle,wrap);inner.insertBefore(current,wrap);
 
   const settingsButton=document.createElement('button');settingsButton.type='button';settingsButton.className='nav-settings-button';settingsButton.setAttribute('aria-label','메뉴 순서 설정');settingsButton.title='메뉴 순서 설정';settingsButton.textContent='⚙';inner.insertBefore(settingsButton,wrap.nextSibling);
+  // 디자인 뼈대: 사이드바 브랜드, 사이드바 아래 버튼 묶음(.nav-foot), h1이 없는 화면의 날짜·제목. 모양은 design/theme.css가 정한다.
+  const brand=document.createElement('a');brand.className='nav-brand';brand.href=BASE+'오답_훈련센터.html';brand.innerHTML='<img src="'+BASE+'design/brand-mark.svg" alt="" width="40" height="40"><span><b>오답 훈련센터</b><small>전산회계 1급</small></span>';inner.prepend(brand);
+  const foot=document.createElement('div');foot.className='nav-foot';inner.append(foot);foot.append(settingsButton);const syncBox=inner.querySelector('.nav-sync');if(syncBox)foot.append(syncBox);
+  // 페이지 머리말(날짜 → 제목)은 모든 화면에서 같은 모양으로 <main> 바로 앞에 둔다. 예전 hero 머리말은 숨긴다(design/theme.css).
+  const main=document.querySelector('main');
+  const needsHead=!document.querySelector('h1')||document.querySelector('body>.hero')||document.body.classList.contains('examiner-page');
+  if(main&&needsHead&&!document.querySelector('.page-head')){const head=document.createElement('div');head.className='page-head';head.innerHTML='<p class="page-date"></p><h1 class="page-title"></h1>';head.querySelector('.page-date').textContent=new Date().toLocaleDateString('ko-KR',{year:'numeric',month:'long',day:'numeric',weekday:'short'});head.querySelector('.page-title').textContent=current.textContent||document.title;main.before(head);document.body.classList.add('has-page-head')}
   const settings=document.createElement('dialog');settings.className='menu-settings';settings.setAttribute('aria-labelledby','menuSettingsTitle');settings.innerHTML='<div class="menu-settings-head"><h2 id="menuSettingsTitle">메뉴 편집</h2><button class="menu-settings-close" type="button" aria-label="닫기">×</button></div><div class="menu-settings-body"><p class="menu-settings-help">메뉴를 마우스로 끌어 순서를 바꾸세요. 삭제한 메뉴는 아래 대기 목록에서 언제든 다시 불러올 수 있습니다.</p><h3 class="menu-list-title">사용 중인 메뉴 <span class="menu-active-count menu-list-count"></span></h3><ol class="menu-order-list"></ol><h3 class="menu-list-title">대기 중인 메뉴 <span class="menu-waiting-count menu-list-count"></span></h3><ul class="menu-waiting-list"></ul></div><div class="menu-settings-actions"><button class="menu-default" type="button">기본 순서</button><button class="menu-cancel" type="button">취소</button><button class="menu-save" type="button">저장</button></div>';document.body.append(settings);
   const orderList=settings.querySelector('.menu-order-list'),waitingList=settings.querySelector('.menu-waiting-list');let draft=[],draftHidden=[];
   function reorderMenu(order,hidden=[]){hiddenMenuIds=new Set((Array.isArray(hidden)?hidden:[]).filter(id=>availableIds.includes(id)));menuOrder=completeOrder(order,availableIds.filter(id=>!hiddenMenuIds.has(id)));menuOrder.forEach(id=>{const link=links.find(item=>item.dataset.menuId===id);if(link){link.hidden=false;wrap.append(link)}});availableIds.filter(id=>hiddenMenuIds.has(id)).forEach(id=>{const link=links.find(item=>item.dataset.menuId===id);if(link){link.hidden=true;wrap.append(link)}})}

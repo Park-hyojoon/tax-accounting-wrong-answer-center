@@ -41,8 +41,7 @@
     @media(pointer:coarse){.question-mark-hint{display:none}}@media print{.question-mark-popup,.question-mark-hint{display:none!important}}
   `;
   document.head.append(style);
-  const hint=document.createElement('p');hint.className='question-mark-hint';hint.textContent='문제의 글자를 드래그 → 오른쪽 클릭: 글자색·형광펜·굵게·밑줄 (이 브라우저에 저장)';questions.before(hint);
-  const popup=document.createElement('div');popup.className='question-mark-popup';popup.hidden=true;
+    const popup=document.createElement('div');popup.className='question-mark-popup';popup.hidden=true;
   popup.setAttribute('role','toolbar');popup.setAttribute('aria-label','선택한 문제 글자 표시');
   popup.innerHTML=`<div class="question-mark-actions">
     <button type="button" data-question-mark="blue" aria-label="파란 글자색" title="파란 글자색"><span class="question-mark-swatch" style="background:#02b4ff"></span></button>

@@ -99,6 +99,7 @@
     @media(max-width:760px){body{font-size:16px}.hero,.question,.save-panel{padding:18px}.prompt{font-size:18px}.dashboard{position:static}.filename-row{grid-template-columns:1fr}.attempt{width:100%;margin-left:0}}
     @media print{.dashboard,.actions,.save-panel,.footer{display:none}.question{break-inside:avoid;box-shadow:none}details:not([open]){display:none}}
   </style>
+  <link rel="stylesheet" href="design/theme.css?v=8">
 </head>
 <body>
   <nav class="top-nav" aria-label="유형별 연습 메뉴">
@@ -157,8 +158,8 @@
   </main>
 
   <script src="github-learning-sync.js?v=22"></script>
-  <script src="season-ui.js?v=46"></script>
-<script src="training-ui.js?v=14"></script>
+  <script src="season-ui.js?v=47"></script>
+<script src="training-ui.js?v=17"></script>
   <script>
     const problems=loadTrainingProblems();
 
@@ -411,6 +412,6 @@
   })();
 </script>
 <script>TrainingSeason.install(problems,{state,theory:true,save:persist,refresh:updateDashboard});</script>
-<script src="question-markup.js?v=5" data-question-mark-subject="theory"></script>
+<script src="question-markup.js?v=6" data-question-mark-subject="theory"></script>
 </body>
 </html>

@@ -7,6 +7,11 @@
   const now=()=>new Date().toISOString();
   const notice=(message,error=false)=>{const s=$('#status');s.textContent=message;s.classList.toggle('error',error)};
   const selectedStyles=()=>[...document.querySelectorAll('#style-options input:checked')].map(i=>i.value);
+  const newStyles=()=>[...document.querySelectorAll('#new-style-options input:checked')].map(i=>i.value);
+  function updateQuickRequest(){
+    const styles=newStyles(),choice=styles.includes('출제위원 랜덤')?'출제위원 랜덤':styles.join('·');
+    $('#quick-request').value='출제위원 새 문제 6개를 이론·일반전표·매입매출에서 2개씩 만들어 테스트에 추가해 주세요. 출제 스타일은 '+choice+'로 해 주세요. 여러 스타일을 골랐다면 문제마다 적절히 나누고, 기출 수준의 계산량과 시험범위·단일 정답을 확인해 주세요.'+(styles.includes('장기 미출제')?' 5회분에서 보이지 않았다는 이유만으로 장기 미출제라고 단정하지 말고 실제 이력을 확인해 주세요.':'');
+  }
   const packs=()=>[pilot,...state.packs,...library.filter(p=>!state.packs.some(saved=>saved.id===p.id))];
   const newestPack=()=>findPack(library.at(-1)?.id||state.packs.at(-1)?.id||pilot.id);
   const findPack=id=>packs().find(p=>p.id===id);
@@ -102,7 +107,16 @@
   $('#subject-picker').addEventListener('click',async event=>{const button=event.target.closest('[data-subject]');if(!button)return;const kind=button.dataset.subject;if(kind==='theory'){$('#journal-practice').hidden=true;await start();return}button.disabled=true;try{if(!journalLoading)journalLoading=Promise.all([window.ExaminerJournalBank?Promise.resolve():loadScript('journal-bank.js?v=1'),window.ExaminerJournal?Promise.resolve():loadScript('journal.js?v=1')]);await journalLoading;window.ExaminerJournal.mount(kind);notice('준비된 '+(kind==='practical'?'일반전표':'매입매출전표')+' 문제를 열었습니다.')}catch(error){journalLoading=null;notice('전표 문제를 열지 못했습니다. '+error.message,true)}finally{button.disabled=false}});
   $('#open-trial').addEventListener('click',()=>createTrial());
   $('#open-tools').addEventListener('click',()=>prepare());
-  $('#request-help').addEventListener('click',()=>{$('#request-guide').hidden=false;$('#request-help').setAttribute('aria-expanded','true');$('#copy-quick-request').focus()});
+  $('#new-style-options').addEventListener('change',event=>{
+    const selected=event.target;if(!selected.matches('input[type=checkbox]'))return;
+    const random=$('#new-style-options input[value="출제위원 랜덤"]');
+    if(selected===random&&selected.checked)$('#new-style-options').querySelectorAll('input:not([value="출제위원 랜덤"])').forEach(input=>input.checked=false);
+    else if(selected!==random&&selected.checked)random.checked=false;
+    if(!newStyles().length)random.checked=true;
+    updateQuickRequest();$('#copy-status').textContent='';
+  });
+  updateQuickRequest();
+  $('#request-help').addEventListener('click',()=>{const guide=$('#request-guide'),opening=guide.hidden;guide.hidden=!opening;$('#request-help').setAttribute('aria-expanded',String(opening));$('#request-help').textContent=opening?'요청문 닫기':'새 문제 부탁하기';if(opening){updateQuickRequest();$('#request-title').focus({preventScroll:true});guide.scrollIntoView({block:'start',behavior:'smooth'})}});
   $('#copy-quick-request').addEventListener('click',async()=>{try{if(!navigator.clipboard?.writeText)throw Error();await navigator.clipboard.writeText($('#quick-request').value);$('#copy-status').textContent='복사했습니다. 지금 대화하던 AI 채팅에 붙여넣고 보내 주세요.'}catch{const t=$('#quick-request');t.focus();t.select();$('#copy-status').textContent='자동 복사가 안 되어 문장을 선택했습니다. 직접 복사하거나 채팅에 같은 문장을 입력해 주세요.'}});
   $('#trial-select').addEventListener('change',()=>{activeTrial=$('#trial-select').value;renderQuestions();if(activeTrial)focusPractice()});
   $('#frequency-filter').addEventListener('change',renderAnalysis);$('#concept-search').addEventListener('input',renderAnalysis);

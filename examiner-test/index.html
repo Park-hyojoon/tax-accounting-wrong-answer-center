@@ -4,28 +4,48 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>출제위원 테스트 · 오답 훈련센터</title>
-  <link rel="stylesheet" href="examiner.css?v=3">
+  <link rel="stylesheet" href="examiner.css?v=4">
   <script defer src="engine.js?v=2"></script>
-  <script defer src="app.js?v=3"></script>
+  <script defer src="app.js?v=4"></script>
+  <link rel="stylesheet" href="../design/theme.css?v=8">
 </head>
-<body>
+<body class="examiner-page">
   <a class="skip" href="#main">본문으로 바로가기</a>
-  <nav class="examiner-top-nav" aria-label="훈련센터 메뉴"><a href="../오답_훈련센터.html">오늘의 오답훈련</a><a href="../이론_오답응용_5문제.html">이론 오답</a><a href="../일반전표_기본연습_24문제.html">일반전표 입력</a><a href="../매입매출전표_오답연습_3문제.html?view=all">매입매출전표 입력</a><a class="active" href="index.html" aria-current="page">출제위원 테스트</a></nav>
+  <nav class="top-nav" aria-label="훈련센터 메뉴"><div class="nav-inner">
+    <a class="nav-link" href="../오답_훈련센터.html">오늘의 오답훈련</a>
+    <a class="nav-link" href="../이론_오답응용_5문제.html">이론 오답</a>
+    <a class="nav-link" href="../일반전표_기본연습_24문제.html">일반전표 입력</a>
+    <a class="nav-link" href="../매입매출전표_오답연습_3문제.html?view=all">매입매출전표 입력</a>
+    <a class="nav-link active" href="../examiner-test/index.html" aria-current="page">출제위원 테스트</a>
+    <a class="nav-link nav-star" href="../오답_훈련센터.html?weakness=1">특별훈련 · 반복 약점</a>
+    <a class="nav-link nav-concepts" href="../개념_정리.html">개념 정리</a>
+    <a class="nav-link" href="../약점_분석_임시.html">약점 분석(임시)</a>
+  </div></nav>
   <main id="main">
     <section class="intro">
-      <h1>배운 내용, 낯선 질문</h1>
-      <p class="lead">“이런 방식으로도 물어보네?”<br>이론과 전표 입력을 연습하세요.</p>
-      <p>출제 조건은 준비해 두었습니다. 따로 설정하지 않아도 됩니다.</p>
-      <div class="main-actions"><button id="start-mode" class="primary" type="button">문제 풀기</button><button id="request-help" type="button" aria-expanded="false" aria-controls="request-guide">새 문제 부탁하기</button></div>
-      <p id="ready-note" class="hint">문제 풀기는 등록된 문제를 엽니다. 새로운 문제는 이 센터를 만든 AI 채팅에 부탁하세요.</p>
+      <h1>출제 조건 설정</h1>
+      <p>새 문제에서 보고 싶은 출제 스타일을 고르세요. 여러 개를 고르면 문제마다 나누어 적용합니다.</p>
+      <fieldset id="new-style-options" class="new-style-options">
+        <legend>새 문제 출제 스타일</legend>
+        <label class="style-option"><input type="checkbox" value="정석 출제">정석 출제</label>
+        <label class="style-option"><input type="checkbox" value="기출 변형">기출 변형</label>
+        <label class="style-option"><input type="checkbox" value="장기 미출제">장기 미출제</label>
+        <label class="style-option"><input type="checkbox" value="교재 주변부">교재 주변부</label>
+        <label class="style-option"><input type="checkbox" value="예외규정">예외규정</label>
+        <label class="style-option"><input type="checkbox" value="함정형">함정형</label>
+        <label class="style-option"><input type="checkbox" value="출제위원 랜덤" checked>출제위원 랜덤</label>
+      </fieldset>
+      <p class="hint">‘장기 미출제’는 실제 출제 이력을 확인할 수 있을 때만 사용합니다. 현재 5회분에서 보이지 않았다는 이유만으로 단정하지 않습니다.</p>
       <div id="request-guide" class="request-guide" hidden>
-        <h2>지금 대화하던 채팅에 보내 주세요</h2>
+        <h2 id="request-title" tabindex="-1">선택한 조건으로 새 문제 부탁하기</h2>
         <p>이 센터를 만들어 달라고 했던 <b>바로 그 AI 채팅</b>에 아래 한 문장을 보내면 됩니다.</p>
-        <label class="stack">보낼 문장<textarea id="quick-request" rows="2" readonly>출제위원 새 문제 6개를 이론·일반전표·매입매출에서 2개씩 만들어 테스트에 추가해 주세요.</textarea></label>
+        <label class="stack">보낼 문장<textarea id="quick-request" rows="3" readonly></textarea></label>
         <button id="copy-quick-request" class="primary" type="button">이 문장 복사</button><p id="copy-status" class="hint" role="status"></p>
         <p>AI가 조건에 맞춰 출제·검토하고 센터에 추가합니다. 완료 안내를 받으면 이 화면을 새로고침하고 <b>문제 풀기</b>를 누르세요.</p>
         <p class="hint">이 버튼이 채팅으로 자동 전송하지는 않습니다. 문장만 보내 주세요. 긴 요청문이나 결과 파일을 옮길 필요는 없습니다.</p>
       </div>
+      <div class="main-actions"><button id="start-mode" type="button">문제 풀기</button><button id="request-help" class="primary" type="button" aria-expanded="false" aria-controls="request-guide">새 문제 부탁하기</button></div>
+      <p id="ready-note" class="hint">문제 풀기는 등록된 문제를 엽니다. 위의 출제 스타일은 새 문제를 부탁할 때만 적용됩니다.</p>
     </section>
     <p id="status" class="status" role="status" aria-live="polite"></p>
     <section id="subject-picker" class="panel" hidden aria-labelledby="subject-title">
@@ -80,5 +100,6 @@
     </details>
     <footer>테스트의 답변과 평가는 기존 오답·통과 기록에 합산되지 않습니다.</footer>
   </main>
+  <script src="../training-ui.js?v=17"></script>
 </body>
 </html>

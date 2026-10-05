@@ -133,6 +133,7 @@
     .star-item-meta{margin-left:auto;font-size:.85rem;font-weight:700;color:var(--muted)}
     details.star-item>.question{margin:0;border:0;border-top:1px dashed var(--line);border-radius:0;box-shadow:none}
   </style>
+  <link rel="stylesheet" href="design/theme.css?v=8">
 </head>
 <body>
   <nav class="top-nav" aria-label="유형별 연습 메뉴">
@@ -165,7 +166,7 @@
           <option value="recentAttempt">최근에 푼 순</option>
         </select>
       </label>
-      <label class="type-filter" for="typeFilter">유형 검색
+      <label class="type-filter" for="typeFilter" hidden>유형 검색
         <input id="typeFilter" type="search" lang="ko" list="typeFilterOptions" placeholder="예: 외화평가" autocomplete="off">
         <datalist id="typeFilterOptions"></datalist>
         <button class="filter-clear" id="clearTypeFilter" type="button">전체</button>
@@ -200,8 +201,8 @@
   </main>
 
   <script src="github-learning-sync.js?v=22"></script>
-  <script src="season-ui.js?v=46"></script>
-<script src="training-ui.js?v=14"></script>
+  <script src="season-ui.js?v=47"></script>
+<script src="training-ui.js?v=17"></script>
   <script src="account-search.js?v=5"></script>
   <script>
     const problems = loadTrainingProblems();
@@ -541,6 +542,6 @@
   })();
 </script>
 <script>TrainingSeason.install(problems,{subject:'practical',state:studyState,save:saveState,refresh:updateProgress});</script>
-<script src="question-markup.js?v=5" data-question-mark-subject="practical"></script>
+<script src="question-markup.js?v=6" data-question-mark-subject="practical"></script>
 </body>
 </html>

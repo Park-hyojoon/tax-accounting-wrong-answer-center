@@ -39,7 +39,7 @@
     '@media(max-width:760px){.weak-profile{padding:14px}.weak-profile-body{grid-template-columns:1fr;gap:4px}}'
   ].join('');
   document.head.append(style);
-  const heading=document.createElement('h2');heading.textContent='특별훈련 · 반복 약점';main.append(heading);
+  const heading=document.createElement('h2');heading.textContent='특별훈련 · 반복 약점';heading.className='weak-title';main.append(heading);
   const sources=document.createElement('div');sources.className='weak-toolbar weak-sources';sources.setAttribute('aria-label','약점 기록 구분');main.append(sources);
   const intro=document.createElement('p');intro.className='weak-description';main.append(intro);
   const bar=document.createElement('div');bar.className='weak-toolbar';bar.setAttribute('aria-label','문제 분류');main.append(bar);

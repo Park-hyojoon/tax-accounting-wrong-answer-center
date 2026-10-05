@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="오답 훈련센터">
+  <rect width="64" height="64" rx="17" fill="#276451"/>
+  <path d="M22.5 25c0-7.2 4.3-11.5 9.5-11.5s9.5 4.3 9.5 11.5" fill="none" stroke="#f3d392" stroke-width="3.4" stroke-linecap="round"/>
+  <path d="M15.5 25h33l-3.2 21.3a4.6 4.6 0 0 1-4.5 3.9H23.2a4.6 4.6 0 0 1-4.5-3.9z" fill="#f3d392"/>
+  <path d="M24.8 36.6l5 5 9.6-10.2" fill="none" stroke="#276451" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

@@ -1,0 +1,513 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Design Guide Line · 오답 훈련센터</title>
+  <link rel="icon" href="design/brand-mark.svg" type="image/svg+xml">
+  <!-- 실제 테마를 그대로 불러온다. 아래 견본(버튼·배지·카드)은 항상 현재 theme.css 모양으로 보인다. -->
+  <link rel="stylesheet" href="design/theme.css?v=8">
+  <style>
+    html body.guide{padding-left:0!important;font-size:15px!important}
+    .guide-shell{display:grid;grid-template-columns:240px minmax(0,1fr);max-width:1320px;margin:0 auto}
+    .guide-toc{position:sticky;top:0;height:100vh;overflow-y:auto;padding:34px 18px;border-right:1px solid var(--ui-line)}
+    .guide-toc .brand{display:flex;align-items:center;gap:11px;margin:0 4px 30px;font-weight:800;font-size:17px;letter-spacing:-.04em;color:var(--ui-ink);text-decoration:none}
+    .guide-toc .brand img{width:40px;height:40px;border-radius:11px}
+    .guide-toc .brand small{display:block;font-size:11px;color:var(--ui-muted);font-weight:700;letter-spacing:0}
+    .guide-toc a.toc-link{display:block;padding:8px 12px;border-radius:11px;color:var(--ui-muted);font-size:13.5px;font-weight:700;text-decoration:none}
+    .guide-toc a.toc-link:hover{background:var(--ui-surface-2);color:var(--ui-ink)}
+    html body.guide main.guide-main{width:auto!important;max-width:none!important;margin:0!important;padding:30px 40px 90px!important;min-width:0}
+    .guide-main section{scroll-margin-top:20px}
+    .g-hero{padding:30px 32px;background:var(--ui-hero);border:1px solid var(--ui-hero-line);border-radius:25px;display:grid;grid-template-columns:1fr 130px;gap:20px;align-items:center;margin-bottom:24px}
+    .g-hero h1{margin:6px 0 10px;font-size:34px;letter-spacing:-.05em;line-height:1.25}
+    .g-hero p{margin:0;color:var(--ui-muted);max-width:640px}
+    .g-hero img{width:120px;transform:rotate(-7deg);filter:drop-shadow(0 12px 0 #cedcc3)}
+    .eyebrow-g{font-size:11px;font-weight:800;letter-spacing:2px;color:var(--ui-primary);text-transform:uppercase}
+    .card-g{background:var(--ui-surface);border:1px solid var(--ui-line);border-radius:21px;padding:25px;margin:0 0 20px}
+    .card-g h2{margin:0 0 6px;font-size:22px;letter-spacing:-.04em}
+    .card-g h3{margin:22px 0 8px;font-size:16px}
+    .card-g>p.lead{margin:0 0 16px;color:var(--ui-muted)}
+    .card-g p,.card-g li{line-height:1.75}
+    .grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+    .grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+    .note-g{background:var(--ui-gold-soft);color:var(--ui-gold-ink);border-radius:12px;padding:12px 16px;font-size:13.5px;line-height:1.75;margin:14px 0}
+    .tip-g{background:var(--ui-mint);color:var(--ui-primary);border-radius:12px;padding:12px 16px;font-size:13.5px;line-height:1.75;margin:14px 0}
+    code,kbd{font-family:Consolas,"D2Coding",monospace;font-size:.88em;background:var(--ui-surface-2);border:1px solid var(--ui-line);border-radius:6px;padding:1px 6px;color:#3b4a43}
+    pre{margin:12px 0;padding:14px 16px;background:#263f36;color:#eef3ea;border-radius:14px;overflow-x:auto;font:13px/1.65 Consolas,"D2Coding",monospace}
+    pre b{color:#f3d392;font-weight:400}
+    table.g{width:100%;border-collapse:collapse;font-size:13.5px;min-width:560px}
+    table.g th,table.g td{padding:10px 12px;border-bottom:1px solid var(--ui-line);text-align:left;vertical-align:top}
+    table.g th{background:var(--ui-surface-2);font-weight:800;white-space:nowrap}
+    .tw{overflow-x:auto;border:1px solid var(--ui-line);border-radius:15px;margin:12px 0}
+    .tw table.g tr:last-child td{border-bottom:0}
+    .swatches{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:12px}
+    .swatch{border:1px solid var(--ui-line);border-radius:15px;overflow:hidden;background:var(--ui-surface)}
+    .swatch i{display:block;height:58px;border-bottom:1px solid var(--ui-line)}
+    .swatch div{padding:9px 12px;font-size:12px;line-height:1.5}
+    .swatch b{display:block;font-size:12.5px}
+    .swatch span{color:var(--ui-muted)}
+    .sample-row{display:flex;flex-wrap:wrap;gap:10px;align-items:center;padding:16px;border:1px dashed var(--ui-line-strong);border-radius:15px;background:var(--ui-bg);margin:10px 0}
+    /* 레이아웃 지도 */
+    .map{display:grid;grid-template-columns:118px 1fr;height:330px;border:2px solid var(--ui-ink);border-radius:16px;overflow:hidden;background:var(--ui-bg);font-size:12px}
+    .map-side{border-right:2px dashed var(--ui-primary);padding:12px 10px;display:flex;flex-direction:column;gap:6px;background:#fbfaf4}
+    .map-side .m-brand{height:26px;border-radius:8px;background:var(--ui-primary);color:#fff;display:grid;place-items:center;font-weight:800;margin-bottom:10px}
+    .map-side .m-link{height:20px;border-radius:7px;background:var(--ui-surface-2)}
+    .map-side .m-link.on{background:var(--ui-mint);outline:1px solid var(--ui-primary)}
+    .map-side .m-foot{margin-top:auto;height:26px;border-radius:8px;background:var(--ui-primary);color:#fff;display:grid;place-items:center}
+    .map-main{padding:14px 26px;display:flex;flex-direction:column;gap:9px;position:relative}
+    .map-main .m-date{width:110px;height:10px;border-radius:4px;background:var(--ui-line-strong)}
+    .map-main .m-title{width:170px;height:22px;border-radius:6px;background:var(--ui-ink);opacity:.75}
+    .map-main .m-tool{height:30px;border-radius:10px;border:1px solid var(--ui-line-strong);background:var(--ui-surface)}
+    .map-main .m-card{flex:1;border-radius:14px;border:1px solid var(--ui-line-strong);background:var(--ui-surface);display:grid;place-items:center;color:var(--ui-muted)}
+    .map-label{position:absolute;font-size:11px;font-weight:800;color:var(--ui-bad);background:#fff;border:1px solid #e6c3b8;border-radius:6px;padding:1px 6px}
+    .phone{width:170px;height:330px;border:2px solid var(--ui-ink);border-radius:24px;overflow:hidden;background:var(--ui-bg);display:flex;flex-direction:column;font-size:11px}
+    .phone .p-bar{display:flex;gap:5px;align-items:center;padding:8px;border-bottom:1px solid var(--ui-line);background:#fbfaf4}
+    .phone .p-bar i{height:20px;border-radius:7px;background:var(--ui-mint);width:38px}
+    .phone .p-bar b{flex:1;height:9px;border-radius:4px;background:var(--ui-line-strong)}
+    .phone .p-bar em{height:20px;width:38px;border-radius:7px;background:var(--ui-primary)}
+    .phone .p-body{padding:10px;display:flex;flex-direction:column;gap:8px;flex:1}
+    .phone .p-body .m-title{width:90px;height:16px;border-radius:5px;background:var(--ui-ink);opacity:.75}
+    .phone .p-body .m-card{flex:1;border-radius:12px;border:1px solid var(--ui-line-strong);background:var(--ui-surface)}
+    .layout-pair{display:grid;grid-template-columns:minmax(0,1fr) 170px;gap:24px;align-items:start}
+    .steps-g{counter-reset:s;list-style:none;padding:0;margin:10px 0}
+    .steps-g li{counter-increment:s;position:relative;padding:12px 0 12px 48px;border-top:1px solid var(--ui-line)}
+    .steps-g li:first-child{border-top:0}
+    .steps-g li::before{content:counter(s);position:absolute;left:0;top:10px;width:32px;height:32px;border-radius:50%;background:var(--ui-mint);color:var(--ui-primary);display:grid;place-items:center;font-weight:800}
+    .type-scale div{display:flex;align-items:baseline;gap:16px;padding:9px 0;border-bottom:1px solid var(--ui-line)}
+    .type-scale div:last-child{border-bottom:0}
+    .type-scale span{width:150px;flex:none;color:var(--ui-muted);font-size:12px}
+    .demo-question{max-width:720px}
+    .demo-question .qhead{display:flex;gap:10px}.demo-question .qhead h3{margin:0}.demo-question .qnum{display:grid;place-items:center}
+    .pill-g{display:inline-flex;gap:6px;align-items:center;padding:6px 12px;border-radius:999px;border:1px solid var(--ui-line);background:var(--ui-surface);font-size:12px}
+    @media (max-width:960px){.guide-shell{display:block}.guide-toc{position:static;height:auto;border-right:0;border-bottom:1px solid var(--ui-line);padding:18px 16px;display:flex;flex-wrap:wrap;gap:4px}.guide-toc .brand{width:100%;margin-bottom:10px}html body.guide main.guide-main{padding:20px 16px 60px!important}.grid2,.grid3{grid-template-columns:1fr}.layout-pair{grid-template-columns:1fr}.g-hero{grid-template-columns:1fr 70px;padding:22px 20px}.g-hero h1{font-size:26px}.g-hero img{width:66px}}
+  </style>
+</head>
+<body class="guide">
+<div class="guide-shell">
+  <nav class="guide-toc" aria-label="가이드 차례">
+    <a class="brand" href="오답_훈련센터.html"><img src="design/brand-mark.svg" alt=""><span>Design Guide<small>오답 훈련센터 · 전산회계 1급</small></span></a>
+    <a class="toc-link" href="#quick">0. 빠른 시작</a>
+    <a class="toc-link" href="#concept">1. 컨셉</a>
+    <a class="toc-link" href="#files">2. 파일 지도</a>
+    <a class="toc-link" href="#cascade">3. 적용 순서</a>
+    <a class="toc-link" href="#layout">4. 메뉴·본문 위치</a>
+    <a class="toc-link" href="#menu">5. 메뉴 구조</a>
+    <a class="toc-link" href="#color">6. 색</a>
+    <a class="toc-link" href="#type">7. 글꼴</a>
+    <a class="toc-link" href="#button">8. 버튼 규격</a>
+    <a class="toc-link" href="#parts">9. 카드·입력·배지</a>
+    <a class="toc-link" href="#question">10. 문제 카드</a>
+    <a class="toc-link" href="#pages">11. 페이지 목록</a>
+    <a class="toc-link" href="#exceptions">12. 바꾸지 않는 영역</a>
+    <a class="toc-link" href="#recipes">13. 변경 방법</a>
+    <a class="toc-link" href="#verify">14. 검증</a>
+    <a class="toc-link" href="#history">15. 변경 기록</a>
+  </nav>
+
+  <main class="guide-main">
+    <header class="g-hero">
+      <div>
+        <div class="eyebrow-g">Design Guide Line · v1 · 2026-10-05</div>
+        <h1>오답 훈련센터 디자인 기준</h1>
+        <p>컨셉은 <b>English Basket</b>입니다. 크림 바탕, 딥그린, 민트, 왼쪽 사이드바. 다음 디자인 변경 때 이 문서와 <code>design/theme.css</code> 하나만 보면 바로 작업할 수 있게 정리했습니다.</p>
+      </div>
+      <img src="design/brand-mark.svg" alt="">
+    </header>
+
+    <!-- 0 -->
+    <section id="quick" class="card-g">
+      <h2>0. 빠른 시작 (인수인계 요약)</h2>
+      <p class="lead">처음 맡은 사람은 이 칸만 읽고 시작해도 됩니다.</p>
+      <ol class="steps-g">
+        <li><b>디자인은 <code>design/theme.css</code> 한 파일이 결정합니다.</b> 색·글꼴·크기는 맨 위 <code>:root</code>의 <code>--ui-*</code> 토큰만 바꾸면 전체에 반영됩니다.</li>
+        <li><b>메뉴 뼈대(브랜드·아래 버튼·날짜/제목)는 <code>training-ui.js</code></b>가 만듭니다. 모양은 theme.css가, 요소 생성은 JS가 맡습니다.</li>
+        <li><b>theme.css는 항상 마지막에 적용됩니다.</b> training-ui.js가 <code>&lt;head&gt;</code> 맨 끝으로 옮깁니다. 그래서 대부분 규칙에 <code>!important</code>가 붙어 있습니다(옛 <code>season.css</code>가 <code>!important</code>를 많이 쓰기 때문).</li>
+        <li><b>수정 후 버전 올리기</b>: theme.css를 고쳤으면 모든 페이지의 <code>design/theme.css?v=N</code>을 하나 올립니다(<a href="#recipes">13장</a>의 명령 참고). training-ui.js를 고쳤으면 <code>training-tool.cmd bump training-ui.js</code> 후 <code>개념_정리.html</code>, <code>약점_분석_임시.html</code>도 같은 번호로 맞춥니다.</li>
+        <li><b>바꾸면 안 되는 곳</b>: KcLep 입력 화면 재현(<code>.kclep-shell</code>), 영수증·계산서 재현(<code>.exhibit*</code>), 문제 표시 색(<code>.qm-*</code>). <a href="#exceptions">12장</a> 참고.</li>
+      </ol>
+    </section>
+
+    <!-- 1 -->
+    <section id="concept" class="card-g">
+      <h2>1. 컨셉: English Basket</h2>
+      <p class="lead">원본: <code>D:\00. 학습센터\English\public\style.css</code> (English Basket 앱). 그 분위기를 회계 훈련 화면에 옮겼습니다.</p>
+      <div class="grid3">
+        <div class="tip-g"><b>따뜻하고 차분하게</b><br>순백 대신 크림(#f8f6ef) 바탕, 검정 대신 짙은 숲색 글자(#263f36). 오래 공부해도 눈이 편한 톤.</div>
+        <div class="tip-g"><b>한 가지 주인공 색</b><br>딥그린(#276451)만 주 버튼·활성 메뉴·진행 막대에 씁니다. 나머지는 민트·크림의 옅은 면으로 위계를 만듭니다.</div>
+        <div class="tip-g"><b>둥글고 가볍게</b><br>카드 21px, 버튼 14px 모서리. 그림자 없이 얇은 선(1px). 버튼은 올리면 2px 떠오릅니다.</div>
+      </div>
+      <h3>디자인 원칙</h3>
+      <ul>
+        <li><b>메뉴는 왼쪽, 본문은 가운데.</b> PC에서는 왼쪽 고정 사이드바(236px), 모바일은 위쪽 얇은 막대 + ☰ 메뉴.</li>
+        <li><b>정답·오답 색은 채점에만.</b> 초록(<code>--ui-ok</code>)·테라코타(<code>--ui-bad</code>)는 채점 결과·위험 버튼에만 씁니다.</li>
+        <li><b>분야 색은 아이콘과 띠에만.</b> 이론=보라, 일반전표=청록, 매입매출=황토. 면 전체를 칠하지 않습니다.</li>
+        <li><b>강조는 골드 안내 상자.</b> 주의·안내 문구는 <code>--ui-gold-soft</code> 바탕 + <code>--ui-gold-ink</code> 글자.</li>
+        <li><b>문구는 짧게.</b> 디자인 변경 때 화면 설명문을 늘리지 않습니다.</li>
+      </ul>
+      <div class="note-g">예전 디자인 안내(<code>D:\00. 학습센터\Design Guide Line Claude\디자인_시스템_가이드.md</code>, "청록+골드 코인")는 지금 화면에 쓰이지 않는 이전 컨셉입니다. 현재 기준은 이 문서입니다.</div>
+    </section>
+
+    <!-- 2 -->
+    <section id="files" class="card-g">
+      <h2>2. 파일 지도: 디자인에 관여하는 파일</h2>
+      <p class="lead">경로는 모두 <code>D:\00. 학습센터\기출문제 연습코너\</code> 기준입니다.</p>
+      <div class="tw"><table class="g">
+        <thead><tr><th>파일</th><th>역할</th><th>디자인 변경 때</th></tr></thead>
+        <tbody>
+          <tr><td><code>design/theme.css</code></td><td><b>현재 디자인의 전부.</b> 토큰, 사이드바, 카드, 버튼, 입력칸, 배지, 문제 카드, 반응형.</td><td><b>여기를 고칩니다.</b></td></tr>
+          <tr><td><code>design/brand-mark.svg</code></td><td>사이드바 로고, 홈 머리말 장식, 파비콘(가이드).</td><td>로고를 바꿀 때 같은 이름으로 교체</td></tr>
+          <tr><td><code>training-ui.js</code></td><td>메뉴 뼈대 생성: 브랜드(<code>.nav-brand</code>), 메뉴 묶음(<code>.nav-links</code>), 아래 버튼 묶음(<code>.nav-foot</code>), 모바일 ☰ 메뉴, 메뉴 편집 창, 날짜·제목(<code>.page-head</code>), theme.css를 마지막으로 옮기기.</td><td>메뉴 요소를 추가·삭제할 때만</td></tr>
+          <tr><td><code>season.css</code></td><td>예전 "회색 압축형" 디자인 + 모바일 필터 창 등 <b>기능 배치</b>. season-ui.js가 불러옵니다.</td><td>건드리지 않음. theme.css가 덮어씁니다.</td></tr>
+          <tr><td>각 HTML의 <code>&lt;style&gt;</code></td><td>페이지 고유 배치(분개표 칸 폭, KcLep 재현, 증빙 재현 등).</td><td>배치 문제일 때만</td></tr>
+          <tr><td><code>concept-notes.css</code></td><td>개념 정리 페이지 배치.</td><td>배치 문제일 때만</td></tr>
+          <tr><td><code>examiner-test/examiner.css</code></td><td>출제위원 테스트 배치(별도 실험 영역).</td><td>배치 문제일 때만</td></tr>
+          <tr><td>JS가 넣는 스타일</td><td><code>season-ui.js</code>(season.css 연결), <code>training-ui.js</code>(메뉴 설정 창), <code>weakness-center.js</code>(약점 카드), <code>github-learning-sync.js</code>(동기화 알림), <code>account-search.js</code>(계정 검색 창), <code>question-markup.js</code>(문제 표시 도구).</td><td>theme.css에서 덮어씀</td></tr>
+          <tr><td><code>Design Guide Line.html</code></td><td>이 문서. theme.css를 직접 불러와 견본을 보여 줍니다.</td><td>디자인을 바꾸면 함께 갱신</td></tr>
+        </tbody>
+      </table></div>
+    </section>
+
+    <!-- 3 -->
+    <section id="cascade" class="card-g">
+      <h2>3. 적용 순서 (왜 theme.css가 이기는가)</h2>
+      <p class="lead">같은 대상에 여러 스타일이 겹칩니다. 나중에 적용된 것이 이깁니다.</p>
+<pre>① 페이지 &lt;style&gt;            (HTML 안, 가장 먼저)
+② design/theme.css         (HTML &lt;head&gt; 끝에 &lt;link&gt;로 연결)
+③ season.css               (season-ui.js가 실행 중에 추가)
+④ JS 스타일들               (training-ui·weakness-center·account-search …)
+<b>⑤ design/theme.css  ← training-ui.js가 &lt;head&gt; 맨 끝으로 다시 옮김 (MutationObserver로 계속 유지)</b></pre>
+      <ul>
+        <li><code>training-ui.js</code>가 없는 페이지(<code>AI_작업규칙.html</code>, <code>examiner-test/index.html</code>)는 ②만으로 충분합니다(뒤에 덮어쓰는 스타일이 없음).</li>
+        <li>JS가 요소에 직접 넣은 색(예: 유형 태그 TOP 10의 <code>style="background…"</code>)도 theme.css의 <code>!important</code>가 이깁니다.</li>
+        <li>CSS 변수는 <code>:root</code>에서 다시 정의합니다. 페이지마다 다르던 옛 변수(<code>--blue</code>, <code>--navy</code>, <code>--sky</code> …)도 theme.css 1장에서 새 토큰에 연결했습니다.</li>
+      </ul>
+    </section>
+
+    <!-- 4 -->
+    <section id="layout" class="card-g">
+      <h2>4. 메뉴 위치 · 본문 위치</h2>
+      <p class="lead">화면 폭에 따라 세 가지 배치가 있습니다. 경계값은 <code>training-ui.js</code>의 <code>MOBILE='(max-width:760px)'</code>와 같아야 합니다.</p>
+      <div class="layout-pair">
+        <div>
+          <div class="map" aria-label="PC 배치 그림">
+            <div class="map-side"><div class="m-brand">로고</div><div class="m-link on"></div><div class="m-link"></div><div class="m-link"></div><div class="m-link"></div><div class="m-link"></div><div class="m-link"></div><div class="m-link"></div><div class="m-foot">⚙ 동기화</div></div>
+            <div class="map-main">
+              <span class="map-label" style="left:6px;top:-1px">↔ 좌우 여백 40px</span>
+              <div class="m-date" style="margin-top:12px"></div><div class="m-title"></div><div class="m-tool"></div><div class="m-card">카드 (본문 최대 1180px)</div>
+            </div>
+          </div>
+          <p style="font-size:12px;color:var(--ui-muted);margin:6px 0 0">PC: 왼쪽 사이드바 236px 고정 · 본문은 남은 폭의 가운데</p>
+        </div>
+        <div>
+          <div class="phone" aria-label="모바일 배치 그림"><div class="p-bar"><i></i><b></b><em></em></div><div class="p-body"><div class="m-title"></div><div class="m-card"></div><div class="m-card"></div></div></div>
+          <p style="font-size:12px;color:var(--ui-muted);margin:6px 0 0">모바일: 위쪽 얇은 막대</p>
+        </div>
+      </div>
+      <div class="tw"><table class="g">
+        <thead><tr><th>구간</th><th>메뉴 위치</th><th>본문 위치</th><th>토큰·규칙 위치(theme.css)</th></tr></thead>
+        <tbody>
+          <tr><td><b>PC</b><br>1101px 이상</td><td>왼쪽 고정 사이드바, 폭 <code>--ui-sidebar-w: 236px</code>. 위에서 34px 아래 로고, 그 아래 메뉴, 맨 아래 ⚙·동기화.</td><td><code>body</code> 왼쪽 여백 = 사이드바 폭. <code>main</code> 최대 <code>--ui-content-max: 1180px</code>, 가운데 정렬, 안쪽 여백 위 30 · 좌우 <code>--ui-gutter: 40px</code> · 아래 70px.</td><td>3장 레이아웃, 4장 사이드바 <code>@media (min-width:761px)</code></td></tr>
+          <tr><td><b>태블릿</b><br>761–1100px</td><td>같은 사이드바, 폭 200px</td><td>좌우 여백 24px, 제목 28px</td><td>14장 <code>@media (min-width:761px) and (max-width:1100px)</code></td></tr>
+          <tr><td><b>모바일</b><br>760px 이하</td><td>위쪽 고정 막대: [☰ 메뉴] [현재 화면 이름] [⚙] [동기화]. 아래로 스크롤하면 숨고, 위로 올리면 나타남(training-ui.js). ☰를 누르면 메뉴 목록이 아래로 펼쳐짐.</td><td>좌우 16px, 위 18px. 카드 안쪽 18px.</td><td>14장 <code>@media (max-width:760px)</code></td></tr>
+        </tbody>
+      </table></div>
+      <div class="tip-g"><b>일관성 규칙 (2026-10-05 사용자 지정)</b>: 모든 화면의 맨 위는 <b>날짜 → 제목</b> 순서, 같은 글자 크기(날짜 13px · 제목 <code>--ui-h1</code> 32px)입니다. training-ui.js가 <code>&lt;main&gt;</code> 바로 앞에 <code>.page-head</code>를 넣고, 제목은 현재 메뉴 이름입니다. 홈의 예전 민트 hero와 특별훈련의 중복 제목(<code>.weak-title</code>)은 숨기고, 출제위원의 큰 제목(<code>.intro h1</code>)은 섹션 제목 크기로 줄입니다(theme.css 15장). 새 페이지도 이 머리말을 씁니다.</div>
+      <h3>본문 위쪽 머리말</h3>
+      <ul>
+        <li><b>날짜 + 제목(<code>.page-head</code>)</b>: h1이 없는 화면(이론·일반전표·매입매출)에 training-ui.js가 <code>&lt;main&gt;</code> 맨 앞에 넣습니다. 제목은 현재 메뉴 이름입니다.</li>
+        <li><b>민트 머리말 카드(<code>.hero</code>)</b>: 홈과 약점 분석. 홈은 <code>&lt;main&gt;</code> 밖에 있으므로 theme.css가 본문과 같은 폭으로 맞춥니다. 홈 머리말 높이는 85px 미만을 유지합니다(<code>tests/compact-notebook.cjs</code>가 검사).</li>
+      </ul>
+      <div class="note-g">상단 메뉴 높이를 쓰던 고정 위치 값(<code>--nav-h</code>, <code>--concept-nav-height</code>)은 PC에서 0으로 고정했습니다. 사이드바는 위쪽을 차지하지 않기 때문입니다. 메뉴를 다시 위로 올리면 이 줄을 지워야 합니다(13장 참고).</div>
+    </section>
+
+    <!-- 5 -->
+    <section id="menu" class="card-g">
+      <h2>5. 메뉴 구조</h2>
+<pre>nav.top-nav
+ └ div.nav-inner
+    ├ a.nav-brand              ← training-ui.js 생성 (로고 + "오답 훈련센터 / 전산회계 1급")
+    ├ button.nav-menu-toggle   ← 모바일 전용 "☰ 메뉴"
+    ├ span.nav-current         ← 모바일 전용 현재 화면 이름
+    ├ div.nav-links            ← 메뉴 항목들 (순서·숨김은 사용자 설정)
+    │   └ a.nav-link[data-menu-id="home|theory|practical|voucher|examiner|special|concepts|analysis"]
+    └ div.nav-foot             ← training-ui.js 생성
+        ├ button.nav-settings-button (⚙ 메뉴 편집)
+        └ div.nav-sync > button#syncAll (🔄 동기화, 홈·이론·일반전표·매입매출에만)</pre>
+      <div class="tw"><table class="g">
+        <thead><tr><th>data-menu-id</th><th>이름</th><th>연결</th><th>아이콘</th></tr></thead>
+        <tbody>
+          <tr><td>home</td><td>오늘의 오답훈련</td><td>오답_훈련센터.html</td><td>◎</td></tr>
+          <tr><td>theory</td><td>이론 오답</td><td>이론_오답응용_5문제.html</td><td>✎ (보라)</td></tr>
+          <tr><td>practical</td><td>일반전표 입력</td><td>일반전표_기본연습_24문제.html</td><td>▤ (청록)</td></tr>
+          <tr><td>voucher</td><td>매입매출전표 입력</td><td>매입매출전표_오답연습_3문제.html?view=all</td><td>▦ (황토)</td></tr>
+          <tr><td>examiner</td><td>출제위원 테스트</td><td>examiner-test/index.html</td><td>✦</td></tr>
+          <tr><td>special</td><td>특별훈련 · 반복 약점</td><td>오답_훈련센터.html?weakness=1 (training-ui.js가 이름·주소를 고정)</td><td>↻</td></tr>
+          <tr><td>concepts</td><td>개념 정리</td><td>개념_정리.html (없으면 training-ui.js가 추가)</td><td>❖</td></tr>
+          <tr><td>analysis</td><td>약점 분석(임시)</td><td>약점_분석_임시.html</td><td>↗</td></tr>
+        </tbody>
+      </table></div>
+      <ul>
+        <li><b>메뉴 항목 원본</b>은 각 HTML의 <code>&lt;nav class="top-nav"&gt;</code> 안에 있습니다. 새 메뉴를 추가하면 모든 페이지의 nav에 같은 줄을 넣고, training-ui.js의 <code>menuId()</code>와 <code>MENU_DEFAULT</code>에 id를 추가하고, theme.css 4장에 아이콘 한 줄을 넣습니다.</li>
+        <li><b>메뉴 순서·숨김</b>은 사용자가 ⚙ 메뉴 편집에서 정하며 <code>exam-20260914-ui-settings</code>에 저장·동기화됩니다. 디자인 변경 때 이 저장 키를 바꾸지 않습니다.</li>
+        <li><b>출제위원 테스트 페이지</b>도 다른 화면과 같은 <code>nav.top-nav</code>와 <code>../training-ui.js</code>를 씁니다(링크는 <code>../</code>로 시작). training-ui.js는 자기 위치(<code>BASE</code>)를 기준으로 로고·특별훈련·개념 정리 주소를 만들므로 하위 폴더에서도 같은 메뉴·순서 설정이 적용됩니다.</li>
+      </ul>
+    </section>
+
+    <!-- 6 -->
+    <section id="color" class="card-g">
+      <h2>6. 색 토큰</h2>
+      <p class="lead">아래 견본은 지금 theme.css에서 읽은 실제 값입니다. 토큰을 바꾸면 이 표도 바뀝니다.</p>
+      <div class="swatches" id="swatches"></div>
+      <h3>쓰임 규칙</h3>
+      <div class="tw"><table class="g">
+        <thead><tr><th>용도</th><th>토큰</th></tr></thead>
+        <tbody>
+          <tr><td>페이지 바탕 / 카드 / 카드 안 옅은 면</td><td><code>--ui-bg</code> / <code>--ui-surface</code> / <code>--ui-surface-2</code></td></tr>
+          <tr><td>본문 글자 / 보조 글자</td><td><code>--ui-ink</code> / <code>--ui-muted</code></td></tr>
+          <tr><td>테두리 / 입력칸 테두리</td><td><code>--ui-line</code> / <code>--ui-line-strong</code></td></tr>
+          <tr><td>주 버튼·활성 메뉴 글자·진행 막대·링크</td><td><code>--ui-primary</code> (hover <code>--ui-primary-dark</code>)</td></tr>
+          <tr><td>보조 버튼·활성 메뉴 바탕·배지</td><td><code>--ui-mint</code> (hover <code>--ui-mint-strong</code>)</td></tr>
+          <tr><td>머리말 카드</td><td><code>--ui-hero</code> + <code>--ui-hero-line</code></td></tr>
+          <tr><td>안내·주의 상자</td><td><code>--ui-gold-soft</code> + <code>--ui-gold-ink</code></td></tr>
+          <tr><td>키보드 초점 테두리</td><td><code>--ui-focus</code></td></tr>
+          <tr><td>정답 / 오답·위험</td><td><code>--ui-ok</code>·<code>--ui-ok-soft</code> / <code>--ui-bad</code>·<code>--ui-bad-soft</code></td></tr>
+          <tr><td>분야 구분</td><td><code>--ui-theory</code> · <code>--ui-practical</code> · <code>--ui-voucher</code> (+ <code>-soft</code>)</td></tr>
+          <tr><td>홈 유형 태그 TOP 10</td><td>누적: 1–3위 진초록, 4–6위 중간 초록, 7–10위 민트 / 현재 훈련 필요: 1–3위 테라코타, 4–6위 주황, 7–10위 연한 골드 (theme.css 9장)</td></tr>
+          <tr><td>약점 분석 막대</td><td><code>--weak</code>(밝은 파랑) · <code>--improved</code>(연한 초록). 화면 설명문이 이 색 이름을 말하므로 색을 바꾸면 설명문도 함께 고칩니다.</td></tr>
+        </tbody>
+      </table></div>
+    </section>
+
+    <!-- 7 -->
+    <section id="type" class="card-g">
+      <h2>7. 글꼴과 크기</h2>
+      <p class="lead">글꼴: <code>--ui-font</code> = ui-rounded, Segoe UI, 맑은 고딕, Apple SD Gothic Neo. 외부 웹폰트는 쓰지 않습니다(오프라인·file:// 실행 유지).</p>
+      <div class="type-scale">
+        <div><span>페이지 제목 · --ui-h1</span><b style="font-size:var(--ui-h1);letter-spacing:-.05em">32px 굵게</b></div>
+        <div><span>섹션 제목 · --ui-h2</span><b style="font-size:var(--ui-h2);letter-spacing:-.04em">21px 굵게</b></div>
+        <div><span>문제 제목</span><b style="font-size:17px">17px 700</b></div>
+        <div><span>문제 본문(prompt)</span><b style="font-size:17px">17px 700, 줄간격 1.85</b></div>
+        <div><span>본문 기본 · --ui-font-size</span><span style="width:auto;color:var(--ui-ink);font-size:15px">15px, 줄간격 1.7</span></div>
+        <div><span>메뉴 항목</span><b style="font-size:14px">14px 700</b></div>
+        <div><span>버튼</span><b style="font-size:14px">14px 700 (작은 버튼 13px)</b></div>
+        <div><span>날짜·보조·배지</span><span style="width:auto;color:var(--ui-muted);font-size:12px">12–13px</span></div>
+      </div>
+      <div class="note-g">개념 정리는 본문·표·차례를 16px로 맞춥니다(<code>tests/concept-notes.cjs</code>가 세 크기가 같은지 검사).</div>
+    </section>
+
+    <!-- 8 -->
+    <section id="button" class="card-g">
+      <h2>8. 버튼 규격</h2>
+      <p class="lead">아래 버튼은 실제 클래스를 쓴 견본입니다. 마우스를 올려 보세요.</p>
+      <div class="sample-row">
+        <button class="btn check-one" type="button">채점하기</button>
+        <button class="btn" type="button">✓ 알고 있어요 · 통과</button>
+        <button class="btn secondary" type="button">폴더 경로 복사</button>
+        <button class="btn danger" type="button">풀이 기록 초기화</button>
+        <button class="btn" type="button" disabled>사용 불가</button>
+      </div>
+      <div class="sample-row">
+        <a class="open-link" href="#button">풀기</a>
+        <button class="filter-clear" type="button">전체</button>
+        <span style="font-size:12px;color:var(--ui-muted)">← 작은 버튼(34px) · ⚙·동기화 버튼은 훈련 화면 사이드바 맨 아래에서 확인</span>
+      </div>
+      <div class="tw"><table class="g">
+        <thead><tr><th>종류</th><th>모양</th><th>클래스</th><th>쓰는 곳</th></tr></thead>
+        <tbody>
+          <tr><td><b>주 버튼</b></td><td>초록 바탕 · 흰 글자</td><td><code>.btn.check-one</code> <code>.btn.green</code> <code>.btn.primary</code> <code>.backup-button</code> <code>.filter-button.active</code> <code>.open-link</code></td><td>화면에서 가장 중요한 한 동작: 채점하기, 저장, 연결, 현재 선택된 필터</td></tr>
+          <tr><td><b>보조 버튼</b> (기본)</td><td>민트 바탕 · 초록 글자</td><td><code>.btn</code> <code>.filter-button</code> <code>.weak-toolbar button</code></td><td>일반 동작</td></tr>
+          <tr><td><b>테두리 버튼</b></td><td>투명 · 얇은 선 · 초록 글자</td><td><code>.btn.secondary</code> <code>.backup-button.secondary</code> <code>.filter-clear</code> <code>.restore-button</code></td><td>덜 중요한 동작: 경로 복사, 연결 해제, 전체 보기</td></tr>
+          <tr><td><b>위험 버튼</b></td><td>투명 · 테라코타 글자·선</td><td><code>.btn.danger</code> <code>.danger</code></td><td>기록 초기화처럼 되돌리기 어려운 동작</td></tr>
+        </tbody>
+      </table></div>
+      <div class="tw"><table class="g">
+        <thead><tr><th>규격</th><th>보통</th><th>작은 버튼</th><th>토큰</th></tr></thead>
+        <tbody>
+          <tr><td>높이(최소)</td><td>42px</td><td>34px</td><td><code>--ui-btn-h</code> / <code>--ui-btn-sm-h</code></td></tr>
+          <tr><td>좌우 안쪽 여백</td><td>18px</td><td>12px</td><td><code>--ui-btn-px</code> / <code>--ui-btn-sm-px</code></td></tr>
+          <tr><td>글자</td><td>14px 700</td><td>13px 700</td><td><code>--ui-btn-font</code> / <code>--ui-btn-sm-font</code></td></tr>
+          <tr><td>모서리</td><td colspan="2">14px (작은 버튼 11px, 메뉴 설정 ⚙는 원형 40px)</td><td><code>--ui-radius-btn</code></td></tr>
+          <tr><td>테두리</td><td colspan="2">1px (주 버튼은 같은 색, 보조 버튼은 투명)</td><td>—</td></tr>
+          <tr><td>올렸을 때</td><td colspan="2">2px 위로 이동 + 한 단계 진한 바탕. 움직임 줄이기 설정이면 이동 없음</td><td>theme.css 7장</td></tr>
+          <tr><td>사용 불가</td><td colspan="2">투명도 50%, 이동 없음</td><td>—</td></tr>
+          <tr><td>사이드바 동기화</td><td colspan="2">높이 40px, 남은 폭 전체, 초록. ⚙는 지름 40px 원형</td><td>theme.css 4장</td></tr>
+        </tbody>
+      </table></div>
+      <div class="tip-g">한 카드 안에 주 버튼은 하나만 둡니다. 문제 카드에서는 「채점하기」가 주 버튼입니다.</div>
+    </section>
+
+    <!-- 9 -->
+    <section id="parts" class="card-g">
+      <h2>9. 카드 · 입력칸 · 배지</h2>
+      <div class="grid2">
+        <div>
+          <h3>카드</h3>
+          <div class="tw" style="margin-top:0"><table class="g" style="min-width:0">
+            <tbody>
+              <tr><th>바탕/선</th><td><code>--ui-surface</code>, 1px <code>--ui-line</code>, 그림자 없음</td></tr>
+              <tr><th>모서리</th><td>21px (<code>--ui-radius-card</code>), 카드 안 작은 상자 15px</td></tr>
+              <tr><th>안쪽 여백</th><td>25px (모바일 18px) · <code>--ui-card-pad</code></td></tr>
+              <tr><th>카드 사이</th><td>20px · <code>--ui-gap</code></td></tr>
+              <tr><th>클래스</th><td><code>.section</code> <code>.question</code> <code>.save-panel</code> <code>.panel</code> <code>.chapter</code> <code>.weak-card</code> …</td></tr>
+            </tbody>
+          </table></div>
+        </div>
+        <div>
+          <h3>입력칸·선택 상자</h3>
+          <div class="sample-row" style="display:grid;gap:10px">
+            <select class="sort-select"><option>취약 우선 · 추천</option></select>
+            <span class="save-row" style="display:block"><input type="text" value="2026-10-05_일반전표" aria-label="견본 입력칸"></span>
+          </div>
+          <p style="font-size:13px;color:var(--ui-muted)">1px <code>--ui-line-strong</code>, 모서리 12px, 높이 34px(도구 막대) · 42px(저장 파일 이름). 초점은 골드 테두리.</p>
+        </div>
+      </div>
+      <h3>배지·태그</h3>
+      <div class="sample-row">
+        <span class="badge">익숙해지는 중</span>
+        <span class="state-badge pass">통과</span>
+        <span class="state-badge hide">오답</span>
+        <span class="state-badge self">스스로 확인</span>
+        <span data-source="theory"><span class="category-badge">이론</span></span>
+        <span data-source="practical"><span class="category-badge">일반전표</span></span>
+        <span data-source="voucher"><span class="category-badge">매입매출</span></span>
+        <a class="season-tag" data-rank="1" href="#parts">재무회계 · 36</a>
+        <a class="season-tag" data-rank="5" href="#parts">재고자산 · 10</a>
+        <a class="season-tag" data-rank="8" href="#parts">매출원가 · 4</a>
+        <a class="season-tag season-current-tag" data-rank="2" href="#parts">구매확인서 · 1문제</a>
+        <span class="pill-g">✦ 날짜 알약</span>
+      </div>
+      <h3>안내 상자 · 진행 막대</h3>
+      <div class="notice" style="padding:12px 16px">⚠️ 안내·주의 상자 (<code>.notice</code>, <code>.backup-warning</code>, <code>.type-filter-band</code>)</div>
+      <div class="progress" style="display:flex;gap:12px;align-items:center;margin-top:12px"><span>채점 3 / 10</span><div class="progress-bar" style="width:220px;overflow:hidden"><span style="display:block;height:100%;width:30%"></span></div></div>
+    </section>
+
+    <!-- 10 -->
+    <section id="question" class="card-g">
+      <h2>10. 문제 카드 구조</h2>
+      <p class="lead">이론·일반전표·매입매출 모두 같은 틀입니다. 아래는 견본입니다(채점 기능 없음).</p>
+      <div class="question demo-question">
+        <div class="qhead"><span class="qnum">1</span><h3>영업부 차량 보험료의 결산 정리</h3></div>
+        <p class="season-origin" style="font-size:12px;color:var(--ui-muted)">121회 · 실무 · 견본</p>
+        <div class="prompt" style="padding:12px 14px;font-weight:700;line-height:1.85">문제 본문(.prompt): 연한 면 + 왼쪽 초록 띠 3px.</div>
+        <div class="qactions" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px"><button class="btn" type="button">✓ 알고 있어요 · 통과</button><button class="btn check-one" type="button">채점하기</button><span class="result ok" style="align-self:center;font-weight:800">정답입니다</span></div>
+        <details style="margin-top:12px"><summary style="padding:10px 12px">정답 · 해설 보기</summary><div style="padding:0 12px 12px">접힌 정답 영역(details)</div></details>
+      </div>
+      <div class="tw"><table class="g">
+        <thead><tr><th>부분</th><th>클래스</th><th>모양</th></tr></thead>
+        <tbody>
+          <tr><td>번호</td><td><code>.qnum</code></td><td>지름 34px 원, 민트 바탕, 초록 숫자</td></tr>
+          <tr><td>제목</td><td><code>.qhead h2/h3</code></td><td>17px 700</td></tr>
+          <tr><td>본문</td><td><code>.prompt</code></td><td><code>--ui-surface-2</code> 면, 왼쪽 3px 초록 띠, 오른쪽 모서리만 둥글게</td></tr>
+          <tr><td>자료 상자</td><td><code>.data-box</code></td><td>연한 골드 면</td></tr>
+          <tr><td>보기(이론)</td><td><code>.choice</code></td><td>선택하면 민트 면 + 초록 테두리</td></tr>
+          <tr><td>채점 후 카드</td><td><code>.question.correct</code> / <code>.wrong</code></td><td>테두리만 연한 초록 / 연한 테라코타</td></tr>
+          <tr><td>결과 문구</td><td><code>.result.ok</code> / <code>.result.no</code></td><td><code>--ui-ok</code> / <code>--ui-bad</code></td></tr>
+          <tr><td>분개 입력표</td><td><code>.entry-wrap</code></td><td>색·모서리만 테마. 칸 높이·폭은 season.css·페이지 style 유지</td></tr>
+          <tr><td>차대 합계</td><td><code>.balance-panel</code></td><td>맞으면 <code>.balanced</code> 연한 초록</td></tr>
+        </tbody>
+      </table></div>
+    </section>
+
+    <!-- 11 -->
+    <section id="pages" class="card-g">
+      <h2>11. 페이지 목록 (테마 적용 현황)</h2>
+      <div class="tw"><table class="g">
+        <thead><tr><th>페이지</th><th>메뉴</th><th>머리말</th><th>비고</th></tr></thead>
+        <tbody>
+          <tr><td><a href="오답_훈련센터.html">오답_훈련센터.html</a> (홈)</td><td>사이드바</td><td>민트 hero (main 밖)</td><td>약점 센터(<code>?weakness=1</code>)는 weakness-center.js가 main을 다시 그림</td></tr>
+          <tr><td><a href="이론_오답응용_5문제.html">이론_오답응용_5문제.html</a></td><td>사이드바</td><td>날짜 + 제목 (JS)</td><td>보기 선택 카드</td></tr>
+          <tr><td><a href="일반전표_기본연습_24문제.html">일반전표_기본연습_24문제.html</a></td><td>사이드바</td><td>날짜 + 제목 (JS)</td><td>분개 입력표, 증빙 재현</td></tr>
+          <tr><td><a href="매입매출전표_오답연습_3문제.html?view=all">매입매출전표_오답연습_3문제.html</a></td><td>사이드바</td><td>날짜 + 제목 (JS)</td><td>KcLep 재현 화면은 그대로</td></tr>
+          <tr><td><a href="개념_정리.html">개념_정리.html</a></td><td>사이드바</td><td>.intro (자체)</td><td>표시 도구 막대가 위에 고정(12px)</td></tr>
+          <tr><td><a href="약점_분석_임시.html">약점_분석_임시.html</a></td><td>사이드바</td><td>민트 hero (main 안)</td><td>막대 색은 설명문과 맞춤</td></tr>
+          <tr><td><a href="examiner-test/index.html">examiner-test/index.html</a></td><td>사이드바 (공통 메뉴)</td><td>.intro 민트</td><td><code>body.examiner-page</code>. 별도 실험 영역, 기능 파일은 건드리지 않음</td></tr>
+          <tr><td><a href="AI_작업규칙.html">AI_작업규칙.html</a></td><td>없음 (단독 문서)</td><td>민트 hero</td><td><code>body.rules-page</code>, 사이드바 여백 없음</td></tr>
+          <tr><td>index.html · 결산정리사항_연습_7문제.html</td><td>—</td><td>—</td><td>홈으로 보내는 안내 파일. 디자인 대상 아님</td></tr>
+          <tr><td>121.html</td><td>—</td><td>—</td><td>어디에서도 연결되지 않는 예전 단독 문제 파일. 이번 변경 제외</td></tr>
+        </tbody>
+      </table></div>
+      <p>새 페이지를 만들면: <code>&lt;head&gt;</code> 끝에 <code>&lt;link rel="stylesheet" href="design/theme.css?v=N"&gt;</code>, 메뉴는 다른 페이지의 <code>&lt;nav class="top-nav"&gt;</code>를 그대로 복사, <code>&lt;/body&gt;</code> 앞에 <code>training-ui.js?v=N</code>. 본문은 <code>&lt;main&gt;</code> 안에 <code>.section</code> 카드로 쌓습니다.</p>
+    </section>
+
+    <!-- 12 -->
+    <section id="exceptions" class="card-g">
+      <h2>12. 바꾸지 않는 영역</h2>
+      <div class="tw"><table class="g">
+        <thead><tr><th>영역</th><th>클래스</th><th>이유</th></tr></thead>
+        <tbody>
+          <tr><td>KcLep 매입매출 입력 화면</td><td><code>.kclep-shell</code> 안 전체</td><td>실제 시험 프로그램과 같은 모양으로 손에 익히기 위함</td></tr>
+          <tr><td>영수증·계산서·통장·표 재현</td><td><code>.exhibit</code>, <code>.exhibit-*</code></td><td>원본 증빙의 구조와 값을 그대로 보여 줘야 함(AGENTS 규칙)</td></tr>
+          <tr><td>문제 표시(글자색·형광펜·밑줄)</td><td><code>.qm-*</code>, <code>.mark-*</code></td><td>사용자가 직접 칠한 표시라 색이 바뀌면 안 됨</td></tr>
+          <tr><td>원문 표</td><td><code>.data-box .source-table</code></td><td>시험지 표 모양 유지</td></tr>
+          <tr><td>저장 키·동기화</td><td>—</td><td>디자인 변경은 <code>exam-20260914-*</code> 저장 키와 기록을 건드리지 않음</td></tr>
+        </tbody>
+      </table></div>
+    </section>
+
+    <!-- 13 -->
+    <section id="recipes" class="card-g">
+      <h2>13. 다음 디자인 변경 방법</h2>
+      <h3>A. 색·글꼴·크기만 바꾸기 (가장 흔함)</h3>
+      <ol class="steps-g">
+        <li><code>design/theme.css</code> 맨 위 <b>0. 디자인 토큰</b>의 값을 바꿉니다. 예: 주 색 <code>--ui-primary</code>, 바탕 <code>--ui-bg</code>, 버튼 높이 <code>--ui-btn-h</code>.</li>
+        <li>모든 페이지의 <code>theme.css?v=N</code> 숫자를 올립니다(아래 명령).</li>
+        <li>이 문서의 6·7·8장 표에 적힌 값을 고칩니다(색 견본은 자동).</li>
+      </ol>
+<pre><b># theme.css 버전 일괄 올리기 (PowerShell, 기출문제 연습코너 폴더에서)</b>
+$files = @('오답_훈련센터.html','이론_오답응용_5문제.html','일반전표_기본연습_24문제.html','매입매출전표_오답연습_3문제.html','약점_분석_임시.html','개념_정리.html','AI_작업규칙.html','examiner-test/index.html','Design Guide Line.html')
+foreach($f in $files){ $t=[IO.File]::ReadAllText($f); $t=[regex]::Replace($t,'theme\.css\?v=(\d+)',{ param($m) 'theme.css?v='+([int]$m.Groups[1].Value+1) }); [IO.File]::WriteAllText($f,$t,(New-Object Text.UTF8Encoding $false)) }</pre>
+      <h3>B. 메뉴를 다시 위쪽 가로 막대로 옮기기</h3>
+      <ol class="steps-g">
+        <li>theme.css 3장의 <code>body{padding-left…}</code>와 <code>html{--nav-h:0px…}</code> 줄을 지웁니다.</li>
+        <li>4장 <code>@media (min-width:761px)</code> 블록의 <code>.top-nav{position:fixed…}</code>를 <code>position:sticky;top:0;width:auto;height:auto</code>로, <code>.nav-inner</code>를 <code>flex-direction:row</code>로, <code>.nav-links</code>를 가로 <code>flex</code>로 바꿉니다. <code>.nav-foot</code>는 <code>margin-left:auto</code>.</li>
+        <li>홈 hero 여백(5장 <code>body&gt;.hero</code>)과 출제위원 사이드바(12장)도 같은 방식으로 정리합니다.</li>
+      </ol>
+      <h3>C. 모바일을 아래쪽 탭 막대로 바꾸기 (English Basket 원본 방식)</h3>
+      <p>메뉴가 8개라 5개까지만 탭에 두고 나머지는 ☰에 남기는 구조가 필요합니다. training-ui.js의 모바일 처리(<code>nav-compact</code>, 스크롤 숨김)를 함께 바꿔야 하므로 사용자에게 먼저 확인합니다.</p>
+      <h3>D. 컨셉 전체 교체</h3>
+      <ol class="steps-g">
+        <li><code>design/theme.css</code>를 복사해 <code>design/theme-이름.css</code>를 만들고 토큰과 규칙을 고칩니다. 목차(0~14장) 구조는 유지합니다.</li>
+        <li>모든 페이지의 링크를 새 파일로 바꿉니다. training-ui.js는 주소에 <code>design/theme</code>가 들어간 링크를 찾아 마지막으로 옮기므로 <b>파일 이름은 <code>design/theme…css</code> 형태를 유지</b>합니다.</li>
+        <li>로고가 바뀌면 <code>design/brand-mark.svg</code>를 교체합니다.</li>
+        <li>이 문서의 1장(컨셉)과 15장(변경 기록)을 고칩니다.</li>
+      </ol>
+      <h3>E. 메뉴 항목 추가</h3>
+      <p>5장 참고: 모든 페이지 nav에 링크 추가 → training-ui.js <code>menuId()</code>·<code>MENU_DEFAULT</code>에 id 추가 → theme.css 4장에 아이콘 한 줄 → <code>training-tool.cmd bump training-ui.js</code> 후 개념 정리·약점 분석 번호도 맞춤.</p>
+      <div class="note-g">하지 말 것: 외부 UI 라이브러리·빌드 단계·웹폰트 추가, 저장 키 변경, 문제 원문·증빙 모양 변경, 사용자 요청 없는 구조 변경.</div>
+    </section>
+
+    <!-- 14 -->
+    <section id="verify" class="card-g">
+      <h2>14. 검증</h2>
+      <ol class="steps-g">
+        <li>로컬 서버로 홈·이론·일반전표·매입매출·개념 정리·약점 분석·출제위원·AI 규칙을 PC 폭(1366px)과 모바일 폭(390px)에서 엽니다. 브라우저 캐시 때문에 옛 화면이 보이면 새로고침(Ctrl+F5).</li>
+        <li>확인할 것: 사이드바 고정, 본문 가로 넘침 없음, ☰ 메뉴 열림, 메뉴 편집 창, 채점 버튼 색, KcLep 화면 원래 모양.</li>
+        <li><code>training-tool.cmd check</code> 한 번.</li>
+        <li>구조를 바꿨다면 관련 브라우저 검사: <code>tests/menu-settings-browser.cjs</code>, <code>tests/compact-notebook.cjs</code>(홈 머리말 85px 미만·모바일 넘침), <code>tests/concept-notes.cjs</code>(글자 크기 일치), <code>tests/examiner-browser.cjs</code>, <code>tests/voucher-entry-browser.cjs</code>.</li>
+      </ol>
+      <div class="note-g">2026-10-05 기준, 디자인 변경 전에도 실패하던 검사가 있습니다: menu-settings-browser('timed' 메뉴), compact-notebook·season-browser·training-review-browser·weakness-center(통과 문제를 목록에서 숨긴다는 예전 기준). 10-05 사용자 변경으로 통과 문제도 목록에 남기 때문이며 디자인과 무관합니다.</div>
+    </section>
+
+    <!-- 15 -->
+    <section id="history" class="card-g">
+      <h2>15. 변경 기록</h2>
+      <div class="tw"><table class="g">
+        <thead><tr><th>날짜</th><th>내용</th></tr></thead>
+        <tbody>
+          <tr><td>2026-10-05</td><td>English Basket 컨셉 적용(v1). <code>design/theme.css</code>·<code>design/brand-mark.svg</code> 신설, 상단 메뉴 → 왼쪽 사이드바, h1 없는 화면에 날짜·제목 머리말 추가, 8개 페이지에 테마 연결, training-ui.js v15.</td></tr>
+        <tr><td>2026-10-05</td><td>메뉴 순서 설정 반영(숨긴 메뉴 표시 버그 수정), 출제위원 테스트도 공통 메뉴 사용, 홈·특별훈련·출제위원 머리말을 날짜→제목으로 통일, 일반전표·매입매출 검색 막대: 기출 회차 → 취약점 Top10(선택하기) → 정렬 → 유형 태그, 유형 검색 숨김.</td></tr>
+        </tbody>
+      </table></div>
+    </section>
+  </main>
+</div>
+<script>
+  // 색 견본: theme.css의 현재 토큰 값을 읽어 보여 준다 (토큰을 바꾸면 자동 반영)
+  (function(){
+    const names=[['--ui-bg','페이지 바탕'],['--ui-surface','카드'],['--ui-surface-2','옅은 면·hover'],['--ui-hero','머리말 카드'],['--ui-ink','본문 글자'],['--ui-muted','보조 글자'],['--ui-line','테두리'],['--ui-line-strong','입력칸 테두리'],['--ui-primary','주 색'],['--ui-primary-dark','주 색 hover'],['--ui-mint','민트'],['--ui-mint-strong','민트 hover'],['--ui-gold','골드 장식'],['--ui-gold-soft','안내 바탕'],['--ui-gold-ink','안내 글자'],['--ui-focus','초점 테두리'],['--ui-ok','정답'],['--ui-ok-soft','정답 바탕'],['--ui-bad','오답·위험'],['--ui-bad-soft','오답 바탕'],['--ui-theory','이론'],['--ui-practical','일반전표'],['--ui-voucher','매입매출']];
+    const css=getComputedStyle(document.documentElement),box=document.getElementById('swatches');
+    names.forEach(([name,label])=>{const value=css.getPropertyValue(name).trim();const el=document.createElement('div');el.className='swatch';el.innerHTML='<i></i><div><b></b><code></code><br><span></span></div>';el.querySelector('i').style.background=value;el.querySelector('b').textContent=label;el.querySelector('code').textContent=name;el.querySelector('span').textContent=value;box.append(el)});
+  })();
+</script>
+</body>
+</html>

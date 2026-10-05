@@ -1,0 +1,461 @@
+/* =====================================================================
+   오답 훈련센터 디자인 테마 · 컨셉 "English Basket"
+   ---------------------------------------------------------------------
+   - 화면 전체의 색·글꼴·메뉴 위치·본문 폭·버튼 규격을 이 파일 하나가 정한다.
+   - 설명서: ../Design Guide Line.html (메뉴/본문 위치, 버튼 규격, 수정 순서)
+   - 이 파일은 항상 마지막에 적용된다. training-ui.js가 <head>의 맨 끝으로 옮긴다.
+     그래서 페이지 <style>, season.css, JS가 넣은 스타일보다 우선한다.
+   - 디자인만 바꾼다. 문제·채점·저장·동기화 기능과 무관하다.
+   - 수정 후에는 모든 페이지의 design/theme.css?v=N 숫자를 하나 올린다.
+
+   목차
+     0. 디자인 토큰 ............ 색·글꼴·크기·간격 (디자인 변경은 여기부터)
+     1. 기존 페이지 변수 연결 ... 페이지마다 다른 옛 변수(--blue 등)를 토큰에 연결
+     2. 기본 바탕·글자
+     3. 레이아웃: 왼쪽 사이드바 + 본문
+     4. 사이드바 메뉴
+     5. 페이지 머리말 (날짜·제목·hero)
+     6. 카드·섹션
+     7. 버튼
+     8. 입력·선택 상자
+     9. 배지·태그·칩
+    10. 문제 카드 (이론·일반전표·매입매출 공통)
+    11. 홈 (오늘의 오답훈련·약점 센터·동기화)
+    12. 다른 페이지 (약점 분석·개념 정리·AI 규칙·출제위원)
+    13. 대화상자·알림
+    14. 반응형 (태블릿·모바일)
+   ===================================================================== */
+
+/* ---------- 0. 디자인 토큰 ---------- */
+:root{
+  /* 색: 바탕과 면 */
+  --ui-bg:#f8f6ef;            /* 페이지 바탕 (크림) */
+  --ui-surface:#fffefa;       /* 카드·입력칸 바탕 */
+  --ui-surface-2:#f2f0e7;     /* 카드 안의 옅은 면, hover */
+  --ui-hero:#e7efdf;          /* 머리말 카드 */
+  --ui-hero-line:#d9e4d1;
+
+  /* 색: 글자와 선 */
+  --ui-ink:#263f36;           /* 본문 글자 */
+  --ui-muted:#718079;         /* 보조 글자 */
+  --ui-line:#e3e7dc;          /* 카드 테두리·구분선 */
+  --ui-line-strong:#cbd7ca;   /* 입력칸 테두리 */
+
+  /* 색: 브랜드 */
+  --ui-primary:#276451;       /* 주 버튼·활성 메뉴 글자·진행 막대 */
+  --ui-primary-dark:#1d4d3e;  /* 주 버튼 hover */
+  --ui-mint:#e7f1e5;          /* 보조 버튼·활성 메뉴 바탕·배지 */
+  --ui-mint-strong:#d5e6d3;
+  --ui-gold:#f3d392;          /* 강조 장식 */
+  --ui-gold-soft:#fff1d5;     /* 안내 상자 바탕 */
+  --ui-gold-ink:#846325;      /* 안내 상자 글자 */
+  --ui-focus:#dc9a3e;         /* 키보드 초점 테두리 */
+
+  /* 색: 채점 상태 (정답·오답에만 사용) */
+  --ui-ok:#276451;
+  --ui-ok-soft:#e3f0e1;
+  --ui-bad:#b0503a;
+  --ui-bad-soft:#fbebe4;
+
+  /* 색: 분야 구분 (메뉴 아이콘·문제 목록 왼쪽 띠) */
+  --ui-theory:#7d68a8;     --ui-theory-soft:#efeaf6;
+  --ui-practical:#3d7a8c;  --ui-practical-soft:#e3eff0;
+  --ui-voucher:#b9782f;    --ui-voucher-soft:#fbefdc;
+
+  /* 글꼴 */
+  --ui-font:ui-rounded,"Segoe UI","Malgun Gothic","맑은 고딕","Apple SD Gothic Neo",sans-serif;
+  --ui-font-size:15px;        /* 본문 기본 */
+  --ui-h1:32px;               /* 페이지 제목 */
+  --ui-h2:21px;               /* 섹션 제목 */
+  --ui-h3:17px;
+
+  /* 레이아웃 */
+  --ui-sidebar-w:236px;       /* 왼쪽 메뉴 폭 (PC) */
+  --ui-content-max:1180px;    /* 본문 최대 폭 (사이드바 제외) */
+  --ui-gutter:40px;           /* 본문 좌우 여백 */
+  --ui-gap:20px;              /* 카드 사이 간격 */
+
+  /* 모서리 */
+  --ui-radius-card:21px;
+  --ui-radius-inner:15px;     /* 카드 안의 작은 상자 */
+  --ui-radius-btn:14px;
+  --ui-radius-input:12px;
+  --ui-radius-badge:7px;
+  --ui-radius-pill:999px;
+
+  /* 버튼 규격 */
+  --ui-btn-h:42px;  --ui-btn-px:18px;  --ui-btn-font:14px;
+  --ui-btn-sm-h:34px; --ui-btn-sm-px:12px; --ui-btn-sm-font:13px;
+
+  /* 카드 안쪽 여백 */
+  --ui-card-pad:25px;
+}
+
+/* ---------- 1. 기존 페이지 변수 연결 ---------- */
+/* 각 HTML의 <style>이 쓰던 옛 변수 이름을 새 토큰에 연결한다. 개별 페이지를 고치지 않아도 색이 바뀐다. */
+:root{
+  --ink:var(--ui-ink);--muted:var(--ui-muted);--line:var(--ui-line);--paper:var(--ui-surface);
+  --navy:var(--ui-ink);--blue:var(--ui-primary);--blue-dark:var(--ui-primary-dark);--blue-soft:var(--ui-mint);--sky:var(--ui-mint);
+  --mint:var(--ui-ok-soft);--green:var(--ui-ok);--red:var(--ui-bad);--rose:var(--ui-bad-soft);
+  --yellow:var(--ui-gold-soft);--orange:var(--ui-gold-ink);--violet:var(--ui-theory-soft);--shadow:none;
+  --season-ink:var(--ui-ink);--season-muted:var(--ui-muted);--season-line:var(--ui-line);--season-paper:var(--ui-surface);--season-green:var(--ui-primary);
+  --compact-control-height:34px;
+}
+
+/* ---------- 2. 기본 바탕·글자 ---------- */
+html{background:var(--ui-bg)}
+body{background:var(--ui-bg)!important;color:var(--ui-ink)!important;font-family:var(--ui-font)!important;font-size:var(--ui-font-size)!important;line-height:1.7;font-synthesis:none}
+button,input,select,textarea{font-family:inherit}
+h1,h2,h3,h4{color:var(--ui-ink);letter-spacing:-.03em}
+a{color:var(--ui-primary)}
+:focus-visible{outline:3px solid var(--ui-focus)!important;outline-offset:3px!important}
+::selection{background:var(--ui-gold)}
+.skip-link{border-radius:var(--ui-radius-btn)}
+
+/* ---------- 3. 레이아웃: 왼쪽 사이드바 + 본문 (PC·태블릿, 761px 이상) ---------- */
+@media (min-width:761px){
+  body{padding-left:var(--ui-sidebar-w)!important}
+  /* 상단 메뉴 높이를 쓰던 고정 위치 값을 0으로 돌린다 (사이드바는 위쪽을 차지하지 않음) */
+  html{--nav-h:0px!important;--concept-nav-height:0px!important;scroll-padding-top:16px}
+  main,.wrap,main.wrap{width:auto!important;max-width:var(--ui-content-max)!important;margin:0 auto!important;padding:30px var(--ui-gutter) 70px!important;box-sizing:border-box}
+  .toolbar,.dashboard{top:12px!important}
+  .question-brief{top:16px!important}
+}
+
+/* ---------- 4. 사이드바 메뉴 ---------- */
+/* DOM: nav.top-nav > .nav-inner > [.nav-brand, .nav-menu-toggle, .nav-current, .nav-links > a.nav-link…, .nav-foot > (.nav-settings-button, .nav-sync)] */
+.top-nav [hidden],.top-nav .nav-links .nav-link[hidden]{display:none!important}
+.nav-brand{display:none;align-items:center;gap:11px;text-decoration:none;color:var(--ui-ink)!important}
+.nav-brand img{width:40px;height:40px;border-radius:11px;flex:none}
+.nav-brand span{display:grid;line-height:1.25}
+.nav-brand b{font-size:17px;font-weight:800;letter-spacing:-.04em}
+.nav-brand small{font-size:11px;font-weight:700;color:var(--ui-muted);letter-spacing:.02em}
+.nav-foot{display:flex;align-items:center;gap:8px}
+
+/* 메뉴 항목 아이콘 (data-menu-id는 training-ui.js가 붙임) */
+.top-nav .nav-link::before{display:inline-block;width:20px;margin-right:9px;text-align:center;font-weight:400;color:var(--menu-accent,var(--ui-muted));content:"•"}
+.top-nav .nav-link[data-menu-id="home"]::before{content:"◎";color:var(--ui-primary)}
+.top-nav .nav-link[data-menu-id="theory"]::before{content:"✎"}
+.top-nav .nav-link[data-menu-id="practical"]::before{content:"▤"}
+.top-nav .nav-link[data-menu-id="voucher"]::before{content:"▦"}
+.top-nav .nav-link[data-menu-id="examiner"]::before{content:"✦";color:var(--ui-gold-ink)}
+.top-nav .nav-link[data-menu-id="special"]::before{content:"↻";color:var(--ui-bad)}
+.top-nav .nav-link[data-menu-id="concepts"]::before{content:"❖";color:var(--ui-primary)}
+.top-nav .nav-link[data-menu-id="analysis"]::before{content:"↗";color:var(--ui-primary)}
+.nav-link[href*="이론_"]{--menu-accent:var(--ui-theory)!important;--menu-soft:var(--ui-theory-soft)!important;--menu-ink:var(--ui-theory)!important}
+.nav-link[href*="일반전표_"]:not(.nav-star){--menu-accent:var(--ui-practical)!important;--menu-soft:var(--ui-practical-soft)!important;--menu-ink:var(--ui-practical)!important}
+.nav-link[href*="매입매출전표_"]{--menu-accent:var(--ui-voucher)!important;--menu-soft:var(--ui-voucher-soft)!important;--menu-ink:var(--ui-voucher)!important}
+
+/* 메뉴 항목 공통 모양 (PC·모바일) */
+.top-nav .nav-link,.top-nav .nav-links .nav-link{display:flex!important;align-items:center;width:100%;padding:11px 14px!important;border:0!important;border-radius:13px!important;background:transparent!important;color:var(--ui-muted)!important;font-size:14px!important;font-weight:700!important;text-align:left!important;text-decoration:none;box-shadow:none!important;outline-offset:-2px!important;transition:background .15s,color .15s}
+.top-nav .nav-link:hover,.top-nav .nav-links .nav-link:hover{background:var(--ui-surface-2)!important;color:var(--ui-ink)!important}
+.top-nav .nav-link.active,.top-nav .nav-links .nav-link.active,.top-nav .nav-links .nav-link.active[aria-current="page"]{background:var(--ui-mint)!important;color:var(--ui-primary)!important;border:0!important}
+
+/* 동기화·메뉴 설정 버튼 */
+.top-nav .nav-sync{margin:0!important;width:auto!important;flex:1 1 auto;display:flex}
+.top-nav .nav-sync-button,.top-nav .nav-sync-button.primary{flex:1 1 auto;min-height:40px!important;padding:8px 14px!important;border:0!important;border-radius:var(--ui-radius-btn)!important;background:var(--ui-primary)!important;color:#fff!important;font-size:13px!important;font-weight:800!important;box-shadow:none!important}
+.top-nav .nav-sync-button:hover:not(:disabled){background:var(--ui-primary-dark)!important}
+.top-nav .nav-settings-button{flex:none;width:40px!important;height:40px!important;border:1px solid var(--ui-line)!important;border-radius:50%!important;background:var(--ui-surface)!important;color:var(--ui-muted)!important;font-size:17px!important}
+.top-nav .nav-settings-button:hover{background:var(--ui-mint)!important;color:var(--ui-primary)!important;border-color:var(--ui-mint-strong)!important}
+
+@media (min-width:761px){
+  .top-nav{position:fixed!important;top:0;left:0;bottom:0;z-index:40;width:var(--ui-sidebar-w);height:100vh;background:var(--ui-bg)!important;border:0!important;border-right:1px solid var(--ui-line)!important;box-shadow:none!important;backdrop-filter:none!important;overflow-y:auto;transform:none!important}
+  .top-nav .nav-inner{display:flex!important;flex-direction:column!important;flex-wrap:nowrap!important;align-items:stretch!important;gap:0!important;max-width:none!important;min-height:100%;margin:0!important;padding:34px 16px 22px!important;overflow:visible!important}
+  .nav-brand{display:flex;margin:0 6px 38px}
+  .top-nav .nav-menu-toggle,.top-nav .nav-current{display:none!important}
+  .top-nav .nav-links{display:flex!important;flex-direction:column;gap:5px}
+  .top-nav .nav-foot{margin-top:auto;padding-top:26px}
+}
+
+/* ---------- 5. 페이지 머리말 ---------- */
+/* 5-1. 날짜·제목: h1이 없는 화면(이론·일반전표·매입매출)에 training-ui.js가 넣는다 */
+.page-head{margin:0 0 22px}
+.page-date{margin:0 0 6px;color:var(--ui-muted);font-size:13px}
+.page-title{margin:0;font-size:var(--ui-h1);line-height:1.25;letter-spacing:-.05em;color:var(--ui-ink)}
+
+/* 5-2. hero (홈 맨 위, 약점 분석) : 민트 카드 */
+.hero{position:relative;overflow:hidden;background:var(--ui-hero)!important;color:var(--ui-ink)!important;border:1px solid var(--ui-hero-line)!important;border-radius:25px!important;box-shadow:none!important}
+.hero h1{color:var(--ui-ink)!important;font-size:var(--ui-h1)!important;line-height:1.25!important;letter-spacing:-.05em!important}
+.hero p{color:var(--ui-muted)}
+.hero a{color:var(--ui-primary)}
+/* 홈: hero가 <main> 밖에 있으므로 본문과 같은 폭·여백으로 맞춘다 (높이는 낮게 유지) */
+body>.hero{margin:30px max(var(--ui-gutter),calc((100% - var(--ui-content-max))/2 + var(--ui-gutter))) 0!important;padding:16px 120px 16px 28px!important}
+body>.hero .hero-inner{max-width:none!important;padding:0!important}
+body>.hero::after{content:"";position:absolute;right:30px;top:50%;width:54px;height:54px;background:url("brand-mark.svg") center/contain no-repeat;transform:translateY(-50%) rotate(-7deg);filter:drop-shadow(0 6px 0 #cedcc3)}
+body>.hero+.top-nav+main,body>.hero~main{padding-top:24px!important}
+
+/* ---------- 6. 카드·섹션 ---------- */
+.section,.save-panel,.question,.panel,.backup-card,.github-sync,.weak-profile,.weak-card,.weak-empty,.chapter,.group,.summary article{background:var(--ui-surface)!important;border:1px solid var(--ui-line)!important;border-radius:var(--ui-radius-card)!important;box-shadow:none!important}
+.section,.save-panel,.question{padding:var(--ui-card-pad)!important;margin:0 0 var(--ui-gap)!important}
+.section h2,.save-panel h2,.panel h2{font-size:var(--ui-h2)!important;letter-spacing:-.04em;color:var(--ui-ink)!important}
+.section-heading p,.section>p,.save-panel>p{color:var(--ui-muted)!important}
+.backup-card,.github-sync{border-radius:var(--ui-radius-inner)!important;background:var(--ui-surface)!important}
+.backup-grid{gap:14px}
+.save-path,.path{background:var(--ui-mint)!important;color:var(--ui-primary)!important;border-radius:var(--ui-radius-input)!important}
+.notice,.backup-warning,.type-filter-band,.star-view-note{background:var(--ui-gold-soft)!important;color:var(--ui-gold-ink)!important;border:0!important;border-radius:var(--ui-radius-input)!important;font-size:13px;line-height:1.7}
+.type-filter-band a{color:var(--ui-primary)!important}
+.empty-state,.season-welcome{background:var(--ui-surface-2)!important;border:1px dashed var(--ui-line-strong)!important;border-radius:var(--ui-radius-inner)!important;color:var(--ui-muted)!important}
+.footer,footer{color:var(--ui-muted)!important;font-size:12px!important}
+details>summary{color:var(--ui-primary)}
+
+/* 진행 막대 */
+.progress{color:var(--ui-ink)!important}
+.progress-bar{height:8px!important;background:#edf0e7!important;border-radius:10px!important}
+.progress-bar span{background:var(--ui-primary)!important;border-radius:10px}
+
+/* 표 (홈·약점 분석 등 일반 표) */
+.table-wrap{border:1px solid var(--ui-line)!important;border-radius:var(--ui-radius-inner)!important;background:var(--ui-surface)}
+.table-wrap th,.section th{background:var(--ui-surface-2)!important;color:var(--ui-ink)!important}
+.table-wrap td,.section td{border-color:var(--ui-line)!important}
+
+/* ---------- 7. 버튼 ---------- */
+/* 7-1. 보조 버튼(기본): 민트 바탕 + 초록 글자 */
+.btn,.backup-button,.filter-button,.weak-toolbar button,.season-tag-more,button.filter,.download-tools button,.download-tools .button,.backup-tools button,.backup-tools .button,.mark-toolbar button,.examiner-page button,.examiner-page .file-button{
+  display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:var(--ui-btn-h)!important;padding:0 var(--ui-btn-px)!important;
+  border:1px solid transparent!important;border-radius:var(--ui-radius-btn)!important;background:var(--ui-mint)!important;color:var(--ui-primary)!important;
+  font-size:var(--ui-btn-font)!important;font-weight:700!important;line-height:1.3!important;text-decoration:none;box-shadow:none!important;cursor:pointer;transition:transform .15s,background .15s}
+.btn:hover,.backup-button:hover,.filter-button:hover,.weak-toolbar button:hover,button.filter:hover,.download-tools button:hover,.mark-toolbar button:hover,.examiner-page button:hover{transform:translateY(-2px);filter:none!important;background:var(--ui-mint-strong)!important}
+.btn:disabled,.backup-button:disabled,.examiner-page button:disabled,.mark-toolbar button:disabled{opacity:.5;cursor:default;transform:none!important}
+
+/* 7-2. 주 버튼: 초록 바탕 + 흰 글자 (채점하기·저장·연결·현재 선택) */
+.btn.check-one,.btn.green,.btn.primary,.backup-button:not(.secondary),.filter-button.active,.open-link,.weak-toolbar button[aria-pressed=true],button.filter.active,.download-tools .button.primary,.examiner-page button.primary,.season-welcome a{
+  background:var(--ui-primary)!important;color:#fff!important;border-color:var(--ui-primary)!important}
+.btn.check-one:hover,.btn.green:hover,.btn.primary:hover,.backup-button:not(.secondary):hover,.filter-button.active:hover,.open-link:hover,.examiner-page button.primary:hover{background:var(--ui-primary-dark)!important;border-color:var(--ui-primary-dark)!important;color:#fff!important}
+
+/* 7-3. 테두리 버튼: 투명 + 얇은 선 (경로 복사·연결 해제·전체 등) */
+.btn.secondary,.backup-button.secondary,.filter-clear,.restore-button,.question .star-one,.question .reset-one{background:transparent!important;color:var(--ui-primary)!important;border:1px solid var(--ui-line-strong)!important}
+.btn.secondary:hover,.backup-button.secondary:hover,.filter-clear:hover,.restore-button:hover{background:var(--ui-surface-2)!important;color:var(--ui-primary)!important}
+
+/* 7-4. 위험 버튼: 기록 초기화 등 */
+.btn.danger,.danger,.btn.reset{background:transparent!important;color:var(--ui-bad)!important;border:1px solid #e6c3b8!important}
+.btn.danger:hover,.danger:hover{background:var(--ui-bad-soft)!important}
+
+/* 7-5. 작은 버튼 */
+.open-link,.restore-button,.filter-clear,.weak-card a,.weak-batch a,.weak-priority>a,.question-more .btn{min-height:var(--ui-btn-sm-h)!important;padding:0 var(--ui-btn-sm-px)!important;font-size:var(--ui-btn-sm-font)!important;border-radius:11px!important;display:inline-flex;align-items:center;font-weight:700}
+.open-link{text-decoration:none}
+
+/* 7-6. 글자 링크형 */
+.mini-link{color:var(--ui-primary)!important}
+.weak-card a,.weak-batch a,.weak-priority>a{background:var(--ui-mint)!important;color:var(--ui-primary)!important;border:0!important;text-decoration:none}
+.weak-card a:hover,.weak-batch a:hover,.weak-priority>a:hover{background:var(--ui-mint-strong)!important}
+
+/* ---------- 8. 입력·선택 상자 ---------- */
+.sort-select,.season-filters select,.study-toolbar select,.study-toolbar input,.type-filter input,.save-row input,.filename-row input,.github-field input,.weak-toolbar select,.filter-bar .sort-select,.examiner-page select,.examiner-page textarea,.examiner-page input[type=search],.examiner-page input[type=text],.voucher-fields input,.voucher-fields select,.journal-row input,.journal-row select{
+  min-height:var(--compact-control-height)!important;border:1px solid var(--ui-line-strong)!important;border-radius:var(--ui-radius-input)!important;background-color:var(--ui-surface)!important;color:var(--ui-ink)!important;font-size:14px!important;box-shadow:none!important}
+.save-row input,.filename-row input,.github-field input{height:42px!important;min-height:42px!important;padding:0 13px!important}
+.sort-label,.round-filter-label,.type-filter,.github-field,.github-remember,.season-filters label{color:var(--ui-ink)!important}
+.github-remember span,.filter-status{color:var(--ui-muted)!important}
+input[type=checkbox],input[type=radio]{accent-color:var(--ui-primary)}
+/* 일반전표 분개 입력표: 줄 높이는 유지하고 색만 맞춤 */
+.entry-wrap table{border-color:var(--ui-line)!important;border-radius:var(--ui-radius-input)!important;background:var(--ui-surface)}
+.entry-wrap th{background:var(--ui-surface-2)!important;color:var(--ui-ink)!important}
+.entry-wrap td{border-color:var(--ui-line)!important}
+.entry-wrap input,.entry-wrap select{border-color:var(--ui-line-strong)!important;border-radius:8px!important;background:var(--ui-surface)!important}
+.entry-wrap input:focus,.entry-wrap select:focus,.study-toolbar input:focus,.type-filter input:focus{outline:3px solid rgba(220,154,62,.35)!important;border-color:var(--ui-focus)!important}
+
+/* 상단 도구 막대 (정렬·회차·유형 검색·진행률) */
+.study-toolbar,.toolbar,.dashboard{gap:8px 10px!important;padding:12px 16px!important;margin:0 0 var(--ui-gap)!important;background:var(--ui-surface)!important;border:1px solid var(--ui-line)!important;border-radius:var(--ui-radius-inner)!important;box-shadow:none!important;backdrop-filter:none!important}
+.study-toolbar .progress{color:var(--ui-muted)!important}
+.mobile-filter-bar button,.mobile-filter-open{border-radius:var(--ui-radius-btn)!important;background:var(--ui-mint)!important;color:var(--ui-primary)!important;border:0!important;font-weight:700!important}
+
+/* ---------- 9. 배지·태그·칩 ---------- */
+.tag,.category-badge,.type-badge,.state-badge,.weak-badge,.badge,.variant-badge,.today-chip{border-radius:var(--ui-radius-badge)!important;background:var(--ui-mint)!important;color:var(--ui-primary)!important;font-size:12px!important;font-weight:700!important}
+[data-source="theory"] .category-badge{background:var(--ui-theory-soft)!important;color:var(--ui-theory)!important}
+[data-source="voucher"] .category-badge{background:var(--ui-voucher-soft)!important;color:var(--ui-voucher)!important}
+[data-source="practical"] .category-badge{background:var(--ui-practical-soft)!important;color:var(--ui-practical)!important}
+.type-badge{background:var(--ui-surface-2)!important;color:var(--ui-muted)!important}
+.state-badge.pass{background:var(--ui-ok-soft)!important;color:var(--ui-ok)!important}
+.state-badge.hide{background:var(--ui-bad-soft)!important;color:var(--ui-bad)!important}
+.state-badge.self,.weak-badge.repeat,.badge.gold{background:var(--ui-gold-soft)!important;color:var(--ui-gold-ink)!important}
+.today-chip{border-radius:var(--ui-radius-pill)!important;padding:6px 12px!important;background:var(--ui-surface)!important;border:1px solid var(--ui-line)!important;color:var(--ui-ink)!important}
+
+/* 유형 태그 (홈 TOP 10): 순위 색은 JS 인라인 대신 아래 3단계를 쓴다 */
+.season-tag{border-radius:var(--ui-radius-badge)!important;background:var(--ui-surface-2)!important;color:var(--ui-muted)!important;font-weight:700}
+.season-tag[data-rank="1"],.season-tag[data-rank="2"],.season-tag[data-rank="3"]{background:var(--ui-primary)!important;color:#fff!important}
+.season-tag[data-rank="4"],.season-tag[data-rank="5"],.season-tag[data-rank="6"]{background:#5b8f78!important;color:#fff!important}
+.season-tag[data-rank="7"],.season-tag[data-rank="8"],.season-tag[data-rank="9"],.season-tag[data-rank="10"]{background:var(--ui-mint-strong)!important;color:var(--ui-primary)!important}
+.season-current-tag[data-rank="1"],.season-current-tag[data-rank="2"],.season-current-tag[data-rank="3"]{background:#a9542f!important;color:#fff!important}
+.season-current-tag[data-rank="4"],.season-current-tag[data-rank="5"],.season-current-tag[data-rank="6"]{background:#cf8a4b!important;color:#fff!important}
+.season-current-tag[data-rank="7"],.season-current-tag[data-rank="8"],.season-current-tag[data-rank="9"],.season-current-tag[data-rank="10"]{background:#f6e2bd!important;color:#6b4512!important}
+.season-current-heading{color:var(--ui-gold-ink)!important}
+.season-current-heading small{background:var(--ui-gold-soft)!important;color:var(--ui-gold-ink)!important}
+.season-current-list{border-left-color:var(--ui-gold)!important;background:#fffaf0!important}
+.season-tag-heading small{background:var(--ui-mint)!important;color:var(--ui-primary)!important}
+#seasonCatalog[data-tags-only]{background:var(--ui-surface)!important;border:1px solid var(--ui-line)!important;border-radius:var(--ui-radius-inner)!important;padding:10px 14px!important}
+#seasonCatalog[data-tags-only] .season-tag-more{background:transparent!important;border-top:1px solid var(--ui-line)!important;color:var(--ui-primary)!important;min-height:36px!important}
+
+/* ---------- 10. 문제 카드 (이론·일반전표·매입매출) ---------- */
+.question .qhead{align-items:center}
+.question .qnum{min-width:34px!important;height:34px!important;border-radius:50%!important;background:var(--ui-mint)!important;color:var(--ui-primary)!important;font-size:14px!important;font-weight:800!important}
+.question .qhead h2,.question .qhead h3{color:var(--ui-ink)!important;font-size:17px!important;font-weight:700!important}
+.question .prompt{background:var(--ui-surface-2)!important;border-left:3px solid var(--ui-primary)!important;border-radius:0 var(--ui-radius-input) var(--ui-radius-input) 0!important;color:var(--ui-ink)}
+.question .data-box{background:#fffaf0!important;border:1px solid #efe3c4!important;border-radius:var(--ui-radius-input)!important}
+.question.correct{border-color:#a9cfb4!important;background:#fbfdf8!important}
+.question.wrong{border-color:#e6bfb3!important;background:#fffcfa!important}
+.result.ok,.field-feedback.ok,.grade-result.ok{color:var(--ui-ok)!important}
+.result.no,.field-feedback.no,.grade-result.wrong{color:var(--ui-bad)!important}
+.field-feedback{border-radius:var(--ui-radius-input)!important}
+.field-feedback.ok{background:var(--ui-ok-soft)!important}
+.field-feedback.no{background:var(--ui-bad-soft)!important}
+.choice{border:1px solid var(--ui-line)!important;border-radius:var(--ui-radius-input)!important;background:var(--ui-surface)!important}
+.choice:hover{background:var(--ui-surface-2)!important}
+.choice:has(input:checked){border-color:var(--ui-primary)!important;background:var(--ui-mint)!important;box-shadow:none!important}
+.choice-number{color:var(--ui-primary)!important}
+.question details:not(.question-more){background:var(--ui-surface)!important;border:1px solid var(--ui-line)!important;border-radius:var(--ui-radius-input)!important}
+.question details>summary{color:var(--ui-primary)!important;font-weight:700}
+.answer-reveal{background:#fffaf0!important;border-color:#efe3c4!important}
+.answer-reveal>summary{color:var(--ui-gold-ink)!important}
+.answer-column{border-color:var(--ui-line)!important;border-radius:var(--ui-radius-input)!important}
+.answer-column-title{background:var(--ui-surface-2)!important;color:var(--ui-ink)!important}
+.answer-compact,.answer-line{background:var(--ui-surface-2)}
+.balance-panel{background:var(--ui-surface-2)!important;border:1px solid var(--ui-line)!important;border-radius:var(--ui-radius-input)!important}
+.balance-panel.balanced{background:var(--ui-ok-soft)!important;border-color:#a9cfb4!important}
+.balance-item{background:var(--ui-surface)!important;color:var(--ui-ink)!important;border-radius:9px!important}
+.before-box{border-color:var(--ui-gold)!important;background:#fffaf0!important;border-radius:var(--ui-radius-input)!important}
+.procedure-check{border-color:var(--ui-gold)!important;color:var(--ui-gold-ink)!important}
+.attempt,.attempt-info,.tip,.help{color:var(--ui-muted)!important}
+.priority-note{color:var(--ui-muted)!important}
+.source{border-color:var(--ui-line)!important;border-radius:var(--ui-radius-inner)!important}
+.source summary{background:var(--ui-surface-2)!important;color:var(--ui-ink)!important}
+/* 예외: .kclep-shell(KcLep 화면 재현)과 .exhibit*(영수증·계산서 재현)은 실제 모양을 유지하므로 색을 바꾸지 않는다 */
+
+/* ---------- 11. 홈 ---------- */
+.today-summary-title{font-size:var(--ui-h2)!important;letter-spacing:-.04em}
+.today-summary-description{color:var(--ui-muted)!important;font-size:14px}
+.problem-item{border:1px solid var(--ui-line)!important;border-left:5px solid var(--ui-practical)!important;border-radius:var(--ui-radius-inner)!important;background:var(--ui-surface)!important}
+.problem-item[data-source="theory"]{border-left-color:var(--ui-theory)!important}
+.problem-item[data-source="voucher"]{border-left-color:var(--ui-voucher)!important}
+.problem-item[data-source="closing"]{border-left-color:var(--ui-primary)!important}
+.problem-meta,.training-note,.frequent-source,.category-card p{color:var(--ui-muted)!important}
+.stat-card,.stat-card:nth-child(n){background:var(--ui-surface)!important;border:1px solid var(--ui-line)!important;border-radius:17px!important;box-shadow:none!important;text-align:center}
+.stat-label{color:var(--ui-muted)!important;font-size:12px!important}
+.stat-value{color:var(--ui-ink)!important}
+.frequent-card{background:var(--ui-gold-soft)!important;border:1px solid #efe3c4!important;border-radius:var(--ui-radius-inner)!important}
+.frequent-count{color:var(--ui-gold-ink)!important}
+.category-card{background:var(--ui-surface)!important;border:1px solid var(--ui-line)!important;border-radius:var(--ui-radius-inner)!important}
+.category-number{color:var(--ui-primary)!important}
+.live-status,.backup-status,.save-status{color:var(--ui-primary)!important}
+.github-help a{color:var(--ui-primary)!important}
+.season-settings>summary{color:var(--ui-ink)!important}
+/* 약점 센터 (?weakness=1) */
+.weak-description,.weak-card p,.weak-profile-meta,.weak-profile-note{color:var(--ui-muted)!important}
+.weak-card,.weak-profile{padding:20px!important}
+.weak-profile-tip{background:var(--ui-surface-2)!important;border-radius:var(--ui-radius-input)!important}
+.weak-profile-list li{border-color:var(--ui-line)!important}
+.weak-profile-list [data-status=weak] strong{color:var(--ui-bad)!important}
+.weak-profile-list [data-status=strong] strong{color:var(--ui-ok)!important}
+
+/* ---------- 12. 다른 페이지 ---------- */
+/* 약점 분석 (막대 색은 화면 설명문 "밝은 파란색 / 연한 초록색"과 맞춰 둔다) */
+:root{--weak:#7fb0c2;--improved:#cfe3c6;--zero:#edf0e7;--nav:var(--ui-primary);--panel:var(--ui-surface);--bg:var(--ui-bg)}
+.summary article{padding:19px!important;text-align:center}
+.filters .filter{min-height:var(--ui-btn-sm-h)!important;padding:0 14px!important;border-radius:var(--ui-radius-pill)!important}
+/* 개념 정리 (본문·표·차례 글자 크기를 16px로 같게 유지) */
+.study-layout{font-size:16px}
+.intro .eyebrow,.focus{color:var(--ui-primary)!important}
+.reading-guide{background:var(--ui-hero)!important;border:1px solid var(--ui-hero-line);border-radius:var(--ui-radius-card)!important}
+.key{background:var(--ui-mint)!important;border-left-color:var(--ui-primary)!important}
+.toc a:hover{background:var(--ui-mint)!important}
+.mark-toolbar{background:var(--ui-surface)!important;border:1px solid var(--ui-line)!important;border-radius:var(--ui-radius-inner)!important;box-shadow:none!important}
+@media (min-width:761px){.mark-toolbar{top:12px!important}.toc{top:calc(var(--concept-toolbar-height,120px) + 30px)!important}.chapter{scroll-margin-top:calc(var(--concept-toolbar-height,120px) + 24px)!important}}
+/* AI 작업 규칙 (사이드바 없는 단독 문서) */
+.rules-page .hero{margin:30px auto 0!important;max-width:1010px;width:calc(100% - 32px);padding:26px 30px!important}
+.rules-page main{padding-top:20px!important}
+.rules-page .toolbar{background:var(--ui-bg)!important;border:0!important;padding:10px 0!important}
+.rules-page .toolbar button,.rules-page .toolbar input{border:1px solid var(--ui-line-strong)!important;border-radius:var(--ui-radius-btn)!important;background:var(--ui-surface)!important;color:var(--ui-ink)}
+.rules-page .toolbar button.active{background:var(--ui-primary)!important;border-color:var(--ui-primary)!important;color:#fff!important}
+.rules-page .group h2{background:var(--ui-surface-2)!important;font-size:17px!important}
+.rules-page .rule{border-color:var(--ui-line)!important}
+.rules-page .summary{background:var(--ui-surface)!important;border:1px solid var(--ui-line)!important;border-radius:var(--ui-radius-card)!important;box-shadow:none!important}
+.rules-page .badge.task{background:var(--ui-surface-2)!important;color:var(--ui-muted)!important}
+@media (min-width:761px){.rules-page{padding-left:0!important}.rules-page main{padding-left:16px!important;padding-right:16px!important;max-width:1042px!important}}
+/* 출제위원 테스트 (examiner-test/index.html, body.examiner-page) */
+.examiner-page{--soft:var(--ui-bg);--amber:var(--ui-gold-soft)}
+.examiner-page .intro,.examiner-page .panel{background:var(--ui-surface)!important;border:1px solid var(--ui-line)!important;border-radius:var(--ui-radius-card)!important}
+.examiner-page .intro{border-top:1px solid var(--ui-line)!important;background:var(--ui-hero)!important;border-color:var(--ui-hero-line)!important}
+.examiner-page .eyebrow{color:var(--ui-primary)!important}
+.examiner-page .style-option{border-radius:var(--ui-radius-input)!important;background:var(--ui-surface)}
+.examiner-page .style-option:has(input:checked){border-color:var(--ui-primary)!important;background:var(--ui-mint)!important}
+.examiner-page .request-guide{background:var(--ui-mint)!important;border-color:var(--ui-mint-strong)!important;border-radius:var(--ui-radius-inner)!important}
+.examiner-page .examiner-top-nav a{border:0!important;border-radius:13px!important;background:transparent!important;color:var(--ui-muted)!important;font-weight:700}
+.examiner-page .examiner-top-nav a:hover{background:var(--ui-surface-2)!important;color:var(--ui-ink)!important}
+.examiner-page .examiner-top-nav a.active{background:var(--ui-mint)!important;color:var(--ui-primary)!important}
+@media (min-width:761px){
+  .examiner-page .examiner-top-nav{position:fixed;top:0;left:0;bottom:0;z-index:40;width:var(--ui-sidebar-w)!important;margin:0!important;padding:34px 16px 22px!important;display:flex!important;flex-direction:column;flex-wrap:nowrap!important;gap:5px!important;background:var(--ui-bg);border-right:1px solid var(--ui-line)}
+  .examiner-page .examiner-top-nav::before{content:"오답 훈련센터";display:flex;align-items:center;min-height:40px;margin:0 6px 38px;padding-left:51px;background:url("brand-mark.svg") left center/40px 40px no-repeat;font-size:17px;font-weight:800;letter-spacing:-.04em;color:var(--ui-ink)}
+  .examiner-page .examiner-top-nav a{width:100%;min-height:0!important;padding:11px 14px!important;font-size:14px!important}
+  .examiner-page header,.examiner-page main{width:auto!important;max-width:var(--ui-content-max)!important}
+  .examiner-page main{padding:30px var(--ui-gutter) 60px!important}
+}
+
+/* ---------- 13. 대화상자·알림 ---------- */
+.menu-settings{border-radius:var(--ui-radius-card)!important;background:var(--ui-surface)!important;color:var(--ui-ink)!important}
+.menu-settings-head,.menu-settings-actions{border-color:var(--ui-line)!important}
+.menu-order-item{background:var(--ui-surface-2)!important;border-color:var(--ui-line)!important;border-radius:var(--ui-radius-input)!important}
+.menu-order-item.dragging{border-color:var(--ui-primary)!important}
+.menu-list-count,.menu-restore{color:var(--ui-primary)!important}
+.menu-delete{color:var(--ui-bad)!important}
+.menu-settings-actions button,.menu-delete,.menu-restore{border-radius:11px!important;border-color:var(--ui-line-strong)!important;background:var(--ui-surface)!important}
+.menu-settings-actions .menu-save{background:var(--ui-primary)!important;border-color:var(--ui-primary)!important;color:#fff!important}
+.sync-toast,.notebook-toast{background:var(--ui-ink)!important;color:#fff!important;border-radius:15px!important;padding:14px 22px!important;font-weight:600!important}
+.sync-toast.error{background:#8a3b28!important}
+.account-search-dialog{border:1px solid var(--ui-line)!important;border-radius:var(--ui-radius-card)!important;background:var(--ui-surface)!important;color:var(--ui-ink)!important}
+.account-search-input{border:2px solid var(--ui-primary)!important;border-radius:var(--ui-radius-input)!important;color:var(--ui-ink)!important}
+.account-search-option{color:var(--ui-ink)!important;border-radius:10px!important;background:transparent!important}
+.account-search-option:hover,.account-search-option.active{background:var(--ui-mint)!important;color:var(--ui-primary)!important}
+.account-search-close{border-radius:50%!important;border-color:var(--ui-line)!important;background:var(--ui-surface-2)!important;color:var(--ui-ink)!important}
+.account-search-overlay{background:rgba(38,63,54,.35)!important}
+.mobile-filter-dialog,.mobile-filter-content{border-radius:var(--ui-radius-card) var(--ui-radius-card) 0 0}
+
+/* ---------- 14. 반응형 ---------- */
+/* 태블릿: 사이드바와 여백을 줄인다 */
+@media (min-width:761px) and (max-width:1100px){
+  :root{--ui-sidebar-w:200px;--ui-gutter:24px;--ui-h1:28px}
+  .top-nav .nav-inner{padding:28px 12px 18px!important}
+  .nav-brand{margin-bottom:28px}
+}
+/* 모바일(760px 이하): 위쪽 얇은 막대 + ☰ 메뉴 (동작은 training-ui.js) */
+@media (max-width:760px){
+  :root{--ui-gutter:16px;--ui-h1:25px;--ui-h2:19px;--ui-card-pad:18px;--ui-font-size:15px}
+  main,.wrap,main.wrap{width:auto!important;max-width:none!important;margin:0!important;padding:18px var(--ui-gutter) 60px!important}
+  .top-nav{background:rgba(248,246,239,.96)!important;border-bottom:1px solid var(--ui-line)!important;box-shadow:none!important;backdrop-filter:blur(10px)}
+  .top-nav .nav-inner{padding:8px 12px!important;gap:8px!important}
+  .top-nav.nav-compact .nav-menu-toggle{min-height:40px!important;padding:0 14px!important;border:0!important;border-radius:var(--ui-radius-btn)!important;background:var(--ui-mint)!important;color:var(--ui-primary)!important;font-weight:800!important}
+  .top-nav.nav-compact .nav-current{color:var(--ui-ink)!important;font-weight:800!important}
+  .top-nav.nav-compact .nav-links{background:var(--ui-surface)!important;border-bottom:1px solid var(--ui-line)!important;box-shadow:0 18px 30px rgba(38,63,54,.12)!important;padding:10px 12px 14px!important;gap:3px!important}
+  .top-nav.nav-compact .nav-links .nav-link{text-align:left!important;justify-content:flex-start}
+  .top-nav.nav-compact .nav-sync-button{min-height:40px!important;padding:0 12px!important}
+  .top-nav .nav-foot{margin-left:auto}
+  body>.hero{margin:16px var(--ui-gutter) 0!important;padding:14px 66px 14px 18px!important;border-radius:var(--ui-radius-card)!important}
+  body>.hero h1{font-size:19px!important}
+  body>.hero::after{right:16px;width:38px;height:38px}
+  .page-head{margin-bottom:16px}
+  .page-date{font-size:12px}
+  .rules-page .hero{width:auto;margin:16px 16px 0!important;padding:20px!important}
+  .examiner-page .examiner-top-nav{display:flex;flex-wrap:nowrap!important;overflow-x:auto;padding:10px 12px!important;background:rgba(248,246,239,.96);border-bottom:1px solid var(--ui-line)}
+  .examiner-page .examiner-top-nav a{flex:none;padding:8px 12px!important}
+}
+@media (prefers-reduced-motion:reduce){.btn,.backup-button,.filter-button{transition:none}.btn:hover,.backup-button:hover{transform:none}}
+@media print{body{padding-left:0!important;background:#fff!important}.top-nav,.examiner-top-nav,.page-date{display:none!important}}
+
+/* ---------- 15. 공통 페이지 머리말 (2026-10-05 사용자 지정: 모든 화면 같은 모양) ---------- */
+/* training-ui.js가 <main> 바로 앞에 .page-head(날짜 → 제목)를 넣는다. 홈의 예전 hero와 출제위원의 큰 제목은 숨기거나 줄인다. */
+body.has-page-head>.hero{display:none!important}
+body>.page-head{box-sizing:border-box;max-width:var(--ui-content-max);margin:0 auto;padding:30px var(--ui-gutter) 0}
+body>.page-head+main,body>.page-head~main{padding-top:0!important}
+.examiner-page.has-page-head .intro h1{font-size:var(--ui-h2)!important;margin-bottom:10px}
+.type-filter[hidden]{display:none!important}
+@media (max-width:760px){body>.page-head{padding:18px var(--ui-gutter) 0}}
+body.has-page-head .weak-title{display:none}
+
+/* 출제위원 테스트 머리 카드: 문제 카드(.question)와 같은 컨셉 (2026-10-05 사용자 지정) */
+.examiner-page .intro{background:var(--ui-surface)!important;border:1px solid var(--ui-line)!important;border-radius:var(--ui-radius-card)!important;padding:var(--ui-card-pad)!important}
+.examiner-page.has-page-head .intro h1{display:flex;align-items:center;gap:10px;font-size:17px!important;font-weight:700;color:var(--ui-ink)}
+.examiner-page .intro h1::before{content:"✦";display:grid;place-items:center;width:34px;height:34px;flex:none;border-radius:50%;background:var(--ui-mint);color:var(--ui-primary);font-size:14px}
+.examiner-page .intro>p:first-of-type{color:var(--ui-muted);font-size:13px}
+.examiner-page .new-style-options{background:transparent!important}
+.examiner-page .style-option{border:1px solid var(--ui-line)!important;background:var(--ui-surface)!important}
+
+/* 페이지 제목 아래 여백 10px (2026-10-05 사용자 지정) */
+body>.page-head{padding-bottom:10px!important}
+@media (max-width:760px){body>.page-head{padding-bottom:10px!important}}

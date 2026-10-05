@@ -113,9 +113,12 @@
     const host=document.querySelector('.toolbar,.dashboard')||document.querySelector('main');
     const bar=document.createElement('div');bar.className='season-filters';
     // Keep the study controls in the learner's reading order: sort, round, tag, then TOP 10.
-    const sortLabel=host?.querySelector('.sort-label');if(sortLabel)bar.append(sortLabel);
-    bar.append(select('기출 회차',problems.map(p=>p.examRound),'exam'),select('유형 태그',problems.flatMap(p=>p.tags||[p.type]),'tag'));
+    // 순서(2026-10-05 사용자 지정): 기출 회차 → 취약점 Top10 → 정렬 → 유형 태그
+    const sortLabel=host?.querySelector('.sort-label');
+    bar.append(select('기출 회차',problems.map(p=>p.examRound),'exam'));
     if(adapter)bar.append(currentTrainingSelect(problems,adapter));
+    if(sortLabel)bar.append(sortLabel);
+    bar.append(select('유형 태그',problems.flatMap(p=>p.tags||[p.type]),'tag'));
     host?.classList.add('study-toolbar');host?.prepend(bar);
     document.body.classList.add('study-page');
     if(adapter?.theory)document.body.classList.add('study-theory');
@@ -131,10 +134,10 @@
     if(!problems.length){const box=document.createElement('section');box.className='season-welcome';box.innerHTML='<span class="season-kicker">NEW CHAPTER</span><h2>다음 기출 오답부터<br>차근차근 쌓아가세요.</h2><p>회차와 틀린 문제를 보내주시면 원문은 회차별 MD로 보관하고,<br>숫자와 조건을 바꾼 응용문제를 이곳에 등록합니다.</p><a href="오답_훈련센터.html">학습 홈으로</a>';host?.after(box)}
   }
   function currentTrainingSelect(problems,adapter){
-    const label=document.createElement('label');label.className='current-training-filter';const name=document.createElement('span');name.className='season-filter-name';name.textContent='현재 훈련 필요 TOP 10';label.append(name);
-    const field=document.createElement('select');field.className='current-training-select';field.setAttribute('aria-label','현재 훈련 필요 TOP 10');
+    const label=document.createElement('label');label.className='current-training-filter';const name=document.createElement('span');name.className='season-filter-name';name.textContent='취약점 Top10';label.append(name);
+    const field=document.createElement('select');field.className='current-training-select';field.setAttribute('aria-label','취약점 Top10');
     let ranked=[];
-    label.refreshCurrentTraining=()=>{ranked=rankTags(practiceRefs(problems,adapter),{[subjectOf(adapter)]:adapter.state});field.replaceChildren(new Option(ranked.length?'취약 유형 선택 · 바로 풀기':'현재 확인된 취약 유형이 없습니다.',''));ranked.forEach(({tag,rows,best},index)=>field.add(new Option(`${index+1}. ${tag} · ${rows.length}문제 · ${best.reason}`,tag)));field.disabled=!ranked.length};
+    label.refreshCurrentTraining=()=>{ranked=rankTags(practiceRefs(problems,adapter),{[subjectOf(adapter)]:adapter.state});field.replaceChildren(new Option(ranked.length?'선택하기':'현재 확인된 취약 유형이 없습니다.',''));ranked.forEach(({tag,rows,best},index)=>field.add(new Option(`${index+1}. ${tag} · ${rows.length}문제`+(best.reason==='노트에서 다시 연습으로 표시'?'':` · ${best.reason}`),tag)));field.disabled=!ranked.length};
     field.onchange=()=>{const selected=ranked.find(group=>group.tag===field.value);if(selected)location.href=priorityUrl(location.pathname,selected.rows,selected.tag)};
     label.title='최근 14일의 반복 오답을 먼저 보고, 연속 오답·최근 5회 결과로 정렬합니다. 채점 전 문제 수는 취약점 순위에 반영하지 않습니다.';
     label.append(field);label.refreshCurrentTraining();return label;
