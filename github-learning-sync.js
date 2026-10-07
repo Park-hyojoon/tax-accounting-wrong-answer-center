@@ -109,7 +109,7 @@
     return {text:base64ToUtf8(data.content),sha:data.sha,path:data.path,updatedUrl:data.html_url};
   }
   async function putFile(path,text,message,options={}){
-    if(!hasToken())throw new Error('먼저 오답 훈련센터 홈에서 GitHub 토큰을 연결하세요.');
+    if(!hasToken())throw new Error('먼저 학습 센터 홈에서 GitHub 토큰을 연결하세요.');
     const hasExpectedSha=Object.prototype.hasOwnProperty.call(options,'expectedSha');
     const existing=hasExpectedSha?null:await getFile(path),body={message,content:utf8ToBase64(text),branch:BRANCH};
     const sha=hasExpectedSha?options.expectedSha:existing?.sha;if(sha)body.sha=sha;
@@ -388,7 +388,7 @@
         if(program.conflict)summary.push('학습기록은 계속 동기화합니다.');
       }else if(!hasToken()){
         const hint=isMobileDevice()
-          ?'처음 한 번만 오답 훈련센터 홈에서 GitHub 토큰을 연결해 주세요. 그 뒤로는 「동기화」 한 번이면 됩니다.'
+          ?'처음 한 번만 학습 센터 홈에서 GitHub 토큰을 연결해 주세요. 그 뒤로는 「동기화」 한 번이면 됩니다.'
           :'PC 동기화 도우미가 아직 준비되지 않았습니다. 잠시 후 다시 누르거나 PC에 다시 로그인해 주세요.';
         setStatus(hint);
         if(onNeedToken)onNeedToken({mobile:isMobileDevice(),hint});

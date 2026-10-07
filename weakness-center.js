@@ -13,6 +13,8 @@
   const formatDate=new Intl.DateTimeFormat('ko-KR',{timeZone:'Asia/Seoul',month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'});
   let source=['submitted','all'].includes(params.get('weaknessSource'))?params.get('weaknessSource'):'recent',kind='type',subjectFilter='all',showPassed=params.get('showPassed')!=='0',sortOrder='priority';
 
+  // 홈에 있던 영역(오늘의 오답훈련, 태그 모음, 동기화 설정, AI 규칙 등)은 지우지 않고 아래쪽에 접힌 영역으로 옮긴다.
+  const legacy=[...main.children];
   main.replaceChildren();
   const style=document.createElement('style');
   style.textContent=[
@@ -47,10 +49,20 @@
   const priorityBox=document.createElement('section');priorityBox.className='weak-profile weak-priority';main.append(priorityBox);
   const profile=document.createElement('section');profile.className='weak-profile';profile.setAttribute('aria-labelledby','weakProfileTitle');main.append(profile);
   const grid=document.createElement('div');grid.className='weak-grid';main.append(grid);
+  legacy.forEach(element=>main.append(element));
 
   function readStates(){return Object.fromEntries(Object.keys(files).map(subject=>{
     try{return [subject,JSON.parse(localStorage.getItem('exam-20260914-'+subject)||'{}')||{}]}catch(_){return [subject,{}]}
   }))}
+  function weakCard(className,ref,badges,title,meta,actions){
+    const card=document.createElement('article');card.className=className;card.dataset.subject=ref.subject;card.dataset.id=String(ref.id);
+    const row=document.createElement('div');row.className='weak-badges';
+    const subject=document.createElement('span');subject.className='weak-badge';subject.textContent=subjects[ref.subject];row.append(subject);
+    for(const item of badges){const b=document.createElement('span'),text=Array.isArray(item)?item[0]:item;b.className='weak-badge'+(Array.isArray(item)?' '+item[1]:'');b.textContent=text;row.append(b)}
+    const h=document.createElement('h3');h.textContent=title;card.append(row,h);
+    const line=meta.filter(Boolean).join(' · ');if(line){const p=document.createElement('p');p.textContent=line;card.append(p)}
+    const foot=document.createElement('div');foot.className='weak-card-foot';actions.forEach(a=>foot.append(a));card.append(foot);return card;
+  }
   function link(refs,label){
     const a=document.createElement('a'),url=new URL(files[refs[0].subject],location.href);
     url.searchParams.set('view','all');url.searchParams.set('fresh','1');url.searchParams.set('sort','priority');url.searchParams.set('weakrefs',refs.map(r=>r.id).join(','));url.searchParams.set('weaknessSource',source);
@@ -147,7 +159,7 @@
     const topScope=new Set((source==='all'?(data.all||[]):source==='submitted'?data.groups.flatMap(group=>group.refs):catalog.filter(ref=>files[ref.subject]&&progress.recentReview(ref.subject,ref.id,states[ref.subject]))).map(refKey));
     const top=[...new Map(catalog.map(ref=>[refKey(ref),ref])).values()].filter(ref=>topScope.has(refKey(ref))&&files[ref.subject]&&(subjectFilter==='all'||ref.subject===subjectFilter)&&need(ref).active&&need(ref).band>0).sort((a,b)=>TrainingSeason.comparePriority(need(a),need(b))||refKey(a).localeCompare(refKey(b))).slice(0,10);
     const topGrid=document.createElement('div');topGrid.className='weak-priority-grid';priorityBox.append(topGrid);
-    top.forEach((ref,index)=>{const card=document.createElement('article');card.className='weak-card weak-priority-card';card.dataset.subject=ref.subject;card.dataset.id=String(ref.id);const title=document.createElement('h3');title.textContent=(index+1)+'. '+ref.title;const detail=document.createElement('p');detail.textContent=subjects[ref.subject]+' · '+need(ref).reason;card.append(title,detail,link([ref],'이 문제 풀기'));topGrid.append(card)});
+    top.forEach((ref,index)=>{const info=need(ref);topGrid.append(weakCard('weak-card weak-priority-card',ref,[],(index+1)+'. '+ref.title,[info.reason,info.lastAt>0?'최근 '+formatDate.format(new Date(info.lastAt)):''],[link([ref],'다시 풀기')]))});
     if(!top.length){const empty=document.createElement('p');empty.textContent='현재 확인된 취약 문제가 없습니다. 아직 풀지 않은 문제는 목록에서 확인하세요.';topGrid.append(empty)}
     renderProfile(states);
     for(const ref of catalog){
@@ -182,12 +194,8 @@
       }
       if(!visible.length)empty(allSubmitted.length?'이 분류에 남은 미통과 문제가 없습니다. 통과 문제 보기로 보관된 문제를 다시 볼 수 있습니다.':'등록된 기출 오답이 없습니다.');
       for(const ref of visible){
-        const card=document.createElement('article');card.className='weak-card weak-all-card';card.dataset.subject=ref.subject;card.dataset.id=String(ref.id);
-        const badge=document.createElement('span');badge.className='weak-badge';badge.textContent=subjects[ref.subject];card.append(badge);
-        if(progress.isCompleted(ref.subject,ref.id,states[ref.subject])){const done=document.createElement('span');done.className='weak-badge';done.textContent='통과 기록 있음';card.append(done)}
-        const title=document.createElement('h3');title.textContent=ref.title;card.append(title);
-        const detail=document.createElement('p');detail.textContent=ref.type+(ref.examRound?' · '+ref.examRound+'회':'')+(need(ref).band>0?' · '+need(ref).reason:'');card.append(detail);
-        card.append(link([ref],'복습하기'));grid.append(card);
+        const done=progress.isCompleted(ref.subject,ref.id,states[ref.subject]);
+        grid.append(weakCard('weak-card weak-all-card',ref,done?['통과 기록 있음']:[],ref.title,[ref.type+(ref.examRound?' · '+ref.examRound+'회':''),need(ref).band>0?need(ref).reason:''],[link([ref],'다시 풀기')]));
       }
       return;
     }
@@ -204,12 +212,7 @@
       }
       if(!visible.length)empty('현재 다시 풀 훈련 중 오답이 없습니다. '+progress.reviewSince.replaceAll('-','.')+' 이후 틀린 문제가 여기에 자동으로 모입니다.');
       for(const ref of visible){
-        const card=document.createElement('article');card.className='weak-card weak-recent-card';card.dataset.subject=ref.subject;card.dataset.id=String(ref.id);
-        const badge=document.createElement('span');badge.className='weak-badge';badge.textContent=subjects[ref.subject];card.append(badge);
-        if(repeated.has(refKey(ref))){const repeat=document.createElement('span');repeat.className='weak-badge repeat';repeat.textContent='반복 약점에도 포함';card.append(repeat)}
-        const title=document.createElement('h3');title.textContent=ref.title;card.append(title);
-        const detail=document.createElement('p');detail.textContent=need(ref).reason+' · 최근 '+formatDate.format(new Date(ref.lastAt));card.append(detail);
-        card.append(link([ref],'다시 풀기'));grid.append(card);
+        grid.append(weakCard('weak-card weak-recent-card',ref,repeated.has(refKey(ref))?[['반복 약점에도 포함','repeat']]:[],ref.title,[need(ref).reason,'최근 '+formatDate.format(new Date(ref.lastAt))],[link([ref],'다시 풀기')]));
       }
       return;
     }
@@ -221,9 +224,9 @@
       const card=document.createElement('article');card.className='weak-card';
       const title=document.createElement('h3');title.textContent=group.label;card.append(title);
       const count=document.createElement('p');count.textContent=(group.resubmitted?'같은 문제 재제출 ':'직접 제출 ')+group.count+'건 · 남은 문제 '+group.refs.length+'개 · 최근 '+group.last;card.append(count);
-      for(const subject of Object.keys(files)){const refs=group.refs.filter(ref=>ref.subject===subject);if(refs.length)card.append(link(refs,subjects[subject]+' 다시 풀기 ('+refs.length+')'))}
+      const foot=document.createElement('div');foot.className='weak-card-foot';
       const detail=document.createElement('details'),summary=document.createElement('summary');summary.textContent='포함된 문제 보기';detail.append(summary);
-      group.refs.forEach(ref=>{const item=document.createElement('div');item.append(link([ref],ref.title));detail.append(item)});card.append(detail);grid.append(card);
+      group.refs.forEach(ref=>{const item=document.createElement('div');item.append(link([ref],ref.title));detail.append(item)});card.append(detail);for(const subject of Object.keys(files)){const refs=group.refs.filter(ref=>ref.subject===subject);if(refs.length)foot.append(link(refs,subjects[subject]+' 다시 풀기 ('+refs.length+')'))}card.append(foot);grid.append(card);
     }
   }
   for(const value of ['recent','submitted','all']){

@@ -32,7 +32,8 @@
   function menuId(link){const href=link.getAttribute('href')||'';if(link.classList.contains('nav-star')||href.includes('weakness=1'))return'special';if(link.classList.contains('nav-concepts')||href.includes('개념_정리'))return'concepts';if(href.includes('examiner-test/'))return'examiner';if(href.includes('이론_'))return'theory';if(href.includes('매입매출전표_'))return'voucher';if(href.includes('일반전표_'))return'practical';if(href.includes('약점_분석_'))return'analysis';if(href.includes('오답_훈련센터'))return'home';return''}
   function readMenuSettings(){try{const value=JSON.parse(localStorage.getItem(MENU_KEY)||'{}');return {menuOrder:Array.isArray(value.menuOrder)?value.menuOrder:[],hiddenMenuIds:Array.isArray(value.hiddenMenuIds)?value.hiddenMenuIds:[]}}catch(_){return {menuOrder:[],hiddenMenuIds:[]}}}
   function completeOrder(order,available){const allowed=new Set(available),seen=new Set(),result=[];[...(Array.isArray(order)?order:[]),...MENU_DEFAULT,...available].forEach(id=>{if(allowed.has(id)&&!seen.has(id)){seen.add(id);result.push(id)}});return result}
-  let links=[...inner.querySelectorAll('a.nav-link')];if(!links.length)return;
+  // '오늘의 오답훈련'은 특별훈련 화면 안의 접힌 영역으로 합쳐졌으므로(2026-10-05) 별도 메뉴로 두지 않는다.
+  let links=[...inner.querySelectorAll('a.nav-link')].filter(link=>{if(menuId(link)==='home'){link.remove();return false}return true});if(!links.length)return;
   links.forEach(link=>{link.dataset.menuId=menuId(link)});
   const availableIds=links.map(link=>link.dataset.menuId),initialSettings=readMenuSettings();
   let hiddenMenuIds=new Set(initialSettings.hiddenMenuIds.filter(id=>availableIds.includes(id)));
@@ -91,7 +92,7 @@
 
   const settingsButton=document.createElement('button');settingsButton.type='button';settingsButton.className='nav-settings-button';settingsButton.setAttribute('aria-label','메뉴 순서 설정');settingsButton.title='메뉴 순서 설정';settingsButton.textContent='⚙';inner.insertBefore(settingsButton,wrap.nextSibling);
   // 디자인 뼈대: 사이드바 브랜드, 사이드바 아래 버튼 묶음(.nav-foot), h1이 없는 화면의 날짜·제목. 모양은 design/theme.css가 정한다.
-  const brand=document.createElement('a');brand.className='nav-brand';brand.href=BASE+'오답_훈련센터.html';brand.innerHTML='<img src="'+BASE+'design/brand-mark.svg" alt="" width="40" height="40"><span><b>오답 훈련센터</b><small>전산회계 1급</small></span>';inner.prepend(brand);
+  const brand=document.createElement('a');brand.className='nav-brand';brand.href=BASE+'오답_훈련센터.html';brand.innerHTML='<img src="'+BASE+'design/brand-mark.svg?v=3" alt="" width="40" height="40"><span><b>학습 센터</b><small>전산회계 1급</small></span>';inner.prepend(brand);
   const foot=document.createElement('div');foot.className='nav-foot';inner.append(foot);foot.append(settingsButton);const syncBox=inner.querySelector('.nav-sync');if(syncBox)foot.append(syncBox);
   // 페이지 머리말(날짜 → 제목)은 모든 화면에서 같은 모양으로 <main> 바로 앞에 둔다. 예전 hero 머리말은 숨긴다(design/theme.css).
   const main=document.querySelector('main');

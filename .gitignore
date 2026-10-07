@@ -12,10 +12,9 @@ __pycache__/
 시간훈련_간략_인수인계.md
 .claude/
 오답훈련센터_학습상태_*.json
+학습센터_학습상태_*.json
 기출 원본 오답/
 intake-index.json
-migrate-season.py
-season-maintenance.py
 
 # 출제위원의 비공개 원문·초기 분석·참고 자료
 examiner-test/private/

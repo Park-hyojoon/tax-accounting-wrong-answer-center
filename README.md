@@ -1,4 +1,4 @@
-# 전산회계 1급 오답 훈련센터
+# 전산회계 1급 학습 센터
 
 전산회계 1급 시험에서 틀린 문제를 다시 훈련하기 위한 개인 학습용 웹페이지입니다.
 
@@ -19,7 +19,7 @@
 
 ## 모바일에서 사용하기
 
-1. [오답 훈련센터 열기](https://park-hyojoon.github.io/tax-accounting-wrong-answer-center/)
+1. [학습 센터 열기](https://park-hyojoon.github.io/tax-accounting-wrong-answer-center/)
 2. 처음 한 번만 홈 아래쪽 「GitHub 연결」에 토큰을 넣고 「연결」을 누릅니다. 「이 기기에 토큰 기억하기」가 켜져 있으면 다음부터 다시 넣지 않아도 됩니다.
 3. 그 뒤로는 어느 화면에서든 「🔄 동기화」 한 번이면 됩니다.
 

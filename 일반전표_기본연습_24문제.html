@@ -6,136 +6,17 @@
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>전산회계 1급 · 일반전표 기출 오답 훈련</title>
-  <style>
-    :root{--navy:#17345f;--blue:#3178c6;--sky:#eaf6ff;--mint:#e9fbf3;--yellow:#fff5bd;--red:#d84343;--green:#16845b;--line:#cdddec;--ink:#172033;--muted:#607089}
-    *{box-sizing:border-box}
-    body{margin:0;background:linear-gradient(135deg,#f5fbff,#fffdf4);color:var(--ink);font-family:"Malgun Gothic","Apple SD Gothic Neo",sans-serif;font-size:18px;line-height:1.65}
-    button,input,select,textarea{font:inherit}
-    input[type="text"],textarea{ime-mode:active}
-    .wrap{width:min(1180px,94vw);margin:32px auto 80px}
-    .top-nav{position:sticky;top:0;z-index:20;background:rgba(255,255,255,.96);border-bottom:1px solid var(--line);box-shadow:0 5px 20px rgba(44,91,128,.08);backdrop-filter:blur(12px)}
-    .nav-inner{max-width:1180px;margin:0 auto;display:flex;flex-wrap:wrap;align-items:center;gap:7px;padding:10px 20px}
-    .nav-link{flex:0 0 auto;text-decoration:none;border:2px solid #d2e4f2;border-radius:13px;padding:7px 14px;background:#fff;color:#34546d;font-weight:800}
-    .nav-link:hover,.nav-link:focus-visible{border-color:#68a9df;background:#edf8ff;outline:none}
-    .nav-link.active{background:var(--blue);border-color:var(--blue);color:#fff}
-    .nav-sync{display:flex;align-items:center;margin-left:auto}
-    .nav-sync-title{font-weight:900;color:var(--navy);letter-spacing:.02em}
-    .nav-sync-button{min-height:38px;padding:6px 11px;border:2px solid var(--line);border-radius:11px;background:#fff;color:var(--navy);font:inherit;font-weight:900;font-size:.87em;cursor:pointer}
-    .nav-sync-button:hover:not(:disabled){border-color:var(--blue);background:var(--sky)}
-    .nav-sync-button:focus-visible{outline:3px solid #bde1fb;outline-offset:2px}
-    .nav-sync-button:disabled{opacity:.6;cursor:progress}
-    .nav-sync-button{white-space:nowrap}
-    .nav-sync-button.primary{border-color:var(--blue);background:var(--blue);color:#fff}
-    .nav-sync-button.primary:hover:not(:disabled){background:#0d5eaa;border-color:#0d5eaa;color:#fff}
-        @media(max-width:760px){.nav-sync{width:100%;margin-left:0}.nav-sync-button{flex:1 1 auto}}
-    .hero{background:#fff;border:2px solid #cfe6f7;border-radius:24px;padding:28px 30px;box-shadow:0 12px 35px rgba(44,91,128,.1)}
-    h1{margin:0 0 10px;color:var(--navy);font-size:clamp(28px,4vw,43px);line-height:1.25}
-    .hero p{margin:8px 0}
-    .notice{margin-top:18px;padding:14px 18px;border-radius:14px;background:var(--yellow);font-weight:700}
-    .toolbar{display:flex;flex-wrap:wrap;gap:12px;margin:20px 0;position:sticky;top:calc(var(--nav-h,62px) + 8px);z-index:5;background:rgba(247,252,255,.94);padding:12px;border-radius:16px;backdrop-filter:blur(8px);border:1px solid #d7e7f4}
-    .type-filter{display:flex;align-items:center;gap:7px;flex:1 1 330px;font-weight:900;color:var(--navy)}
-    .type-filter input{min-width:150px;flex:1;min-height:44px;border:2px solid #c8dbea;border-radius:10px;padding:8px 12px;font:inherit;background:#fff;color:var(--ink)}
-    .type-filter input:focus{outline:3px solid rgba(34,126,189,.2);border-color:#227ebd}
-    .filter-clear{min-height:44px;padding:7px 12px;background:#fff;border:2px solid #c8dbea;border-radius:10px;font-weight:900;color:var(--navy);cursor:pointer}
-    .filter-status{align-self:center;color:var(--muted);font-weight:800;white-space:nowrap}
-    .btn{border:0;border-radius:12px;padding:11px 18px;cursor:pointer;font-weight:800;background:var(--blue);color:#fff;box-shadow:0 4px 10px rgba(49,120,198,.18)}
-    .btn:hover{filter:brightness(.96);transform:translateY(-1px)}
-    .btn.secondary{background:#fff;color:var(--navy);border:2px solid var(--line);box-shadow:none}
-    .btn.green{background:var(--green)}
-    .progress{display:flex;align-items:center;gap:12px;margin-left:auto;font-weight:800;color:var(--navy)}
-    .sort-label{display:flex;align-items:center;gap:8px;white-space:nowrap;font-weight:800;color:var(--navy)}
-    .sort-label[hidden]{display:none}
-    .sort-select{border:2px solid var(--line);border-radius:12px;background:#fff;color:var(--navy);font-weight:800;font-size:inherit;padding:9px 12px;cursor:pointer}
-    .sort-select:focus-visible{border-color:#5d9ed2;outline:none}
-    @media(max-width:720px){.sort-label{width:100%;align-items:stretch;flex-direction:column;gap:5px}.sort-select{width:100%}}
-    .progress-bar{width:180px;height:14px;background:#dfeaf2;border-radius:99px;overflow:hidden}
-    .progress-bar span{display:block;height:100%;width:0;background:linear-gradient(90deg,#39a7f0,#27b47e);transition:.25s}
-    .source{margin:22px 0;background:#fff;border:1px solid var(--line);border-radius:18px;overflow:hidden}
-    .source summary{cursor:pointer;padding:17px 20px;font-weight:800;color:var(--navy);background:#f3faff}
-    .source-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:18px;padding:20px}
-    .source figure{margin:0;border:1px solid #dce6ee;border-radius:12px;padding:10px;background:#fff}
-    .source img{display:block;width:100%;height:auto;border-radius:6px}
-    .source figcaption{font-size:15px;color:var(--muted);margin-top:8px}
-    .section-title{margin:34px 0 16px;color:var(--navy);font-size:28px}
-    .question{background:#fff;border:2px solid #d9e7f2;border-radius:22px;padding:24px;margin:20px 0;box-shadow:0 8px 24px rgba(44,91,128,.07)}
-    .question.correct{border-color:#72c9a7;background:#fbfffd}
-    .question.wrong{border-color:#f1a4a4}
-    .qhead{display:flex;align-items:flex-start;gap:14px;margin-bottom:12px}
-    .qnum{display:grid;place-items:center;min-width:48px;height:48px;background:var(--navy);color:#fff;border-radius:14px;font-size:22px;font-weight:900}
-    .qhead h3{margin:0;color:var(--navy);font-size:24px}
-    .tag{display:inline-block;margin-top:3px;background:var(--sky);color:#246093;border-radius:99px;padding:2px 10px;font-size:14px;font-weight:800}
-    .prompt{font-size:20px;font-weight:700;margin:15px 0;padding:18px;background:#f8fbfe;border-left:6px solid #76b9e8;border-radius:8px}
-    .exhibit-layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);gap:16px;align-items:start;margin:15px 0}.exhibit-layout{align-items:stretch}.question .exhibit-layout>.prompt{margin:0!important;align-self:end}.exhibit-layout .exhibit{margin:0}
-    @media(max-width:900px){.exhibit-layout{grid-template-columns:1fr}.exhibit-layout>.prompt{align-self:start}}
-    .exhibit{margin:14px 0;padding:0;background:#fff;border:1px solid #9fb3c4;border-radius:6px;overflow:hidden;font-size:15px;color:#1f2d3a}
-    .exhibit-bank .bank-head{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 14px;background:#a3dcc9;font-weight:700;font-size:20px}.exhibit-bank .bank-head small{font-size:12px;font-weight:400;margin-left:2px}.exhibit-bank .bank-head b{font-size:26px;color:#1c3f3a;letter-spacing:2px}
-    .exhibit-bank .bank-body{padding:14px 18px}.exhibit-bank h4{margin:0 auto 14px;width:max-content;max-width:100%;padding:0 22px 4px;border-bottom:2px solid #1f2d3a;font-size:19px;text-align:center}
-    .exhibit-bank dl{display:grid;grid-template-columns:auto 1fr;gap:3px 10px;margin:0}.exhibit-bank dt{white-space:pre}.exhibit-bank dd{margin:0}.exhibit-bank .bank-info{display:grid;grid-template-columns:1fr 1fr;gap:6px 26px;margin-bottom:10px}
-    .exhibit-bank .bank-calc{display:flex;gap:12px;align-items:flex-start}.exhibit-bank .bank-label{white-space:nowrap}.exhibit-bank .bank-items{display:grid;grid-template-columns:1fr 1fr;gap:6px 26px;flex:1}.exhibit-bank .bank-side{align-self:end;margin-bottom:2px}
-    .exhibit-bank .bank-foot{display:flex;justify-content:space-between;gap:12px;padding:10px 18px;font-size:12px;color:#54606b}.exhibit-bank .bank-foot b{font-size:15px;color:#1f2d3a}
-    .exhibit-table figcaption{padding:9px 14px;background:#e9f1f8;font-weight:700}.exhibit-table table{width:100%;border-collapse:collapse}.exhibit-table th,.exhibit-table td{padding:8px 12px;border:1px solid #c4d1dc;text-align:right}.exhibit-table th{background:#f3f7fb;text-align:center;font-weight:600}.exhibit-table td:nth-child(-n+2){text-align:center}.exhibit-table tfoot td{font-weight:700;background:#fafcfe}.exhibit-table tfoot td:first-child{text-align:center}
-    @media(max-width:720px){.exhibit-bank .bank-info,.exhibit-bank .bank-items{grid-template-columns:1fr}.exhibit-bank .bank-calc{flex-direction:column;gap:4px}.exhibit-bank .bank-head{font-size:16px}.exhibit-bank .bank-head b{font-size:20px}}
-    .entry-wrap{overflow-x:auto;margin-top:16px}
-    table{width:100%;border-collapse:separate;border-spacing:0;min-width:850px;border:1px solid var(--line);border-radius:12px;overflow:hidden}
-    th{background:#dff2ff;color:var(--navy);padding:10px 8px;font-size:16px;border-bottom:1px solid var(--line)}
-    td{padding:8px;border-bottom:1px solid #e5edf3;border-right:1px solid #e5edf3}
-    tr:last-child td{border-bottom:0} td:last-child{border-right:0}
-    input,select{width:100%;min-height:44px;border:2px solid #cad8e3;border-radius:9px;padding:6px 9px;background:#fff;color:var(--ink)}
-    input:focus,select:focus{outline:3px solid #bce0ff;border-color:#4997d5}
-    .side{min-width:82px}.account{min-width:180px}.amount{min-width:150px;text-align:right}.division{min-width:110px}.memo{min-width:100px;text-align:center}
-    .row-state{width:38px;text-align:center;font-size:22px;font-weight:900}
-    .balance-panel{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:13px 0 0;padding:12px;background:#eef7fd;border:2px solid #cde3f2;border-radius:13px}
-    .balance-item{text-align:center;padding:8px;border-radius:9px;background:#fff;color:var(--navy);font-weight:900}
-    .balance-item strong{display:block;font-size:21px}
-    .balance-panel.balanced{background:#eafaf2;border-color:#69c39f}.balance-panel.balanced .difference{color:var(--green)}
-    .qactions{display:flex;flex-wrap:wrap;gap:10px;margin-top:16px;align-items:center}
-    .result{font-weight:900;min-height:32px;padding-left:4px}
-    .result.ok{color:var(--green)}.result.no{color:var(--red)}
-    details.reveal{margin-top:12px;border:1px solid var(--line);border-radius:12px;background:#fffdf6;overflow:hidden}
-    details.reveal summary{cursor:pointer;padding:11px 15px;font-weight:800;color:#684d00;list-style:none}
-    details.reveal summary::-webkit-details-marker{display:none}
-    .reveal-body{padding:6px 16px 16px;border-top:1px solid #eee3bd}
-    .answer-columns{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:8px}
-    .answer-column{min-width:0;border:1px solid #d8dee6;border-radius:8px;overflow:hidden;background:#fff}
-    .answer-column-title{padding:7px 10px;background:#eef1f4;color:var(--navy);font-weight:900;text-align:center}
-    .answer-line{display:grid;grid-template-columns:minmax(110px,1fr) minmax(90px,.85fr) auto;gap:8px;align-items:center;padding:8px 10px;border-bottom:1px dashed #d8d8d8}
-    .answer-line:last-child{border-bottom:0}
-    .answer-side{display:none}.answer-empty{padding:14px;text-align:center;color:var(--muted)}
-    .entry-toggle{margin-top:14px;border:1px solid var(--line);border-radius:9px;background:#fafafa;overflow:hidden}
-    .entry-toggle>summary{cursor:pointer;padding:10px 13px;font-weight:800;color:var(--navy);list-style:none}.entry-toggle>summary::-webkit-details-marker{display:none}.entry-toggle>summary::before{content:'＋ ';font-weight:900}.entry-toggle[open]>summary::before{content:'－ '}.entry-toggle-body{padding:0 10px 10px}
-    .grand{margin:34px 0;background:var(--navy);color:#fff;border-radius:22px;padding:25px;text-align:center}
-    .grand strong{font-size:34px}.grand p{margin:8px 0}
-    .tip{font-size:16px;color:var(--muted)}
-    .attempt-info{margin-left:auto;color:var(--muted);font-size:15px;font-weight:800}
-    .save-panel{margin:34px 0;background:#fff;border:2px solid #bcdcca;border-radius:22px;padding:25px;box-shadow:0 9px 28px rgba(32,114,81,.08)}
-    .save-panel h2{margin:0 0 8px;color:var(--navy)}
-    .save-path{display:flex;align-items:center;gap:9px;flex-wrap:wrap;padding:12px 14px;background:#eef9f4;border-radius:12px;color:#185f47;font-weight:800;word-break:break-all}
-    .save-row{display:grid;grid-template-columns:minmax(250px,1fr) auto;gap:10px;margin-top:16px}
-    .save-row input{width:100%;min-height:48px}
-    .save-options{display:flex;flex-wrap:wrap;gap:18px;margin-top:15px}.save-options label{display:flex;align-items:center;gap:8px;font-weight:800}.save-options input{width:22px;height:22px;min-height:22px;accent-color:var(--green)}
-    .save-status{min-height:29px;margin:12px 0 0;font-weight:900;color:var(--green)}
-    .danger{background:#fff!important;color:var(--red)!important;border:2px solid #e8b3b8!important;box-shadow:none!important}
-    .footer{text-align:center;color:var(--muted);margin-top:30px;font-size:15px}
-    @media(max-width:720px){body{font-size:16px}.wrap{width:96vw}.hero,.question,.save-panel{padding:18px}.progress{width:100%;margin-left:0}.progress-bar{flex:1}.prompt{font-size:18px}.answer-columns{gap:7px}.answer-line{grid-template-columns:1fr;padding:7px}.answer-line span{grid-column:auto!important}.answer-line span:nth-child(2){font-weight:700}.answer-line span:last-child{text-align:right}.balance-panel{grid-template-columns:1fr}.save-row{grid-template-columns:1fr}.attempt-info{width:100%;margin-left:0}.type-filter{flex-basis:100%}.filter-status{width:100%}}
-    @media print{.toolbar,.qactions,.source,.save-panel{display:none}.question{break-inside:avoid;box-shadow:none}.reveal:not([open]){display:none}}
-    .star-one[aria-pressed="true"]{background:#ffd54a;border-color:#e0b100;color:#5a3d00}
-    .star-note{margin:8px 0 0;padding:8px 12px;border-radius:10px;background:#fff4c2;color:#6b4a00;font-weight:900}
-    .variant-badge{background:#e8f0ff;color:#1d4d9b;margin-left:6px}
-    .star-tools{display:flex;justify-content:flex-end;gap:8px;margin:12px 0}
-    .star-group{margin:18px 0 26px}
-    .star-group-title{margin:0 0 10px;font-size:1.15rem;color:var(--navy)}.star-group-title small{margin-left:8px;font-size:.85rem;color:var(--muted)}
-    details.star-item{margin:8px 0;border:1px solid var(--line);border-radius:14px;background:#fff;overflow:hidden}
-    details.star-item>summary{display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:12px 16px;cursor:pointer;font-weight:900;list-style:none}
-    details.star-item>summary::-webkit-details-marker{display:none}
-    details.star-item>summary::before{content:'▸';color:var(--muted)}details.star-item[open]>summary::before{content:'▾'}
-    details.star-item>summary .qnum{width:30px;height:30px;font-size:.9rem}
-    .star-item-meta{margin-left:auto;font-size:.85rem;font-weight:700;color:var(--muted)}
-    details.star-item>.question{margin:0;border:0;border-top:1px dashed var(--line);border-radius:0;box-shadow:none}
-  </style>
-  <link rel="stylesheet" href="design/theme.css?v=8">
+  <title>일반전표 입력 · 학습 센터</title>
+  <link rel="stylesheet" href="entry/practical.css?v=1">
+  <link rel="stylesheet" href="entry/common.css?v=1">
+  <link rel="stylesheet" href="design/theme.css?v=12">
+  <link rel="icon" type="image/svg+xml" href="design/brand-mark.svg?v=3">
+  <link rel="icon" type="image/png" sizes="32x32" href="design/favicon-32.png?v=3">
+  <link rel="icon" type="image/png" sizes="192x192" href="design/icon-192.png?v=3">
+  <link rel="shortcut icon" href="design/favicon.ico?v=3">
+  <link rel="apple-touch-icon" href="design/apple-touch-icon.png?v=3">
 </head>
-<body>
+<body class="entry-practical" data-entry-host="practical">
   <nav class="top-nav" aria-label="유형별 연습 메뉴">
     <div class="nav-inner">
       <a class="nav-link" href="오답_훈련센터.html">오늘의 오답훈련</a>
@@ -151,7 +32,7 @@
       </div>
     </div>
   </nav>
-  <script src="data/practical.js?v=33"></script>
+  <script src="data/practical.js?v=34"></script>
   <script>(function(){var nav=document.querySelector('.top-nav');function sync(){document.documentElement.style.setProperty('--nav-h',(nav?nav.offsetHeight:60)+'px')}sync();window.addEventListener('resize',sync)})()</script>
   <main class="wrap">
     <div class="toolbar">
@@ -187,359 +68,31 @@
     <section class="save-panel" id="savePanel">
       <h2>학습기록 저장</h2>
       <p>오늘 채점한 문제와 오늘의 채점 이력만 Markdown 파일로 저장합니다.</p>
-      <div class="save-path"><span>D:\00. 학습센터\기출문제 연습코너\또 틀렸다!</span><button class="btn secondary" id="copyPath" type="button">폴더 경로 복사</button></div>
+      <div class="save-path"><span>D:\00. 학습센터\03. 기출문제 연습코너\또 틀렸다!</span><button class="btn secondary" id="copyPath" type="button">폴더 경로 복사</button></div>
       <div class="save-row">
         <input type="text" id="recordFileName" lang="ko" data-ko-auto aria-label="학습기록 파일 이름">
         <button class="btn green" id="saveTodayRecord" type="button">오늘 학습기록 저장</button>
       </div>
       <div class="save-options"><label><input type="checkbox" id="koAuto" checked> 영문 자판 입력을 두벌식 한글로 자동 변환</label></div>
-      <p class="tip">오답 훈련센터 홈에서 GitHub를 연결한 세션은 학습기록이 GitHub에 바로 저장됩니다. 연결하지 않았거나 GitHub 저장에 실패하면 기존처럼 이 기기에 Markdown 파일로 저장됩니다.</p>
+      <p class="tip">학습 센터 홈에서 GitHub를 연결한 세션은 학습기록이 GitHub에 바로 저장됩니다. 연결하지 않았거나 GitHub 저장에 실패하면 기존처럼 이 기기에 Markdown 파일로 저장됩니다.</p>
       <p class="save-status" id="saveStatus" aria-live="polite"></p>
       <button class="btn danger" id="resetLearning" type="button">저장된 풀이 이력 모두 초기화</button>
     </section>
     <p class="footer">학습용 자료 · 전표 입력 순서는 달라도 계정과목, 금액, 차·대변이 맞으면 정답으로 처리됩니다.</p>
   </main>
 
-  <script src="github-learning-sync.js?v=22"></script>
-  <script src="season-ui.js?v=47"></script>
-<script src="training-ui.js?v=17"></script>
+  <script src="github-learning-sync.js?v=23"></script>
+  <script src="season-ui.js?v=50"></script>
+<script src="training-ui.js?v=19"></script>
   <script src="account-search.js?v=5"></script>
-  <script>
-    const problems = loadTrainingProblems();
-
-    function A(side,account,amount,division='',memo='',partner=''){return{side,account,amount,division,memo,partner}}
-    const el = (s,root=document)=>root.querySelector(s);
-    const els = (s,root=document)=>[...root.querySelectorAll(s)];
-    const money = n=>Number(n).toLocaleString('ko-KR')+'원';
-    // NFKC는 거래처명의 ㈜와 (주)처럼 모양만 다른 호환 문자를 같은 값으로 맞춘다.
-    const normText = s=>String(s||'').normalize('NFKC').replace(/[\s()·._-]/g,'').toLowerCase();
-    const normMoney = s=>Number(String(s||'').replace(/[^0-9-]/g,''))||0;
-    const normMemo = s=>normText(s).replace('적요','').replace('적용','');
-    const STORAGE_KEY='exam-20260914-practical';
-    const nowIso=()=>new Date().toISOString();
-    const localDate=(value=Date.now())=>{const d=new Date(value);if(Number.isNaN(d.getTime()))return'';return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`};
-    problems.forEach(p=>{if(!p.addedDate)p.addedDate='2026-09-01'});
-    const STATE_VERSION='exam-20260914-practical-schema';
-    const OLD_TO_NEW_INDEX={4:0,6:1,8:2,9:3,10:4,11:5,12:6,13:7,14:8,15:9,16:10,17:11,18:12,19:13,20:14,21:15,22:16,23:17,24:18,25:19,26:20,27:21,28:22,29:23,30:24,31:25,32:26};
-    const defaultState=()=>({schemaVersion:STATE_VERSION,startedAt:nowIso(),updatedAt:nowIso(),cards:{},fileName:`일반전표_새학습_학습기록_${localDate()}`,koAuto:true});
-    let studyState=loadState();
-    function migrateStateTo27(rawState={}){
-      const source=rawState&&typeof rawState==='object'?rawState:{};
-      if(source.schemaVersion===STATE_VERSION)return source;
-      const oldCards=source.cards&&typeof source.cards==='object'?source.cards:{},cards={};
-      Object.entries(OLD_TO_NEW_INDEX).forEach(([oldIndex,newIndex])=>{
-        const oldCard=oldCards[oldIndex];if(!oldCard)return;
-        const migratedCard={...oldCard};delete migratedCard.note;cards[newIndex]=migratedCard;
-      });
-      const fileName=String(source.fileName||'').replace('일반전표_33문제','일반전표_27문제');
-      return {...source,schemaVersion:STATE_VERSION,migratedAt:nowIso(),cards,...(fileName?{fileName}:{})};
-    }
-    function loadState(){try{const raw=JSON.parse(localStorage.getItem(STORAGE_KEY)||'{}'),migrated=migrateStateTo27(raw),s=Object.assign(defaultState(),migrated);if(/^일반전표_(?:24|27|28|31|32|33|34|36|41|43|44|46)문제_학습기록_\d{4}-\d{2}-\d{2}$/.test(s.fileName||''))s.fileName=`일반전표_새학습_학습기록_${localDate()}`;Object.values(s.cards||{}).forEach(c=>{const wasCorrect=c.correct===true||(c.history||[]).some(h=>h.correct);c.passed=c.trainingCenterRestored?false:Boolean(c.passed||wasCorrect);c.archived=Boolean(c.archived);c.history=c.history||[];delete c.note});if(raw.schemaVersion!==STATE_VERSION)localStorage.setItem(STORAGE_KEY,JSON.stringify(s));return s}catch(e){return defaultState()}}
-    function saveState(){studyState.updatedAt=nowIso();localStorage.setItem(STORAGE_KEY,JSON.stringify(studyState))}
-    function cardState(index){const s=studyState.cards[index]||(studyState.cards[index]={rows:[],graded:false,correct:false,attempts:0,wrongCount:0,history:[],passed:false,archived:false});if(s.passed===undefined)s.passed=false;if(s.archived===undefined)s.archived=false;return s}
-
-    const REQUIRED_ACCOUNT_CODES={'매도가능증권':'178'};
-    function accountParts(value){
-      if(value&&typeof value==='object')return{name:String(value.name||value.account||''),code:String(value.code||'')};
-      const raw=String(value||''),match=raw.match(/^(\d+)\|(.+)$/);
-      return match?{code:match[1],name:match[2]}:{code:'',name:raw};
-    }
-    function accountOptionHtml(value){
-      const a=accountParts(value),code=a.code||REQUIRED_ACCOUNT_CODES[a.name]||'',optionValue=code?`${code}|${a.name}`:a.name,label=code?`${code} ${a.name}`:a.name;
-      return `<option value="${optionValue}">${label}</option>`;
-    }
-    function answerHtml(a,p){
-      const extra=[a.division?`구분: ${a.division}`:'',a.partner?`거래처: ${a.partner}`:'',a.memo?`적요: ${a.memo}`:''].filter(Boolean).join(' · ');
-      const code=p.requiredAccountCodes?.[a.account]||REQUIRED_ACCOUNT_CODES[a.account];
-      return `<div class="answer-line"><span class="answer-side">${a.side==='D'?'차변':'대변'}</span><span>${code?`${code} `:''}${a.account}</span><span>${extra||'—'}</span><span>${money(a.amount)}</span></div>`;
-    }
-    function answerColumns(p){
-      const column=(side,label)=>{const rows=p.answers.filter(a=>a.side===side).map(a=>answerHtml(a,p)).join('');return `<section class="answer-column"><div class="answer-column-title">${label}</div>${rows||'<div class="answer-empty">해당 없음</div>'}</section>`};
-      return `<div class="answer-columns">${column('D','차변')}${column('C','대변')}</div>`;
-    }
-
-    function accountField(p){return p.accountSelect?`<select class="account" lang="ko" aria-label="계정과목 선택"><option value="">계정과목 선택</option>${p.accountOptions.map(accountOptionHtml).join('')}</select>`:'<input class="account" type="text" lang="ko" data-ko-auto autocomplete="off" placeholder="계정과목" aria-label="계정과목">'}
-    function partnerField(p){return p.partnerOptions?`<select class="partner" lang="ko" aria-label="거래처 선택"><option value="">해당 없음</option>${p.partnerOptions.map(a=>`<option value="${a}">${a}</option>`).join('')}</select>`:'<select class="partner" disabled aria-label="거래처 해당 없음"><option value="">해당 없음</option></select>'}
-    function rowHtml(i,p){return `<tr class="entry-row">
-      <td><select class="side" aria-label="차변 또는 대변"><option value="D">차변</option><option value="C">대변</option></select></td>
-      <td>${accountField(p)}</td>
-      <td><input class="amount" type="text" inputmode="numeric" autocomplete="off" placeholder="0" aria-label="금액"></td>
-      <td><select class="division" aria-label="판관비 또는 제조원가 구분"><option value="">해당 없음</option><option value="판">판</option><option value="제">제</option></select></td>
-      <td>${partnerField(p)}</td>
-      <td><input class="memo" type="text" inputmode="numeric" autocomplete="off" placeholder="필요 시 8" aria-label="적요코드"></td>
-      <td class="row-state" aria-label="채점 결과"></td>
-    </tr>`}
-
-    function questionHtml(p,i){return `<article class="question" data-index="${i}" data-added-date="${p.addedDate}">
-      <div class="qhead"><span class="qnum">${i+1}</span><div><h3>${p.title}</h3><span class="tag">${p.type}</span>${p.variantOf!=null?`<span class="tag variant-badge">AI 응용문제 · 원문제 ${p.variantOf+1}번</span>`:''}</div></div>
-      <p class="star-note" hidden>★ 이 문제는 특별히 훈련이 필요합니다.</p>
-      ${p.exhibit?`<div class="exhibit-layout"><div class="prompt">${p.prompt}</div>${p.exhibit}</div>`:`<div class="prompt">${p.prompt}</div>`}
-      <details class="entry-toggle"><summary>전표 입력 영역 열기</summary><div class="entry-toggle-body"><div class="entry-wrap"><table>
-        <thead><tr><th>구분</th><th>계정과목</th><th>금액</th><th>판 / 제 선택</th><th>거래처</th><th>적요코드</th><th>결과</th></tr></thead>
-        <tbody>${Array.from({length:Math.max(4,p.answers.length)},(_,r)=>rowHtml(r,p)).join('')}</tbody>
-      </table></div>
-      <div class="balance-panel" aria-live="polite"><div class="balance-item">차변 합계<strong class="debit-total">0원</strong></div><div class="balance-item">대변 합계<strong class="credit-total">0원</strong></div><div class="balance-item difference">차액<strong class="difference-total">0원 · 입력 대기</strong></div></div>
-      <p class="tip">금액은 쉼표 없이 입력해도 됩니다. 판관비/제조원가 구분이 필요한 계정은 ‘판/제 선택’을 사용하세요.</p></div></details>
-      <div class="qactions"><button class="btn check-one" type="button">채점하기</button><button class="btn secondary clear-one" type="button">이 문제 영구 삭제</button><button class="btn secondary star-one" type="button" aria-pressed="false" title="이 문제는 특별히 훈련이 필요합니다. AI가 학습기록에서 이 표시를 보면 숫자를 바꾼 응용문제 1개를 더 만듭니다.">★ 특별 훈련</button><span class="result" aria-live="polite"></span><span class="attempt-info"></span></div>
-      <details class="reveal answer-box"><summary>정답 · 해설 보기</summary><div class="reveal-body">${answerColumns(p)}<p><strong>해설:</strong> ${p.explanation}</p></div></details>
-    </article>`}
-
-    el('#questions').innerHTML=problems.map(questionHtml).join('');
-
-    function setupAmount(input){
-      input.addEventListener('keydown',e=>{
-        if(e.key==='+' || e.code==='NumpadAdd'){
-          e.preventDefault();
-          const digits=input.value.replace(/\D/g,'');
-          input.value=(digits?digits+'000':'000').replace(/\B(?=(\d{3})+(?!\d))/g,',');
-          input.dispatchEvent(new Event('input',{bubbles:true}));
-        }
-      });
-      input.addEventListener('input',()=>{
-        const digits=input.value.replace(/\D/g,'');
-        input.value=digits.replace(/\B(?=(\d{3})+(?!\d))/g,',');
-      });
-    }
-    els('.amount').forEach(setupAmount);
-
-    function snapshotRows(card){return els('.entry-row',card).map(row=>({side:el('.side',row).value,account:el('.account',row).value,amount:el('.amount',row).value,division:el('.division',row).value,partner:el('.partner',row).value,memo:el('.memo',row).value}))}
-    function updateTotals(card){
-      let debit=0,credit=0;
-      els('.entry-row',card).forEach(row=>{const value=normMoney(el('.amount',row).value);if(el('.side',row).value==='D')debit+=value;else credit+=value});
-      el('.debit-total',card).textContent=money(debit);el('.credit-total',card).textContent=money(credit);
-      const diff=Math.abs(debit-credit),balanced=debit>0&&debit===credit,panel=el('.balance-panel',card);
-      panel.classList.toggle('balanced',balanced);el('.difference-total',card).textContent=debit===0&&credit===0?'0원 · 입력 대기':balanced?'0원 · 차·대 일치':`${money(diff)} · ${debit>credit?'차변 초과':'대변 초과'}`;
-    }
-    function markChanged(card){
-      const s=cardState(card.dataset.index);s.rows=snapshotRows(card);s.graded=false;delete s.correct;
-      card.classList.remove('correct','wrong');delete card.dataset.graded;delete card.dataset.correct;
-      const result=el('.result',card);result.className='result';result.textContent='입력 내용이 자동 저장되었습니다.';
-      updateTotals(card);saveState();updateProgress()
-    }
-    function renderAttempt(card){const s=cardState(card.dataset.index);el('.attempt-info',card).textContent=`채점 ${s.attempts||0}회 · 틀림 ${s.wrongCount||0}회`}
-    const DIRECT_INTAKE_INDICES=new Set([0,1,2,3,5,6,7,8,9,10,11,12,15,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,51,52,53,54,56,57,58,59,60,61,62,63,64,65,66,68,69,70,71,72,73,74,75,76,77,78,79,80,81]);
-    const todayView=new URLSearchParams(location.search).get('view')==='today';
-    const typeView=(new URLSearchParams(location.search).get('type')||'').trim();
-    const starView=new URLSearchParams(location.search).get('view')==='star';
-    // 응용문제의 원문제도 기기의 ★ 상태와 관계없이 같은 묶음에 표시한다.
-    const variantSourceIndices=new Set(problems.filter(p=>p.variantOf!=null).map(p=>p.variantOf));
-    function restoreCard(card){
-      const s=cardState(card.dataset.index),rows=els('.entry-row',card);
-      const index=Number(card.dataset.index),problemOf=problems[index]||{},isDirect=DIRECT_INTAKE_INDICES.has(index);
-      if(s.deleted||!TrainingSeason.matches(problems[index])){card.hidden=true;return}
-      card.hidden=starView?!(s.starred||!isDirect||variantSourceIndices.has(index)):!isDirect?true:Boolean(s.passed||s.archived||(todayView&&card.dataset.addedDate!==localDate()));
-      el('.star-one',card).setAttribute('aria-pressed',String(Boolean(s.starred)));el('.star-note',card).hidden=!s.starred;
-      (s.rows||[]).forEach((saved,i)=>{if(!rows[i])return;el('.side',rows[i]).value=saved.side||'D';el('.account',rows[i]).value=saved.account||'';el('.amount',rows[i]).value=saved.amount||'';el('.division',rows[i]).value=saved.division||'';el('.partner',rows[i]).value=saved.partner||'';el('.memo',rows[i]).value=saved.memo||''});
-      if(s.graded){card.dataset.graded='true';card.dataset.correct=String(Boolean(s.correct));card.classList.toggle('correct',Boolean(s.correct));card.classList.toggle('wrong',!s.correct);const result=el('.result',card);result.className='result '+(s.correct?'ok':'no');result.textContent=s.correct?'정답입니다!':`마지막 채점은 오답입니다. (${s.matched||0}/${problems[Number(card.dataset.index)].answers.length}개 분개 일치)`}
-      updateTotals(card);renderAttempt(card)
-    }
-    els('.question').forEach(restoreCard);
-
-    function readRows(card){return els('.entry-row',card).map((row,index)=>{
-      const selected=accountParts(el('.account',row).value);
-      return {
-      row,index,side:el('.side',row).value,account:selected.name,accountCode:selected.code,amount:normMoney(el('.amount',row).value),division:el('.division',row).value,partner:el('.partner',row).value,memo:normMemo(el('.memo',row).value),
-      filled:Boolean(el('.account',row).value.trim()||el('.amount',row).value.trim()||el('.division',row).value||el('.partner',row).value||el('.memo',row).value.trim())
-    }}).filter(r=>r.filled)}
-
-    function isMatch(row,ans,p){
-      const accountOptions=ans.account.split('/').map(normText);
-      const requiredCode=p.requiredAccountCodes?.[ans.account]||REQUIRED_ACCOUNT_CODES[ans.account];
-      return row.side===ans.side && accountOptions.includes(normText(row.account)) && (!requiredCode||row.accountCode===String(requiredCode)) && row.amount===ans.amount && (ans.division?row.division===ans.division:!row.division) && (ans.partner?normText(row.partner)===normText(ans.partner):!row.partner) && (!ans.memo||row.memo===normMemo(ans.memo));
-    }
-
-    function grade(card,scroll=false){
-      const p=problems[Number(card.dataset.index)], rows=readRows(card), used=new Set();
-      els('.entry-row',card).forEach(r=>{el('.row-state',r).textContent='';r.style.background=''});
-      let best=null;
-      for(const set of [p.answers,...(p.alternateAnswers||[])]){
-        const u=new Set(),hits=[];
-        for(const ans of set){const found=rows.find(r=>!u.has(r.index)&&isMatch(r,ans,p));if(found){u.add(found.index);hits.push(found)}}
-        const setOk=hits.length===set.length&&rows.length===set.length;
-        if(!best||(setOk&&!best.ok)||(!best.ok&&hits.length>best.hits.length))best={set,used:u,hits,ok:setOk};
-        if(best.ok)break;
-      }
-      const matched=best.hits.length;
-      best.hits.forEach(found=>{el('.row-state',found.row).textContent='✓';found.row.style.background='#effcf6'});
-      rows.filter(r=>!best.used.has(r.index)).forEach(r=>{el('.row-state',r.row).textContent='✕';r.row.style.background='#fff2f2'});
-      const ok=best.ok;
-      card.dataset.graded='true';card.dataset.correct=String(ok);card.classList.toggle('correct',ok);card.classList.toggle('wrong',!ok);
-      const result=el('.result',card);result.className='result '+(ok?'ok':'no');
-      result.textContent=ok?'정답입니다! 통과 처리되어 다음 방문부터 숨겨집니다.':`다시 확인해보세요. (${matched}/${best.set.length}개 분개 일치)`;
-      const s=cardState(card.dataset.index);s.rows=snapshotRows(card);s.graded=true;s.correct=ok;s.matched=matched;s.attempts=(s.attempts||0)+1;if(ok){s.passed=true;s.passedAt=nowIso();delete s.trainingCenterRestored;delete s.selfPassed;delete s.selfPassedAt}else{s.wrongCount=(s.wrongCount||0)+1;s.passed=false;s.trainingCenterRestored=true;s.restoredAt=nowIso();delete s.selfPassed;delete s.selfPassedAt}s.history=s.history||[];s.history.push({at:nowIso(),correct:ok,matched,rows:snapshotRows(card)});saveState();renderAttempt(card);
-      updateProgress();if(scroll)card.scrollIntoView({behavior:'smooth',block:'center'});return ok;
-    }
-
-    function clearCard(card){
-      els('input',card).forEach(x=>x.value='');els('select.account,select.partner',card).forEach(x=>x.value='');els('select.side',card).forEach(x=>x.value='D');els('select.division',card).forEach(x=>x.value='');
-      els('.entry-row',card).forEach(r=>{r.style.background='';el('.row-state',r).textContent=''});
-      card.classList.remove('correct','wrong');delete card.dataset.graded;delete card.dataset.correct;el('.result',card).textContent='';el('.result',card).className='result';const s=cardState(card.dataset.index);s.rows=snapshotRows(card);s.graded=false;delete s.correct;saveState();updateTotals(card);updateProgress();
-    }
-    function archiveCard(card){
-      if(!confirm('이 문제를 영구 삭제할까요?\n목록·통계에서 완전히 사라지고 복구할 수 없습니다.'))return;
-      studyState.cards[Number(card.dataset.index)]={deleted:true,deletedAt:nowIso()};saveState();card.dataset.typeFilterBaseHidden='true';card.hidden=true;updateProgress();
-    }
-
-    function toggleStar(card){
-      const s=cardState(card.dataset.index);s.starred=!s.starred;if(s.starred)s.starredAt=nowIso();else delete s.starredAt;saveState();
-      el('.star-one',card).setAttribute('aria-pressed',String(s.starred));el('.star-note',card).hidden=!s.starred;
-    }
-
-    els('.question').forEach(card=>{
-      el('.check-one',card).addEventListener('click',()=>grade(card));
-      el('.clear-one',card).addEventListener('click',()=>archiveCard(card));
-      el('.star-one',card).addEventListener('click',()=>toggleStar(card));
-      els('.entry-row input,.entry-row select',card).forEach(x=>{x.addEventListener('input',()=>markChanged(card));x.addEventListener('change',()=>markChanged(card))});
-    });
-
-    const questionOrder=els('.question');
-    questionOrder.forEach(card=>{card.dataset.typeFilterBaseHidden=String(card.hidden)});
-
-    function updateProgress(){
-      const cards=els('.question').filter(c=>!c.hidden&&!c.classList.contains('repeat-filter-hidden')),graded=cards.filter(c=>c.dataset.graded==='true').length,correct=cards.filter(c=>c.dataset.correct==='true').length;
-      const wrong=Object.values(studyState.cards).reduce((n,s)=>n+(s.wrongCount||0),0);
-      el('#progressText').textContent=`채점 ${graded} / ${cards.length} · 정답 ${correct} · 누적 오답 ${wrong}`;
-      el('#progressFill').style.width=(cards.length?graded/cards.length*100:100)+'%';
-      if(!cards.length){el('#grandScore').textContent='현재 노출할 문제가 없습니다.';el('#grandMessage').textContent='통과한 문제는 학습 상태에서 다시 볼 수 있습니다.'}
-      else if(graded){el('#grandScore').textContent=`${correct} / ${cards.length}문제 정답`;el('#grandMessage').textContent=graded===cards.length?(correct===cards.length?'모두 맞았습니다. 기본기가 아주 탄탄합니다!':'정답과 해설을 확인한 뒤 다시 입력해보세요.'):'아직 채점하지 않은 문제가 있습니다.'}
-      else{el('#grandScore').textContent='아직 채점하지 않았습니다.';el('#grandMessage').textContent='각 문제의 ‘채점하기’ 또는 채점해 보세요.'}
-    }
-
-    el('#recordFileName').value=studyState.fileName||defaultState().fileName;
-    el('#koAuto').checked=studyState.koAuto!==false;
-    el('#recordFileName').addEventListener('input',e=>{studyState.fileName=e.target.value;saveState()});
-    el('#koAuto').addEventListener('change',e=>{studyState.koAuto=e.target.checked;saveState();resetKoreanBuffers()});
-    el('#copyPath').addEventListener('click',async()=>{
-      const path='D:\\00. 학습센터\\기출문제 연습코너\\또 틀렸다!';
-      try{await navigator.clipboard.writeText(path);el('#saveStatus').textContent='폴더 경로를 복사했습니다.'}catch(e){el('#saveStatus').textContent='경로를 복사하지 못했습니다. 화면의 경로를 직접 복사해 주세요.'}
-    });
-
-    function safeFileName(raw,suffix=''){
-      let name=(raw||'일반전표_학습기록').replace(/[<>:"/\\|?*\x00-\x1F]/g,'-').trim().replace(/\.+$/,'').replace(/\.md$/i,'');
-      return `${name}${suffix}.md`
-    }
-    function fmtDate(iso){try{return new Intl.DateTimeFormat('ko-KR',{dateStyle:'medium',timeStyle:'medium'}).format(new Date(iso))}catch(e){return iso}}
-    function cleanRows(rows){return (rows||[]).filter(r=>String(r.account||'').trim()||normMoney(r.amount)||r.division||String(r.partner||'').trim()||String(r.memo||'').trim())}
-    function mdSafe(value){return String(value??'').replace(/\|/g,'\\|').replace(/\r?\n/g,' ')}
-    function rowTable(rows,answerMode=false){
-      const lines=['| 차/대변 | 계정과목 | 금액 | 판/제 | 거래처 | 적요 |','|---|---|---:|---|---|---|'];
-      const list=answerMode?rows:cleanRows(rows);
-      if(!list.length){lines.push('| - | 입력 없음 | 0원 | - | - | - |');return lines}
-      list.forEach(r=>{const account=accountParts(r.account),code=account.code||REQUIRED_ACCOUNT_CODES[account.name]||'',label=code?`${code} ${account.name}`:account.name;lines.push(`| ${r.side==='D'?'차변':'대변'} | ${mdSafe(label)||'미입력'} | ${money(answerMode?r.amount:normMoney(r.amount))} | ${r.division||'-'} | ${mdSafe(r.partner)||'-'} | ${r.memo||'-'} |`)});return lines
-    }
-    function buildTodayRecord(today=localDate()){
-      const all=problems.map((p,i)=>{const s=cardState(i),todayHistory=(s.history||[]).filter(h=>!h.cancelledAt&&localDate(h.at)===today);return{p,i,s,todayHistory}}),list=all.filter(x=>x.todayHistory.length);
-      const attempts=list.reduce((n,x)=>n+x.todayHistory.length,0),wrong=list.reduce((n,x)=>n+x.todayHistory.filter(h=>!h.correct).length,0),correct=attempts-wrong;
-      const lines=['# 전산회계 1급 일반전표 오늘 학습기록','',`- 학습 날짜: ${today}`,`- 저장 시각: ${fmtDate(nowIso())}`,`- 오늘 학습한 문제: ${list.length}/${problems.length}문제`,`- 오늘 채점 시도: ${attempts}회`,`- 오늘 정답 시도: ${correct}회`,`- 오늘 오답 시도: ${wrong}회`,`- 기록 범위: 오늘 날짜의 채점 이력이 있는 문제와 오늘 이력만`,'','## 오늘 자주 틀린 유형',''];
-      const ranked={};list.forEach(x=>{const count=x.todayHistory.filter(h=>!h.correct).length;if(count)ranked[x.p.type]=(ranked[x.p.type]||0)+count});const rankedList=Object.entries(ranked).sort((a,b)=>b[1]-a[1]);
-      if(rankedList.length)rankedList.forEach(([type,n])=>lines.push(`- ${type}: ${n}회 틀림`));else lines.push('- 오늘 기록된 오답이 없습니다.');lines.push('');
-      if(!list.length)lines.push('## 오늘 학습 문제','', '- 오늘 채점한 문제가 없습니다.','');
-      list.forEach(({p,s,todayHistory},order)=>{
-        const last=todayHistory[todayHistory.length-1],todayWrong=todayHistory.filter(h=>!h.correct).length;
-        lines.push(`## ${order+1}. ${p.title} (${p.type})`,'',`**문제:** ${p.prompt}`,'',`- 오늘 마지막 결과: ${last.correct?'정답':'오답'}`,...(s.selfPassed?[`- 스스로 정답 인정(통과): ${fmtDate(s.selfPassedAt)}`]:[]),`- 오늘 채점 횟수: ${todayHistory.length}회`,`- 오늘 틀린 횟수: ${todayWrong}회`,'','### 현재 입력','',...rowTable(s.rows||[]),'','### 정답','',...rowTable(p.answers,true),'',`**해설:** ${p.explanation}`,'','### 오늘 채점 이력','');
-        todayHistory.forEach((h,n)=>{lines.push(`#### 오늘 ${n+1}차 시도 · ${fmtDate(h.at)} · ${h.source==='notebook'?'노트 학습 · 직접 표시 / ':''}${h.correct?'정답':'오답'} (${h.matched}/${p.answers.length}개 일치)`,'',...(h.timing?[`- 시간 훈련: ${(h.timing.elapsedMs/1000).toFixed(1)}초 / 목표 ${h.timing.targetSeconds}초${h.timing.assisted?' (해설 참고)':''}`,'']:[]),...rowTable(h.rows||[]),'')});
-        lines.push('---','')
-      });
-      const starred=all.filter(x=>x.s.starred);
-      if(starred.length){lines.push('## ★ 특별 훈련이 필요한 문제 (사용자 표시)','','사용자가 「★ 특별 훈련」으로 표시한 문제입니다. 응용문제가 없는 문제는 같은 구조로 숫자·날짜·거래처만 바꾼 응용문제를 **1개씩만** 만들어 `variantOf`에 원문제 인덱스를 적어 추가해 주세요.','');starred.forEach(x=>{const hasVariant=problems.some(q=>q.variantOf===x.i);lines.push(`- [${x.i+1}] ${x.p.title} (${x.p.type}) · 표시 ${fmtDate(x.s.starredAt||'')} · 응용문제 ${hasVariant?'있음':`없음 → 추가 필요 (variantOf:${x.i})`}`)});lines.push('')}
-      lines.push('## AI에게 전달할 요청 예시','', '> 이 오늘 학습기록에서 틀린 문제와 반복해서 헷갈린 유형을 분석해 주세요. 같은 전표 구조를 유지하면서 숫자·날짜·상황을 바꾼 전산회계 1급 실무 응용문제를 만들어 주세요.','');
-      return lines.join('\n')
-    }
-    function createTodayRecord(){const date=localDate(),filename=safeFileName(el('#recordFileName').value),content=buildTodayRecord(date);return{date,filename,content}}
-    window.createGeneralJournalTodayRecord=createTodayRecord;
-    async function saveLocalRecord({filename:name,content},githubFailure=''){
-      const status=el('#saveStatus'),prefix=githubFailure?`GitHub 저장 실패: ${githubFailure}. `:'';
-      try{
-        if('showSaveFilePicker' in window){const handle=await window.showSaveFilePicker({suggestedName:name,types:[{description:'Markdown 학습기록',accept:{'text/markdown':['.md']}}]});const writable=await handle.createWritable();await writable.write(content);await writable.close();status.textContent=`${prefix}${handle.name} 파일을 이 기기에 저장했습니다.`;return}
-      }catch(e){if(e.name==='AbortError'){status.textContent=`${prefix}로컬 저장을 취소했습니다.`;return}}
-      const blob=new Blob([content],{type:'text/markdown;charset=utf-8'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),1000);status.textContent=`${prefix}${name} 파일을 이 기기에 다운로드했습니다.`
-    }
-    async function saveTodayRecord(){
-      const payload=createTodayRecord(),status=el('#saveStatus'),github=window.TrainingGitHub;
-      if(await github?.canSaveRemote?.()){
-        status.textContent='GitHub에 오늘 학습기록을 저장하고 있습니다.';
-        try{await github.saveDailyRecord('practical',payload.date,payload.content);status.textContent=`${payload.date} 일반전표 오늘 학습기록을 GitHub에 저장했습니다.`;return}
-        catch(error){await saveLocalRecord(payload,error?.message||'알 수 없는 오류');return}
-      }
-      await saveLocalRecord(payload)
-    }
-    el('#saveTodayRecord').addEventListener('click',saveTodayRecord);
-    el('#resetLearning').addEventListener('click',()=>{if(confirm('새 기출 오답의 전표 입력, 채점 이력과 틀린 횟수를 모두 지울까요?')){localStorage.removeItem(STORAGE_KEY);location.reload()}});
-
-    // 영문 자판 상태의 일반적인 두벌식 입력을 한글로 조합한다.
-    const C_MAP={r:'ㄱ',R:'ㄲ',s:'ㄴ',e:'ㄷ',E:'ㄸ',f:'ㄹ',a:'ㅁ',q:'ㅂ',Q:'ㅃ',t:'ㅅ',T:'ㅆ',d:'ㅇ',w:'ㅈ',W:'ㅉ',c:'ㅊ',z:'ㅋ',x:'ㅌ',v:'ㅍ',g:'ㅎ'};
-    const V_MAP={k:'ㅏ',o:'ㅐ',i:'ㅑ',O:'ㅒ',j:'ㅓ',p:'ㅔ',u:'ㅕ',P:'ㅖ',h:'ㅗ',y:'ㅛ',n:'ㅜ',b:'ㅠ',m:'ㅡ',l:'ㅣ'};
-    const CHO=['ㄱ','ㄲ','ㄴ','ㄷ','ㄸ','ㄹ','ㅁ','ㅂ','ㅃ','ㅅ','ㅆ','ㅇ','ㅈ','ㅉ','ㅊ','ㅋ','ㅌ','ㅍ','ㅎ'];
-    const JUNG=['ㅏ','ㅐ','ㅑ','ㅒ','ㅓ','ㅔ','ㅕ','ㅖ','ㅗ','ㅘ','ㅙ','ㅚ','ㅛ','ㅜ','ㅝ','ㅞ','ㅟ','ㅠ','ㅡ','ㅢ','ㅣ'];
-    const JONG=['','ㄱ','ㄲ','ㄳ','ㄴ','ㄵ','ㄶ','ㄷ','ㄹ','ㄺ','ㄻ','ㄼ','ㄽ','ㄾ','ㄿ','ㅀ','ㅁ','ㅂ','ㅄ','ㅅ','ㅆ','ㅇ','ㅈ','ㅊ','ㅋ','ㅌ','ㅍ','ㅎ'];
-    const V_COMB={'ㅗㅏ':'ㅘ','ㅗㅐ':'ㅙ','ㅗㅣ':'ㅚ','ㅜㅓ':'ㅝ','ㅜㅔ':'ㅞ','ㅜㅣ':'ㅟ','ㅡㅣ':'ㅢ'};
-    const F_COMB={'ㄱㅅ':'ㄳ','ㄴㅈ':'ㄵ','ㄴㅎ':'ㄶ','ㄹㄱ':'ㄺ','ㄹㅁ':'ㄻ','ㄹㅂ':'ㄼ','ㄹㅅ':'ㄽ','ㄹㅌ':'ㄾ','ㄹㅍ':'ㄿ','ㄹㅎ':'ㅀ','ㅂㅅ':'ㅄ'};
-    const isC=x=>CHO.includes(x),isV=x=>JUNG.includes(x);
-    function romanToHangul(raw){const j=[...raw].map(x=>C_MAP[x]||V_MAP[x]||x);let out='',i=0;while(i<j.length){const x=j[i];if(isC(x)&&isV(j[i+1])){let cho=CHO.indexOf(x),v=j[i+1];i+=2;if(isV(j[i])&&V_COMB[v+j[i]]){v=V_COMB[v+j[i]];i++}let f='';if(isC(j[i])&&JONG.includes(j[i])){const c1=j[i],c2=j[i+1],after=j[i+2];if(isV(c2)){}else if(isC(c2)&&F_COMB[c1+c2]&&!isV(after)){f=F_COMB[c1+c2];i+=2}else{f=c1;i++}}out+=String.fromCharCode(0xAC00+cho*588+JUNG.indexOf(v)*28+JONG.indexOf(f))}else if(isV(x)&&isV(j[i+1])&&V_COMB[x+j[i+1]]){out+=V_COMB[x+j[i+1]];i+=2}else{out+=x;i++}}return out}
-    function resetKoreanBuffers(){els('[data-ko-auto]').forEach(x=>{x.dataset.koRaw='';x.dataset.koBase=x.value})}
-    function setupKoreanInput(field){field.dataset.koRaw='';field.dataset.koBase=field.value;field.addEventListener('focus',()=>{field.dataset.koRaw='';field.dataset.koBase=field.value});field.addEventListener('blur',()=>{field.dataset.koRaw='';field.dataset.koBase=field.value});field.addEventListener('keydown',e=>{if(!el('#koAuto').checked||e.ctrlKey||e.altKey||e.metaKey)return;const raw=field.dataset.koRaw||'',atEnd=field.selectionStart===field.value.length&&field.selectionEnd===field.value.length;if(e.key==='Backspace'&&raw&&atEnd){e.preventDefault();const next=raw.slice(0,-1);field.dataset.koRaw=next;field.value=(field.dataset.koBase||'')+romanToHangul(next);field.dispatchEvent(new Event('input',{bubbles:true}));return}if(/^[A-Za-z]$/.test(e.key)&&atEnd){e.preventDefault();if(!raw)field.dataset.koBase=field.value;const next=raw+e.key;field.dataset.koRaw=next;field.value=(field.dataset.koBase||'')+romanToHangul(next);field.dispatchEvent(new Event('input',{bubbles:true}));return}field.dataset.koRaw='';field.dataset.koBase=field.value})}
-    els('[data-ko-auto]').forEach(setupKoreanInput);
-    updateProgress();
-    function buildStarView(){
-      if(!starView)return;
-      document.title='★ 특별 훈련 · 일반전표';
-      const sortLabel=el('.sort-label');if(sortLabel)sortLabel.hidden=true;
-      const title=el('.section-title');if(title)title.hidden=true;
-      const grand=el('.grand');if(grand)grand.hidden=true;
-      els('.nav-link').forEach(a=>{const on=a.classList.contains('nav-star');a.classList.toggle('active',on);if(on)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current')});
-      const current=document.querySelector('.nav-current');if(current)current.textContent='★ 특별 훈련';
-      const box=el('#questions'),groups=new Map();
-      els('.question').filter(c=>!c.hidden).forEach(card=>{const p=problems[Number(card.dataset.index)];if(!groups.has(p.type))groups.set(p.type,[]);groups.get(p.type).push(card)});
-      const tools='<div class="star-tools"><button class="btn secondary star-open-all" type="button">보기</button><button class="btn secondary star-close-all" type="button">접기</button></div>';
-      if(!groups.size){box.innerHTML='<div class="notice">★ 표시한 문제가 아직 없습니다. 「일반전표 입력」에서 문제 아래의 「★ 특별 훈련」 버튼을 누르면 이곳에 유형별로 모입니다.</div>';return}
-      const wrap=document.createElement('div');wrap.className='star-view';wrap.innerHTML=tools;
-      groups.forEach((cards,type)=>{
-        const group=document.createElement('section');group.className='star-group';group.innerHTML=`<h2 class="star-group-title">${type}<small>${cards.length}문제</small></h2>`;
-        cards.sort((a,b)=>{const pa=problems[Number(a.dataset.index)],pb=problems[Number(b.dataset.index)];const ka=pa.variantOf!=null?pa.variantOf:Number(a.dataset.index),kb=pb.variantOf!=null?pb.variantOf:Number(b.dataset.index);return ka-kb||Number(pa.variantOf!=null)-Number(pb.variantOf!=null)||Number(a.dataset.index)-Number(b.dataset.index)});
-        cards.forEach(card=>{
-          const p=problems[Number(card.dataset.index)],s=cardState(card.dataset.index),item=document.createElement('details');item.className='star-item';
-          item.innerHTML=`<summary><span class="qnum">${Number(card.dataset.index)+1}</span><span>${p.title}</span>${p.variantOf!=null?`<span class="tag variant-badge">응용문제</span>`:'<span class="tag">기존 문제</span>'}<span class="star-item-meta">채점 ${s.attempts||0}회 · 틀림 ${s.wrongCount||0}회${s.passed?' · 통과':''}</span></summary>`;
-          item.appendChild(card);group.appendChild(item);
-        });
-        wrap.appendChild(group);
-      });
-      wrap.insertAdjacentHTML('beforeend',tools);box.replaceChildren(wrap);
-      els('.star-open-all').forEach(b=>b.addEventListener('click',()=>els('details.star-item').forEach(d=>{d.open=true})));
-      els('.star-close-all').forEach(b=>b.addEventListener('click',()=>els('details.star-item').forEach(d=>{d.open=false})));
-    }
-    buildStarView();
-    function installTypeFilter(){
-      const input=el('#typeFilter'),options=el('#typeFilterOptions'),status=el('#typeFilterStatus');
-      const normalize=value=>String(value||'').trim().replace(/\s+/g,'').toLocaleLowerCase('ko-KR');
-      const available=[...new Set(questionOrder.filter(card=>card.dataset.typeFilterBaseHidden!=='true').map(card=>problems[Number(card.dataset.index)]?.type).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'ko'));
-      options.replaceChildren(...available.map(type=>{const option=document.createElement('option');option.value=type;return option}));
-      function applyTypeFilter(){
-        const query=normalize(input.value);let visible=0;
-        questionOrder.forEach(card=>{
-          const baseHidden=card.dataset.typeFilterBaseHidden==='true',matches=TrainingSeason.matches(problems[Number(card.dataset.index)])&&(!query||normalize(problems[Number(card.dataset.index)]?.type).includes(query));
-          if(starView){
-            const item=card.closest('details.star-item');if(!item)return;
-            card.hidden=!matches;item.hidden=!matches;if(matches)visible++;
-          }else{card.hidden=baseHidden||!matches;if(!card.hidden)visible++}
-        });
-        if(starView)els('.star-group').forEach(group=>{const count=els('details.star-item',group).filter(item=>!item.hidden).length;group.hidden=count===0;const small=el('.star-group-title small',group);if(small)small.textContent=`${count}문제`});
-        status.textContent=query?`검색 결과 ${visible}문제`:`전체 ${visible}문제`;
-        if(query&&!starView&&!visible){
-          const specialCount=questionOrder.filter(card=>!DIRECT_INTAKE_INDICES.has(Number(card.dataset.index))&&normalize(problems[Number(card.dataset.index)]?.type).includes(query)).length;
-          if(specialCount){const link=document.createElement('a');link.className='open-link';link.href=`일반전표_기본연습_24문제.html?view=star&type=${encodeURIComponent(input.value.trim())}`;link.textContent=`★ 특별훈련 ${specialCount}문제 보기`;status.append(' · ',link)}
-        }
-        updateProgress();
-        if(query&&!visible){el('#grandScore').textContent='검색 결과가 없습니다.';el('#grandMessage').textContent='유형 태그의 일부 글자만 입력하거나 「전체」를 눌러보세요.'}
-      }
-      input.value=typeView;input.addEventListener('input',applyTypeFilter);
-      el('#clearTypeFilter').addEventListener('click',()=>{input.value='';applyTypeFilter();input.focus()});
-      applyTypeFilter();
-    }
-    installTypeFilter();
-    (function(){
-    if(typeof window.TrainingGitHub?.installSyncBar!=='function'){const button=document.querySelector('#syncAll');if(button)button.addEventListener('click',()=>alert('동기화 기능을 불러오지 못했습니다. Ctrl+F5로 새로고침한 뒤 다시 눌러주세요.'));return}
-    TrainingGitHub.installSyncBar({onNeedToken:({mobile})=>{if(mobile)TrainingGitHub.showToast('처음 한 번만 오답 훈련센터 홈 아래쪽에서 GitHub 토큰을 연결한 뒤 다시 눌러주세요.',8000)}});
-  })();
+  <script src="entry/grading.js?v=2"></script>
+<script src="entry/practical.js?v=4"></script>
+<script>
+  function A(side,account,amount,division='',memo='',partner=''){return{side,account,amount,division,memo,partner}}
+  const problems=loadTrainingProblems();
+  const DIRECT_INTAKE_INDICES=new Set([0,1,2,3,5,6,7,8,9,10,11,12,15,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,51,52,53,54,56,57,58,59,60,61,62,63,64,65,66,68,69,70,71,72,73,74,75,76,77,78,79,80,81]);
+  const entryProgram=PracticalEntry.mount({problems,directIndices:DIRECT_INTAKE_INDICES});
+  const {state:studyState,save:saveState,refresh:updateProgress,grade,readRows,snapshotRows,isMatch,updateTotals}=entryProgram;
 </script>
 <script>TrainingSeason.install(problems,{subject:'practical',state:studyState,save:saveState,refresh:updateProgress});</script>
 <script src="question-markup.js?v=6" data-question-mark-subject="practical"></script>

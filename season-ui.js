@@ -1,6 +1,6 @@
 (function(){
   'use strict';
-  const style=document.createElement('link');style.rel='stylesheet';style.href='season.css?v=22';document.head.append(style);
+  const style=document.createElement('link');style.rel='stylesheet';style.href='season.css?v=23';document.head.append(style);
   const params=new URLSearchParams(location.search);
   const escape=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   function isCompleted(subject,id,state={}){
@@ -20,7 +20,7 @@
     const actualLast=actual.length?Date.parse(actual.at(-1).at):0,fresh=actualLast>=now-14*86400000;
     const band=!active?-1:actual.length>=2?(fresh?6:4):actual.length?(fresh?5:3):current.length?2:(card.trainingCenterRestored||options.recurrent)?1:0;
     const result={subject,id,active,band,wrongStreak:actual.length,noteWrong:current.length-actual.length,recentWrong,recentAttempts:recent.length,lastAt,rate:recent.length?(recentWrong+1)/(recent.length+2):0,recurrent:Boolean(options.recurrent)};
-    result.reason=actual.length?`연속 오답 ${actual.length}회 · 최근 ${recent.length}회 중 ${recentWrong}회 오답`:current.length?'노트에서 다시 연습으로 표시':band===1?(options.recurrent?'기출 원문 재제출 · 재풀이 확인 필요':'다시 학습할 문제'):recent.length?'현재 남은 오답 없음':'아직 실제 채점 전';
+    result.reason=actual.length?`연속 오답 ${actual.length}회 · 최근 ${recent.length}회 중 ${recentWrong}회 오답`:current.length?'':band===1?(options.recurrent?'':'다시 학습할 문제'):recent.length?'현재 남은 오답 없음':'아직 실제 채점 전';
     return result;
   }
   function comparePriority(a,b){return b.band-a.band||Math.min(b.wrongStreak,5)-Math.min(a.wrongStreak,5)||b.rate-a.rate||b.recentWrong-a.recentWrong||b.lastAt-a.lastAt}
@@ -59,7 +59,7 @@
         const repeated=item.need.active&&(item.need.wrongStreak>=2||item.need.noteWrong>=2||item.need.recurrent);
         item.card.classList.toggle('repeat-filter-hidden',mode==='repeatWrong'&&!repeated);
         let note=item.card.querySelector('.priority-note');if(!note){note=document.createElement('p');note.className='priority-note';note.style.cssText='font-size:14px;color:#52677d;margin:6px 0 12px';item.card.querySelector('.qhead')?.after(note)}
-        note.textContent=item.need.reason;note.hidden=item.need.band<=0;
+        note.textContent=item.need.reason;note.hidden=item.need.band<=0||!item.need.reason;
         const wrapper=item.card.closest('details.star-item');
         if(wrapper){const group=wrapper.parentElement;group.append(wrapper);if(!groups.has(group))groups.set(group,item)}else box.append(item.card);
       }
@@ -137,7 +137,7 @@
     const label=document.createElement('label');label.className='current-training-filter';const name=document.createElement('span');name.className='season-filter-name';name.textContent='취약점 Top10';label.append(name);
     const field=document.createElement('select');field.className='current-training-select';field.setAttribute('aria-label','취약점 Top10');
     let ranked=[];
-    label.refreshCurrentTraining=()=>{ranked=rankTags(practiceRefs(problems,adapter),{[subjectOf(adapter)]:adapter.state});field.replaceChildren(new Option(ranked.length?'선택하기':'현재 확인된 취약 유형이 없습니다.',''));ranked.forEach(({tag,rows,best},index)=>field.add(new Option(`${index+1}. ${tag} · ${rows.length}문제`+(best.reason==='노트에서 다시 연습으로 표시'?'':` · ${best.reason}`),tag)));field.disabled=!ranked.length};
+    label.refreshCurrentTraining=()=>{ranked=rankTags(practiceRefs(problems,adapter),{[subjectOf(adapter)]:adapter.state});field.replaceChildren(new Option(ranked.length?'선택하기':'현재 확인된 취약 유형이 없습니다.',''));ranked.forEach(({tag,rows,best},index)=>field.add(new Option(`${index+1}. ${tag} · ${rows.length}문제`+(best.reason?` · ${best.reason}`:''),tag)));field.disabled=!ranked.length};
     field.onchange=()=>{const selected=ranked.find(group=>group.tag===field.value);if(selected)location.href=priorityUrl(location.pathname,selected.rows,selected.tag)};
     label.title='최근 14일의 반복 오답을 먼저 보고, 연속 오답·최근 5회 결과로 정렬합니다. 채점 전 문제 수는 취약점 순위에 반영하지 않습니다.';
     label.append(field);label.refreshCurrentTraining();return label;
@@ -231,9 +231,12 @@
   }
   function catalog(meta,sources){
     // Secondary settings stay available without lengthening the daily study screen.
-    for(const [id,label] of [['backupSection','동기화 설정 · 학습기록 백업']]){
+    // 유형별 태그 모음은 동기화 설정과 따로 접히는 영역으로 둔다.
+    const tagHost=document.getElementById('seasonCatalog'),backup=document.getElementById('backupSection');
+    if(tagHost&&backup){const tagSection=document.createElement('section');tagSection.className='section';tagSection.id='catalogSection';const tagDetails=document.createElement('details');tagDetails.className='season-settings';const tagSummary=document.createElement('summary');tagSummary.textContent='회차·유형별 오답 누적 · 훈련 필요 TOP 10';tagDetails.append(tagSummary,tagHost);tagSection.append(tagDetails);backup.before(tagSection)}
+    for(const [id,label] of [['backupSection','동기화 설정 · 학습기록 백업'],['aiRulesSection','AI 작업 규칙 점검']]){
       const section=document.getElementById(id);if(!section)continue;
-      const details=document.createElement('details');details.className='season-settings';details.open=true;
+      const details=document.createElement('details');details.className='season-settings';details.open=false;
       const summary=document.createElement('summary');summary.textContent=label;details.append(summary);
       section.querySelector('.section-heading')?.remove();while(section.firstChild)details.append(section.firstChild);section.append(details);
     }
@@ -250,7 +253,6 @@
     const subjectOrder=['theory','practical','voucher'],tags=new Map(),subjectTags=new Map(subjectOrder.map(subject=>[subject,new Map()])),seen=new Set();
     const learningState={theory:readState('exam-20260914-theory'),practical:readState('exam-20260914-practical'),voucher:readState('exam-20260914-voucher')};
     function readState(key){try{return JSON.parse(localStorage.getItem(key)||'{}')}catch(_){return {}}}
-    const isPassed=entry=>isCompleted(entry.subject,entry.id,learningState[entry.subject]);
     entries.filter(e=>!e.variant&&e.variantOf==null&&e.questionNo!=='').forEach(e=>{
       const id=e.subject+':'+e.id;if(seen.has(id))return;seen.add(id);
       [...new Set(e.tags?.length?e.tags:[e.type])].filter(Boolean).forEach(tag=>{
@@ -273,7 +275,7 @@
       const currentHeading=document.createElement('h5');currentHeading.className='season-tag-heading season-current-heading';currentHeading.innerHTML='현재 훈련 필요 <small>TOP 10</small>';section.append(currentHeading);
       const currentList=document.createElement('div');currentList.className='season-tag-list season-current-list';
       const activeTags=rankTags(entries.filter(entry=>entry.subject===subject),learningState);
-      activeTags.forEach(({tag,rows,best},index)=>{const a=document.createElement('a');a.className='season-tag season-current-tag';a.textContent=tag+' · '+rows.length+'문제 · '+best.reason;a.title=`${sources[subject].label} · ${best.reason}`;a.href=priorityUrl(sources[subject].file,rows,tag);a.style.backgroundColor=activeColors[index];a.style.color=index<6?'#fff':'#5B2A0A';a.dataset.rank=String(index+1);currentList.append(a)});
+      activeTags.forEach(({tag,rows,best},index)=>{const a=document.createElement('a');a.className='season-tag season-current-tag';a.textContent=tag+' · '+rows.length+'문제'+(best.reason?' · '+best.reason:'');a.title=`${sources[subject].label}${best.reason?' · '+best.reason:''}`;a.href=priorityUrl(sources[subject].file,rows,tag);a.style.backgroundColor=activeColors[index];a.style.color=index<6?'#fff':'#5B2A0A';a.dataset.rank=String(index+1);currentList.append(a)});
       if(!activeTags.length){const done=document.createElement('span');done.className='season-current-empty';done.textContent='현재 확인된 취약 유형이 없습니다. 채점 전 문제는 정렬에서 찾아볼 수 있습니다.';currentList.append(done)}
       section.append(currentList);groups.append(section);
     });host.append(groups);

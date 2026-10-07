@@ -3,11 +3,16 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>출제위원 테스트 · 오답 훈련센터</title>
-  <link rel="stylesheet" href="examiner.css?v=4">
-  <script defer src="engine.js?v=2"></script>
-  <script defer src="app.js?v=4"></script>
-  <link rel="stylesheet" href="../design/theme.css?v=8">
+  <title>출제위원 테스트 · 학습 센터</title>
+  <link rel="stylesheet" href="examiner.css?v=6">
+  <script defer src="engine.js?v=3"></script>
+  <script defer src="app.js?v=7"></script>
+  <link rel="stylesheet" href="../design/theme.css?v=12">
+  <link rel="icon" type="image/svg+xml" href="../design/brand-mark.svg?v=3">
+  <link rel="icon" type="image/png" sizes="32x32" href="../design/favicon-32.png?v=3">
+  <link rel="icon" type="image/png" sizes="192x192" href="../design/icon-192.png?v=3">
+  <link rel="shortcut icon" href="../design/favicon.ico?v=3">
+  <link rel="apple-touch-icon" href="../design/apple-touch-icon.png?v=3">
 </head>
 <body class="examiner-page">
   <a class="skip" href="#main">본문으로 바로가기</a>
@@ -29,28 +34,43 @@
         <legend>새 문제 출제 스타일</legend>
         <label class="style-option"><input type="checkbox" value="정석 출제">정석 출제</label>
         <label class="style-option"><input type="checkbox" value="기출 변형">기출 변형</label>
-        <label class="style-option"><input type="checkbox" value="장기 미출제">장기 미출제</label>
+        <label class="style-option"><input type="checkbox" value="장기 미출제 후보">장기 미출제</label>
         <label class="style-option"><input type="checkbox" value="교재 주변부">교재 주변부</label>
         <label class="style-option"><input type="checkbox" value="예외규정">예외규정</label>
         <label class="style-option"><input type="checkbox" value="함정형">함정형</label>
         <label class="style-option"><input type="checkbox" value="출제위원 랜덤" checked>출제위원 랜덤</label>
       </fieldset>
-      <p class="hint">‘장기 미출제’는 실제 출제 이력을 확인할 수 있을 때만 사용합니다. 현재 5회분에서 보이지 않았다는 이유만으로 단정하지 않습니다.</p>
+      <p class="hint">‘장기 미출제’는 후보입니다. 분석한 표본(이론 최근 5회·과거 2회, 실무 4회)에서 보이지 않은 범위 내 개념이며 출제 확률은 단정하지 않습니다.</p>
       <div id="request-guide" class="request-guide" hidden>
-        <h2 id="request-title" tabindex="-1">선택한 조건으로 새 문제 부탁하기</h2>
-        <p>이 센터를 만들어 달라고 했던 <b>바로 그 AI 채팅</b>에 아래 한 문장을 보내면 됩니다.</p>
-        <label class="stack">보낼 문장<textarea id="quick-request" rows="3" readonly></textarea></label>
-        <button id="copy-quick-request" class="primary" type="button">이 문장 복사</button><p id="copy-status" class="hint" role="status"></p>
-        <p>AI가 조건에 맞춰 출제·검토하고 센터에 추가합니다. 완료 안내를 받으면 이 화면을 새로고침하고 <b>문제 풀기</b>를 누르세요.</p>
-        <p class="hint">이 버튼이 채팅으로 자동 전송하지는 않습니다. 문장만 보내 주세요. 긴 요청문이나 결과 파일을 옮길 필요는 없습니다.</p>
+        <h2 id="request-title" tabindex="-1">선택한 조건으로 새 문제 출제하기</h2>
+        <section id="auto-panel" class="auto-panel" aria-label="바로 출제">
+          <p id="auto-state" class="auto-state" role="status">PC 도우미 연결을 확인하고 있습니다…</p>
+          <div class="auto-counts" role="group" aria-label="분야별 문항 수">
+            <label>이론 <select id="auto-theory"><option>0</option><option>1</option><option selected>2</option><option>3</option><option>4</option></select></label>
+            <label>일반전표 <select id="auto-practical"><option>0</option><option>1</option><option selected>2</option><option>3</option><option>4</option></select></label>
+            <label>매입매출 <select id="auto-voucher"><option>0</option><option>1</option><option selected>2</option><option>3</option><option>4</option></select></label>
+            <span id="auto-total" class="hint"></span>
+          </div>
+          <div class="auto-actions"><button id="auto-run" class="primary" type="button" disabled>지금 출제하기</button><button id="auto-cancel" type="button" hidden>출제 중단</button><button id="auto-login" type="button" hidden>AI 연결</button></div>
+          <ol id="auto-log" class="auto-log" aria-live="polite"></ol>
+          <div id="auto-result"></div>
+          <p class="hint">ChatGPT 계정의 Codex로 출제합니다(유료 API 키 사용 없음). ① 후보를 구상해 9개 기준으로 거른 뒤 ② 형식·세액·차대변을 검사하고 ③ 정답을 모르는 다른 대화가 독립적으로 풀어 보아 정답이 일치한 문항만 추가합니다. 보통 5~15분 걸립니다.</p>
+        </section>
+        <details id="manual-request" class="manual-request">
+          <summary>도우미를 쓸 수 없을 때(휴대폰 등): 채팅에 직접 부탁하기</summary>
+          <p>이 센터를 만들어 달라고 했던 <b>바로 그 AI 채팅</b>에 아래 한 문장을 보내면 됩니다.</p>
+          <label class="stack">보낼 문장<textarea id="quick-request" rows="3" readonly></textarea></label>
+          <button id="copy-quick-request" class="primary" type="button">이 문장 복사</button><p id="copy-status" class="hint" role="status"></p>
+          <p class="hint">이 버튼이 채팅으로 자동 전송하지는 않습니다. AI가 출제를 끝내면 이 화면을 새로고침하고 <b>문제 풀기</b>를 누르세요.</p>
+        </details>
       </div>
-      <div class="main-actions"><button id="start-mode" type="button">문제 풀기</button><button id="request-help" class="primary" type="button" aria-expanded="false" aria-controls="request-guide">새 문제 부탁하기</button></div>
-      <p id="ready-note" class="hint">문제 풀기는 등록된 문제를 엽니다. 위의 출제 스타일은 새 문제를 부탁할 때만 적용됩니다.</p>
+      <div class="main-actions"><button id="start-mode" type="button">문제 풀기</button><button id="request-help" class="primary" type="button" aria-expanded="false" aria-controls="request-guide">새 문제 출제하기</button></div>
+      <p id="ready-note" class="hint">문제 풀기는 등록된 문제를 엽니다. 위의 출제 스타일은 새 문제를 출제할 때만 적용됩니다.</p>
     </section>
     <p id="status" class="status" role="status" aria-live="polite"></p>
     <section id="subject-picker" class="panel" hidden aria-labelledby="subject-title">
       <h2 id="subject-title" tabindex="-1">어떤 문제를 풀까요?</h2>
-      <p>여기에는 이미 준비된 문제가 열립니다. 새 출제가 필요할 때만 위의 ‘새 문제 부탁하기’를 사용하세요.</p>
+      <p>여기에는 이미 준비된 문제가 열립니다. 새 문제가 필요할 때만 위의 ‘새 문제 출제하기’를 사용하세요.</p>
       <div class="subject-actions">
         <button type="button" data-subject="theory">이론 문제</button>
         <button type="button" data-subject="practical">일반전표 입력</button>
@@ -73,14 +93,14 @@
           <label class="history-picker">이전에 풀던 문제<select id="trial-select"><option value="">아직 풀이 기록이 없습니다</option></select></label>
           <div class="controls"><label>문제 묶음<select id="pack-select"></select></label><label>문항 수<select id="count"><option>5</option><option selected>6</option><option>7</option><option>8</option></select></label></div>
           <fieldset id="style-options"><legend>준비된 문제에서 골라 풀기</legend></fieldset>
-          <p class="hint">스타일 선택은 준비된 문제를 고르는 조건입니다. 새 출제는 위의 ‘새 문제 부탁하기’를 이용하세요.</p>
+          <p class="hint">스타일 선택은 준비된 문제를 고르는 조건입니다. 새 출제는 위의 ‘새 문제 출제하기’를 이용하세요.</p>
           <button id="open-trial" type="button">선택한 문제 풀기</button>
         </details>
         <details id="analysis-panel">
           <summary>이론 기출 분석과 출제 기준</summary>
           <p>기본 출제는 <b>질문 방향 바꾸기 2문항 · 비슷한 개념 구분하기 2문항 · 세부개념이나 예외 활용하기 2문항</b>입니다. 기출 수준의 지식·문장·계산량으로 구성합니다.</p>
-          <p id="analysis-summary"></p><p class="hint">제공하신 후기 요약은 123~126회를 대체로 평이하게, 127회 이론을 상대적으로 까다롭게 평가합니다. 이는 통계가 아닌 참고 의견입니다. 난도는 실제 기출의 풀이량과 처리 기준을 우선해 점검합니다. 분석한 5회분에서 보이지 않은 개념을 최근 수년간 미출제됐다고 단정하지 않습니다.</p>
-          <div class="controls"><label>관찰 빈도<select id="frequency-filter"><option value="all">전체</option><option value="frequent">자주 관찰 · 3회차 이상</option><option value="occasional">가끔 관찰 · 1~2회차</option><option value="unseen">표본 내 미관찰</option></select></label><label>개념 검색<input id="concept-search" type="search" placeholder="예: 면세, 재고" maxlength="100"></label></div>
+          <p id="analysis-summary"></p><div id="practice-summary" class="practice-summary"></div><p class="hint">제공하신 후기 요약은 123~126회를 대체로 평이하게, 127회 이론을 상대적으로 까다롭게 평가합니다. 이는 통계가 아닌 참고 의견입니다. 난도는 실제 기출의 풀이량과 처리 기준을 우선해 점검합니다. 분석한 5회분에서 보이지 않은 개념을 최근 수년간 미출제됐다고 단정하지 않습니다.</p>
+          <div class="controls"><label>관찰 빈도<select id="frequency-filter"><option value="all">전체</option><option value="frequent">자주 관찰 · 3회차 이상</option><option value="occasional">가끔 관찰 · 1~2회차</option><option value="unseen">최근 5회 미관찰</option><option value="older">과거(103·104회)에만 관찰</option></select></label><label>개념 검색<input id="concept-search" type="search" placeholder="예: 면세, 재고" maxlength="100"></label></div>
           <p class="scroll-hint">분석표는 좌우로 밀어 나머지 열을 볼 수 있습니다.</p>
           <div class="table-wrap" tabindex="0" aria-label="개념별 관찰 빈도 · 좌우 스크롤"><table><caption>개념별 관찰 빈도 · 이론 75문항</caption><thead><tr><th>분야 / 세부개념</th><th>문항 수 / 관찰 회차</th><th>판단 포인트와 함정</th></tr></thead><tbody id="concept-rows"></tbody></table></div>
           <details><summary>문장·선택지 패턴과 자료 근거</summary><div id="patterns"></div><ul id="scope-references"></ul></details>
@@ -100,6 +120,6 @@
     </details>
     <footer>테스트의 답변과 평가는 기존 오답·통과 기록에 합산되지 않습니다.</footer>
   </main>
-  <script src="../training-ui.js?v=17"></script>
+  <script src="../training-ui.js?v=19"></script>
 </body>
 </html>

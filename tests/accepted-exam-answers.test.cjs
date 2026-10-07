@@ -3,9 +3,10 @@ const fs=require('node:fs'),path=require('node:path'),vm=require('node:vm');
 const root=path.join(__dirname,'..');
 const theoryHtml=fs.readFileSync(path.join(root,'이론_오답응용_5문제.html'),'utf8');
 const voucherHtml=fs.readFileSync(path.join(root,'매입매출전표_오답연습_3문제.html'),'utf8');
+const voucherSource=fs.readFileSync(path.join(root,'entry/voucher.js'),'utf8');
 const oneLine=(html,name)=>html.split(/\r?\n/).find(line=>line.trim().startsWith('function '+name+'('));
 const theoryGrade=theoryHtml.match(/    function grade\(card\)\{[\s\S]*?\n    \}/)[0];
-const voucherGrade=oneLine(voucherHtml,'grade');
+const voucherGrade=oneLine(voucherSource,'grade');
 function problemList(subject){
   const c={A:(side,account,amount,division='',memo='',partner='')=>({side,account,amount,division,memo,partner})};
   vm.createContext(c);vm.runInContext(fs.readFileSync(path.join(root,'data/'+subject+'.js'),'utf8'),c);
@@ -43,12 +44,12 @@ test('single-answer theory behavior and unanswered guard remain unchanged',()=>{
 function voucherContext(p,type,supply=p.voucher.supply){
   const s={},controls=new Map();
   const c={problems:[p],voucher:()=>({...p.voucher,type,supply,journal:'혼합'}),
-    CARD_TYPES:new Set(['17.카과','57.카과']),num:x=>Number(x)||0,normSupplier:x=>String(x||''),
+    EntryGrading:require('../entry/grading.js'),options:{},CARD_TYPES:new Set(['17.카과','57.카과']),num:x=>Number(x)||0,normSupplier:x=>String(x||''),
     rows:()=>p.variants.find(v=>v.journal==='혼합').rows,
     rowsEqualForGrade:()=>({ok:true,matched:1,total:1}),$$:()=>[],
     $:selector=>{if(!controls.has(selector))controls.set(selector,{});return controls.get(selector)},
     cs:()=>s,save:()=>{},progress:()=>{},nowIso:()=> '2026-10-05T03:00:00Z',money:String};
-  vm.createContext(c);vm.runInContext([oneLine(voucherHtml,'acceptedVoucherTypes'),oneLine(voucherHtml,'extraAnswer'),voucherGrade].join('\n'),c);
+  vm.createContext(c);vm.runInContext([oneLine(voucherSource,'acceptedVoucherTypes'),oneLine(voucherSource,'extraAnswer'),voucherGrade].join('\n'),c);
   return {c,s};
 }
 test('126 voucher 3: both official type alternatives accepted, wrong type/amount rejected',()=>{
@@ -86,6 +87,6 @@ test('new voucher journal variants balance including automatic cash/card counter
 test('answer display/export uses complete accepted answer sets and inline scripts parse',()=>{
   assert.match(theoryHtml,/정답: \$\{theoryAnswerText\(p\)\}/);
   assert.match(theoryHtml,/- 정답: \$\{theoryAnswerText\(p\)\}/);
-  assert.match(voucherHtml,/- 유형: \$\{acceptedVoucherTypes\(p\)\.join/);
+  assert.match(voucherSource,/- 유형: \$\{acceptedVoucherTypes\(p\)\.join/);
   for(const html of [theoryHtml,voucherHtml])for(const m of html.matchAll(/<script\b[^>]*>([\s\S]*?)<\/script>/g))new vm.Script(m[1]);
 });

@@ -10,7 +10,7 @@
   const newStyles=()=>[...document.querySelectorAll('#new-style-options input:checked')].map(i=>i.value);
   function updateQuickRequest(){
     const styles=newStyles(),choice=styles.includes('출제위원 랜덤')?'출제위원 랜덤':styles.join('·');
-    $('#quick-request').value='출제위원 새 문제 6개를 이론·일반전표·매입매출에서 2개씩 만들어 테스트에 추가해 주세요. 출제 스타일은 '+choice+'로 해 주세요. 여러 스타일을 골랐다면 문제마다 적절히 나누고, 기출 수준의 계산량과 시험범위·단일 정답을 확인해 주세요.'+(styles.includes('장기 미출제')?' 5회분에서 보이지 않았다는 이유만으로 장기 미출제라고 단정하지 말고 실제 이력을 확인해 주세요.':'');
+    $('#quick-request').value='출제위원 새 문제 6개를 이론·일반전표·매입매출에서 2개씩 만들어 테스트에 추가해 주세요. examiner-test/brief.md의 출제위원 지침을 따르고, 출제 스타일은 '+choice+'로 해 주세요. 여러 스타일을 골랐다면 문제마다 적절히 나누고, 기출 수준의 계산량과 시험범위·단일 정답을 확인해 주세요.'+(styles.includes('장기 미출제 후보')?' 표본에서 보이지 않았다는 이유만으로 장기 미출제라고 단정하지 말고 근거를 함께 적어 주세요.':'');
   }
   const packs=()=>[pilot,...state.packs,...library.filter(p=>!state.packs.some(saved=>saved.id===p.id))];
   const newestPack=()=>findPack(library.at(-1)?.id||state.packs.at(-1)?.id||pilot.id);
@@ -22,6 +22,12 @@
   }
   function tableHtml(t){const widths=t.headers.length===2?[22,78]:t.headers.length===3?[29,27,44]:[];return `<div class="table-wrap" tabindex="0" aria-label="${esc(t.caption)}"><table>${widths.length?`<colgroup>${widths.map(w=>`<col style="width:${w}%">`).join('')}</colgroup>`:''}<caption>${esc(t.caption)}</caption><thead><tr>${t.headers.map(h=>`<th>${esc(h)}</th>`).join('')}</tr></thead><tbody>${t.rows.map(r=>`<tr>${r.map(c=>`<td>${esc(c)}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`}
   const references=refs=>refs.length?`<ul>${refs.map(r=>`<li class="reference"><a href="${esc(r.url)}" target="_blank" rel="noopener noreferrer">${esc(r.title)}</a></li>`).join('')}</ul>`:'';
+  const REVIEW_LABELS={copy:'기출 복사 여부',textbook:'교재형 수준',sentence:'시험 문장',choices:'선택지 구성',peripheral:'주변부 활용',absence:'최근 미출제',exception:'예외규정',surprise:'뜻밖의 판단 지점',forced:'억지·범위 이탈'};
+  function reviewTable(review){if(!review)return '<p class="hint">9개 기준 검토 메모가 없는 문항입니다.</p>';return `${review.verdict?`<p class="hint">${esc(review.verdict)}</p>`:''}<div class="table-wrap review-table" tabindex="0"><table><caption>9개 기준 AI 1차 검토 (사람의 검증·시험 적합성 인증 아님)</caption><tbody>${Object.entries(REVIEW_LABELS).map(([k,l])=>`<tr><th>${esc(l)}</th><td>${esc(review[k]||'기록 없음')}</td></tr>`).join('')}</tbody></table></div>`}
+  const lintList=notes=>notes.length?`<ul class="lint-list">${notes.map(n=>`<li><b>${esc(n.level)}</b> ${esc(n.text)}</li>`).join('')}</ul>`:'<p class="hint">자동 점검에서 걸린 표면 신호가 없습니다.</p>';
+  const trialNote=packId=>{const raw=(window.ExaminerLibrary||[]).find(p=>p&&p.id===packId);return raw&&raw.selectionNote?` · AI가 후보를 거른 과정: ${raw.selectionNote}`:''};
+  const allQuestions=()=>packs().flatMap(p=>p.questions);
+  async function loadJournal(){if(!window.EntryGrading)await loadScript('../entry/grading.js?v=2');return Promise.all([window.ExaminerJournalBank?Promise.resolve():loadScript('journal-bank.js?v=1'),window.ExaminerJournal?Promise.resolve():loadScript('journal.js?v=4'),window.ExaminerJournalLibrary?Promise.resolve():loadScript('journal-library.js?t='+Date.now())])}
   function loadScript(src){return new Promise((resolve,reject)=>{const script=document.createElement('script');script.src=src;script.onload=resolve;script.onerror=()=>{script.remove();reject(Error('분석 자료를 읽지 못했습니다. 새로고침 후 다시 시도해 주세요.'))};document.head.append(script)})}
   function renderPickers(){
     const previous=$('#pack-select').value;
@@ -30,12 +36,16 @@
     $('#trial-select').innerHTML='<option value="">테스트를 선택하세요</option>'+state.trials.slice().reverse().map(t=>`<option value="${esc(t.id)}">${esc(new Date(t.at).toLocaleString('ko-KR'))} · ${esc(findPack(t.packId).label)} · ${t.questionIds.length}문항</option>`).join('');$('#trial-select').value=activeTrial;
   }
   function renderAnalysis(){
-    $('#analysis-summary').textContent=`${analysis.rounds.join('·')}회 · 이론 ${analysis.records.length}문항. 정답·해설 요약, 출제 포인트와 함정, 문장·선택지 유형을 한 번 구조화했습니다. ${analysis.coverage.limitation}`;
+    const older=analysis.olderRecords||[],tested=E.coverage(packs()).concepts;
+    $('#analysis-summary').textContent=`최근 ${analysis.rounds.join('·')}회 이론 ${analysis.records.length}문항${older.length?`과 과거 ${(analysis.olderRounds||[]).join('·')}회 ${older.length}문항`:''}을 정답·해설 요약, 출제 포인트와 함정, 문장·선택지 유형으로 구조화했습니다. ${analysis.coverage.limitation}`;
     const filter=$('#frequency-filter').value,search=$('#concept-search').value.trim().toLowerCase();
-    const rows=analysis.concepts.filter(c=>{const n=c.frequency.rounds.length;return (!search||(c.label+c.area+c.point+c.trap).toLowerCase().includes(search))&&(filter==='all'||filter==='frequent'&&n>=3||filter==='occasional'&&n>0&&n<3||filter==='unseen'&&n===0)});
-    $('#concept-rows').innerHTML=rows.map(c=>`<tr><td><small>${esc(c.area)}</small><br><b>${esc(c.label)}</b><p class="scope-note">${esc(c.frequency.label)}</p></td><td>${c.frequency.questions}문항 / 75문항<br>${c.frequency.rounds.length?esc(c.frequency.rounds.join('·')+'회'):'관찰되지 않음'}<br><small>장기 미출제 판정 불가</small></td><td>${esc(c.point)}<br><small>함정 후보: ${esc(c.trap)}</small></td></tr>`).join('')||'<tr><td colspan="3">조건에 맞는 개념이 없습니다.</td></tr>';
-    $('#patterns').innerHTML=`<p>${esc(analysis.patterns.sentences)}</p><p>${Object.entries(analysis.patterns.counts).map(([k,v])=>`${esc(k)} ${v}문항`).join(' · ')}</p><ul>${analysis.patterns.distractors.map(p=>`<li>${esc(p)}</li>`).join('')}</ul><p class="hint">세부 출제 포인트와 함정은 AI 분석 의견입니다. 실제 수험생의 실수 이유를 추정한 기록이 아닙니다.</p>`;
-    $('#scope-references').innerHTML=analysis.scope.references.map(r=>`<li class="reference"><a href="${esc(r.url)}" target="_blank" rel="noopener noreferrer">${esc(r.title)}</a></li>`).join('');
+    const rows=analysis.concepts.filter(c=>{const n=c.frequency.rounds.length,o=c.frequency.older?c.frequency.older.questions:0;return (!search||(c.label+c.area+c.point+c.trap).toLowerCase().includes(search))&&(filter==='all'||filter==='frequent'&&n>=3||filter==='occasional'&&n>0&&n<3||filter==='unseen'&&n===0||filter==='older'&&n===0&&o>0)});
+    $('#concept-rows').innerHTML=rows.map(c=>{const o=c.frequency.older;return `<tr><td><small>${esc(c.area)}</small><br><b>${esc(c.label)}</b><p class="scope-note">${esc(c.frequency.label)}</p></td><td>최근 ${c.frequency.questions}문항 / ${analysis.records.length}문항<br>${c.frequency.rounds.length?esc(c.frequency.rounds.join('·')+'회'):'최근 5회 관찰되지 않음'}${o?`<br>과거 ${(analysis.olderRounds||[]).join('·')}회: ${o.questions}문항${o.rounds.length?' ('+esc(o.rounds.join('·'))+'회)':''}`:''}<br><small>${esc(c.frequency.longAbsence)}</small></td><td>${esc(c.point)}<br><small>함정 후보: ${esc(c.trap)}</small><br><small>테스트 출제 ${tested[c.id]||0}회</small></td></tr>`}).join('')||'<tr><td colspan="3">조건에 맞는 개념이 없습니다.</td></tr>';
+    const choiceCounts={};for(const r of [...analysis.records,...older])choiceCounts[r.choicePattern]=(choiceCounts[r.choicePattern]||0)+1;
+    $('#patterns').innerHTML=`<p>${esc(analysis.patterns.sentences)}</p><p>${Object.entries(analysis.patterns.counts).map(([k,v])=>`${esc(k)} ${v}문항`).join(' · ')}</p><p><b>오답 선택지 유형</b> (최근·과거 ${analysis.records.length+older.length}문항) ${Object.entries(choiceCounts).map(([k,v])=>`${esc(k)} ${v}`).join(' · ')}</p><ul>${analysis.patterns.distractors.map(p=>`<li>${esc(p)}</li>`).join('')}</ul><p class="hint">세부 출제 포인트와 함정은 AI 분석 의견입니다. 실제 수험생의 실수 이유를 추정한 기록이 아닙니다.</p>`;
+    $('#scope-references').innerHTML=[analysis.scope.official?{title:analysis.scope.official.source,url:analysis.scope.official.url}:null,...analysis.scope.references].filter(Boolean).map(r=>`<li class="reference"><a href="${esc(r.url)}" target="_blank" rel="noopener noreferrer">${esc(r.title)}</a></li>`).join('');
+    const P=window.ExaminerPracticeAnalysis,box=$('#practice-summary');
+    if(P&&box){const seen=P.voucherTypes.filter(v=>v.count),unseen=P.voucherTypes.filter(v=>!v.count);box.innerHTML=`<p>${esc(P.rounds.join('·'))}회 실무 ${P.coverage.questions}문항(${Object.entries(P.coverage.parts).map(([k,v])=>esc(k)+' '+v).join(' · ')}). ${esc(P.coverage.method)}. ${esc(P.coverage.limitation)}</p><p><b>관찰된 매입매출 유형</b> ${seen.map(v=>`${esc(v.code)} ${v.count}`).join(' · ')}</p><p><b>표본 내 미관찰 유형</b> ${unseen.map(v=>esc(v.code)).join(' · ')}</p><p><b>일반전표 개념(계정 기준)</b> ${P.concepts.filter(c=>c.count).map(c=>`${esc(c.label)} ${c.count}`).join(' · ')}</p>`}
   }
   function renderQuestions(){
     const trial=state.trials.find(t=>t.id===activeTrial);
@@ -46,9 +56,10 @@
     $('#questions').innerHTML=trial.questionIds.map((id,i)=>{
       const q=pack.questions.find(q=>q.id===id),a=latest(state.attempts,a=>a.trialId===trial.id&&a.questionId===id);
       if(a){done++;if(a.correct)correct++}
-      return `<article class="question" data-id="${esc(id)}"><span class="tag">${esc(q.area)}</span> <h3>${i+1}. ${esc(q.title)}</h3><p class="prompt">${esc(q.prompt)}</p>${q.table?tableHtml(q.table):''}<fieldset class="choices"><legend class="hint">정답 하나를 선택하세요</legend>${q.choices.map((c,n)=>`<label class="choice"><input type="radio" name="choice-${esc(id)}" value="${n}" ${a?.choice===n?'checked':''}><span>${circled[n]} ${esc(c)}</span></label>`).join('')}</fieldset><button class="grade" type="button">채점하기</button><p class="grade-result ${a?(a.correct?'ok':'wrong'):''}" role="status">${a?(a.correct?'정답입니다.':'다시 확인해 보세요.')+' · 테스트 기록에만 저장':''}</p><details class="answer"><summary>정답·해설 보기</summary><div class="answer-content"><b>정답 ${circled[q.answer]}</b><p>${esc(q.explanation)}</p><ol>${q.distractorReasons.map((r,n)=>`<li>${circled[n]} ${esc(r)}</li>`).join('')}</ol></div></details><details class="audit" ${a?'':'hidden'}><summary>출제 근거와 난이도 점검</summary><div class="audit-content"><p class="hint">${q.styles.map(esc).join(' · ')}</p><p><b>출제 의도</b> ${esc(q.intent)}</p><p><b>함정 후보</b> ${esc(q.trap)}</p><p><b>기출과 다른 지점</b> ${esc(q.novelty)}</p><p><b>계산 부담</b> ${esc(q.calculationLoad)}</p><p><b>범위 경계</b> ${esc(q.boundary)}</p><p><b>근거</b> ${esc(q.basis)}</p>${references(q.references)}<p class="hint">개념 연결: ${q.conceptIds.map(c=>esc(analysis.concepts.find(x=>x.id===c).label)).join(' · ')}<br>관련 기출: ${q.sourceRefs.length?esc(q.sourceRefs.join(', ')):'표본에 직접 대응 문항 없음'}<br>정답 근거와 계산 부담은 기출 수준으로 점검했습니다. 실제 시험문항이라는 뜻은 아닙니다.</p></div></details></article>`;
+      return `<article class="question" data-id="${esc(id)}"><span class="tag">${esc(q.area)}</span> <h3>${i+1}. ${esc(q.title)}</h3><p class="prompt">${esc(q.prompt)}</p>${q.table?tableHtml(q.table):''}<fieldset class="choices"><legend class="hint">정답 하나를 선택하세요</legend>${q.choices.map((c,n)=>`<label class="choice"><input type="radio" name="choice-${esc(id)}" value="${n}" ${a?.choice===n?'checked':''}><span>${circled[n]} ${esc(c)}</span></label>`).join('')}</fieldset><button class="grade" type="button">채점하기</button><p class="grade-result ${a?(a.correct?'ok':'wrong'):''}" role="status">${a?(a.correct?'정답입니다.':'다시 확인해 보세요.')+' · 테스트 기록에만 저장':''}</p><details class="answer"><summary>정답·해설 보기</summary><div class="answer-content"><b>정답 ${circled[q.answer]}</b><p>${esc(q.explanation)}</p><ol>${q.distractorReasons.map((r,n)=>`<li>${circled[n]} ${esc(r)}</li>`).join('')}</ol></div></details><details class="audit" ${a?'':'hidden'}><summary>출제 근거와 난이도 점검</summary><div class="audit-content"><p class="hint">${q.styles.map(esc).join(' · ')}</p><p><b>출제 의도</b> ${esc(q.intent)}</p><p><b>함정 후보</b> ${esc(q.trap)}</p><p><b>기출과 다른 지점</b> ${esc(q.novelty)}</p><p><b>계산 부담</b> ${esc(q.calculationLoad)}</p><p><b>범위 경계</b> ${esc(q.boundary)}</p><p><b>근거</b> ${esc(q.basis)}</p>${references(q.references)}${reviewTable(q.review)}<h4>자동 점검</h4>${lintList(E.lintQuestion(q,allQuestions()))}<p class="hint">개념 연결: ${q.conceptIds.map(c=>esc(analysis.concepts.find(x=>x.id===c).label)).join(' · ')}<br>관련 기출: ${q.sourceRefs.length?esc(q.sourceRefs.join(', ')):'표본에 직접 대응 문항 없음'}<br>정답 근거와 계산 부담은 기출 수준으로 점검했습니다. 실제 시험문항이라는 뜻은 아닙니다.</p></div></details></article>`;
     }).join('');
     $('#trial-summary').textContent=`${trial.questionIds.length}문항 중 ${done}문항 풀이 · 정답 ${correct}개`;
+    $('#trial-summary').textContent+=trialNote(trial.packId);
   }
   async function prepare(){
     if(ready)return true;
@@ -56,7 +67,7 @@
     const button=$('#start-mode');button.disabled=true;$('#open-tools').disabled=true;button.textContent='문제 준비 중…';
     loading=(async()=>{
       try{
-      await Promise.all([window.ExaminerAnalysis?Promise.resolve():loadScript('analysis.js?v=1'),window.ExaminerPilot?Promise.resolve():loadScript('questions.js?v=2'),window.ExaminerLibrary?Promise.resolve():loadScript('library.js?v=1')]);
+      await Promise.all([window.ExaminerAnalysis?Promise.resolve():loadScript('analysis.js?v=2'),window.ExaminerPilot?Promise.resolve():loadScript('questions.js?v=3'),window.ExaminerLibrary?Promise.resolve():loadScript('library.js?t='+Date.now()),window.ExaminerPracticeAnalysis?Promise.resolve():loadScript('practice-analysis.js?v=1').catch(()=>{})]);
         analysis=window.ExaminerAnalysis;pilot=E.validatePack(window.ExaminerPilot,analysis);
         if(!Array.isArray(window.ExaminerLibrary)||window.ExaminerLibrary.length>20)throw Error('새 문제 목록을 확인할 수 없습니다.');
         library=window.ExaminerLibrary.map(p=>E.validatePack(p,analysis));
@@ -65,7 +76,7 @@
         for(const p of library){const saved=state.packs.find(s=>s.id===p.id);if(saved&&JSON.stringify(saved)!==JSON.stringify(p))throw Error('이미 풀었던 문제와 새 목록의 내용이 다릅니다. 기존 기록을 보존하고 확인이 필요합니다.')}
         $('#style-options').innerHTML=[...E.STYLES,'출제위원 랜덤'].map(s=>'<label class="style-option"><input type="checkbox" value="'+esc(s)+'" '+(E.DEFAULT_STYLES.includes(s)?'checked':'')+'>'+esc(s)+'</label>').join('');
         $('#mode').hidden=false;$('#open-tools').hidden=true;activeTrial=state.trials.at(-1)?.id||'';renderPickers();renderAnalysis();renderQuestions();ready=true;
-        $('#ready-note').textContent=library.length?'새로 추가된 문제부터 열립니다. 풀던 문제는 이어서 풀 수 있습니다.':'현재 준비된 시범 6문제를 풀 수 있습니다. 새 출제는 ‘새 문제 부탁하기’를 이용하세요.';
+        $('#ready-note').textContent=library.length?'새로 추가된 문제부터 열립니다. 풀던 문제는 이어서 풀 수 있습니다.':'현재 준비된 시범 6문제를 풀 수 있습니다. 새 출제는 ‘새 문제 출제하기’를 이용하세요.';
         return true;
       }catch(error){notice('문제를 불러오지 못했습니다. '+error.message,true);return false}
       finally{button.disabled=false;$('#open-tools').disabled=false;button.textContent='문제 풀기';loading=null}
@@ -94,7 +105,7 @@
     const input=card.querySelector('input[type=radio]:checked');if(!input){card.querySelector('.grade-result').textContent='정답 하나를 먼저 선택하세요.';return}
     const t=state.trials.find(t=>t.id===activeTrial),q=findPack(t.packId).questions.find(q=>q.id===card.dataset.id),choice=Number(input.value),next=E.clone(state);
     next.attempts.push({id:uid('attempt'),at:now(),trialId:t.id,questionId:q.id,choice,correct:choice===q.answer});if(!save(next))return;
-    const r=card.querySelector('.grade-result');r.textContent=(choice===q.answer?'정답입니다.':'다시 확인해 보세요.')+' · 테스트 기록에만 저장';r.className='grade-result '+(choice===q.answer?'ok':'wrong');card.querySelector('.answer').open=true;card.querySelector('.audit').hidden=false;const completed=t.questionIds.map(id=>latest(state.attempts,a=>a.trialId===t.id&&a.questionId===id));$('#trial-summary').textContent=`${t.questionIds.length}문항 · 채점한 문제 ${completed.filter(Boolean).length} · 정답 ${completed.filter(a=>a?.correct).length}. 기존 훈련 기록에는 합산하지 않습니다.`;notice('테스트 채점 기록을 저장했습니다.');
+    const r=card.querySelector('.grade-result');r.textContent=(choice===q.answer?'정답입니다.':'다시 확인해 보세요.')+' · 테스트 기록에만 저장';r.className='grade-result '+(choice===q.answer?'ok':'wrong');card.querySelector('.answer').open=true;card.querySelector('.audit').hidden=false;const completed=t.questionIds.map(id=>latest(state.attempts,a=>a.trialId===t.id&&a.questionId===id));$('#trial-summary').textContent=`${t.questionIds.length}문항 · 채점한 문제 ${completed.filter(Boolean).length} · 정답 ${completed.filter(a=>a?.correct).length}. 기존 훈련 기록에는 합산하지 않습니다.`+trialNote(t.packId);notice('테스트 채점 기록을 저장했습니다.');
   }
   function download(name,text,type='application/json'){const blob=new Blob([text],{type}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=name;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000)}
   function stage(){
@@ -103,8 +114,102 @@
     }catch(error){pending=null;$('#pending').replaceChildren();notice('가져오기를 보류합니다. '+error.message,true)}
   }
   async function readFile(file,limit){if(!file)throw Error('파일을 선택해 주세요.');if(file.size>limit)throw Error('파일이 너무 큽니다.');return file.text()}
+  // ---- 바로 출제: PC 동기화 도우미(127.0.0.1) → 설치된 Codex. 도우미가 없으면(휴대폰 등) 아래 수동 문장을 쓴다. ----
+  const HELPER=(()=>{try{return localStorage.getItem('tax-accounting-helper-url')||'http://127.0.0.1:8790'}catch{return 'http://127.0.0.1:8790'}})();
+  let autoTimer=0,autoBusy=false,shownJob='';
+  async function helper(path,body){
+    if(location.protocol==='https:')throw Error('https 화면에서는 PC 도우미를 쓸 수 없습니다.');
+    const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),body===undefined?4000:20000);
+    try{const response=await fetch(HELPER+path,{method:body===undefined?'GET':'POST',headers:body===undefined?undefined:{'Content-Type':'application/json'},body:body===undefined?undefined:JSON.stringify(body),signal:controller.signal,cache:'no-store'});const data=await response.json();if(!response.ok||data.ok===false)throw Error(data.message||'요청을 처리하지 못했습니다.');return data}
+    finally{clearTimeout(timer)}
+  }
+  const autoCounts=()=>({theory:Number($('#auto-theory').value),practical:Number($('#auto-practical').value),voucher:Number($('#auto-voucher').value)});
+  function autoTotal(){const c=autoCounts(),sum=c.theory+c.practical+c.voucher;$('#auto-total').textContent=`합계 ${sum}문항 (권장 5~8, 최대 8)`;return sum}
+  function setAutoState(text,ok){const s=$('#auto-state');s.textContent=text;s.dataset.ok=ok?'1':'0'}
+  function renderAutoLog(job){$('#auto-log').innerHTML=(job?.events||[]).map(e=>`<li><time>${esc(new Date(e.at).toLocaleTimeString('ko-KR'))}</time> ${esc(e.message)}</li>`).join('')}
+  async function checkAuto(){
+    $('#auto-run').disabled=true;
+    try{
+      const status=await helper('/api/examiner/status');
+      if(!status.installed){setAutoState('Codex가 설치되어 있지 않아 바로 출제할 수 없습니다. 아래 수동 방법을 쓰세요.',false);$('#manual-request').open=true;return}
+      if(!status.loggedIn){setAutoState('Codex에 ChatGPT 계정 로그인이 필요합니다. 「AI 연결」을 누르세요.',false);$('#auto-login').hidden=false;return}
+      $('#auto-login').hidden=true;
+      const running=status.job&&status.job.phase==='running';
+      setAutoState(`PC 도우미와 Codex가 연결되었습니다${status.model?' · 모델 '+status.model:''}.`,true);
+      $('#auto-run').disabled=running||autoTotal()<1;
+      if(status.job&&['running','review'].includes(status.job.phase))followJob(status.job);
+    }catch(error){
+      setAutoState('PC 도우미가 꺼져 있거나 이 화면에서 연결할 수 없습니다. PC에서는 「오답훈련센터 시작.bat」으로 도우미를 켜면 바로 출제할 수 있습니다. 휴대폰이면 아래 수동 방법을 쓰세요.',false);$('#manual-request').open=true;
+    }
+  }
+  function followJob(job){
+    renderAutoLog(job);$('#auto-cancel').hidden=job.phase!=='running';$('#auto-run').disabled=job.phase==='running';
+    if(job.phase==='running'){setAutoState('출제 중입니다. 이 화면을 닫지 않아도 되고, 도우미가 계속 처리합니다.',true);if(!autoTimer)autoTimer=setInterval(pollJob,2500);return}
+    clearInterval(autoTimer);autoTimer=0;
+    if(job.phase==='review'&&shownJob!==job.id){shownJob=job.id;handleCandidate(job)}
+    else if(job.phase==='error'){setAutoState(job.message||'출제를 마치지 못했습니다.',false);$('#auto-run').disabled=false}
+  }
+  async function pollJob(){try{const data=await helper('/api/examiner/job');if(data.job)followJob(data.job)}catch{setAutoState('도우미와 연결이 끊겼습니다. 도우미를 다시 켜면 진행 상황을 이어서 볼 수 있습니다.',false)}}
+  async function reloadLibraries(){
+    await loadScript('library.js?t='+Date.now());
+    library=window.ExaminerLibrary.map(p=>E.validatePack(p,analysis));
+    await loadScript('journal-library.js?t='+Date.now());
+    renderPickers();renderAnalysis();
+  }
+  async function handleCandidate(job){
+    const c=job.candidate,box=$('#auto-result');
+    try{
+      if(!await prepare())throw Error('분석 자료를 읽지 못했습니다.');
+      await loadJournal();
+      const pack=c.pack?E.validatePack(c.pack,analysis):null;
+      if(c.journalBatch)window.ExaminerJournal.validateBank(c.journalBatch.items);
+      const theoryNotes=pack?E.lintPack(pack,allQuestions()).map(n=>({...n,where:'이론',title:(pack.questions.find(q=>q.id===n.questionId)||{}).title})):[];
+      const journalNotes=c.journalBatch?c.journalBatch.items.flatMap(i=>window.ExaminerJournal.lintItem(i).map(n=>({...n,where:i.kind==='practical'?'일반전표':'매입매출',title:i.title}))):[];
+      const notes=[...theoryNotes,...journalNotes].filter(n=>n.level==='주의');
+      const summary=`<p><b>이론 ${pack?pack.questions.length:0}문항 · 전표 ${c.journalBatch?c.journalBatch.items.length:0}문항</b>이 정답을 모르는 독립 재풀이까지 통과했습니다.</p>${c.selectionNote?`<p class="hint">AI가 후보를 거른 과정: ${esc(c.selectionNote)}</p>`:''}${c.withheld&&c.withheld.length?`<details><summary>걸러진 후보 ${c.withheld.length}건</summary><ul>${c.withheld.map(w=>`<li>${esc(w)}</li>`).join('')}</ul></details>`:''}`;
+      if(notes.length){
+        box.innerHTML=`${summary}<div class="warning"><b>자동 점검에서 주의가 나왔습니다.</b><ul class="lint-list">${notes.map(n=>`<li>${esc(n.where)}${n.title?' 「'+esc(n.title)+'」':''}: ${esc(n.text)}</li>`).join('')}</ul></div><div class="controls"><button id="auto-accept" class="primary" type="button">그래도 추가</button><button id="auto-reject" type="button">추가하지 않음</button></div>`;
+        $('#auto-accept').onclick=()=>registerCandidate(job);$('#auto-reject').onclick=()=>discardCandidate(job,'사용자가 주의 항목을 보고 추가하지 않았습니다.');
+        setAutoState('검수는 통과했지만 확인할 점이 있습니다.',false);
+      }else{box.innerHTML=summary;await registerCandidate(job)}
+    }catch(error){
+      box.innerHTML=`<div class="warning">화면의 최종 형식 검사에서 걸러져 추가하지 않았습니다. ${esc(error.message)}</div>`;
+      setAutoState('추가하지 않았습니다.',false);$('#auto-run').disabled=false;
+      try{await helper('/api/examiner/discard',{jobId:job.id,reason:error.message})}catch{}
+    }
+  }
+  async function registerCandidate(job){
+    setAutoState('문제를 센터에 추가하고 있습니다…',true);
+    try{
+      const result=await helper('/api/examiner/register',{jobId:job.id});
+      await reloadLibraries();
+      setAutoState(`추가했습니다: 이론 ${result.added.theory}문항, 전표 ${result.added.journal}문항. 아래 버튼으로 바로 풀어 보세요. 모든 기기에 반영하려면 「동기화」를 누르세요.`,true);
+      $('#auto-result').insertAdjacentHTML('beforeend','<div class="controls auto-open"><button type="button" data-open="theory" class="primary">이론 문제 풀기</button><button type="button" data-open="practical">일반전표 풀기</button><button type="button" data-open="voucher">매입매출 풀기</button></div>');
+      $('#auto-run').disabled=false;
+    }catch(error){setAutoState('추가하지 못했습니다. '+error.message,false);$('#auto-run').disabled=false}
+  }
+  async function discardCandidate(job,reason){try{await helper('/api/examiner/discard',{jobId:job.id,reason})}catch{}$('#auto-result').innerHTML='<p class="hint">추가하지 않았습니다.</p>';setAutoState('추가하지 않았습니다.',false);$('#auto-run').disabled=false}
+  async function runAuto(){
+    if(autoBusy)return;
+    const counts=autoCounts(),total=autoTotal();
+    if(total<1||total>8){setAutoState('문항은 1~8개로 정해 주세요.',false);return}
+    autoBusy=true;$('#auto-run').disabled=true;$('#auto-result').replaceChildren();shownJob='';
+    try{const data=await helper('/api/examiner/generate',{counts,styles:newStyles()});followJob(data.job)}
+    catch(error){setAutoState('출제를 시작하지 못했습니다. '+error.message,false);$('#auto-run').disabled=false}
+    finally{autoBusy=false}
+  }
+  $('#auto-run').addEventListener('click',runAuto);
+  $('#auto-cancel').addEventListener('click',async()=>{try{await helper('/api/examiner/cancel',{})}catch{}pollJob()});
+  $('#auto-login').addEventListener('click',async()=>{
+    try{await helper('/api/examiner/login',{});setAutoState('열린 창에서 ChatGPT에 로그인한 뒤 잠시 기다려 주세요.',true);
+      const wait=setInterval(async()=>{try{const s=await helper('/api/examiner/status');if(s.loggedIn){clearInterval(wait);checkAuto()}}catch{}},3000);setTimeout(()=>clearInterval(wait),300000)}
+    catch(error){setAutoState('AI 연결 창을 열지 못했습니다. '+error.message,false)}
+  });
+  ['theory','practical','voucher'].forEach(k=>$('#auto-'+k).addEventListener('change',()=>{const total=autoTotal();$('#auto-run').disabled=total<1||total>8||!$('#auto-cancel').hidden}));
+  $('#auto-result').addEventListener('click',event=>{const b=event.target.closest('[data-open]');if(!b)return;$('#start-mode').click();setTimeout(()=>{const pick=document.querySelector('#subject-picker [data-subject="'+b.dataset.open+'"]');if(pick)pick.click()},0)});
+  autoTotal();
   $('#start-mode').addEventListener('click',()=>{const picker=$('#subject-picker');picker.hidden=false;$('#practice').hidden=true;$('#journal-practice').hidden=true;$('#subject-title').focus({preventScroll:true});picker.scrollIntoView({block:'start'})});
-  $('#subject-picker').addEventListener('click',async event=>{const button=event.target.closest('[data-subject]');if(!button)return;const kind=button.dataset.subject;if(kind==='theory'){$('#journal-practice').hidden=true;await start();return}button.disabled=true;try{if(!journalLoading)journalLoading=Promise.all([window.ExaminerJournalBank?Promise.resolve():loadScript('journal-bank.js?v=1'),window.ExaminerJournal?Promise.resolve():loadScript('journal.js?v=1')]);await journalLoading;window.ExaminerJournal.mount(kind);notice('준비된 '+(kind==='practical'?'일반전표':'매입매출전표')+' 문제를 열었습니다.')}catch(error){journalLoading=null;notice('전표 문제를 열지 못했습니다. '+error.message,true)}finally{button.disabled=false}});
+  $('#subject-picker').addEventListener('click',async event=>{const button=event.target.closest('[data-subject]');if(!button)return;const kind=button.dataset.subject;if(kind==='theory'){$('#journal-practice').hidden=true;await start();return}button.disabled=true;try{if(!journalLoading)journalLoading=loadJournal();await journalLoading;const result=await window.ExaminerJournal.mount(kind);if(!result?.warning)notice('준비된 '+(kind==='practical'?'일반전표':'매입매출전표')+' 문제를 열었습니다.')}catch(error){journalLoading=null;notice('전표 문제를 열지 못했습니다. '+error.message,true)}finally{button.disabled=false}});
   $('#open-trial').addEventListener('click',()=>createTrial());
   $('#open-tools').addEventListener('click',()=>prepare());
   $('#new-style-options').addEventListener('change',event=>{
@@ -116,7 +221,7 @@
     updateQuickRequest();$('#copy-status').textContent='';
   });
   updateQuickRequest();
-  $('#request-help').addEventListener('click',()=>{const guide=$('#request-guide'),opening=guide.hidden;guide.hidden=!opening;$('#request-help').setAttribute('aria-expanded',String(opening));$('#request-help').textContent=opening?'요청문 닫기':'새 문제 부탁하기';if(opening){updateQuickRequest();$('#request-title').focus({preventScroll:true});guide.scrollIntoView({block:'start',behavior:'smooth'})}});
+  $('#request-help').addEventListener('click',()=>{const guide=$('#request-guide'),opening=guide.hidden;guide.hidden=!opening;$('#request-help').setAttribute('aria-expanded',String(opening));$('#request-help').textContent=opening?'요청문 닫기':'새 문제 출제하기';if(opening){updateQuickRequest();checkAuto();$('#request-title').focus({preventScroll:true});guide.scrollIntoView({block:'start',behavior:'smooth'})}});
   $('#copy-quick-request').addEventListener('click',async()=>{try{if(!navigator.clipboard?.writeText)throw Error();await navigator.clipboard.writeText($('#quick-request').value);$('#copy-status').textContent='복사했습니다. 지금 대화하던 AI 채팅에 붙여넣고 보내 주세요.'}catch{const t=$('#quick-request');t.focus();t.select();$('#copy-status').textContent='자동 복사가 안 되어 문장을 선택했습니다. 직접 복사하거나 채팅에 같은 문장을 입력해 주세요.'}});
   $('#trial-select').addEventListener('change',()=>{activeTrial=$('#trial-select').value;renderQuestions();if(activeTrial)focusPractice()});
   $('#frequency-filter').addEventListener('change',renderAnalysis);$('#concept-search').addEventListener('input',renderAnalysis);

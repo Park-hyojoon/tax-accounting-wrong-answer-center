@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>전산회계 1급 · 이론 기출 오답 훈련</title>
+  <title>이론 오답 · 학습 센터</title>
   <style>
     :root{--navy:#15345e;--blue:#2d78c5;--sky:#e7f5ff;--mint:#e9fbf3;--yellow:#fff4b8;--red:#ce3f4b;--green:#137e57;--line:#cadceb;--ink:#172235;--muted:#65748a}
     *{box-sizing:border-box}
@@ -99,7 +99,12 @@
     @media(max-width:760px){body{font-size:16px}.hero,.question,.save-panel{padding:18px}.prompt{font-size:18px}.dashboard{position:static}.filename-row{grid-template-columns:1fr}.attempt{width:100%;margin-left:0}}
     @media print{.dashboard,.actions,.save-panel,.footer{display:none}.question{break-inside:avoid;box-shadow:none}details:not([open]){display:none}}
   </style>
-  <link rel="stylesheet" href="design/theme.css?v=8">
+  <link rel="stylesheet" href="design/theme.css?v=12">
+  <link rel="icon" type="image/svg+xml" href="design/brand-mark.svg?v=3">
+  <link rel="icon" type="image/png" sizes="32x32" href="design/favicon-32.png?v=3">
+  <link rel="icon" type="image/png" sizes="192x192" href="design/icon-192.png?v=3">
+  <link rel="shortcut icon" href="design/favicon.ico?v=3">
+  <link rel="apple-touch-icon" href="design/apple-touch-icon.png?v=3">
 </head>
 <body>
   <nav class="top-nav" aria-label="유형별 연습 메뉴">
@@ -117,7 +122,7 @@
       </div>
     </div>
   </nav>
-  <script src="data/theory.js?v=31"></script>
+  <script src="data/theory.js?v=32"></script>
   <script>(function(){var nav=document.querySelector('.top-nav');function sync(){document.documentElement.style.setProperty('--nav-h',(nav?nav.offsetHeight:60)+'px')}sync();window.addEventListener('resize',sync)})()</script>
   <main class="wrap">
     <div class="dashboard">
@@ -141,7 +146,7 @@
     <section class="save-panel" id="savePanel">
       <h2>학습기록 저장</h2>
       <p>오늘 채점한 문제와 오늘의 답변 이력, 정답 및 핵심 해설만 Markdown 파일로 저장합니다.</p>
-      <div class="path"><span>D:\00. 학습센터\기출문제 연습코너\또 틀렸다!</span><button class="btn secondary" id="copyPath" type="button">폴더 경로 복사</button></div>
+      <div class="path"><span>D:\00. 학습센터\03. 기출문제 연습코너\또 틀렸다!</span><button class="btn secondary" id="copyPath" type="button">폴더 경로 복사</button></div>
       <div class="filename-row">
         <input type="text" id="fileName" lang="ko" data-ko-auto aria-label="저장 파일 이름">
         <button class="btn green" id="saveToday" type="button">오늘 학습기록 저장</button>
@@ -157,9 +162,9 @@
     <p class="footer">학습기록은 사용자 컴퓨터에만 저장되며 외부로 자동 전송되지 않습니다.</p>
   </main>
 
-  <script src="github-learning-sync.js?v=22"></script>
-  <script src="season-ui.js?v=47"></script>
-<script src="training-ui.js?v=17"></script>
+  <script src="github-learning-sync.js?v=23"></script>
+  <script src="season-ui.js?v=50"></script>
+<script src="training-ui.js?v=19"></script>
   <script>
     const problems=loadTrainingProblems();
 
@@ -255,7 +260,7 @@
     $('#fileName').addEventListener('input',e=>{state.fileName=e.target.value;persist()});
     $('#koAuto').addEventListener('change',e=>{state.koAuto=e.target.checked;persist();resetKoreanBuffers()});
     $('#copyPath').addEventListener('click',async()=>{
-      const path='D:\\00. 학습센터\\기출문제 연습코너\\또 틀렸다!';
+      const path='D:\\00. 학습센터\\03. 기출문제 연습코너\\또 틀렸다!';
       try{await navigator.clipboard.writeText(path);$('#saveStatus').textContent='폴더 경로를 복사했습니다.'}catch(e){$('#saveStatus').textContent='폴더 경로를 복사하지 못했습니다. 화면의 경로를 직접 선택해 복사해 주세요.'}
     });
 
@@ -408,7 +413,7 @@
     buildStarView();
     (function(){
     if(typeof window.TrainingGitHub?.installSyncBar!=='function'){const button=document.querySelector('#syncAll');if(button)button.addEventListener('click',()=>alert('동기화 기능을 불러오지 못했습니다. Ctrl+F5로 새로고침한 뒤 다시 눌러주세요.'));return}
-    TrainingGitHub.installSyncBar({onNeedToken:({mobile})=>{if(mobile)TrainingGitHub.showToast('처음 한 번만 오답 훈련센터 홈 아래쪽에서 GitHub 토큰을 연결한 뒤 다시 눌러주세요.',8000)}});
+    TrainingGitHub.installSyncBar({onNeedToken:({mobile})=>{if(mobile)TrainingGitHub.showToast('처음 한 번만 학습 센터 홈 아래쪽에서 GitHub 토큰을 연결한 뒤 다시 눌러주세요.',8000)}});
   })();
 </script>
 <script>TrainingSeason.install(problems,{state,theory:true,save:persist,refresh:updateDashboard});</script>

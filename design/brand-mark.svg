@@ -1,6 +1,21 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="오답 훈련센터">
-  <rect width="64" height="64" rx="17" fill="#276451"/>
-  <path d="M22.5 25c0-7.2 4.3-11.5 9.5-11.5s9.5 4.3 9.5 11.5" fill="none" stroke="#f3d392" stroke-width="3.4" stroke-linecap="round"/>
-  <path d="M15.5 25h33l-3.2 21.3a4.6 4.6 0 0 1-4.5 3.9H23.2a4.6 4.6 0 0 1-4.5-3.9z" fill="#f3d392"/>
-  <path d="M24.8 36.6l5 5 9.6-10.2" fill="none" stroke="#276451" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="학습 센터">
+  <rect width="512" height="512" rx="82" fill="#fffdf5"/>
+  <!-- fast, focused learning: yellow motion lines + red stopwatch -->
+  <g fill="none" stroke="#e6be18" stroke-linecap="round">
+    <path d="M18 205h139" stroke-width="31"/>
+    <path d="M9 267h122" stroke-width="29"/>
+    <path d="M18 329h130" stroke-width="29"/>
+    <path d="M55 391h108" stroke-width="27"/>
+    <path d="M18 143h72" stroke-width="25"/>
+  </g>
+  <g fill="none" stroke="#e21f2f" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="310" cy="285" r="174" stroke-width="39"/>
+    <path d="M310 111V62" stroke-width="39"/>
+    <path d="M259 59h102" stroke-width="39"/>
+    <path d="M184 158l-37-37" stroke-width="36"/>
+    <path d="M436 158l37-37" stroke-width="36"/>
+    <path d="M310 285h105" stroke-width="33"/>
+  </g>
+  <circle cx="310" cy="285" r="32" fill="#e21f2f"/>
+  <circle cx="310" cy="285" r="11" fill="#fffdf5"/>
 </svg>

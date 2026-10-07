@@ -7,7 +7,8 @@ $failureLog = Join-Path $PSScriptRoot '.sync-helper-launcher.log'
 function Test-SyncHelper {
     try {
         $response = Invoke-RestMethod -Uri $statusUrl -Method Get -TimeoutSec 2
-        return $response.helper -eq 'tax-accounting-sync-helper' -and $response.season -eq 'exam-20260914'
+        # Version 3+ also serves examiner auto-generation; an older running helper is replaced below.
+        return $response.helper -eq 'tax-accounting-sync-helper' -and $response.season -eq 'exam-20260914' -and [int]$response.version -ge 3
     }
     catch {
         return $false

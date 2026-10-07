@@ -1,0 +1,15 @@
+/* 전표 입력 공통 배치: 일반 메뉴와 출제위원 테스트에서 함께 사용한다. */
+:where([data-entry-host]){--compact-control-height:29px}
+:where([data-entry-host]) .question-layout{display:block!important}:where([data-entry-host]) .answer-workspace{width:100%!important;max-width:100%!important;overflow:visible!important}
+:where([data-entry-host]) .kclep-shell{zoom:1!important;font-size:13px!important;margin-top:12px!important;max-width:100%}
+:where([data-entry-host]) .kclep-scroll{overflow-x:auto!important}:where([data-entry-host]) .kclep-subfields{overflow-x:auto!important}
+:where([data-entry-host]) .balance-panel{padding:6px!important;gap:6px!important;background:#f0f1f3!important;border:1px solid #d5d9df!important;border-radius:6px!important}:where([data-entry-host]) .balance-item{padding:5px!important;font-size:12px!important}:where([data-entry-host]) .balance-item strong{font-size:15px!important}
+:where([data-entry-host]) .entry-table input,:where([data-entry-host]) .entry-table select{font-size:14px!important}
+:where([data-entry-host]) .entry-wrap table{border-radius:5px!important}
+:where([data-entry-host]) .entry-wrap th{height:27px!important;padding:3px 6px!important;line-height:18px!important;font-size:12px!important;white-space:nowrap;background:#e7e9ed!important;font-weight:600!important}
+:where([data-entry-host]) .entry-wrap th:last-child{min-width:42px;width:42px}
+:where([data-entry-host]) .entry-wrap td{padding:3px 5px!important}
+:where([data-entry-host]) .entry-wrap input,:where([data-entry-host]) .entry-wrap select{height:var(--compact-control-height)!important;min-height:var(--compact-control-height)!important;padding:2px 6px!important;line-height:18px!important;font-size:13px!important;border-width:1px!important;border-radius:4px!important}
+:where([data-entry-host]) .kclep-subfields{gap:5px!important;min-height:38px!important;padding:5px!important}:where([data-entry-host]) .kclep-subfields input,:where([data-entry-host]) .kclep-subfields select{height:25px!important;min-height:25px!important;font-size:12px!important}
+:where([data-entry-host]) .voucher-entry-table th,:where([data-entry-host]) .voucher-entry-table td,:where([data-entry-host]) .journal-table th,:where([data-entry-host]) .journal-table td{height:28px!important;padding:1px 3px!important;font-size:12px!important}
+:where([data-entry-host]) .voucher-entry-table input,:where([data-entry-host]) .voucher-entry-table select,:where([data-entry-host]) .journal-table input,:where([data-entry-host]) .journal-table select{height:24px!important;min-height:0!important;padding:1px 2px!important;font-size:12px!important}

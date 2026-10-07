@@ -19,6 +19,7 @@
     ['surprise','뜻밖이지만 납득되는 판단 지점이 있나요?','계산량 증가와 구분'],
     ['forced','억지스럽거나 범위를 벗어나나요?','높을수록 문제']
   ];
+  const REVIEW_KEYS=RUBRIC.map(r=>r[0]);
   const fail=message=>{throw new Error(message)};
   const text=(value,max,label)=>{if(typeof value!=='string'||!value.trim()||value.length>max)fail(label+'의 글자 수/형식을 확인해 주세요.');return value};
   const id=value=>text(value,80,'ID')&&/^[a-zA-Z0-9][a-zA-Z0-9_-]*$/.test(value);
@@ -28,7 +29,7 @@
     if(!pack||pack.schemaVersion!==1||pack.season!==SEASON)fail('이 시즌의 출제위원 문제 JSON이 아닙니다.');
     if(!id(pack.id))fail('문제 묶음 ID 형식이 잘못되었습니다.');text(pack.label,160,'묶음 이름');
     if(!Array.isArray(pack.questions)||pack.questions.length<1||pack.questions.length>8)fail('한 묶음은 1~8문항만 허용합니다.');
-    const concepts=new Map(analysis.concepts.map(c=>[c.id,c])),refs=new Set(analysis.records.map(r=>r.id)),seen=new Set();
+    const concepts=new Map(analysis.concepts.map(c=>[c.id,c])),refs=new Set([...analysis.records,...(analysis.olderRecords||[])].map(r=>r.id)),seen=new Set();
     const questions=pack.questions.map(q=>{
       if(!q||!id(q.id)||seen.has(q.id))fail('문제 ID가 잘못되었거나 중복되었습니다.');seen.add(q.id);
       for(const [key,max]of Object.entries({title:140,prompt:2400,explanation:2400,intent:800,trap:800,novelty:800,basis:1200,boundary:800,calculationLoad:80}))text(q[key],max,key);
@@ -43,8 +44,13 @@
       if(!Array.isArray(q.distractorReasons)||q.distractorReasons.length!==4||q.distractorReasons.some(r=>typeof r!=='string'||!r.trim()||r.length>900))fail('각 선택지의 해설 4개가 필요합니다.');
       let table;
       if(q.table){const t=q.table;text(t.caption,180,'표 제목');if(!Array.isArray(t.headers)||!t.headers.length||t.headers.length>8||t.headers.some(h=>typeof h!=='string'||h.length>120)||!Array.isArray(t.rows)||!t.rows.length||t.rows.length>16||t.rows.some(r=>!Array.isArray(r)||r.length!==t.headers.length||r.some(c=>typeof c!=='string'||c.length>500)))fail('자료표의 행과 열을 확인해 주세요.');table=clone(t)}
+      // 9개 평가 기준의 AI 1차 검토 메모(선택). 문자열만 허용하고 화면에서는 글자로만 표시한다.
+      let review;
+      if(q.review!==undefined&&q.review!==null){if(typeof q.review!=='object'||Array.isArray(q.review))fail('검토 메모(review) 형식을 확인해 주세요.');review={};for(const [k,v]of Object.entries(q.review)){if(typeof v!=='string'||v.length>600)fail('검토 메모의 글자 수/형식을 확인해 주세요.');if(REVIEW_KEYS.includes(k)||k==='verdict')review[k]=v}}
       // Allow-listed fields only. Imported HTML/JS/extra metadata is never executed.
-      return Object.fromEntries(Object.entries({...q,...(table?{table}:{})}).filter(([k])=>['id','title','area','conceptIds','styles','prompt','choices','answer','explanation','distractorReasons','intent','trap','novelty','calculationLoad','sourceRefs','basis','references','boundary','table'].includes(k)));
+      const out=Object.fromEntries(Object.entries({...q,...(table?{table}:{})}).filter(([k])=>['id','title','area','conceptIds','styles','prompt','choices','answer','explanation','distractorReasons','intent','trap','novelty','calculationLoad','sourceRefs','basis','references','boundary','table'].includes(k)&&!(k==='table'&&!table)));
+      if(review&&Object.keys(review).length)out.review=review;
+      return out;
     });
     return {schemaVersion:1,season:SEASON,id:pack.id,label:pack.label,questions};
   }
@@ -82,16 +88,18 @@
     if(!styles.length||styles.some(s=>s!=='출제위원 랜덤'&&!STYLES.includes(s))||!Number.isInteger(count)||count<5||count>8)fail('AI 요청은 스타일 1개 이상, 5~8문항으로 지정해 주세요.');
     const examples=[];
     for(const c of analysis.concepts){const row=analysis.records.filter(r=>r.conceptIds.includes(c.id)&&!r.qualityNote).at(-1);if(row&&examples.length<12)examples.push({id:row.id,round:row.round,area:row.area,conceptIds:row.conceptIds,answerSummary:row.answerSummary,explanation:row.explanation,textPattern:row.textPattern,choicePattern:row.choicePattern})}
-    const context={snapshot:analysis.snapshotId,coverage:analysis.coverage,scope:analysis.scope,styles,count,concepts:analysis.concepts.map(c=>({id:c.id,area:c.area,label:c.label,point:c.point,trap:c.trap,observed:c.frequency.questions,observedRounds:c.frequency.rounds,lastObservedRound:c.lastObservedRound,absence:c.frequency.longAbsence})),representativeSummaries:examples,patterns:analysis.patterns};
-    const schema={schemaVersion:1,season:SEASON,id:'ai-batch-UNIQUE-ID',label:'출제위원 검토 대기 문제',questions:[{id:'ai-question-UNIQUE-ID',title:'정답을 누설하지 않는 제목',area:'회계원리',conceptIds:['cash-maturity'],styles:['함정형'],prompt:'시험 문장',choices:['선택지1','선택지2','선택지3','선택지4'],answer:0,explanation:'정답의 완전한 풀이',distractorReasons:['정답 이유','오답 이유','오답 이유','오답 이유'],intent:'판단하려는 지점',trap:'함정 요소',novelty:'기출과 다른 판단 구조',calculationLoad:'없음/날짜 비교/단순 가감',sourceRefs:[],basis:'확인한 정답·범위 근거',references:[{title:'공식 교재·기준·법령',url:'https://example.invalid/replace-with-verified-source'}],boundary:'범위를 벗어나지 않는 이유',table:{caption:'자료표가 필요할 때만',headers:['구분','내용'],rows:[['자료','값']]}}]};
+    const context={snapshot:analysis.snapshotId,coverage:analysis.coverage,scope:analysis.scope,styles,count,concepts:analysis.concepts.map(c=>({id:c.id,area:c.area,label:c.label,point:c.point,trap:c.trap,observed:c.frequency.questions,observedRounds:c.frequency.rounds,lastObservedRound:c.lastObservedRound,olderObserved:c.frequency.older?c.frequency.older.questions:undefined,absence:c.frequency.longAbsence})),officialScope:analysis.scope.official,representativeSummaries:examples,patterns:analysis.patterns};
+    const schema={schemaVersion:1,season:SEASON,id:'ai-batch-UNIQUE-ID',label:'출제위원 검토 대기 문제',questions:[{id:'ai-question-UNIQUE-ID',title:'정답을 누설하지 않는 제목',area:'회계원리',conceptIds:['cash-maturity'],styles:['함정형'],prompt:'시험 문장',choices:['선택지1','선택지2','선택지3','선택지4'],answer:0,explanation:'정답의 완전한 풀이',distractorReasons:['정답 이유','오답 이유','오답 이유','오답 이유'],intent:'판단하려는 지점',trap:'함정 요소',novelty:'기출과 다른 판단 구조',calculationLoad:'없음/날짜 비교/단순 가감',sourceRefs:[],basis:'확인한 정답·범위 근거',references:[{title:'공식 교재·기준·법령',url:'https://example.invalid/replace-with-verified-source'}],boundary:'범위를 벗어나지 않는 이유',table:{caption:'자료표가 필요할 때만',headers:['구분','내용'],rows:[['자료','값']]},review:Object.fromEntries(RUBRIC.map(r=>[r[0],'통과/주의/해당 없음: '+r[1]]))}]};
     return [
       '출제위원 테스트 모드. 일반 문제 등록·수정·태그 분류에 이 지침을 사용하지 않는다.',
       '원문 재분석 없이 아래 구조화 요약을 사용하여 '+count+'개의 이론 4지선다 신규 문제를 출제한다. 범위는 전산회계 1급 회계원리·원가회계·부가가치세다.',
       '목적은 낯설지만 배운 내용으로 풀 수 있는 문제다. 기출을 난이도·문장 길이·계산량의 기준으로 사용한다. '+(count===6?'질문 방향 바꾸기 2문항, 비슷한 개념 구분하기 2문항, 세부개념이나 예외 활용하기 2문항으로 배분한다.':'질문 방향 바꾸기, 비슷한 개념 구분하기, 세부개념이나 예외 활용하기를 가능한 고르게 배분한다.')+' 스타일은 보조 분류다. 모든 스타일을 채우려고 억지 문제를 만들지 않는다. 출제 의도·함정·기출과의 차이·근거는 풀이 전에 힌트로 노출하지 않는다.',
       '기출 빈도는 출제범위를 제한하지 않는다. 세부개념 후보 목록을 탐색하되 선택 개념의 공식 교재/기준/법령 근거를 확인한다. 새로운 개념이 목록에 없으면 근거와 함께 목록 확장부터 제안하고 임의로 기존 ID에 끼워넣지 않는다.',
       '주어진 회차 밖의 빈도, 최근 수년의 장기 미출제, 실제 출제확률을 추정하여 단정하지 않는다. 장기 미출제 후보는 표본 내 미관찰 또는 최근 관찰되지 않은 후보일 뿐이다. 사용자의 교재 중요도도 확인되지 않았다.',
+      '학습자의 정답률·체감 난이도·이전 대화의 분위기에 맞춰 수준을 낮추지 않는다. 정의를 그대로 묻고 오답이 명백한 교재 기본 예제 수준은 실패로 본다. 기준은 공식 평가범위와 실제 기출의 판단 깊이다.',
       '숫자·날짜만 바꾸지 말고 조건의 방향, 판단 기준, 예외의 경계, 개념 결합을 바꾼다. 계산을 복잡하게 하는 것은 출제위원다움이 아니다. 억지 사례·고급회계·법인세·소득세 계산을 배제한다.',
       '각 문항은 단일 정답, 반증 가능한 오답 3개, 자연스러운 시험 문장을 갖춘다. 단서 누락·과한 단정 표현·복수 정답 가능성을 검토한다. 예외규정은 현행 시행일과 정확한 조문을 확인한다.',
+      '각 문항 review에 9개 기준(copy·textbook·sentence·choices·peripheral·absence·exception·surprise·forced)을 "통과/주의/해당 없음: 이유"로 적고, 주의가 2개 이상인 후보는 빼고 다른 후보로 바꾼다.',
       '근거 없이 정답을 확정하지 않는다. AI 자체 검토를 인간의 품질 승인으로 표현하지 않는다. 부족한 근거는 출제 보류 사유로 보고하고 허위 URL을 만들지 않는다.',
       '원문/개인 기록/토큰을 요청하지 않는다. 출력은 아래 형식의 JSON만 반환한다. 표가 필요하면 table을 사용한다. sourceRefs는 아래 분석 문항 ID 중 실제 근거만 연결하고, 표본 밖의 문항에는 references의 확인한 HTTPS 링크가 필요하다.',
       '사용 가능한 분석 문항 연결: '+analysis.records.map(r=>r.id+'='+r.conceptIds.join('+')).join(', '),
@@ -99,5 +107,33 @@
       'JSON 형식 (예시 내용과 example.invalid 주소는 실제 검증 결과로 교체):\n'+JSON.stringify(schema)
     ].join('\n\n');
   }
-  return {SEASON,KEY,STYLES,DEFAULT_STYLES,RUBRIC,validatePack,selectQuestions,empty,validateState,mergeState,buildRequest,clone};
+  // 자동 점검: 형식은 통과했지만 시험 문제로서 의심되는 표면 신호를 찾는다. 정답·범위를 인증하지 않는다.
+  const words=value=>new Set(String(value||'').replace(/[^\p{L}\p{N}]+/gu,' ').split(' ').filter(w=>w.length>=2));
+  function similarity(a,b){const x=words(a),y=words(b);if(!x.size||!y.size)return 0;let same=0;for(const w of x)if(y.has(w))same++;return same/Math.min(x.size,y.size)}
+  const ABSOLUTE=/항상|반드시|모두|전혀|절대|오직|무조건/;
+  const LEAK=/함정|예외규정|장기 ?미출제|주변부|출제위원/;
+  function lintQuestion(q,others=[]){
+    const notes=[],add=(level,text)=>notes.push({level,text});
+    if(Array.isArray(q.choices)&&q.choices.length===4&&Number.isInteger(q.answer)){
+      const lengths=q.choices.map(c=>String(c).length),right=lengths[q.answer],rest=lengths.filter((_,i)=>i!==q.answer),avg=rest.reduce((a,b)=>a+b,0)/rest.length;
+      if(right>=avg*1.4&&right-avg>=12)add('주의','정답 선택지만 눈에 띄게 깁니다.');
+      if(ABSOLUTE.test(q.choices[q.answer]))add('주의','정답 선택지에 단정 표현(항상·모두 등)이 있습니다.');
+      const answerWords=[...words(q.choices[q.answer])].filter(w=>w.length>=3&&!words(q.prompt).has(w));if(answerWords.some(w=>String(q.title).includes(w)))add('주의','제목에 정답 선택지의 핵심어가 보입니다.');
+    }
+    if(LEAK.test(String(q.title)+' '+String(q.prompt)))add('주의','제목이나 지문에 출제 의도를 드러내는 말이 있습니다.');
+    const numbers=(String(q.prompt)+' '+JSON.stringify(q.table||q.exhibit||'')).match(/\d[\d,]{2,}/g)||[];
+    if(numbers.length>=10)add('주의','숫자 자료가 많습니다. 계산량으로 난도를 올리지 않았는지 확인이 필요합니다.');
+    if(q.review&&typeof q.review==='object'){const cautions=Object.entries(q.review).filter(([k,v])=>REVIEW_KEYS.includes(k)&&/^\s*주의/.test(v));if(cautions.length>=2)add('주의','AI 자기 검토에서 주의 항목이 '+cautions.length+'개입니다.')}
+    else add('참고','9개 기준 자기 검토 메모가 없는 문항입니다.');
+    for(const o of others){if(o.id!==q.id&&similarity(q.prompt,o.prompt)>=0.6){add('주의','다른 테스트 문제「'+o.title+'」와 지문이 많이 겹칩니다.');break}}
+    return notes;
+  }
+  function lintPack(pack,others=[]){
+    const notes=[];for(const q of pack.questions)for(const n of lintQuestion(q,others))notes.push({questionId:q.id,...n});
+    if(pack.questions.length>=4){const counts=[0,0,0,0];pack.questions.forEach(q=>counts[q.answer]++);const max=Math.max(...counts);if(max/pack.questions.length>0.5)notes.push({questionId:'',level:'주의',text:'정답 번호가 '+(['①','②','③','④'][counts.indexOf(max)])+'에 몰려 있습니다.'})}
+    return notes;
+  }
+  // 테스트에 이미 출제한 개념·스타일을 센다. 다음 출제에서 같은 판단 지점이 반복되지 않게 하는 자료다.
+  function coverage(packs){const concepts={},styles={};for(const p of packs)for(const q of p.questions){for(const c of q.conceptIds||[])concepts[c]=(concepts[c]||0)+1;for(const s of q.styles||[])styles[s]=(styles[s]||0)+1}return {concepts,styles}}
+  return {SEASON,KEY,STYLES,DEFAULT_STYLES,RUBRIC,REVIEW_KEYS,validatePack,selectQuestions,empty,validateState,mergeState,buildRequest,lintQuestion,lintPack,coverage,similarity,clone};
 });

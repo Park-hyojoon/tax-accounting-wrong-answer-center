@@ -48,3 +48,34 @@ test('all main pages link from top navigation without loading examiner data',()=
   for(const f of ['오답_훈련센터.html','이론_오답응용_5문제.html','일반전표_기본연습_24문제.html','매입매출전표_오답연습_3문제.html','개념_정리.html','약점_분석_임시.html']){const html=fs.readFileSync(path.join(root,f),'utf8');assert.match(html,/href="examiner-test\/index.html"/);assert.doesNotMatch(html,/<script[^>]+examiner-test/)}
   const html=fs.readFileSync(path.join(root,'examiner-test/index.html'),'utf8');assert.ok(!html.includes('src="analysis.js')&&!html.includes('src="questions.js')&&!html.includes('src="journal.js'));assert.equal(E.KEY,'exam-20260914-examiner-test-v1');
 });
+test('analysis keeps recent and older theory samples apart and adds official-scope concepts without inventing frequency',()=>{
+  assert.deepEqual(analysis.olderRounds,[103,104]);assert.equal(analysis.olderRecords.length,30);
+  const ids=new Set(analysis.concepts.map(c=>c.id));for(const r of analysis.olderRecords){assert.ok(r.conceptIds.every(c=>ids.has(c)));assert.ok(/^r10[34]-theory-\d+$/.test(r.id))}
+  assert.equal(new Set([...analysis.records,...analysis.olderRecords].map(r=>r.id)).size,105);
+  for(const id of ['liability-basic','tangible-subsequent','process-cost','vat-bad-debt']){const c=analysis.concepts.find(x=>x.id===id);assert.ok(c,id);assert.equal(c.frequency.questions,0)}
+  assert.equal(analysis.concepts.find(c=>c.id==='tangible-subsequent').frequency.older.questions,1);
+  assert.match(analysis.concepts.find(c=>c.id==='normal-loss').frequency.longAbsence,/장기 미출제 후보/);
+  assert.ok(analysis.scope.official.url.startsWith('https://www.kacpta.or.kr/'));
+});
+test('review notes survive validation, and unknown or non-string notes are rejected',()=>{
+  assert.deepEqual(Object.keys(pilot.questions[0].review).sort(),['absence','choices','copy','exception','forced','peripheral','sentence','surprise','textbook','verdict']);
+  const p=copy(pilot);p.questions[0].review.copy=3;assert.throws(()=>E.validatePack(p,analysis));
+  const q=copy(pilot);q.questions[0].review={copy:'통과',hack:'<script>'};assert.deepEqual(Object.keys(E.validatePack(q,analysis).questions[0].review),['copy']);
+});
+test('auto lint flags surface problems but stays silent on the reviewed pilot',()=>{
+  assert.deepEqual(E.lintPack(pilot,pilot.questions),[]);
+  const q=copy(pilot.questions[0]);q.choices=['짧다','이 선택지만 지나치게 길게 쓰여 있어서 눈에 띄고 단정 표현인 항상 맞다고 말한다','다','라'];q.answer=1;q.title='함정형 판단';
+  const notes=E.lintQuestion(q,[]).map(n=>n.text).join('|');assert.match(notes,/눈에 띄게 깁니다/);assert.match(notes,/단정 표현/);assert.match(notes,/출제 의도/);
+  const twin=copy(pilot.questions[1]);twin.id='twin';assert.match(E.lintQuestion(twin,pilot.questions).map(n=>n.text).join('|'),/지문이 많이 겹칩니다/);
+  const skewed=copy(pilot);skewed.questions.forEach(x=>x.answer=2);assert.ok(E.lintPack(skewed,[]).some(n=>/몰려/.test(n.text)));
+});
+test('coverage counts tested concepts and styles for the next request',()=>{
+  const cov=E.coverage([pilot]);assert.equal(cov.concepts.securities,1);assert.equal(cov.concepts['vat-zero'],1);assert.equal(cov.styles['함정형'],5);
+});
+test('AI request forbids lowering the level and demands the nine-point review',()=>{
+  const request=E.buildRequest(analysis,E.DEFAULT_STYLES,6);assert.match(request,/수준을 낮추지 않는다/);assert.match(request,/9개 기준/);assert.match(request,/officialScope/);
+});
+test('brief keeps the level, scope and review rules in one place',()=>{
+  const brief=fs.readFileSync(path.join(root,'examiner-test/brief.md'),'utf8');
+  for(const phrase of ['수준 기준 — 낮추지 않는다','공식 평가범위','| copy |','| forced |','"장기 미출제"는 언제나 **후보**','계산을 복잡하게 만드는 것과 출제위원답게 만드는 것은 다르다','주의"가 2개 이상'])assert.ok(brief.includes(phrase),phrase);
+});

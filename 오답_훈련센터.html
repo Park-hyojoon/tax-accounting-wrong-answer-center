@@ -6,7 +6,8 @@
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>전산회계 1급 오답 훈련센터</title>
+  <script>(function(){var q=new URLSearchParams(location.search);if(!q.has('weakness')){q.set('weakness','1');location.replace(location.pathname+'?'+q.toString()+location.hash)}})()</script>
+  <title>학습 센터</title>
   <style>
     :root{
       --ink:#17324d;
@@ -185,14 +186,19 @@
     }
     @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
   </style>
-  <link rel="stylesheet" href="design/theme.css?v=8">
+  <link rel="stylesheet" href="design/theme.css?v=12">
+  <link rel="icon" type="image/svg+xml" href="design/brand-mark.svg?v=3">
+  <link rel="icon" type="image/png" sizes="32x32" href="design/favicon-32.png?v=3">
+  <link rel="icon" type="image/png" sizes="192x192" href="design/icon-192.png?v=3">
+  <link rel="shortcut icon" href="design/favicon.ico?v=3">
+  <link rel="apple-touch-icon" href="design/apple-touch-icon.png?v=3">
 </head>
 <body>
   <a class="skip-link" href="#main">본문으로 바로가기</a>
   <header class="hero">
     <div class="hero-inner">
       <p class="eyebrow">2026.09.14 새 학습 시작 · 기출 회차별 오답 훈련</p>
-      <h1>전산회계 1급 오답 훈련센터</h1>
+      <h1>전산회계 1급 학습 센터</h1>
     </div>
   </header>
 
@@ -219,7 +225,7 @@
     </div>
 
     <section class="section" id="todaySection" hidden>
-      <details class="today-accordion" open>
+      <details class="today-accordion">
         <summary>
           <span class="today-summary-main">
             <span class="today-summary-title" role="heading" aria-level="2">오늘의 오답훈련</span>
@@ -296,15 +302,7 @@
       </div>
     </section>
 
-    <section class="section" aria-labelledby="examinerTestTitle">
-      <div class="section-heading"><div>
-        <h2 id="examinerTestTitle">출제위원 테스트</h2>
-        <p>배운 내용을 낯선 질문으로, 기출 수준의 6문제씩 연습합니다. 조건 설정 없이 바로 풀고, 새 문제는 이 센터를 만든 AI 채팅에 한 문장으로 요청하세요.</p>
-      </div></div>
-      <a class="backup-button secondary" href="examiner-test/index.html">출제위원 테스트 열기</a>
-    </section>
-
-    <section class="section" aria-labelledby="aiRulesTitle">
+    <section class="section" id="aiRulesSection" aria-labelledby="aiRulesTitle">
       <div class="section-heading">
         <div>
           <h2 id="aiRulesTitle">AI 작업 규칙 점검</h2>
@@ -314,13 +312,13 @@
       <a class="backup-button secondary" href="AI_작업규칙.html">전체 규칙과 점검 결과 보기</a>
     </section>
 
-    <p class="footer">오답 훈련센터 · 「동기화」 또는 「오늘 학습기록 저장」을 누른 경우에만 GitHub로 기록을 보냅니다.</p>
+    <p class="footer">학습 센터 · 「동기화」 또는 「오늘 학습기록 저장」을 누른 경우에만 GitHub로 기록을 보냅니다.</p>
   </main>
 
-  <script src="github-learning-sync.js?v=22"></script>
-  <script src="season-catalog.js?v=49"></script>
-  <script src="season-ui.js?v=47"></script>
-<script src="training-ui.js?v=17"></script>
+  <script src="github-learning-sync.js?v=23"></script>
+  <script src="season-catalog.js?v=50"></script>
+  <script src="season-ui.js?v=50"></script>
+<script src="training-ui.js?v=19"></script>
   <script>
     const SOURCES={
       practical:{label:'일반전표',file:'일반전표_기본연습_24문제.html',key:'exam-20260914-practical'},
@@ -442,7 +440,14 @@
   ['개발용역비 자산 처리','신제품 개발 연구용역비 지급','2026-10-05',42],
   ['거래처 식사비 전표 이동 수정','식사비 사용 목적 확인 후 전표 수정','2026-10-05',55],
   ['원천징수한 예금이자 수정','예금이자 수령액의 원천징수 확인','2026-10-05',56],
-  ['대여금 상환기일 분류 수정','대여금 상환기일 확인 후 전표 수정','2026-10-05',58]
+  ['대여금 상환기일 분류 수정','대여금 상환기일 확인 후 전표 수정','2026-10-05',58],
+  ['외화장기차입금 상환과 외환차손','외화 차입금 일부 상환','2026-10-07',16],
+  ['받을어음 부도처리','매출거래처 발행 어음 부도','2026-10-07',17],
+  ['미지급 중간배당금 지급과 원천징수','중간배당금 지급','2026-10-07',18],
+  ['유형자산 무상수증','제조공장 기계 무상 수취','2026-10-07',19],
+  ['단기매매증권 취득과 거래원가','주식 취득 및 수수료 지급','2026-10-07',20],
+  ['외상매출금의 현금 및 어음 회수','매출채권 일부 현금 회수','2026-10-07',21],
+  ['대손충당금 잔액과 대손처리 수정','파산 거래처 채권 전표 수정','2026-10-07',22]
 ];
     const theoryMeta=[
   ['exam121-reliability-variant','회계정보의 신뢰성 구성요소','회계정보의 질적 특성 판단','2026-09-14',1],
@@ -640,7 +645,22 @@
   ['daily-20261005-exam123-theory-12','직접노무비 기준 제조간접비 배부','제조지시서별 원가 배부','2026-10-05',27],
   ['daily-20261005-exam123-theory-13','세금계산서 필요적 기재사항','세금계산서의 기재사항','2026-10-05',28],
   ['daily-20261005-exam123-theory-14','사업자단위 과세','사업자단위 과세','2026-10-05',29],
-  ['daily-20261005-exam123-theory-15','부가가치세 간주공급','재화의 공급으로 보는 거래','2026-10-05',30]
+  ['daily-20261005-exam123-theory-15','부가가치세 간주공급','재화의 공급으로 보는 거래','2026-10-05',30],
+  ['daily-20261007-exam108-theory-theory-1','자기주식처분손실의 자본 분류','자기주식 처분 차액의 표시','2026-10-07',1],
+  ['daily-20261007-exam108-theory-theory-2','타인발행 당좌수표와 선수금','제품 판매 계약금 수취','2026-10-07',2],
+  ['daily-20261007-exam108-theory-theory-3','기말재고 과대계상 영향','기말재고 오류와 재무제표','2026-10-07',3],
+  ['daily-20261007-exam108-theory-theory-4','무형자산 상각기간과 방법','무형자산 상각 기준','2026-10-07',4],
+  ['daily-20261007-exam108-theory-theory-5','단기투자자산의 분류','단기투자자산 합계 계산','2026-10-07',5],
+  ['daily-20261007-exam108-theory-theory-6','유동부채와 비유동부채 분류','부채의 분류','2026-10-07',6],
+  ['daily-20261007-exam108-theory-theory-7','저가법에 따른 재고자산평가손실','기말재고자산 평가','2026-10-07',7],
+  ['daily-20261007-exam108-theory-theory-8','거래별 수익인식기준','판매 방식별 수익 인식','2026-10-07',8],
+  ['daily-20261007-exam108-theory-theory-9','원재료 재고 증감과 당기원재료원가','당기 원재료원가 계산','2026-10-07',9],
+  ['daily-20261007-exam108-theory-theory-10','제조원가명세서 구성요소','제조원가명세서 항목','2026-10-07',10],
+  ['daily-20261007-exam108-theory-theory-11','제조간접원가 예정배부 차이','제조간접원가 배부차이','2026-10-07',11],
+  ['daily-20261007-exam108-theory-theory-12','종합원가계산 평균법과 선입선출법','종합원가계산의 특징','2026-10-07',12],
+  ['daily-20261007-exam108-theory-theory-13','세금계산서 발급의무 면제','거래별 세금계산서 발급','2026-10-07',13],
+  ['daily-20261007-exam108-theory-theory-14','업종별 부가가치세 사업장 범위','업종별 사업장 소재지','2026-10-07',14],
+  ['daily-20261007-exam108-theory-theory-15','부가가치세 납세의무와 담세자','부가가치세의 특징','2026-10-07',15]
 ];
     const closingMeta=[];
     const voucherMeta=[
@@ -751,7 +771,14 @@
   ['대표이사 개인용 물품 구입','대표이사 개인 운동기구 대금 이체','2026-10-05',52],
   ['영업부 차량 운용리스료 지급','영업부 차량 리스료 결제','2026-10-05',53],
   ['제품 외상 판매','제품 판매와 월말 대금 수령 약정','2026-10-05',54],
-  ['상품 매입운송비 전표 이동 수정','상품 매입 운송비 전표 수정','2026-10-05',57]
+  ['상품 매입운송비 전표 이동 수정','상품 매입 운송비 전표 수정','2026-10-05',57],
+  ['신용카드 과세 제품매출과 매출채권','제품 판매대금 카드 결제','2026-10-07',23],
+  ['기계장치 매입운송비의 취득원가','제작 기계 운송비 지급','2026-10-07',24],
+  ['제조 외주가공비 과세매입','제품 임가공 대금 지급','2026-10-07',25],
+  ['기증 목적 구입과 매입세액 불공제','육군부대 기증 물품 구입','2026-10-07',26],
+  ['복합기 카드매입과 비품','영업부 복합기 구입','2026-10-07',27],
+  ['원재료 매입과 부가세 현금지급','양가죽 매입과 일부 현금 지급','2026-10-07',28],
+  ['비영업용 승용차 매입세액 불공제 수정','업무용 승용차 전표 수정','2026-10-07',29]
 ];
 
     const META=[
@@ -800,7 +827,7 @@
 
     function downloadBackup(){
       const data=JSON.stringify(TrainingGitHub.backupPayload(),null,2),blob=new Blob([data],{type:'application/json;charset=utf-8'}),link=document.createElement('a');
-      link.href=URL.createObjectURL(blob);link.download=`오답훈련센터_학습상태_${localDateKey()}.json`;document.body.appendChild(link);link.click();link.remove();
+      link.href=URL.createObjectURL(blob);link.download=`학습센터_학습상태_${localDateKey()}.json`;document.body.appendChild(link);link.click();link.remove();
       setTimeout(()=>URL.revokeObjectURL(link.href),1000);$('#backupStatus').textContent='학습상태 백업 파일을 저장했습니다. 모바일의 다운로드 또는 파일 앱에서 확인하세요.';
     }
     async function importBackupFile(file){
@@ -972,6 +999,6 @@
   </script>
 <script>TrainingSeason.catalog(META,SOURCES);</script>
 <script src="weakness-data.js?v=22"></script>
-<script src="weakness-center.js?v=14"></script>
+<script src="weakness-center.js?v=15"></script>
 </body>
 </html>
