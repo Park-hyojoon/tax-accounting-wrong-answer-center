@@ -6,7 +6,7 @@
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <script>(function(){var q=new URLSearchParams(location.search);if(!q.has('weakness')){q.set('weakness','1');location.replace(location.pathname+'?'+q.toString()+location.hash)}})()</script>
+  <script>(function(){var q=new URLSearchParams(location.search);if(!q.has('weakness'))location.replace('일반전표_기본연습_24문제.html')})()</script>
   <title>학습 센터</title>
   <style>
     :root{
@@ -186,12 +186,12 @@
     }
     @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
   </style>
-  <link rel="stylesheet" href="design/theme.css?v=12">
-  <link rel="icon" type="image/svg+xml" href="design/brand-mark.svg?v=3">
-  <link rel="icon" type="image/png" sizes="32x32" href="design/favicon-32.png?v=3">
-  <link rel="icon" type="image/png" sizes="192x192" href="design/icon-192.png?v=3">
-  <link rel="shortcut icon" href="design/favicon.ico?v=3">
-  <link rel="apple-touch-icon" href="design/apple-touch-icon.png?v=3">
+  <link rel="stylesheet" href="design/theme.css?v=14">
+  <link rel="icon" type="image/svg+xml" href="design/brand-mark.svg?v=4">
+  <link rel="icon" type="image/png" sizes="32x32" href="design/favicon-32.png?v=4">
+  <link rel="icon" type="image/png" sizes="192x192" href="design/icon-192.png?v=4">
+  <link rel="shortcut icon" href="design/favicon.ico?v=4">
+  <link rel="apple-touch-icon" href="design/apple-touch-icon.png?v=4">
 </head>
 <body>
   <a class="skip-link" href="#main">본문으로 바로가기</a>
@@ -246,9 +246,8 @@
               <select class="sort-select" id="sortOrder">
                 <option value="priority" selected>취약 우선 · 추천</option>
                 <option value="recentRegistered">최근 등록 순</option>
-                <option value="registered">등록 순서</option>
                 <option value="wrong">오답 많은 순</option>
-                <option value="repeatWrong">반복해서 틀린 문제</option>
+                <option value="random">랜덤 순</option>
                 <option value="unattempted">아직 안 푼 문제 우선</option>
                 <option value="recentAttempt">최근에 푼 순</option>
               </select>
@@ -317,8 +316,8 @@
 
   <script src="github-learning-sync.js?v=23"></script>
   <script src="season-catalog.js?v=50"></script>
-  <script src="season-ui.js?v=50"></script>
-<script src="training-ui.js?v=19"></script>
+  <script src="season-ui.js?v=52"></script>
+<script src="training-ui.js?v=21"></script>
   <script>
     const SOURCES={
       practical:{label:'일반전표',file:'일반전표_기본연습_24문제.html',key:'exam-20260914-practical'},
@@ -924,8 +923,12 @@
 
     function visibleUnpassed(){return records.filter(record=>!record.passed&&!record.archived)}
     function registrationCompare(a,b){return a.registered.localeCompare(b.registered)||number(a.registeredOrder)-number(b.registeredOrder)||a.metaOrder-b.metaOrder}
-    function sortTraining(list){return [...list].sort((a,b)=>{
-      if(currentSort==='priority'||currentSort==='repeatWrong')return TrainingSeason.comparePriority(a.priority,b.priority)||registrationCompare(a,b);
+    let randomOrder=new Map();
+    function sortTraining(list){
+      if(currentSort==='random'&&!randomOrder.size)randomOrder=new Map(TrainingSeason.shuffle(records).map((record,index)=>[record.source+':'+record.id,index]));
+      return [...list].sort((a,b)=>{
+      if(currentSort==='random')return randomOrder.get(a.source+':'+a.id)-randomOrder.get(b.source+':'+b.id);
+      if(currentSort==='priority')return TrainingSeason.comparePriority(a.priority,b.priority)||registrationCompare(a,b);
       if(currentSort==='wrong')return b.wrong-a.wrong||b.attempts-a.attempts||registrationCompare(a,b);
       if(currentSort==='unattempted')return Number(a.attempts>0)-Number(b.attempts>0)||registrationCompare(a,b);
       if(currentSort==='recentAttempt')return b.lastAttempt-a.lastAttempt||registrationCompare(a,b);
@@ -935,7 +938,7 @@
     function renderTraining(){
       const today=localDateKey();
       // AI 응용문제(★ 특별 훈련용)는 오늘의 오답훈련에 노출하지 않는다.
-      const list=sortTraining(records.filter(record=>!record.archived&&!record.variant&&(currentSort!=='repeatWrong'||record.recurrent)&&(currentFilter==='all'||record.registered===today)&&(!currentExamRound||String(record.examRound)===currentExamRound)));
+      const list=sortTraining(records.filter(record=>!record.archived&&!record.variant&&(currentFilter==='all'||record.registered===today)&&(!currentExamRound||String(record.examRound)===currentExamRound)));
       const target=$('#trainingList');
       if(list.length)target.innerHTML=list.map(record=>problemItem(record,{view:currentFilter,plain:true})).join('');
       else if(currentFilter==='today')target.innerHTML=emptyState(`${currentExamRound?currentExamRound+'회에 ':''}오늘 등록된 문제가 없습니다.`,'선택한 조건으로 오늘 등록된 문제가 없습니다. ‘전체 문제’를 누르면 이전 문제도 볼 수 있습니다.');
@@ -991,7 +994,7 @@
       onNeedToken:({mobile})=>{if(mobile){$('#githubToken').scrollIntoView({behavior:'smooth',block:'center'});$('#githubToken').focus()}}
     });
     refreshGitHubStatus();
-    $('#sortOrder').addEventListener('change',event=>{currentSort=event.target.value;renderTraining();$('#liveStatus').textContent=`${event.target.options[event.target.selectedIndex].text}으로 정렬했습니다.`});
+    $('#sortOrder').addEventListener('change',event=>{currentSort=event.target.value;if(currentSort==='random')randomOrder=new Map();renderTraining();$('#liveStatus').textContent=`${event.target.options[event.target.selectedIndex].text}으로 정렬했습니다.`});
     window.addEventListener('storage',event=>{if(Object.values(SOURCES).some(source=>source.key===event.key))scheduleRenderAll('다른 학습 화면에서 바뀐 기록을 반영했습니다.')});
     window.addEventListener('focus',()=>scheduleRenderAll());
     document.addEventListener('visibilitychange',()=>{if(!document.hidden)scheduleRenderAll()});

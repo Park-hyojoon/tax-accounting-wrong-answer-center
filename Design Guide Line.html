@@ -5,12 +5,12 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Design Guide Line · 학습 센터</title>
   <!-- 실제 테마를 그대로 불러온다. 아래 견본(버튼·배지·카드)은 항상 현재 theme.css 모양으로 보인다. -->
-  <link rel="stylesheet" href="design/theme.css?v=12">
-  <link rel="icon" type="image/svg+xml" href="design/brand-mark.svg?v=3">
-  <link rel="icon" type="image/png" sizes="32x32" href="design/favicon-32.png?v=3">
-  <link rel="icon" type="image/png" sizes="192x192" href="design/icon-192.png?v=3">
-  <link rel="shortcut icon" href="design/favicon.ico?v=3">
-  <link rel="apple-touch-icon" href="design/apple-touch-icon.png?v=3">
+  <link rel="stylesheet" href="design/theme.css?v=14">
+  <link rel="icon" type="image/svg+xml" href="design/brand-mark.svg?v=4">
+  <link rel="icon" type="image/png" sizes="32x32" href="design/favicon-32.png?v=4">
+  <link rel="icon" type="image/png" sizes="192x192" href="design/icon-192.png?v=4">
+  <link rel="shortcut icon" href="design/favicon.ico?v=4">
+  <link rel="apple-touch-icon" href="design/apple-touch-icon.png?v=4">
   <style>
     html body.guide{padding-left:0!important;font-size:15px!important}
     .guide-shell{display:grid;grid-template-columns:240px minmax(0,1fr);max-width:1320px;margin:0 auto}
@@ -89,7 +89,7 @@
 <body class="guide">
 <div class="guide-shell">
   <nav class="guide-toc" aria-label="가이드 차례">
-    <a class="brand" href="오답_훈련센터.html"><img src="design/brand-mark.svg?v=3" alt=""><span>Design Guide<small>학습 센터 · 전산회계 1급</small></span></a>
+    <a class="brand" href="오답_훈련센터.html"><img src="design/brand-mark.svg?v=4" alt=""><span>Design Guide<small>학습 센터 · 전산회계 1급</small></span></a>
     <a class="toc-link" href="#quick">0. 빠른 시작</a>
     <a class="toc-link" href="#concept">1. 컨셉</a>
     <a class="toc-link" href="#files">2. 파일 지도</a>
@@ -115,7 +115,7 @@
         <h1>학습 센터 디자인 기준</h1>
         <p>컨셉은 <b>English Basket</b>입니다. 크림 바탕, 딥그린, 민트, 왼쪽 사이드바. 다음 디자인 변경 때 이 문서와 <code>design/theme.css</code> 하나만 보면 바로 작업할 수 있게 정리했습니다.</p>
       </div>
-      <img src="design/brand-mark.svg?v=3" alt="">
+      <img src="design/brand-mark.svg?v=4" alt="">
     </header>
 
     <!-- 0 -->
@@ -288,14 +288,14 @@
     <!-- 7 -->
     <section id="type" class="card-g">
       <h2>7. 글꼴과 크기</h2>
-      <p class="lead">글꼴: <code>--ui-font</code> = ui-rounded, Segoe UI, 맑은 고딕, Apple SD Gothic Neo. 외부 웹폰트는 쓰지 않습니다(오프라인·file:// 실행 유지).</p>
+      <p class="lead">메뉴·화면 제목은 PC에 설치된 Hancom MalangMalang, 문제 영역은 나눔고딕을 우선 사용합니다. 없는 기기는 기본 고딕으로 표시합니다. 폰트 다운로드 없이 오프라인에서도 동작합니다.</p>
       <div class="type-scale">
         <div><span>페이지 제목 · --ui-h1</span><b style="font-size:var(--ui-h1);letter-spacing:-.05em">32px 굵게</b></div>
         <div><span>섹션 제목 · --ui-h2</span><b style="font-size:var(--ui-h2);letter-spacing:-.04em">21px 굵게</b></div>
         <div><span>문제 제목</span><b style="font-size:17px">17px 700</b></div>
         <div><span>문제 본문(prompt)</span><b style="font-size:17px">17px 700, 줄간격 1.85</b></div>
         <div><span>본문 기본 · --ui-font-size</span><span style="width:auto;color:var(--ui-ink);font-size:15px">15px, 줄간격 1.7</span></div>
-        <div><span>메뉴 항목</span><b style="font-size:14px">14px 700</b></div>
+        <div><span>메뉴 항목</span><b style="font-size:17px">17px 700 · 짙은 글자</b></div>
         <div><span>버튼</span><b style="font-size:14px">14px 700 (작은 버튼 13px)</b></div>
         <div><span>날짜·보조·배지</span><span style="width:auto;color:var(--ui-muted);font-size:12px">12–13px</span></div>
       </div>
@@ -498,6 +498,8 @@ foreach($f in $files){ $t=[IO.File]::ReadAllText($f); $t=[regex]::Replace($t,'th
     <!-- 15 -->
     <section id="history" class="card-g">
       <h2>15. 변경 기록</h2>
+      <p>2026-10-08: 메뉴 글자를 17px로 확대하고 짙게 표시. PC 메뉴 폭은 256px, 태블릿 236px. 메뉴 높이에 안쪽 여백이 중복되어 생기던 스크롤을 수정하고 작은 화면에서도 메뉴·동기화 버튼에 접근 가능하게 유지. 집중훈련 선택지를 큰 주제로 묶고, 복습 시작 버튼은 페이지 제목 옆으로 이동. 첫 화면과 로고 연결은 일반전표 입력.</p>
+      <p>2026-10-08: 공통 메뉴에 ‘오늘 복습’ 추가. review.html은 기존 테마 토큰·카드·메뉴를 사용하며 review.css는 복습 화면의 배치를 담당합니다. 세 분야 입력 화면의 위쪽에서 복습 목록으로 이동할 수 있습니다.</p>
       <p>2026-10-07: 웹 앱 표시 이름을 ‘학습 센터’로 변경. 메뉴 브랜드·브라우저 제목·안내 문구를 통일하고, 기존 파일명·주소·저장 키와 디자인은 유지했습니다.</p>
       <div class="tw"><table class="g">
         <thead><tr><th>날짜</th><th>내용</th></tr></thead>
@@ -506,6 +508,8 @@ foreach($f in $files){ $t=[IO.File]::ReadAllText($f); $t=[regex]::Replace($t,'th
           <tr><td>2026-10-05</td><td>로고를 바구니에서 <b>퍼즐 조각+체크</b>(문제 해결)로 교체. 브라우저 탭·북마크 아이콘으로 <code>design/brand-mark.svg</code>·<code>favicon-*.png</code>·<code>favicon.ico</code>·<code>apple-touch-icon.png</code>를 모든 페이지 <code>&lt;head&gt;</code>에 연결. 탭 제목은 "페이지 이름 · 학습 센터"(홈은 "학습 센터"). 홈(오늘의 오답훈련)을 특별훈련 화면으로 합쳐 모든 영역을 접힌 아코디언으로 이동하고 홈 주소는 특별훈련으로 연결. 특별훈련 카드를 [분야 배지 → 제목 → 보조 줄 → 오른쪽 아래 "다시 풀기"]로 통일하고 단계별 버튼 색(탭 초록·분야 필터 청록·이어 풀기 황토) 분리. 안내 문구 "노트에서 다시 연습으로 표시"·"기출 원문 재제출 · 재풀이 확인 필요" 삭제.</td></tr>
           <tr><td>2026-10-07</td><td>학습 센터 아이콘을 <b>빨간 스톱워치+노란 속도선</b> 콘셉트로 교체. SVG를 기준으로 탭·북마크·바로가기용 PNG·ICO·애플 터치 아이콘을 다시 만들고 아이콘 URL에 v2 캐시 버전을 적용.</td></tr>
           <tr><td>2026-10-07</td><td>작은 아이콘이 흰 모서리만 표시되던 축소 오류를 수정. 모든 크기의 PNG·ICO를 다시 만들고 아이콘 URL을 v3으로 갱신.</td></tr>
+          <tr><td>2026-10-07</td><td>즐겨찾기의 16픽셀 표시에서도 선명하도록 스톱워치를 화면 끝 가까이 확대하고 빨간 테두리·바늘·노란 속도선을 굵게 조정. 모든 아이콘을 다시 만들고 URL을 v4로 갱신.</td></tr>
+          <tr><td>2026-10-08</td><td>공통 정렬 메뉴에서 등록 순서·반복해서 틀린 문제를 제거하고 랜덤 순 추가. 랜덤 선택 시 섞되 채점 중에는 순서를 유지.</td></tr>
           <tr><td>2026-10-05</td><td>출제위원 테스트: 자동 출제 패널(<code>.auto-panel</code>)·9개 기준 검토 표(<code>.review-table</code>)·자동 점검 목록(<code>.lint-list</code>) 스타일을 theme.css 16장에 추가.</td></tr>
           <tr><td>2026-10-05</td><td>메뉴 순서 설정 반영(숨긴 메뉴 표시 버그 수정), 출제위원 테스트도 공통 메뉴 사용, 홈·특별훈련·출제위원 머리말을 날짜→제목으로 통일, 일반전표·매입매출 검색 막대: 기출 회차 → 취약점 Top10(선택하기) → 정렬 → 유형 태그, 유형 검색 숨김.</td></tr>
           <tr><td>2026-10-05</td><td>전표 입력기를 entry/ 한 곳으로 분리하여 기존 메뉴와 출제위원이 함께 호출. 입력기 공통 배치를 season.css에서 entry/common.css로 이동하고 출제위원 일반 폼 스타일이 KcLep 입력칸에 겹치지 않게 조정. 기존 테마·머리말·기록 보존.</td></tr>

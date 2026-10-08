@@ -40,9 +40,10 @@ SUBJECTS = {
     'voucher': dict(label='매입매출전표', file='매입매출전표_오답연습_3문제.html',
                     meta='voucherMeta', type_idx=0, title_idx=1, id_kind='index'),
 }
-PAGES = [HUB] + [s['file'] for s in SUBJECTS.values()]
+PAGES = [HUB] + [s['file'] for s in SUBJECTS.values()] + ['review.html']
 SHARED_SCRIPTS = ['github-learning-sync.js', 'training-ui.js', 'account-search.js',
-                  LEDGER, 'mistake-memory.js', 'season-ui.js', 'season-catalog.js']
+                  LEDGER, 'mistake-memory.js', 'season-ui.js', 'season-catalog.js',
+                  'review-engine.js', 'review-practice.js', 'review-dashboard.js']
 
 
 # ── 파일 입출력 (줄바꿈 형식 보존) ──────────────────────────────────────────
@@ -335,7 +336,7 @@ def append_push(text, snippet, nl=None):
 
 def bump_version(script, pages=None):
     """해당 스크립트를 실제로 불러오는 화면의 <script src="파일?v=N"> 을 함께 올린다."""
-    pages = pages or PAGES
+    pages = pages or PAGES + ['개념_정리.html', '약점_분석_임시.html', 'examiner-test/index.html', 'Design Guide Line.html', 'AI_작업규칙.html']
     numbers = []
     page_text = {}
     for page in pages:

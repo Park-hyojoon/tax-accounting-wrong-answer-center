@@ -35,7 +35,28 @@
       if(!best||(ok&&!best.ok)||(!best.ok&&hits.length>best.hits.length))best={set,used,hits,ok};
       if(best.ok)break;
     }
-    return {...best,matched:best.hits.length};
+    return {...best,matched:best.hits.length,wrongLabels:best.ok?[]:rowIssues(rows,best.set,problem)};
+  }
+  // Describe observed mismatches only; never infer why the learner made them.
+  function rowIssues(rows,answers,problem={}){
+    const labels=new Set(),used=new Set();
+    if(rows.length!==answers.length)labels.add('분개 행 수');
+    for(const answer of answers){
+      const names=answer.account.split('/').map(normText);
+      const candidates=rows.map((row,index)=>({row,index})).filter(({row,index})=>!used.has(index)&&names.includes(normText(accountParts(row.accountValue||row.account).name)));
+      const exact=candidates.find(({row})=>practicalMatch(row,answer,problem));
+      if(exact){used.add(exact.index);continue}
+      if(candidates.length!==1){labels.add('계정과목·분개 구성');continue}
+      const {row,index}=candidates[0];used.add(index);
+      if(row.side!==answer.side)labels.add('차변·대변');
+      if(num(row.amount)!==answer.amount)labels.add('분개 금액');
+      if((row.division||'')!==(answer.division||''))labels.add('판매비·제조경비 구분');
+      if(normSupplier(row.partner)!==normSupplier(answer.partner))labels.add('거래처');
+      if(answer.memo&&normMemo(row.memo)!==normMemo(answer.memo))labels.add('적요');
+      const required=problem.requiredAccountCodes?.[answer.account]||REQUIRED_ACCOUNT_CODES[answer.account];
+      if(required&&String(row.accountCode||accountParts(row.accountValue||row.account).code)!==String(required))labels.add('계정코드');
+    }
+    return labels.size?[...labels]:['분개 조건'];
   }
   const normSummary=value=>/^8(?:\D|$)/.test(String(value||'').trim())?'8':String(value||'').trim();
   function aggregate(list,defaultCodes={}){

@@ -99,12 +99,13 @@
     @media(max-width:760px){body{font-size:16px}.hero,.question,.save-panel{padding:18px}.prompt{font-size:18px}.dashboard{position:static}.filename-row{grid-template-columns:1fr}.attempt{width:100%;margin-left:0}}
     @media print{.dashboard,.actions,.save-panel,.footer{display:none}.question{break-inside:avoid;box-shadow:none}details:not([open]){display:none}}
   </style>
-  <link rel="stylesheet" href="design/theme.css?v=12">
-  <link rel="icon" type="image/svg+xml" href="design/brand-mark.svg?v=3">
-  <link rel="icon" type="image/png" sizes="32x32" href="design/favicon-32.png?v=3">
-  <link rel="icon" type="image/png" sizes="192x192" href="design/icon-192.png?v=3">
-  <link rel="shortcut icon" href="design/favicon.ico?v=3">
-  <link rel="apple-touch-icon" href="design/apple-touch-icon.png?v=3">
+  <link rel="stylesheet" href="design/theme.css?v=14">
+  <link rel="stylesheet" href="review.css?v=2">
+  <link rel="icon" type="image/svg+xml" href="design/brand-mark.svg?v=4">
+  <link rel="icon" type="image/png" sizes="32x32" href="design/favicon-32.png?v=4">
+  <link rel="icon" type="image/png" sizes="192x192" href="design/icon-192.png?v=4">
+  <link rel="shortcut icon" href="design/favicon.ico?v=4">
+  <link rel="apple-touch-icon" href="design/apple-touch-icon.png?v=4">
 </head>
 <body>
   <nav class="top-nav" aria-label="유형별 연습 메뉴">
@@ -130,9 +131,8 @@
         <select class="sort-select" id="sortOrder">
           <option value="priority" selected>취약 우선 · 추천</option>
           <option value="recentRegistered">최근 등록 순</option>
-          <option value="registered">등록 순서</option>
           <option value="wrong">오답 많은 순</option>
-          <option value="repeatWrong">반복해서 틀린 문제</option>
+          <option value="random">랜덤 순</option>
           <option value="unattempted">아직 안 푼 문제 우선</option>
           <option value="recentAttempt">최근에 푼 순</option>
         </select>
@@ -163,8 +163,8 @@
   </main>
 
   <script src="github-learning-sync.js?v=23"></script>
-  <script src="season-ui.js?v=50"></script>
-<script src="training-ui.js?v=19"></script>
+  <script src="season-ui.js?v=52"></script>
+<script src="training-ui.js?v=21"></script>
   <script>
     const problems=loadTrainingProblems();
 
@@ -213,7 +213,7 @@
     const typeView=(new URLSearchParams(location.search).get('type')||'').trim();
     const starView=new URLSearchParams(location.search).get('view')==='star';
     const weaknessRefs=new Set((new URLSearchParams(location.search).get('weakrefs')||'').split(',').filter(Boolean));
-    const passedReviewQuery=new URLSearchParams(location.search),explicitPassReview=passedReviewQuery.get('reviewAll')==='1'&&passedReviewQuery.get('showPassed')==='1';
+    const passedReviewQuery=new URLSearchParams(location.search),explicitPassReview=passedReviewQuery.get('review')==='1'||passedReviewQuery.get('reviewAll')==='1'&&passedReviewQuery.get('showPassed')==='1';
     // 응용문제의 원문제도 ★ 상태와 관계없이 같은 묶음에 표시한다. 이론은 id 문자열로 원문제를 가리킨다.
     const variantSourceIds=new Set(problems.filter(p=>p.variantOf!=null).map(p=>p.variantOf));
     const sessionPassed=new Set();
@@ -416,6 +416,8 @@
     TrainingGitHub.installSyncBar({onNeedToken:({mobile})=>{if(mobile)TrainingGitHub.showToast('처음 한 번만 학습 센터 홈 아래쪽에서 GitHub 토큰을 연결한 뒤 다시 눌러주세요.',8000)}});
   })();
 </script>
+<script src="review-engine.js?v=2"></script>
+<script src="review-practice.js?v=2"></script>
 <script>TrainingSeason.install(problems,{state,theory:true,save:persist,refresh:updateDashboard});</script>
 <script src="question-markup.js?v=6" data-question-mark-subject="theory"></script>
 </body>

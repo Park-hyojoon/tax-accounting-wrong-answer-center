@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "revision": 125,
-  "updatedAt": "2026-10-07T11:09:44+09:00",
+  "revision": 129,
+  "updatedAt": "2026-10-08T18:15:00+09:00",
   "files": [
     "오답_훈련센터.html",
     "일반전표_기본연습_24문제.html",
@@ -63,7 +63,12 @@
     "design/icon-192.png",
     "design/icon-512.png",
     "design/apple-touch-icon.png",
-    "scripts/rasterize-brand-icon.cjs"
+    "scripts/rasterize-brand-icon.cjs",
+    "review.html",
+    "review-engine.js",
+    "review-dashboard.js",
+    "review-practice.js",
+    "review.css"
   ],
-  "note": "108회 기출 연습 29개 등록"
+  "note": "메뉴 확대와 스크롤 제거, 문제 나눔고딕·제목 둥근 글꼴, 큰 주제 집중훈련, 제목 옆 복습 버튼, 일반전표 첫 화면"
 }

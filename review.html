@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>오늘 복습 · 학습 센터</title>
+  <link rel="icon" href="design/favicon.ico?v=4">
+  <link rel="stylesheet" href="design/theme.css?v=14">
+  <link rel="stylesheet" href="review.css?v=2">
+</head>
+<body class="review-page">
+  <nav class="top-nav" aria-label="학습 메뉴"><div class="nav-inner">
+    <a class="nav-link active" href="review.html" aria-current="page">오늘 복습</a>
+    <a class="nav-link" href="일반전표_기본연습_24문제.html">일반전표 입력</a>
+    <a class="nav-link" href="매입매출전표_오답연습_3문제.html?view=all">매입매출전표 입력</a>
+    <a class="nav-link" href="이론_오답응용_5문제.html">이론 오답</a>
+    <a class="nav-link" href="examiner-test/index.html">출제위원 테스트</a>
+    <a class="nav-link" href="약점_분석_임시.html">약점 분석(임시)</a>
+    <div class="nav-sync"><button class="nav-sync-button primary" id="syncAll" type="button">🔄 동기화</button></div>
+  </div></nav>
+  <main>
+    <section class="section review-controls">
+      <h2>골고루 풀며 감각을 유지하세요</h2>
+      <p>복습할 유형과 처음 풀어볼 유형을 함께 골라 드립니다. 같은 유형에서는 가능한 한 다른 문제로 연습합니다.</p>
+      <div class="review-options">
+        <label>연습 방식<select id="reviewMode"><option value="balanced">골고루 연습 · 기본</option><option value="focus">집중훈련 · 직접 선택</option></select></label>
+        <label>분야<select id="reviewSubject"><option value="">세 분야 골고루</option><option value="practical">일반전표</option><option value="voucher">매입매출전표</option><option value="theory">이론</option></select></label>
+        <label>하루 목표<select id="reviewLimit"><option value="6">6유형</option><option value="9">9유형</option><option value="12">12유형</option></select></label>
+        <label id="focusTypeLabel" hidden>집중할 주제<select id="focusType"><option value="">최근 오답 유형</option></select></label>
+      </div>
+      <p id="reviewSummary" role="status"></p>
+      <p class="review-muted">기본 복습 간격은 1 → 3 → 7 → 14 → 30일입니다. 틀린 유형은 다음 날 다시 확인합니다. 같은 날 수정한 답은 간격을 늘리지 않습니다.</p>
+    </section>
+    <section class="section"><h2 id="reviewListTitle">오늘의 추천</h2><div id="reviewList"></div></section>
+    <section class="section"><h2>반복해서 확인할 부분</h2><p class="review-muted">유형별 최근 5번의 학습일 중 2일 이상 틀린 입력 항목입니다. 같은 문제의 당일 재채점은 중복해서 세지 않습니다.</p><div id="reviewMistakes"></div></section>
+    <details class="section"><summary>전체 유형과 다음 복습일</summary><p class="review-muted">유형 이름을 기준으로 묶습니다. 아직 풀이 기록이 없는 유형은 ‘첫 연습’으로 표시합니다.</p><div id="reviewSchedule"></div></details>
+  </main>
+  <script src="github-learning-sync.js?v=23"></script>
+  <script src="training-ui.js?v=21"></script>
+  <script src="season-catalog.js?v=50"></script>
+  <script src="review-engine.js?v=2"></script>
+  <script src="review-dashboard.js?v=2"></script>
+</body></html>

@@ -1,6 +1,6 @@
 (function(){
   'use strict';
-  const style=document.createElement('link');style.rel='stylesheet';style.href='season.css?v=23';document.head.append(style);
+  const style=document.createElement('link');style.rel='stylesheet';style.href='season.css?v=24';document.head.append(style);
   const params=new URLSearchParams(location.search);
   const escape=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   function isCompleted(subject,id,state={}){
@@ -24,6 +24,11 @@
     return result;
   }
   function comparePriority(a,b){return b.band-a.band||Math.min(b.wrongStreak,5)-Math.min(a.wrongStreak,5)||b.rate-a.rate||b.recentWrong-a.recentWrong||b.lastAt-a.lastAt}
+  function shuffle(values){
+    const result=[...values];
+    for(let i=result.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[result[i],result[j]]=[result[j],result[i]]}
+    return result;
+  }
   function rankTags(entries,states){
     const tags=new Map(),seen=new Set();
     for(const entry of entries){
@@ -39,6 +44,7 @@
   function sortQuestions(problems,adapter){
     const field=document.querySelector('#sortOrder'),box=document.querySelector('#questions');if(!field||!box)return;
     const subject=subjectOf(adapter),cards=[...box.querySelectorAll('.question')],order=new Map(cards.map((card,index)=>[card,index]));
+    let randomOrder=new Map();
     if([...field.options].some(option=>option.value===params.get('sort')))field.value=params.get('sort');
     function refresh(){
       const mode=field.value,list=cards.map(card=>{
@@ -46,8 +52,10 @@
         const history=(adapter.theory?adapter.state.history?.[id]:adapter.state.cards?.[id]?.history)||[],valid=history.filter(event=>event&&!event.cancelledAt&&typeof event.correct==='boolean'&&Number.isFinite(Date.parse(event.at)));
         return {card,id,need,index:order.get(card),added:card.dataset.addedDate||'',attempts:valid.length,wrong:valid.filter(event=>!event.correct).length,last:Math.max(0,...valid.map(event=>Date.parse(event.at)))};
       });
+      if(mode==='random'&&!randomOrder.size)randomOrder=new Map(shuffle(cards).map((card,index)=>[card,index]));
       list.sort((a,b)=>{
-        if(mode==='priority'||mode==='repeatWrong')return comparePriority(a.need,b.need)||a.index-b.index;
+        if(mode==='random')return randomOrder.get(a.card)-randomOrder.get(b.card);
+        if(mode==='priority')return comparePriority(a.need,b.need)||a.index-b.index;
         if(mode==='wrong')return b.wrong-a.wrong||a.index-b.index;
         if(mode==='unattempted')return Number(a.attempts>0)-Number(b.attempts>0)||a.index-b.index;
         if(mode==='recentAttempt')return b.last-a.last||a.index-b.index;
@@ -56,8 +64,6 @@
       });
       const groups=new Map();
       for(const item of list){
-        const repeated=item.need.active&&(item.need.wrongStreak>=2||item.need.noteWrong>=2||item.need.recurrent);
-        item.card.classList.toggle('repeat-filter-hidden',mode==='repeatWrong'&&!repeated);
         let note=item.card.querySelector('.priority-note');if(!note){note=document.createElement('p');note.className='priority-note';note.style.cssText='font-size:14px;color:#52677d;margin:6px 0 12px';item.card.querySelector('.qhead')?.after(note)}
         note.textContent=item.need.reason;note.hidden=item.need.band<=0||!item.need.reason;
         const wrapper=item.card.closest('details.star-item');
@@ -66,7 +72,7 @@
       for(const group of groups.keys())group.parentElement.append(group);
       document.querySelector('.current-training-filter')?.refreshCurrentTraining?.();adapter.refresh();
     }
-    field.addEventListener('change',refresh);
+    field.addEventListener('change',()=>{if(field.value==='random')randomOrder=new Map();refresh()});
     document.addEventListener('click',event=>{if(event.target.closest('.check-one,.notebook-pass,.notebook-wrong,.notebook-restore,.notebook-toast button'))setTimeout(refresh,0)},true);
     refresh();
   }
@@ -79,7 +85,7 @@
   }
   function install(problems,adapter){
     const weakIds=new Set((params.get('weakrefs')||'').split(',').filter(Boolean));
-    if(weakIds.size&&adapter){
+    if(weakIds.size&&adapter&&params.get('review')!=='1'){
       document.body.classList.add('weakness-practice');
       const weaknessSource=params.get('weaknessSource');
       const labels={recent:'훈련 중 오답 다시 풀기',submitted:'직접 제출 반복 약점 다시 풀기',all:'모든 기출문제 오답 복습'};
@@ -129,7 +135,7 @@
       const brief=card.querySelector('.question-brief'),workspace=card.querySelector('.answer-workspace');
       if(brief&&workspace){while(brief.firstChild)workspace.append(brief.firstChild);brief.remove()}
     });
-    if(adapter){notebook(problems,adapter,bar);sortQuestions(problems,adapter)}
+    if(adapter){notebook(problems,adapter,bar);sortQuestions(problems,adapter);window.TrainingReviewUI?.install(problems,adapter)}
     if(host)mobileFilters(host,bar);
     if(!problems.length){const box=document.createElement('section');box.className='season-welcome';box.innerHTML='<span class="season-kicker">NEW CHAPTER</span><h2>다음 기출 오답부터<br>차근차근 쌓아가세요.</h2><p>회차와 틀린 문제를 보내주시면 원문은 회차별 MD로 보관하고,<br>숫자와 조건을 바꾼 응용문제를 이곳에 등록합니다.</p><a href="오답_훈련센터.html">학습 홈으로</a>';host?.after(box)}
   }
@@ -297,5 +303,5 @@
       document.querySelector('main')?.prepend(panel);
     }
   }
-  window.TrainingSeason={matches,install,catalog,isCompleted,priority,comparePriority,rankTags,priorityUrl};
+  window.TrainingSeason={matches,install,catalog,isCompleted,priority,comparePriority,rankTags,priorityUrl,shuffle};
 })();

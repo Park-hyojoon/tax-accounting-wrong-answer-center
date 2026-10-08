@@ -144,8 +144,8 @@
       const ok=best.ok;
       card.dataset.graded='true';card.dataset.correct=String(ok);card.classList.toggle('correct',ok);card.classList.toggle('wrong',!ok);
       const result=el('.result',card);result.className='result '+(ok?'ok':'no');
-      result.textContent=ok?'정답입니다!':`다시 확인해보세요. (${matched}/${best.set.length}개 분개 일치)`;
-      const s=cardState(card.dataset.index);s.rows=snapshotRows(card);s.graded=true;s.correct=ok;s.matched=matched;s.attempts=(s.attempts||0)+1;if(ok){s.passed=true;s.passedAt=nowIso();delete s.trainingCenterRestored;delete s.selfPassed;delete s.selfPassedAt}else{s.wrongCount=(s.wrongCount||0)+1;s.passed=false;s.trainingCenterRestored=true;s.restoredAt=nowIso();delete s.selfPassed;delete s.selfPassedAt}s.history=s.history||[];s.history.push({at:nowIso(),correct:ok,matched,rows:snapshotRows(card)});saveState();renderAttempt(card);
+      result.textContent=ok?'정답입니다!':`다시 확인해보세요. (${matched}/${best.set.length}개 분개 일치) · ${best.wrongLabels.join(', ')}`;
+      const s=cardState(card.dataset.index);s.rows=snapshotRows(card);s.graded=true;s.correct=ok;s.matched=matched;s.attempts=(s.attempts||0)+1;if(ok){s.passed=true;s.passedAt=nowIso();delete s.trainingCenterRestored;delete s.selfPassed;delete s.selfPassedAt}else{s.wrongCount=(s.wrongCount||0)+1;s.passed=false;s.trainingCenterRestored=true;s.restoredAt=nowIso();delete s.selfPassed;delete s.selfPassedAt}s.history=s.history||[];s.history.push({at:nowIso(),correct:ok,matched,rows:snapshotRows(card),wrongLabels:best.wrongLabels});saveState();renderAttempt(card);
       options.onGrade?.(card,{correct:ok,matched,wrongLabels:ok?[]:['분개 행']});updateProgress();if(scroll)card.scrollIntoView({behavior:'smooth',block:'center'});return ok;
     }
 
@@ -213,7 +213,7 @@
       list.forEach(({p,s,todayHistory},order)=>{
         const last=todayHistory[todayHistory.length-1],todayWrong=todayHistory.filter(h=>!h.correct).length;
         lines.push(`## ${order+1}. ${p.title} (${p.type})`,'',`**문제:** ${p.prompt}`,'',`- 오늘 마지막 결과: ${last.correct?'정답':'오답'}`,...(s.selfPassed?[`- 스스로 정답 인정(통과): ${fmtDate(s.selfPassedAt)}`]:[]),`- 오늘 채점 횟수: ${todayHistory.length}회`,`- 오늘 틀린 횟수: ${todayWrong}회`,'','### 현재 입력','',...rowTable(s.rows||[]),'','### 정답','',...rowTable(p.answers,true),'',`**해설:** ${p.explanation}`,'','### 오늘 채점 이력','');
-        todayHistory.forEach((h,n)=>{lines.push(`#### 오늘 ${n+1}차 시도 · ${fmtDate(h.at)} · ${h.source==='notebook'?'노트 학습 · 직접 표시 / ':''}${h.correct?'정답':'오답'} (${h.matched}/${p.answers.length}개 일치)`,'',...(h.timing?[`- 시간 훈련: ${(h.timing.elapsedMs/1000).toFixed(1)}초 / 목표 ${h.timing.targetSeconds}초${h.timing.assisted?' (해설 참고)':''}`,'']:[]),...rowTable(h.rows||[]),'')});
+        todayHistory.forEach((h,n)=>{lines.push(`#### 오늘 ${n+1}차 시도 · ${fmtDate(h.at)} · ${h.source==='notebook'?'노트 학습 · 직접 표시 / ':''}${h.correct?'정답':'오답'} (${h.matched}/${p.answers.length}개 일치)`,'',...(h.wrongLabels?.length?[`- 다시 확인할 부분: ${h.wrongLabels.join(', ')}`,'']:[]),...(h.timing?[`- 시간 훈련: ${(h.timing.elapsedMs/1000).toFixed(1)}초 / 목표 ${h.timing.targetSeconds}초${h.timing.assisted?' (해설 참고)':''}`,'']:[]),...rowTable(h.rows||[]),'')});
         lines.push('---','')
       });
       const starred=all.filter(x=>x.s.starred);
