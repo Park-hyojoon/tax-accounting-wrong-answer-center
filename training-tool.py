@@ -41,6 +41,7 @@ SUBJECTS = {
                     meta='voucherMeta', type_idx=0, title_idx=1, id_kind='index'),
 }
 PAGES = [HUB] + [s['file'] for s in SUBJECTS.values()] + ['review.html']
+BUMP_PAGES = PAGES + ['개념_정리.html', '약점_분석_임시.html', 'examiner-test/index.html', 'Design Guide Line.html', 'AI_작업규칙.html']
 SHARED_SCRIPTS = ['github-learning-sync.js', 'training-ui.js', 'account-search.js',
                   LEDGER, 'mistake-memory.js', 'season-ui.js', 'season-catalog.js',
                   'review-engine.js', 'review-practice.js', 'review-dashboard.js']
@@ -336,7 +337,7 @@ def append_push(text, snippet, nl=None):
 
 def bump_version(script, pages=None):
     """해당 스크립트를 실제로 불러오는 화면의 <script src="파일?v=N"> 을 함께 올린다."""
-    pages = pages or PAGES + ['개념_정리.html', '약점_분석_임시.html', 'examiner-test/index.html', 'Design Guide Line.html', 'AI_작업규칙.html']
+    pages = pages or BUMP_PAGES
     numbers = []
     page_text = {}
     for page in pages:
@@ -792,7 +793,8 @@ def cmd_add(spec_path):
     parent=ROOT/'또 틀렸다!';parent.mkdir(exist_ok=True)
     with tempfile.TemporaryDirectory(prefix='registration-',dir=parent) as directory:
         stage=Path(directory)
-        paths=PAGES+SHARED_SCRIPTS+[VERSION_FILE,'season-catalog.js']+['data/'+s+'.js' for s in SUBJECTS]
+        # Version refresh must see the same pages here as in normal operation.
+        paths=list(dict.fromkeys(BUMP_PAGES+SHARED_SCRIPTS+[VERSION_FILE,'season-catalog.js']+['data/'+s+'.js' for s in SUBJECTS]))
         for name in paths:
             target=stage/name;target.parent.mkdir(parents=True,exist_ok=True);shutil.copy2(ROOT/name,target)
         registration_label = '기출 연습' if daily_practice else '응용문제'

@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "revision": 131,
-  "updatedAt": "2026-10-08T18:15:00+09:00",
+  "revision": 132,
+  "updatedAt": "2026-10-08T20:43:10+09:00",
   "files": [
     "오답_훈련센터.html",
     "일반전표_기본연습_24문제.html",
@@ -70,5 +70,5 @@
     "review-practice.js",
     "review.css"
   ],
-  "note": "오늘 복습 시작 버튼을 페이지 제목 바로 옆에 배치, 오른쪽 날짜 여백은 묶음 뒤로 이동"
+  "note": "117회 기출 연습 29개 등록"
 }
