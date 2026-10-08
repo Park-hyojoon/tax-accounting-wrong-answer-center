@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Design Guide Line · 학습 센터</title>
   <!-- 실제 테마를 그대로 불러온다. 아래 견본(버튼·배지·카드)은 항상 현재 theme.css 모양으로 보인다. -->
-  <link rel="stylesheet" href="design/theme.css?v=14">
+  <link rel="stylesheet" href="design/theme.css?v=17">
   <link rel="icon" type="image/svg+xml" href="design/brand-mark.svg?v=4">
   <link rel="icon" type="image/png" sizes="32x32" href="design/favicon-32.png?v=4">
   <link rel="icon" type="image/png" sizes="192x192" href="design/icon-192.png?v=4">
@@ -295,7 +295,7 @@
         <div><span>문제 제목</span><b style="font-size:17px">17px 700</b></div>
         <div><span>문제 본문(prompt)</span><b style="font-size:17px">17px 700, 줄간격 1.85</b></div>
         <div><span>본문 기본 · --ui-font-size</span><span style="width:auto;color:var(--ui-ink);font-size:15px">15px, 줄간격 1.7</span></div>
-        <div><span>메뉴 항목</span><b style="font-size:17px">17px 700 · 짙은 글자</b></div>
+        <div><span>메뉴 항목</span><b style="font-size:18.7px">18.7px 700 · 둥근 글꼴</b></div>
         <div><span>버튼</span><b style="font-size:14px">14px 700 (작은 버튼 13px)</b></div>
         <div><span>날짜·보조·배지</span><span style="width:auto;color:var(--ui-muted);font-size:12px">12–13px</span></div>
       </div>
@@ -498,6 +498,8 @@ foreach($f in $files){ $t=[IO.File]::ReadAllText($f); $t=[regex]::Replace($t,'th
     <!-- 15 -->
     <section id="history" class="card-g">
       <h2>15. 변경 기록</h2>
+      <p>2026-10-08: 공통 개발·디자인 가이드의 본문 최소 16px, 기능·안내 최소 14px 기준 적용. 학습 센터 본문은 18px, 기능·보조 글자는 16px 중심으로 확대. 매입매출 공유 입력기 문제 카드 내부는 기존 크기 유지. 날짜는 오른쪽 위로 옮기고 PC 제목을 사이드바 브랜드 상단에 정렬.</p>
+      <p>2026-10-08 추가: 브랜드 로고 40→60px, 학습 센터 이름 17→25.5px로 50% 확대. 메뉴는 17→18.7px로 10% 확대하고 글자 간격·둥근 강조 배경·전환 효과를 정돈했습니다. PC 메뉴 폭 280px, 태블릿 260px.</p>
       <p>2026-10-08: 메뉴 글자를 17px로 확대하고 짙게 표시. PC 메뉴 폭은 256px, 태블릿 236px. 메뉴 높이에 안쪽 여백이 중복되어 생기던 스크롤을 수정하고 작은 화면에서도 메뉴·동기화 버튼에 접근 가능하게 유지. 집중훈련 선택지를 큰 주제로 묶고, 복습 시작 버튼은 페이지 제목 옆으로 이동. 첫 화면과 로고 연결은 일반전표 입력.</p>
       <p>2026-10-08: 공통 메뉴에 ‘오늘 복습’ 추가. review.html은 기존 테마 토큰·카드·메뉴를 사용하며 review.css는 복습 화면의 배치를 담당합니다. 세 분야 입력 화면의 위쪽에서 복습 목록으로 이동할 수 있습니다.</p>
       <p>2026-10-07: 웹 앱 표시 이름을 ‘학습 센터’로 변경. 메뉴 브랜드·브라우저 제목·안내 문구를 통일하고, 기존 파일명·주소·저장 키와 디자인은 유지했습니다.</p>

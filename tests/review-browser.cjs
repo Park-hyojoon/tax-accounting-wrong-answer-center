@@ -14,7 +14,7 @@ const url=name=>pathToFileURL(path.resolve(__dirname,'..',name)).href;
   await page.evaluate(()=>document.fonts.ready);
   if(width>760){
    const nav=await page.locator('.top-nav').evaluate(nav=>({width:nav.clientWidth,scrollWidth:nav.scrollWidth,height:nav.clientHeight,scrollHeight:nav.scrollHeight,footer:nav.querySelector('.nav-foot').getBoundingClientRect().bottom,font:getComputedStyle(nav.querySelector('.nav-link')).fontSize}));
-   assert.equal(nav.scrollWidth,nav.width,'no horizontal sidebar overflow');assert.equal(nav.scrollHeight,nav.height,'no vertical sidebar overflow');assert.ok(nav.footer<=950);assert.equal(nav.font,'17px');
+   assert.equal(nav.scrollWidth,nav.width,'no horizontal sidebar overflow');assert.equal(nav.scrollHeight,nav.height,'no vertical sidebar overflow');assert.ok(nav.footer<=950);assert.equal(nav.font,'20px');
    await page.setViewportSize({width,height:600});assert.ok(await page.locator('.nav-foot').evaluate(el=>el.getBoundingClientRect().bottom<=600),'footer reachable on shorter screen');await page.setViewportSize({width,height:950});
   }
   await page.screenshot({path:path.resolve(__dirname,'../output/review-'+width+'.png'),fullPage:true});
