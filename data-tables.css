@@ -1,0 +1,15 @@
+/* Complete read-only materials; never hide values or shrink fonts to fit. */
+body .study-data-container.study-data-container{min-width:0!important;max-width:100%!important;overflow:visible!important;max-height:none!important;white-space:normal!important}
+body .study-data-container.study-data-container figure{margin-inline:0!important}
+body .study-data-container.study-data-container:has(>table.study-data-table.study-data-table){container-type:inline-size}
+body .study-data-container.study-data-container table.study-data-table.study-data-table{width:100%!important;min-width:0!important;max-width:100%!important;table-layout:fixed!important;border-collapse:collapse!important;border-spacing:0!important}
+body .study-data-container.study-data-container table.study-data-table.study-data-table :is(th,td){min-width:0!important;width:auto!important;padding:var(--study-table-cell-padding,8px 10px)!important;height:auto!important;white-space:normal!important;overflow-wrap:anywhere!important;word-break:normal!important;line-height:1.6!important;text-align:left!important;border:1px solid var(--ui-line-strong,var(--line,#cbd7ca))!important;vertical-align:top!important}
+body .study-data-container.study-data-container table.study-data-table.study-data-pairs th{width:54%!important}
+body .study-data-container.study-data-container table.study-data-table.study-data-pairs td{font-variant-numeric:tabular-nums}
+@container (max-width:600px){
+  body .study-data-container.study-data-container table.study-data-table.study-data-records thead{display:none}
+  body .study-data-container.study-data-container table.study-data-table.study-data-records tbody{display:block}
+  body .study-data-container.study-data-container table.study-data-table.study-data-records tbody tr{display:block;margin:0 0 12px;border-top:2px solid var(--ui-line-strong,var(--line,#cbd7ca))}
+  body .study-data-container.study-data-container table.study-data-table.study-data-records tbody :is(th,td){display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px}
+  body .study-data-container.study-data-container table.study-data-table.study-data-records tbody :is(th,td)::before{content:attr(data-study-label);font-weight:700;white-space:normal}
+}

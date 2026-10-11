@@ -89,7 +89,7 @@
   async function loadEditor(kind){
     await Promise.all([globalThis.EntryAccounts?Promise.resolve():resource('../entry/accounts.js?v=1'),globalThis.TrainingSearchPicker?Promise.resolve():resource('../account-search.js?v=5'),resource('../entry/common.css?v=1',true),resource('../entry/'+kind+'.css?v=1',true)]);
     const name=kind==='practical'?'PracticalEntry':'VoucherEntry';
-    if(!globalThis[name])await resource('../entry/'+kind+'.js?v=4');
+    if(!globalThis.TrainingCorrection)await resource('../entry/correction.js?v=1');if(!globalThis[name])await resource('../entry/'+kind+'.js?v='+(kind==='voucher'?9:10));
     return globalThis[name];
   }
   function exhibitHtml(exhibit){

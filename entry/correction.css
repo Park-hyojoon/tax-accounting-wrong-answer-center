@@ -1,0 +1,13 @@
+/* Shared correction fields for hosts that do not load the accounting center theme. */
+.question .correction-hint{margin:8px 0;color:var(--ui-muted,var(--muted));font-size:var(--font-ui,16px);line-height:1.6}
+.question .correction-original{margin:12px 0;padding:10px 12px;border:1px solid var(--ui-line-strong,var(--line));border-radius:10px;min-width:0}
+.question .correction-original>summary{cursor:pointer;color:var(--ui-primary,var(--primary));font-weight:700}
+.question .correction-original-fields{display:flex;flex-wrap:wrap;gap:var(--ui-correction-field-gap,8px);padding:10px 0;min-width:0}
+.question .correction-original-fields[hidden]{display:none}
+.question .correction-original-fields label{display:flex;flex-direction:column;gap:3px;flex:1 1 140px;min-width:0;font-size:var(--font-ui,16px)}
+.question .correction-original-fields input{width:100%;max-width:100%;min-height:44px;border:1px solid var(--ui-line-strong,var(--line));border-radius:5px;padding:4px 8px;font:inherit;font-size:var(--font-ui,16px);background:var(--ui-surface,var(--surface));color:var(--ui-ink,var(--ink))}
+.question .correction-original-row{display:flex;flex-wrap:wrap;gap:var(--ui-correction-field-gap,8px);width:100%}
+.question .correction-original-row label{flex-basis:150px}
+.question .correction-original .procedure-check{display:flex;align-items:center;gap:8px;margin:8px 0}
+.question .correction-original .procedure-check input{width:auto;min-height:0}
+.question .correction-prompt-only{display:block!important}

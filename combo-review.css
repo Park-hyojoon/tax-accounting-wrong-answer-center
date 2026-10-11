@@ -1,0 +1,12 @@
+.combo-tabs{display:flex;flex-wrap:wrap;align-items:center;gap:var(--ui-combo-tab-gap,8px);margin:8px 0}
+.combo-tabs .combo-tab{display:inline-flex;align-items:center;min-height:44px;padding:9px 14px;border:1px solid var(--ui-primary,#276451);border-radius:14px;background:var(--ui-surface,#fff);color:var(--ui-primary,#276451);font-size:16px;font-weight:700;text-decoration:none;line-height:1.4}
+.combo-tabs .combo-tab[aria-current=page]{background:var(--ui-primary,#276451);color:#fff;border-width:2px;box-shadow:none}
+.combo-tabs .combo-tab[aria-disabled=true]{opacity:.65}
+.combo-tabs .combo-tab:focus-visible{outline:3px solid var(--ui-focus,#bb963a);outline-offset:3px}
+.combo-status,.combo-back{font-size:16px;line-height:1.65}
+.combo-review .review-heading-row{flex-wrap:wrap}
+.combo-review .review-heading-row>.open-link{display:none!important}
+.combo-review .study-toolbar,.combo-review .filter-bar{display:none!important}
+.combo-review .page-head{flex-wrap:wrap}
+.combo-review .combo-status{width:100%;margin:6px 0}
+.combo-review .theory-card{margin-bottom:20px}

@@ -20,6 +20,9 @@
   // 모바일(760px 이하)에서 상단 메뉴를 얇은 한 줄 바로 접고, 아래로 스크롤하면 숨긴다. PC에서는 아무것도 바꾸지 않는다.
   const MOBILE='(max-width:760px)';
   const nav=document.querySelector('.top-nav');if(!nav)return;
+  const SIDEBAR_KEY='exam-20260914-sidebar-collapsed';
+  let sidebarPreference=false;
+  try{sidebarPreference=localStorage.getItem(SIDEBAR_KEY)==='1'}catch(_){}
   const inner=nav.querySelector('.nav-inner')||nav;
   let specialLink=inner.querySelector('a.nav-star')||inner.querySelector('a.nav-link[href*="view=star"]');
   if(!specialLink){specialLink=document.createElement('a');specialLink.className='nav-link nav-star';(inner.querySelector('a[href="약점_분석_임시.html"]')||inner.querySelector('a:last-of-type'))?.before(specialLink)}
@@ -120,9 +123,22 @@
   toggle.addEventListener('click',()=>setOpen(!nav.classList.contains('open')));
   wrap.addEventListener('click',event=>{if(event.target.closest('a'))setOpen(false)});
   document.addEventListener('click',event=>{if(nav.classList.contains('open')&&!nav.contains(event.target))setOpen(false)});
-  document.addEventListener('keydown',event=>{if(event.key==='Escape')setOpen(false)});
+  document.addEventListener('keydown',event=>{
+    if(event.key==='Escape')setOpen(false);
+    if(!event.ctrlKey||event.altKey||event.shiftKey||event.key.toLowerCase()!=='b'||media.matches||event.repeat)return;
+    if(event.target.closest?.('input,textarea,select,[contenteditable="true"]'))return;
+    event.preventDefault();setSidebarCollapsed(!sidebarPreference,true);
+  });
 
   const media=window.matchMedia(MOBILE);
+  function setSidebarCollapsed(collapsed,persist=false){
+    if(persist){sidebarPreference=collapsed;try{localStorage.setItem(SIDEBAR_KEY,collapsed?'1':'0')}catch(_){}}
+    const hidden=collapsed&&!media.matches;
+    document.documentElement.classList.toggle('sidebar-collapsed',hidden);
+    nav.inert=hidden;
+    if(hidden)nav.setAttribute('aria-hidden','true');else nav.removeAttribute('aria-hidden');
+  }
+  window.addEventListener('storage',event=>{if(event.key===SIDEBAR_KEY){sidebarPreference=event.newValue==='1';setSidebarCollapsed(sidebarPreference)}});
   let lastY=window.scrollY;
   function onScroll(){
     if(!media.matches||nav.classList.contains('open'))return;
@@ -135,6 +151,7 @@
   function apply(){
     nav.classList.toggle('nav-compact',media.matches);
     if(!media.matches){nav.classList.remove('nav-hidden');setOpen(false)}
+    setSidebarCollapsed(sidebarPreference);
     window.dispatchEvent(new Event('resize'));
   }
   media.addEventListener?media.addEventListener('change',apply):media.addListener(apply);

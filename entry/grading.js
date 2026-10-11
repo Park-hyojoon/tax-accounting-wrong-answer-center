@@ -82,7 +82,7 @@
     const amount=accepted.some(([s,t])=>num(entry.supply)===s&&num(entry.vat)===t);
     if(!amount&&checks.supply&&checks.vat){checks.supply=false;checks.vat=false}
     let chosen=null,rowCheck={ok:false,matched:0,total:0};
-    for(const variant of problem.variants){if(entry.journal!==variant.journal)continue;if(variant.supply!==undefined&&(num(entry.supply)!==variant.supply||num(entry.vat)!==variant.vat))continue;const result=rowsEqualForGrade(input,variant.rows,problem.requiredAccountCodes||REQUIRED_ACCOUNT_CODES);if(result.ok){chosen=variant;rowCheck=result;break}if(result.matched>rowCheck.matched)rowCheck=result}
+    for(const variant of problem.variants){if(entry.journal!==variant.journal)continue;if(variant.type&&entry.type!==variant.type)continue;if(variant.supply!==undefined&&(num(entry.supply)!==variant.supply||num(entry.vat)!==variant.vat))continue;const result=rowsEqualForGrade(input,variant.rows,problem.requiredAccountCodes||REQUIRED_ACCOUNT_CODES);if(result.ok){chosen=variant;rowCheck=result;break}if(result.matched>rowCheck.matched)rowCheck=result}
     checks.journal=Boolean(chosen);
     const labels={procedure:'기존 일반전표 삭제',date:'거래일자',type:'유형',supply:'공급가액',vat:'세액',supplier:'공급처',electronic:'전자 여부',cardCompany:'신용카드사',serviceFee:'봉사료',zeroRate:'영세율 구분',deductReason:'불공제사유',journal:'분개 선택·계정·판/제·적요'};
     return{checks,chosen,rowCheck,correct:Object.values(checks).every(Boolean),wrongLabels:Object.keys(checks).filter(key=>!checks[key]).map(key=>labels[key])};

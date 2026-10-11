@@ -46,7 +46,8 @@
     const subject=subjectOf(adapter),cards=[...box.querySelectorAll('.question')],order=new Map(cards.map((card,index)=>[card,index]));
     let randomOrder=new Map();
     if([...field.options].some(option=>option.value===params.get('sort')))field.value=params.get('sort');
-    function refresh(){
+    function refresh(reorder=true){
+      const comboIds=window.TrainingComboReview?.active('exam-20260914-review-combo')?.subjects?.[subject];
       const mode=field.value,list=cards.map(card=>{
         const id=adapter.theory?card.dataset.id:Number(card.dataset.index),problem=adapter.theory?problems.find(p=>p.id===id):problems[id],need=priority(subject,id,adapter.state,{recurrent:problem?.recurrenceOf});
         const history=(adapter.theory?adapter.state.history?.[id]:adapter.state.cards?.[id]?.history)||[],valid=history.filter(event=>event&&!event.cancelledAt&&typeof event.correct==='boolean'&&Number.isFinite(Date.parse(event.at)));
@@ -54,6 +55,7 @@
       });
       if(mode==='random'&&!randomOrder.size)randomOrder=new Map(shuffle(cards).map((card,index)=>[card,index]));
       list.sort((a,b)=>{
+        if(comboIds){const rank=id=>{const i=comboIds.indexOf(String(id));return i<0?Infinity:i};return rank(a.id)-rank(b.id)||a.index-b.index}
         if(mode==='random')return randomOrder.get(a.card)-randomOrder.get(b.card);
         if(mode==='priority')return comparePriority(a.need,b.need)||a.index-b.index;
         if(mode==='wrong')return b.wrong-a.wrong||a.index-b.index;
@@ -67,13 +69,13 @@
         let note=item.card.querySelector('.priority-note');if(!note){note=document.createElement('p');note.className='priority-note';note.style.cssText='font-size:14px;color:#52677d;margin:6px 0 12px';item.card.querySelector('.qhead')?.after(note)}
         note.textContent=item.need.reason;note.hidden=item.need.band<=0||!item.need.reason;
         const wrapper=item.card.closest('details.star-item');
-        if(wrapper){const group=wrapper.parentElement;group.append(wrapper);if(!groups.has(group))groups.set(group,item)}else box.append(item.card);
+        if(reorder){if(wrapper){const group=wrapper.parentElement;group.append(wrapper);if(!groups.has(group))groups.set(group,item)}else box.append(item.card)}
       }
       for(const group of groups.keys())group.parentElement.append(group);
       document.querySelector('.current-training-filter')?.refreshCurrentTraining?.();adapter.refresh();
     }
     field.addEventListener('change',()=>{if(field.value==='random')randomOrder=new Map();refresh()});
-    document.addEventListener('click',event=>{if(event.target.closest('.check-one,.notebook-pass,.notebook-wrong,.notebook-restore,.notebook-toast button'))setTimeout(refresh,0)},true);
+    document.addEventListener('click',event=>{if(event.target.closest('.check-one,.notebook-pass,.notebook-wrong,.notebook-restore,.notebook-toast button'))setTimeout(()=>refresh(false),0)},true);
     refresh();
   }
   function matches(p){return (!params.get('exam')||String(p.examRound)===params.get('exam'))&&(!params.get('tag')||(p.tags||[]).includes(params.get('tag')))}
@@ -99,7 +101,7 @@
     }
     // A tag is a fresh practice entry point: clear only the current answer fields
     // once, while retaining pass state, attempts, wrong counts, and full history.
-    if(params.get('fresh')==='1'&&(params.get('tag')||weakIds.size)&&adapter){
+    if(params.get('fresh')==='1'&&(params.get('tag')||weakIds.size)&&adapter&&!window.TrainingComboReview?.active('exam-20260914-review-combo')?.visited?.[subjectOf(adapter)]){
       const targets=problems.map((problem,index)=>({problem,index})).filter(x=>weakIds.size?weakIds.has(String(adapter.theory?x.problem.id:x.index)):matches(x.problem));
       if(adapter.theory){
         for(const {problem} of targets){
@@ -109,7 +111,7 @@
       }else{
         for(const {index} of targets){
           const card=adapter.state.cards?.[index];if(!card)continue;
-          ['voucher','rows','graded','correct','matched'].forEach(key=>delete card[key]);
+          ['voucher','rows','graded','correct','matched','correctionInitialized','correctionDraftSession'].forEach(key=>delete card[key]);
         }
       }
       adapter.save();

@@ -515,6 +515,8 @@ def cmd_check():
                     f'{info["label"]} {idx}번: 매도가능증권 계정코드 문제의 정답은 178이어야 합니다')
             missing=required-set(top_keys(item))
             if missing: problems_fail.append(f'{key} {idx}: 필수 필드 누락 {sorted(missing)}')
+            if key in ('practical','voucher') and (field(item,'before') or re.search(r'<(?:figcaption|h4)[^>]*>[^<]*(?:수정\s+전|삭제 대상)',item)) and 'initialEntry' not in top_keys(item):
+                problems_fail.append(f'{key} {idx}: 전표 수정 문제에는 수정 전 입력 initialEntry가 필요합니다')
         if len(items) > 3:
             key_sets = [set(top_keys(x)) for x in items]
             common = set.intersection(*key_sets[:-1]) if len(key_sets) > 1 else set()
@@ -693,6 +695,7 @@ CONTRACT = '''# 새 기출 오답 등록 (spec 하나로 일괄 처리)
 }
 원본당 대표 응용문제 1개. meta와 mistakes는 자동 생성하므로 작성하지 않는다.
 문제 객체에는 type, title, prompt, addedDate 및 해당 분야 필수 답안 필드를 넣는다.
+전표 수정 문제는 정답과 독립적인 initialEntry:{subject:"practical|voucher",voucher:{date,type,supply,vat,supplier,electronic,journal,...},rows:[{side,account,amount,division,partner,memo}]}를 넣는다. 일반전표는 voucher를 생략한다. 제공된 수정 전 값만 기록하며 정답에서 추정하지 않는다. 공통 입력기가 초기값을 채우므로 수정 전 전표·분개를 별도 HTML 표로 새로 만들지 않는다. 다른 종류 전표로 옮길 때 initialEntry.subject는 삭제할 기존 전표 분야다.
 사용자가 모든 기출문제 오답 복습 메뉴를 지정하면 reviewMenu:true를 넣는다. 지정하지 않은 접수를 자동 합산하지 않는다.
 오답 신고가 아닌 일일 기출 연습은 registrationKind:"daily-practice"로 지정한다. 원문은 보관하되 직접 오답 원장과 재오답 횟수에는 합산하지 않는다. reviewMenu:true와 recurrenceOf는 함께 지정할 수 없다.
 회차 MD·원장·화면·유형목록·버전을 함께 갱신하며 실패 시 반영하지 않는다.

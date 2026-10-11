@@ -18,6 +18,10 @@
     const OLD_TO_NEW_INDEX={4:0,6:1,8:2,9:3,10:4,11:5,12:6,13:7,14:8,15:9,16:10,17:11,18:12,19:13,20:14,21:15,22:16,23:17,24:18,25:19,26:20,27:21,28:22,29:23,30:24,31:25,32:26};
     const defaultState=()=>({schemaVersion:STATE_VERSION,startedAt:nowIso(),updatedAt:nowIso(),cards:{},fileName:`일반전표_새학습_학습기록_${localDate()}`,koAuto:true});
     let studyState=options.state||loadState();
+    const correctionReload=performance.getEntriesByType('navigation')[0]?.type==='reload';
+    const correctionSessionKey='exam-20260914-practical-correction-session';
+    let correctionSession=String(Date.now())+'-'+Math.random();
+    try{if(!options.embedded){if(correctionReload)correctionSession=sessionStorage.getItem(correctionSessionKey)||correctionSession;sessionStorage.setItem(correctionSessionKey,correctionSession)}}catch(_){}
     function migrateStateTo27(rawState={}){
       const source=rawState&&typeof rawState==='object'?rawState:{};
       if(source.schemaVersion===STATE_VERSION)return source;
@@ -66,7 +70,7 @@
       ${p.exhibit?`<div class="exhibit-layout"><div class="prompt">${p.prompt}</div>${p.exhibit}</div>`:`<div class="prompt">${p.prompt}</div>`}
       <details class="entry-toggle"><summary>전표 입력 영역 열기</summary><div class="entry-toggle-body"><div class="entry-wrap"><table>
         <thead><tr><th>구분</th><th>계정과목</th><th>금액</th><th>판 / 제 선택</th><th>거래처</th><th>적요코드</th><th>결과</th></tr></thead>
-        <tbody>${Array.from({length:Math.max(4,p.answers.length)},(_,r)=>rowHtml(r,p)).join('')}</tbody>
+        <tbody>${Array.from({length:Math.max(4,p.answers.length,p.initialEntry?.subject==='practical'?p.initialEntry.rows.length:0)},(_,r)=>rowHtml(r,p)).join('')}</tbody>
       </table></div>
       <div class="balance-panel" aria-live="polite"><div class="balance-item">차변 합계<strong class="debit-total">0원</strong></div><div class="balance-item">대변 합계<strong class="credit-total">0원</strong></div><div class="balance-item difference">차액<strong class="difference-total">0원 · 입력 대기</strong></div></div>
       <p class="tip">금액은 쉼표 없이 입력해도 됩니다. 판관비/제조원가 구분이 필요한 계정은 ‘판/제 선택’을 사용하세요.</p></div></details>
@@ -75,6 +79,7 @@
     </article>`}
 
     questionHost.innerHTML=problems.map(questionHtml).join('');
+    root.TrainingCorrectionExhibits?.(questionHost,problems);root.TrainingDataTables?.prepare(questionHost);
 
     function setupAmount(input){
       input.addEventListener('keydown',e=>{
@@ -102,6 +107,7 @@
     }
     function markChanged(card){
       const s=cardState(card.dataset.index);s.rows=snapshotRows(card);s.graded=false;delete s.correct;
+      if(root.TrainingCorrection?.same(problems[card.dataset.index],'practical'))s.correctionDraftSession=correctionSession;
       card.classList.remove('correct','wrong');delete card.dataset.graded;delete card.dataset.correct;
       const result=el('.result',card);result.className='result';result.textContent='입력 내용이 자동 저장되었습니다.';
       updateTotals(card);saveState();updateProgress()
@@ -116,10 +122,23 @@
     function restoreCard(card){
       const s=cardState(card.dataset.index),rows=els('.entry-row',card);
       const index=Number(card.dataset.index),problemOf=problems[index]||{},isDirect=DIRECT_INTAKE_INDICES.has(index);
+      const restartCorrection=!options.embedded&&!root.TrainingComboReview?.active('exam-20260914-review-combo')?.visited?.practical&&root.TrainingCorrection?.same(problemOf,'practical')&&!(correctionReload&&s.correctionDraftSession===correctionSession&&!s.graded);
+      if(restartCorrection){s.graded=false;delete s.correct;root.TrainingCorrection.seed(s,problemOf,'practical',true)}else root.TrainingCorrection?.seed(s,problemOf,'practical');
       if(!options.embedded&&(s.deleted||!TrainingSeason.matches(problems[index]))){card.hidden=true;return}
       card.hidden=options.embedded?false:starView?!(s.starred||!isDirect||variantSourceIndices.has(index)):!isDirect?true:Boolean(s.passed||s.archived||(todayView&&card.dataset.addedDate!==localDate()));
-      el('.star-one',card).setAttribute('aria-pressed',String(Boolean(s.starred)));el('.star-note',card).hidden=!s.starred;
-      (s.rows||[]).forEach((saved,i)=>{if(!rows[i])return;el('.side',rows[i]).value=saved.side||'D';el('.account',rows[i]).value=saved.account||'';el('.amount',rows[i]).value=saved.amount||'';el('.division',rows[i]).value=saved.division||'';el('.partner',rows[i]).value=saved.partner||'';el('.memo',rows[i]).value=saved.memo||''});
+      el('.star-one',card)?.setAttribute('aria-pressed',String(Boolean(s.starred)));const starNote=el('.star-note',card);if(starNote)starNote.hidden=!s.starred;
+      (s.rows||[]).forEach((saved,i)=>{
+        if(!rows[i])return;el('.side',rows[i]).value=saved.side||'D';
+        const account=el('.account',rows[i]),raw=saved.account||'';
+        if(account.tagName==='SELECT'){
+          const parsed=accountParts(raw),match=[...account.options].find(option=>option.value===raw)||[...account.options].find(option=>accountParts(option.value).name===parsed.name);
+          if(!match&&raw){const code=REQUIRED_ACCOUNT_CODES[parsed.name]||'';account.add(new Option((code?code+' ':'')+parsed.name,code?code+'|'+parsed.name:parsed.name))}
+          account.value=match?.value||[...account.options].find(option=>accountParts(option.value).name===parsed.name)?.value||'';
+        }else account.value=raw;
+        el('.amount',rows[i]).value=saved.amount??'';el('.division',rows[i]).value=saved.division||'';
+        const partner=el('.partner',rows[i]);if(saved.partner&&![...partner.options].some(option=>option.value===saved.partner)){partner.disabled=false;partner.add(new Option(saved.partner,saved.partner))}partner.value=saved.partner||'';
+        el('.memo',rows[i]).value=saved.memo||'';
+      });
       if(s.graded){card.dataset.graded='true';card.dataset.correct=String(Boolean(s.correct));card.classList.toggle('correct',Boolean(s.correct));card.classList.toggle('wrong',!s.correct);const result=el('.result',card);result.className='result '+(s.correct?'ok':'no');result.textContent=s.correct?'정답입니다!':`마지막 채점은 오답입니다. (${s.matched||0}/${problems[Number(card.dataset.index)].answers.length}개 분개 일치)`}
       updateTotals(card);renderAttempt(card)
     }
@@ -161,6 +180,14 @@
 
     els('.question').forEach(card=>{
       el('.check-one',card).addEventListener('click',()=>grade(card));
+      el('.correction-reset',card)?.addEventListener('click',()=>{
+        if(!confirm('수정 중인 내용을 수정 전 전표로 되돌릴까요? 기존 채점 이력은 유지됩니다.'))return;
+        const s=cardState(card.dataset.index);root.TrainingCorrection.seed(s,problems[card.dataset.index],'practical',true);
+        s.correctionDraftSession=correctionSession;
+        s.graded=false;delete s.correct;card.classList.remove('correct','wrong');delete card.dataset.graded;delete card.dataset.correct;
+        els('.entry-row',card).forEach(row=>{el('.account',row).value='';el('.amount',row).value='';el('.division',row).value='';el('.partner',row).value='';el('.memo',row).value='';el('.row-state',row).textContent='';row.style.background=''});
+        restoreCard(card);const result=el('.result',card);result.className='result';result.textContent='수정 전 입력으로 되돌렸습니다. 기존 채점 이력은 유지됩니다.';saveState();updateProgress();
+      });
       el('.clear-one',card).addEventListener('click',()=>archiveCard(card));
       el('.star-one',card).addEventListener('click',()=>toggleStar(card));
       els('.entry-row input,.entry-row select',card).forEach(x=>{x.addEventListener('input',()=>markChanged(card));x.addEventListener('change',()=>markChanged(card))});

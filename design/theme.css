@@ -33,6 +33,9 @@
 @font-face{font-family:"학습센터 문제글꼴";src:local("NanumGothic Bold"),local("NanumGothicBold");font-weight:700 900;font-style:normal;font-display:swap}
 /* ---------- 0. 디자인 토큰 ---------- */
 :root{
+  --study-table-cell-padding:8px 10px;
+  --ui-correction-field-gap:8px;
+  --ui-combo-tab-gap:8px;
   /* 색: 바탕과 면 */
   --ui-bg:#f8f6ef;            /* 페이지 바탕 (크림) */
   --ui-surface:#fffefa;       /* 카드·입력칸 바탕 */
@@ -69,7 +72,7 @@
 
   /* 글꼴 */
   --ui-font:"학습센터 둥근글꼴","NanumGothic","나눔고딕","Apple SD Gothic Neo","Malgun Gothic",sans-serif;
-  --ui-study-font:"학습센터 문제글꼴","NanumGothic","나눔고딕","Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+  --ui-study-font:"NanumGothic","나눔고딕","Apple SD Gothic Neo","Malgun Gothic",sans-serif;
   --ui-menu-font-size:20px;
   --ui-font-size:var(--ui-readable-15,15px);        /* 본문 기본 */
   --ui-h1:34px;               /* 페이지 제목 */
@@ -113,7 +116,11 @@
 html{background:var(--ui-bg)}
 body{background:var(--ui-bg)!important;color:var(--ui-ink)!important;font-family:var(--ui-font)!important;font-size:var(--ui-font-size)!important;line-height:1.7;font-synthesis:none}
 .question{font-family:var(--ui-study-font)!important}
+/* Reading copy uses Nanum Gothic; page/card titles, navigation, controls and buttons keep their existing faces. */
+body main :is(p,li,td,.prompt,.data-box,.choice,.detail-body,.explanation,.answer-text,.answer-line,.answer-compact,.review-reason,.review-muted):not(.kclep-shell *):not(.exhibit *){font-family:var(--ui-study-font)!important}
 button,input,select,textarea{font-family:inherit}
+/* 2026-10-10 사용자 지정: 정렬·선택 드롭다운과 입력칸도 나눔고딕. KcLep 입력기·원본 증빙·매입매출 공유 입력기 내부는 제외. */
+:is(select,option,input,textarea):not(.kclep-shell *):not(.exhibit *):not([data-entry-host] *){font-family:var(--ui-study-font)!important}
 h1,h2,h3,h4{color:var(--ui-ink);letter-spacing:-.03em}
 a{color:var(--ui-primary)}
 :focus-visible{outline:3px solid var(--ui-focus)!important;outline-offset:3px!important}
@@ -123,6 +130,9 @@ a{color:var(--ui-primary)}
 /* ---------- 3. 레이아웃: 왼쪽 사이드바 + 본문 (PC·태블릿, 761px 이상) ---------- */
 @media (min-width:761px){
   body{padding-left:var(--ui-sidebar-w)!important}
+  html.sidebar-collapsed body{padding-left:0!important}
+  html.sidebar-collapsed .top-nav{transform:translateX(-100%)!important;visibility:hidden;pointer-events:none}
+  html.sidebar-collapsed .sidebar-reopen{display:inline-flex!important}
   /* 상단 메뉴 높이를 쓰던 고정 위치 값을 0으로 돌린다 (사이드바는 위쪽을 차지하지 않음) */
   html{--nav-h:0px!important;--concept-nav-height:0px!important;scroll-padding-top:16px}
   main,.wrap,main.wrap{width:auto!important;max-width:var(--ui-content-max)!important;margin:0 auto!important;padding:30px var(--ui-gutter) 70px!important;box-sizing:border-box}
@@ -139,6 +149,9 @@ a{color:var(--ui-primary)}
 .nav-brand b{font-size:var(--ui-readable-25-5,25.5px);font-weight:700;letter-spacing:-.035em}
 .nav-brand small{font-size:var(--ui-readable-16-5,16.5px);font-weight:400;color:var(--ui-muted);letter-spacing:0}
 .nav-foot{display:flex;align-items:center;gap:8px}
+.sidebar-reopen{display:none!important;position:fixed;top:18px;left:12px;z-index:41;align-items:center;gap:6px;min-height:40px;padding:6px 12px;border:1px solid var(--ui-line-strong);border-radius:var(--ui-radius-btn);background:var(--ui-surface);color:var(--ui-primary);font:700 16px var(--ui-font);cursor:pointer;box-shadow:0 3px 12px rgba(38,63,54,.12)}
+.sidebar-reopen:hover{background:var(--ui-mint)}
+.sidebar-reopen:focus-visible{outline:3px solid var(--ui-focus)}
 
 /* 메뉴 항목 아이콘 (data-menu-id는 training-ui.js가 붙임) */
 .top-nav .nav-link::before{display:inline-block;width:20px;margin-right:9px;text-align:center;font-weight:400;color:var(--menu-accent,var(--ui-muted));content:"•"}
@@ -167,7 +180,7 @@ a{color:var(--ui-primary)}
 .top-nav .nav-settings-button:hover{background:var(--ui-mint)!important;color:var(--ui-primary)!important;border-color:var(--ui-mint-strong)!important}
 
 @media (min-width:761px){
-  .top-nav{position:fixed!important;top:0;left:0;bottom:0;z-index:40;box-sizing:border-box;width:var(--ui-sidebar-w);height:100vh;background:var(--ui-bg)!important;border:0!important;border-right:1px solid var(--ui-line)!important;box-shadow:none!important;backdrop-filter:none!important;overflow:hidden!important;transform:none!important}
+  .top-nav{position:fixed!important;top:0;left:0;bottom:0;z-index:40;box-sizing:border-box;width:var(--ui-sidebar-w);height:100vh;background:var(--ui-bg)!important;border:0!important;border-right:1px solid var(--ui-line)!important;box-shadow:none!important;backdrop-filter:none!important;overflow:hidden!important;transform:none!important;transition:transform .2s ease,visibility .2s}
   .top-nav .nav-inner{display:flex!important;flex-direction:column!important;flex-wrap:nowrap!important;align-items:stretch!important;gap:0!important;box-sizing:border-box;width:100%;height:100%;max-width:none!important;min-height:0!important;margin:0!important;padding:34px 16px 22px!important;overflow:hidden!important}
   .nav-brand{display:flex;flex-shrink:0;margin:0 6px 30px}
   .top-nav .nav-menu-toggle,.top-nav .nav-current{display:none!important}
@@ -569,3 +582,16 @@ body>.page-head{position:relative;padding-top:34px!important;padding-right:var(-
  .page-head .review-heading-row{padding-right:0}
  :where(.entry-voucher) .question{--ui-h2:19px}
 }
+/* 수정 문제는 기존 입력을 직접 고친다. 전표 이동 문제만 삭제할 기존 입력을 함께 표시한다. */
+.question .correction-hint{margin:8px 0;color:var(--ui-muted);font-size:16px;line-height:1.6;font-family:var(--ui-study-font)}
+.question .correction-original{margin:12px 0;padding:10px 12px;border:1px solid var(--ui-line-strong);border-radius:10px;min-width:0}
+.question .correction-original>summary{cursor:pointer;color:var(--ui-primary);font-weight:700}
+.question .correction-original-fields{display:flex;flex-wrap:wrap;gap:var(--ui-correction-field-gap);padding:10px 0;min-width:0}
+.question .correction-original-fields[hidden]{display:none}
+.question .correction-original-fields label{display:flex;flex-direction:column;gap:3px;flex:1 1 140px;min-width:0;font-size:14px}
+.question .correction-original-fields input{width:100%;max-width:100%;min-height:32px;border:1px solid var(--ui-line-strong);border-radius:5px;padding:4px 8px;font:16px var(--ui-study-font);background:var(--ui-surface);color:var(--ui-ink)}
+.question .correction-original-row{display:flex;flex-wrap:wrap;gap:var(--ui-correction-field-gap);width:100%}
+.question .correction-original-row label{flex-basis:150px}
+.question .correction-original .procedure-check{display:flex;align-items:center;gap:8px;margin:8px 0}
+.question .correction-original .procedure-check input{width:auto;min-height:0}
+.question .correction-prompt-only{display:block!important}

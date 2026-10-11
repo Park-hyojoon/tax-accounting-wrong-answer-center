@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Design Guide Line · 학습 센터</title>
   <!-- 실제 테마를 그대로 불러온다. 아래 견본(버튼·배지·카드)은 항상 현재 theme.css 모양으로 보인다. -->
-  <link rel="stylesheet" href="design/theme.css?v=17">
+  <link rel="stylesheet" href="design/theme.css?v=23">
   <link rel="icon" type="image/svg+xml" href="design/brand-mark.svg?v=4">
   <link rel="icon" type="image/png" sizes="32x32" href="design/favicon-32.png?v=4">
   <link rel="icon" type="image/png" sizes="192x192" href="design/icon-192.png?v=4">
@@ -288,7 +288,7 @@
     <!-- 7 -->
     <section id="type" class="card-g">
       <h2>7. 글꼴과 크기</h2>
-      <p class="lead">메뉴·화면 제목은 PC에 설치된 Hancom MalangMalang, 문제 영역은 나눔고딕을 우선 사용합니다. 없는 기기는 기본 고딕으로 표시합니다. 폰트 다운로드 없이 오프라인에서도 동작합니다.</p>
+      <p class="lead">메뉴·화면 제목·버튼은 기존 글꼴을 유지하고, 문제·보기·해설·답안 설명 등 읽는 글은 나눔고딕을 우선 사용합니다. 없는 기기는 기본 고딕으로 표시합니다. 폰트 다운로드 없이 오프라인에서도 동작합니다.</p>
       <div class="type-scale">
         <div><span>페이지 제목 · --ui-h1</span><b style="font-size:var(--ui-h1);letter-spacing:-.05em">32px 굵게</b></div>
         <div><span>섹션 제목 · --ui-h2</span><b style="font-size:var(--ui-h2);letter-spacing:-.04em">21px 굵게</b></div>
@@ -498,6 +498,10 @@ foreach($f in $files){ $t=[IO.File]::ReadAllText($f); $t=[regex]::Replace($t,'th
     <!-- 15 -->
     <section id="history" class="card-g">
       <h2>15. 변경 기록</h2>
+      <p>2026-10-11 복합 복습: 세 분야에서 선택한 문제를 유지하고 상단 분야 버튼으로 이동합니다. 활성 분야는 딥그린 채움으로 구별하며 통과 수와 전체 진행을 표시합니다. 입력 중 답안·채점 이력을 유지하고 채점 뒤에는 문제 카드를 재정렬하지 않습니다. combo-review.js·combo-review.css를 세무온과 공유합니다.</p>
+      <p>2026-10-11 자료표: 계산에 필요한 문제 속 자료는 가로 스크롤 없이 전부 표시합니다. 열이 많은 단일 자료행은 항목/금액·조건의 세로 표, 여러 행의 비교 자료는 좁은 카드에서 항목명이 붙은 행별 표시로 바꿉니다. data-tables.js·data-tables.css를 세무온과 공유하며 원문 값·미지수·입력용 전표 표는 유지합니다.</p>
+      <p>2026-10-11 최종 변경: 수정 전 전표·분개를 별도 표로 보여주지 않고 실제 입력칸에 미리 채웁니다. 사용자는 잘못된 부분을 수정한 뒤 전체 전표를 채점합니다. 초기값은 정답과 별도의 initialEntry로 관리하며 윗단 수정으로 기존 분개를 덮어쓰지 않습니다. 전표 종류를 옮기는 문제는 기존 입력칸·삭제 절차와 새 대상 입력칸을 함께 제공합니다. 기존 원문과 채점 이력은 보존합니다.</p>
+      <p>2026-10-10: 문제·보기·해설·답안 설명과 본문 읽기 글을 나눔고딕으로 통일. 제목·메뉴·버튼과 KcLep 입력기·원본 증빙의 모양은 유지. PC에서 Ctrl+B로 사이드바를 접고 다시 열며, 접힌 상태에는 왼쪽 위에 메뉴 열기 버튼을 표시합니다.</p>
       <p>2026-10-08: 공통 개발·디자인 가이드의 본문 최소 16px, 기능·안내 최소 14px 기준 적용. 학습 센터 본문은 18px, 기능·보조 글자는 16px 중심으로 확대. 매입매출 공유 입력기 문제 카드 내부는 기존 크기 유지. 날짜는 오른쪽 위로 옮기고 PC 제목을 사이드바 브랜드 상단에 정렬.</p>
       <p>2026-10-08 추가: 브랜드 로고 40→60px, 학습 센터 이름 17→25.5px로 50% 확대. 메뉴는 17→18.7px로 10% 확대하고 글자 간격·둥근 강조 배경·전환 효과를 정돈했습니다. PC 메뉴 폭 280px, 태블릿 260px.</p>
       <p>2026-10-08: 메뉴 글자를 17px로 확대하고 짙게 표시. PC 메뉴 폭은 256px, 태블릿 236px. 메뉴 높이에 안쪽 여백이 중복되어 생기던 스크롤을 수정하고 작은 화면에서도 메뉴·동기화 버튼에 접근 가능하게 유지. 집중훈련 선택지를 큰 주제로 묶고, 복습 시작 버튼은 페이지 제목 옆으로 이동. 첫 화면과 로고 연결은 일반전표 입력.</p>

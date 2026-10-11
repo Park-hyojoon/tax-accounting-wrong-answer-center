@@ -4,8 +4,10 @@
   <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
   <title>오늘 복습 · 학습 센터</title>
   <link rel="icon" href="design/favicon.ico?v=4">
-  <link rel="stylesheet" href="design/theme.css?v=17">
-  <link rel="stylesheet" href="review.css?v=2">
+  <link rel="stylesheet" href="design/theme.css?v=23">
+  <link rel="stylesheet" href="review.css?v=3">
+<link rel="stylesheet" href="combo-review.css?v=1">
+<script src="combo-review.js?v=1"></script>
 </head>
 <body class="review-page">
   <nav class="top-nav" aria-label="학습 메뉴"><div class="nav-inner">
@@ -25,6 +27,7 @@
         <label>연습 방식<select id="reviewMode"><option value="balanced">골고루 연습 · 기본</option><option value="focus">집중훈련 · 직접 선택</option></select></label>
         <label>분야<select id="reviewSubject"><option value="">세 분야 골고루</option><option value="practical">일반전표</option><option value="voucher">매입매출전표</option><option value="theory">이론</option></select></label>
         <label>하루 목표<select id="reviewLimit"><option value="6">6유형</option><option value="9">9유형</option><option value="12">12유형</option></select></label>
+        <button class="btn primary combo-start" id="comboStart" type="button">세 분야 3문제씩 바로 복습</button>
         <label id="focusTypeLabel" hidden>집중할 주제<select id="focusType"><option value="">최근 오답 유형</option></select></label>
       </div>
       <p id="reviewSummary" role="status"></p>
@@ -35,8 +38,8 @@
     <details class="section"><summary>전체 유형과 다음 복습일</summary><p class="review-muted">유형 이름을 기준으로 묶습니다. 아직 풀이 기록이 없는 유형은 ‘첫 연습’으로 표시합니다.</p><div id="reviewSchedule"></div></details>
   </main>
   <script src="github-learning-sync.js?v=23"></script>
-  <script src="training-ui.js?v=21"></script>
-  <script src="season-catalog.js?v=51"></script>
+  <script src="training-ui.js?v=26"></script>
+  <script src="season-catalog.js?v=55"></script>
   <script src="review-engine.js?v=2"></script>
-  <script src="review-dashboard.js?v=2"></script>
+  <script src="review-dashboard.js?v=4"></script>
 </body></html>
